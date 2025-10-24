@@ -127,7 +127,7 @@ OscarOutput<Format, Contents>::OscarOutput(
 
 template <OscarOutputFormat Format, int Contents>
 inline void OscarOutput<Format, Contents>::write(const Particles &particles) {
-  write_in_chunks(particles);
+  write_in_chunk<ToASCII>(particles);
 }
 
 template <OscarOutputFormat Format, int Contents>
@@ -850,7 +850,12 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
-  std::fprintf(file_.get(), "%s", formatter_.data_line(data).c_str());
+  std::fprintf(file_.get(), "%s", formatter_.particle_line(data).c_str());
+}
+
+template <OscarOutputFormat Format, int Contents>
+void OscarOutput<Format, Contents>::write(const ToASCII::type &buffer) {
+  std::fprintf(file_.get(), "%s", buffer.c_str());
 }
 
 namespace {

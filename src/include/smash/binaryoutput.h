@@ -146,49 +146,45 @@ class BinaryOutputBase : public OutputInterface {
    *         `ParticleList`.
    * \param[in] particles Container of particles whose binary representation
    *            is to be written.
-   *
-   * \see binary_chunk(const Range&)
-   * \see fill_binary_buffer(const ParticleData&, ToBinary::type&)
    */
-  template <class Range,
+  template <typename Converter, class Range,
             std::enable_if_t<std::is_same_v<Range, Particles> ||
                                  std::is_same_v<Range, ParticleList>,
                              bool> = true>
   void write_in_chunk(const Range &particles) {
-    using std::begin;
-    using std::end;
-
-    const auto first = begin(particles);
-    const auto last = end(particles);
+    const auto first = std::begin(particles);
+    const auto last = std::end(particles);
     if (first == last)
       return;
 
-    const std::size_t max_buffer_size =
-        sizeof(char) * static_cast<std::size_t>(std::pow(10.0, 9.0));
+    constexpr std::size_t max_buffer_size = static_cast<std::size_t>(1e9);
     const std::size_t bytes_per_particle =
         formatter_.compute_single_size(*first);
-    const std::size_t total_size = bytes_per_particle * particles.size();
-    if (total_size <= max_buffer_size) {
+
+    if (particles.size() <= max_buffer_size / bytes_per_particle) {
       write(formatter_.particles_chunk(particles));
       return;
     }
 
-    ToBinary::type buffer{};
+    typename Converter::type buffer;
     buffer.reserve(max_buffer_size);
 
-    for (const ParticleData &part : particles) {
-      if (bytes_per_particle + buffer.size() >= max_buffer_size) {
+    for (const ParticleData &particle : particles) {
+      auto particle_line = formatter_.particle_line(particle);
+      const std::size_t line_size = particle_line.size();
+      if (buffer.size() + line_size > max_buffer_size) {
         write(buffer);
         buffer.clear();
       }
-      formatter_.fill_buffer(part, buffer);
+      buffer.insert(buffer.end(),
+                    std::make_move_iterator(particle_line.begin()),
+                    std::make_move_iterator(particle_line.end()));
     }
 
     if (!buffer.empty()) {
       write(buffer);
     }
   }
-
   /// Binary particles output file path
   RenamingFilePtr file_;
 
@@ -198,7 +194,7 @@ class BinaryOutputBase : public OutputInterface {
   /// Format variant number associated to the custom quantities case
   const uint16_t format_custom_ = 2;
   /// The output formatter
-  OutputFormatterBinary formatter_;
+  OutputFormatter<ToBinary> formatter_;
 };
 
 /**

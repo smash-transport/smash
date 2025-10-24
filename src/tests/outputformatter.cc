@@ -31,22 +31,22 @@ TEST(ASCII_converter) {
 
 TEST_CATCH(empty_quantities, std::invalid_argument) {
   std::vector<std::string> empty{};
-  OutputFormatterASCII formatter(empty);
+  OutputFormatter<ToASCII> formatter(empty);
 }
 
 TEST_CATCH(invalid_quantity, std::invalid_argument) {
   std::vector<std::string> invalid_quantities = {"gibberish"};
-  OutputFormatterASCII formatter(invalid_quantities);
+  OutputFormatter<ToASCII> formatter(invalid_quantities);
 }
 
 TEST_CATCH(repeated_quantity, std::invalid_argument) {
   std::vector<std::string> repeated_quantities = {"t", "t"};
-  OutputFormatterASCII formatter(repeated_quantities);
+  OutputFormatter<ToASCII> formatter(repeated_quantities);
 }
 
 TEST_CATCH(incompatible_quantity, std::invalid_argument) {
   std::vector<std::string> repeated_quantities = {"id", "ID"};
-  OutputFormatterASCII formatter(repeated_quantities);
+  OutputFormatter<ToASCII> formatter(repeated_quantities);
 }
 
 TEST(valid_line_maker) {
@@ -76,7 +76,7 @@ TEST(valid_line_maker) {
                                                "baryon_number",
                                                "strangeness"};
 
-  OutputFormatterASCII formatter(valid_quantities);
+  OutputFormatter<ToASCII> formatter(valid_quantities);
 
   const auto quantities_line = std::accumulate(
       std::begin(valid_quantities), std::end(valid_quantities), std::string{},
@@ -114,15 +114,16 @@ TEST(valid_line_maker) {
   correct_line << p.get_history().p2.string() << " ";
   correct_line << p.pdgcode().baryon_number() << " ";
   correct_line << p.pdgcode().strangeness() << "\n";
-  VERIFY(correct_line.str() == formatter.data_line(p));
+  
+  VERIFY(correct_line.str() == formatter.particle_line(p));
 }
 
-TEST(binary_data_line) {
+TEST(binary_particle_line) {
   ParticleData p = Test::smashon_random();
   std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
-  OutputFormatterBinary formatter(quantities);
+  OutputFormatter<ToBinary> formatter(quantities);
 
-  std::vector<char> chunk = formatter.data_line(p);
+  std::vector<char> chunk = formatter.particle_line(p);
 
   double t = *reinterpret_cast<double*>(chunk.data());
   double x = *reinterpret_cast<double*>(chunk.data() + sizeof(double));
@@ -137,7 +138,7 @@ TEST(binary_data_line) {
   VERIFY(id == p.id());
 }
 
-TEST(per_particle_binary_data_line_same_as_particles_chunk) {
+TEST(per_particle_binary_particle_line_same_as_particles_chunk) {
   ParticleList particles;
   const std::size_t N = 33;
   particles.reserve(N);
@@ -147,7 +148,7 @@ TEST(per_particle_binary_data_line_same_as_particles_chunk) {
   }
 
   std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
-  OutputFormatterBinary formatter(quantities);
+  OutputFormatter<ToBinary> formatter(quantities);
 
   // Chunk for whole container
   std::vector<char> particles_chunk = formatter.particles_chunk(particles);
@@ -156,7 +157,7 @@ TEST(per_particle_binary_data_line_same_as_particles_chunk) {
   std::vector<char> per_particle_chunk;
   per_particle_chunk.reserve(particles_chunk.size());
   for (const auto& p : particles) {
-    auto data = formatter.data_line(p);
+    auto data = formatter.particle_line(p);
     per_particle_chunk.insert(per_particle_chunk.end(), data.begin(),
                               data.end());
   }

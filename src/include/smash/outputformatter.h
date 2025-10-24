@@ -10,17 +10,11 @@
 #ifndef SRC_INCLUDE_SMASH_OUTPUTFORMATTER_H_
 #define SRC_INCLUDE_SMASH_OUTPUTFORMATTER_H_
 
-#include <algorithm>
-#include <cassert>
-#include <cstdio>
-#include <cstring>
 #include <functional>
 #include <map>
-#include <numeric>
+#include <optional>
 #include <sstream>
-#include <stdexcept>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 #include "smash/particledata.h"
@@ -36,37 +30,11 @@ struct ToASCII {
   /// Return type of this converter.
   using type = std::string;
 
-  /// ASCII policy: insert a separator between fields and an end-of-record char.
-  static constexpr bool has_sep = true;
-
   /// Character used to separate fields in ASCII output.
-  static constexpr char sep_char = ' ';
-
-  /// Indicates whether an end-of-record character is appended (true for ASCII).
-  static constexpr bool has_end = true;
+  static constexpr std::optional<char> separator{' '};
 
   /// Character used to mark the end of a record in ASCII output.
-  static constexpr char end_char = '\n';
-
-  /**
-   * \brief Indicates whether the byte size varies between particles.
-   *
-   * For variable-length types (e.g. strings), this returns \c true since
-   * different ParticleData instances may have different sizes.
-   */
-  constexpr bool size_varies() const { return true; }
-
-  /**
-   * \brief Returns the byte size of the given data.
-   *
-   * Assumes 1 byte per element (string stores chars).
-   *
-   * \param[in] data Data object.
-   * \return Total size in bytes.
-   */
-  std::size_t size_of_type(const type& data) const {
-    return sizeof(char) * data.size();
-  }
+  static constexpr std::optional<char> end_of_line{'\n'};
 
   /**
    * Converts an integer.
@@ -76,7 +44,18 @@ struct ToASCII {
   type as_integer(int value) const { return std::to_string(value); }
 
   /**
-   * Converts a double with default precision (~6 significant digits).
+   * Converts a double with 6 digits of precision.
+   *
+   * \note The usage of \c std::snprintf over \c std::ostringstream is because
+   * of performance reasons (in C++20 this will be replaced with \c std::format
+   * which is even better). The returned string is constructed from the buffer
+   * in a way to exclude the terminating null character from the buffer. The
+   * hard-coded buffer size should fit any number, but a couple of assert are
+   * used to possibly investigate unexpected behaviour.
+   *
+   * \warning Since the buffer size is needed twice, it makes sense to store it
+   * in a variable. However, cpplint complains if the variable name is not
+   * starting with \c k followed by CamelCase.
    *
    * \param[in] value number to convert
    */
@@ -91,6 +70,15 @@ struct ToASCII {
 
   /**
    * Converts a double with 9 digits of precision.
+   *
+   * \see \c as_double for further information.
+   *
+   * \note The duplication of the code of the \c as_double method is done on
+   * purpose as naively extracting a function passing the \c std::snprintf
+   * format string as parameter would trigger a warning in compilation (the
+   * format has to be a literal in order to be checked by the compiler at
+   * compile time) and the effort to avoid this is not worth now, especially
+   * since this code will be changed anyhow when using C++20.
    *
    * \param[in] value number to convert
    */
@@ -107,7 +95,7 @@ struct ToASCII {
    * Because %ToASCII converts into strings, this simply returns the string
    * itself.
    *
-   * \param[in] str string to be written
+   * \param[inout] str string to be written
    */
   type as_string(const std::string& str) const { return str; }
 };
@@ -121,39 +109,11 @@ class ToBinary {
   /// Return type of this converter.
   using type = std::vector<char>;
 
-  /// Binary policy: no separators between fields, no end-of-record char.
-  static constexpr bool has_sep = false;
+  /// separator char is not needed for Binary format
+  static constexpr std::optional<char> separator = std::nullopt;
 
-  /// Character used to separate fields (unused for binary).
-  static constexpr char sep_char = 0;
-
-  /// Indicates whether an end-of-record character is appended (false for
-  /// binary).
-  static constexpr bool has_end = false;
-
-  /// Character used to mark the end of a record (unused for binary).
-  static constexpr char end_char = 0;
-
-  /**
-   * \brief Indicates whether the byte size varies between particles.
-   *
-   * For the current set of binary fields (fixed-size scalars), this is \c
-   * false. If variable-length fields are ever added to binary output, flip
-   * this.
-   */
-  constexpr bool size_varies() const { return false; }
-
-  /**
-   * \brief Returns the byte size of the given data.
-   *
-   * Assumes 1 byte per element (vector of char).
-   *
-   * \param[in] data Data object.
-   * \return Total size in bytes.
-   */
-  std::size_t size_of_type(const type& data) const {
-    return sizeof(char) * data.size();
-  }
+  /// Endline char is not needed for Binary format
+  static constexpr std::optional<char> end_of_line = std::nullopt;
 
   /**
    * Converts an integer to binary format.
@@ -172,7 +132,13 @@ class ToBinary {
   type as_double(double value) const { return as_binary_data(value); }
 
   /**
-   * Converts a double to binary format (same as as_double for binary).
+   * Converts a double to binary format, intended for precise representation.
+   * Note that for binary output there is no difference between this and the
+   * \c ToBinary::as_double method, but this method has still to be introduced
+   * to allow other classes to get the converter class as a template parameter.
+   *
+   * \param[in] value number to convert
+   * \return a vector of char representing the binary format of the double
    */
   type as_precise_double(double value) const { return as_double(value); }
 
@@ -215,15 +181,15 @@ class ToBinary {
  *    value from a \c ParticleData instance.
  * 2. Adding the proper key-value pair to the \c units_ map, specifying the unit
  *    of the quantity.
- *
- * \tparam Converter The desired output format. Must be either \c ToASCII or \c
- * ToBinary.
+ * 
+ * \tparam Converter The desired output format. At the moment it must be either
+ *                   \c ToASCII or `ToBinary`.
  */
 template <typename Converter,
           std::enable_if_t<std::is_same_v<Converter, ToASCII> ||
                                std::is_same_v<Converter, ToBinary>,
                            bool> = true>
-class OutputFormatterBase {
+class OutputFormatter {
  public:
   /**
    * Creates the formatter. This reduces the number of literal strings flying
@@ -238,7 +204,7 @@ class OutputFormatterBase {
    * \throw std::invalid_argument if incompatible quantities exist in the list
    * \throw std::invalid_argument if there are repeated quantities
    */
-  explicit OutputFormatterBase(const std::vector<std::string>& in_quantities)
+  explicit OutputFormatter(const std::vector<std::string>& in_quantities)
       : quantities_(in_quantities) {
     validate_quantities();
     for (const std::string& quantity : quantities_) {
@@ -375,78 +341,33 @@ class OutputFormatterBase {
   }
 
   /**
-   * Computes and returns the total bytes used by a single particle using
+   * Computes and returns the total size of single particle using
    * all registered getters.
    *
-   * For ASCII, includes the single-byte field separators inserted between
-   * values, and includes the end-of-record character (e.g., '\n').
-   *
-   * \return Total byte size of one particle´s representation.
+   * \return Total size of one sample particle´s representation.
    */
   std::size_t compute_single_size(const ParticleData& sample) const {
     std::size_t size = 0;
     for (const auto& getter : getters_) {
       const typename Converter::type tmp = getter(sample);
-      size += converter_.size_of_type(tmp);
-    }
-    if constexpr (Converter::has_sep) {
-      if (!getters_.empty())
-        size += (getters_.size() - 1);  // separators
-    }
-    if constexpr (Converter::has_end) {
-      size += 1;  // end-of-record char
+      size += tmp.size() + static_cast<int>(Converter::separator.has_value()) +
+              static_cast<int>(Converter::end_of_line.has_value());
     }
     return size;
-  }
-
-  /**
-   * Appends the Converter::type representation of a single particle to an
-   * existing buffer, avoiding intermediate allocations when building large
-   * blocks.
-   *
-   * For ASCII (policy: has_sep=true, has_end=true), a single-byte separator is
-   * inserted between fields and a trailing end-of-record character is appended.
-   * For binary (policy: has_sep=false, has_end=false), neither is added.
-   *
-   * \param[in]  p       Particle whose information is to be appended.
-   * \param[out] buffer  Destination buffer to which the data is appended.
-   */
-  void fill_buffer(const ParticleData& p,
-                   typename Converter::type& buffer) const {
-    bool first = true;
-    for (const auto& get : getters_) {
-      if constexpr (Converter::has_sep) {
-        if (!first)
-          buffer.push_back(Converter::sep_char);
-        first = false;
-      }
-      const auto data = get(p);
-      buffer.insert(buffer.end(), data.begin(), data.end());
-    }
-    if constexpr (Converter::has_end) {
-      buffer.push_back(Converter::end_char);
-    }
   }
 
   /**
    * Produces a data chunk representing a single particle
    * suitable for writing to an output file.
    *
-   * For ASCII (policy: has_end=true), this returns the space-separated fields
-   * **including** a trailing newline. For binary, this returns the packed
-   * scalar bytes with no separators and no trailing newline.
-   *
    * \param[in] p Particle whose information is to be written.
    * \return A buffer containing the formatted data.
    *
-   * \see fill_buffer(const ParticleData&, Converter::type&)
+   * \see append_to_buffer
    */
-  typename Converter::type data_line(const ParticleData& p) const {
+  typename Converter::type particle_line(const ParticleData& p) const {
     typename Converter::type chunk{};
-    // For binary this is exact; for ASCII it's exact as well since we count
-    // separators and the end-of-record char.
-    chunk.reserve(compute_single_size(p));
-    fill_buffer(p, chunk);
+    append_to_buffer(p, chunk);
     return chunk;
   }
 
@@ -466,7 +387,7 @@ class OutputFormatterBase {
    * \return A Converter::type buffer containing the formatted data for the
    * entire block.
    *
-   * \see fill_buffer(const ParticleData&, typename Converter::type&)
+   * \see append_to_buffer(const ParticleData&, typename Converter::type&)
    */
   template <class Range,
             std::enable_if_t<std::is_same_v<Range, Particles> ||
@@ -478,18 +399,64 @@ class OutputFormatterBase {
     if (it == particles.end())
       return chunk;
 
-    // Reserve based on first particle (exact for current binary payloads; exact
-    // for ASCII too since compute_single_size includes separators and
-    // end-of-record char).
+    /// Estimated chunk size. Precise for Binary
     chunk.reserve(particles.size() * compute_single_size(*it));
 
     for (const ParticleData& p : particles) {
-      fill_buffer(p, chunk);
+      append_to_buffer(p, chunk);
     }
     return chunk;
   }
 
- protected:
+  /**
+   * Produces the line with quantities for the header of the output file.
+   *
+   * Appends each quantity name to the output buffer, separating them
+   * by the separator character if it is defined in the Converter.
+   *
+   * \return Converter::type
+   */
+  typename Converter::type quantities_line() const {
+    typename Converter::type out;
+    bool first = true;
+
+    for (const auto& string_name : quantities_) {
+      if (!first && Converter::separator) {
+        out.push_back(*Converter::separator);
+      }
+      typename Converter::type name = converter_.as_string(string_name);
+      out.insert(out.end(), name.begin(), name.end());
+      first = false;
+    }
+
+    return out;
+  }
+
+  /**
+   * Produces the line with units for the header of the output file.
+   *
+   * Looks up each quantity’s unit in the units_ map and appends it to the
+   * output buffer. Each unit is separated by the separator character if
+   * defined.
+   *
+   * \return Converter::type
+   */
+  typename Converter::type unit_line() const {
+    typename Converter::type out;
+    bool first = true;
+
+    for (const auto& key : quantities_) {
+      if (!first && Converter::separator) {
+        out.push_back(*Converter::separator);
+      }
+      const auto& unit = converter_.as_string(this->units_.at(key));
+      out.insert(out.end(), unit.begin(), unit.end());
+      first = false;
+    }
+    return out;
+  }
+
+ private:
   /// Member to convert data into the correct output format.
   Converter converter_{};
 
@@ -579,61 +546,31 @@ class OutputFormatterBase {
           "together. Please, fix the configuration file.");
     }
   }
-};
 
-/**
- * Binary formatter
- */
-class OutputFormatterBinary : public OutputFormatterBase<ToBinary> {
- public:
   /**
-   * \brief Base class typedef for convenience.
+   * Appends the Converter::type representation of a single particle to an
+   * existing buffer, avoiding intermediate allocations when building large
+   * blocks.
    *
-   * This alias makes the underlying template base class more
-   * readable and simplifies access to inherited members.
+   * \param[in]  p       Particle whose information is to be appended.
+   * \param[out] buffer  Destination buffer to which the data is appended.
    */
-  using OutputFormatterBase<ToBinary>::OutputFormatterBase;
-};
-
-/**
- * ASCII formatter
- */
-class OutputFormatterASCII : public OutputFormatterBase<ToASCII> {
- public:
-  /**
-   * \brief Base class typedef for convenience.
-   *
-   * This alias makes the underlying template base class more
-   * readable and simplifies access to inherited members.
-   */
-  using OutputFormatterBase<ToASCII>::OutputFormatterBase;
-
-  /**
-   * Produces the line with quantities for the header of the output file.
-   * \return string with name of quantities separated by a space.
-   */
-  ToASCII::type quantities_line() const {
-    return std::accumulate(
-        std::begin(quantities_), std::end(quantities_), std::string{},
-        [this](const std::string& ss, const std::string& s) {
-          return ss.empty() ? this->converter_.as_string(s)
-                            : ss + " " + this->converter_.as_string(s);
-        });
-  }
-
-  /**
-   * Produces the line with units for the header of the output file.
-   * \return string with units separated by a space.
-   */
-  ToASCII::type unit_line() const {
-    return std::accumulate(
-        std::begin(quantities_), std::end(quantities_), std::string{},
-        [this](const std::string& ss, const std::string& s) {
-          return ss.empty()
-                     ? this->converter_.as_string(this->units_.at(s))
-                     : ss + " " +
-                           this->converter_.as_string(this->units_.at(s));
-        });
+  void append_to_buffer(const ParticleData& p,
+                        typename Converter::type& buffer) const {
+    bool first = true;
+    for (const auto& get : getters_) {
+      if constexpr (Converter::separator) {
+        if (!first)
+          buffer.push_back(*Converter::separator);
+        first = false;
+      }
+      const auto data = get(p);
+      buffer.insert(buffer.end(), std::make_move_iterator(data.begin()),
+                    std::make_move_iterator(data.end()));
+    }
+    if constexpr (Converter::end_of_line) {
+      buffer.push_back(*Converter::end_of_line);
+    }
   }
 };
 
