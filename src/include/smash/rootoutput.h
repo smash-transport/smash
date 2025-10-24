@@ -195,10 +195,11 @@ class RootOutput : public OutputInterface {
   std::vector<double> y_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> z_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> formation_time_ =
-      std::vector<double>(max_buffer_size_, 0.0);
+    std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> xsec_factor_ = std::vector<double>(max_buffer_size_, 0.0);
-  std::vector<double> time_last_coll_ =
-      std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> time_last_collision_ =
+    std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<int> id_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> pdgcode_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> charge_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> coll_per_part_ = std::vector<int>(max_buffer_size_, 0);
