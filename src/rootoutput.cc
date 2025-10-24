@@ -56,17 +56,18 @@ const int RootOutput::max_buffer_size_ = 500000;
  * decays.
  *
  * Every physical quantity corresponds to a separate TBranch.
- * One entry in the \c particles TTree is:
+ * One entry (block) in the \c particles TTree is comprised of:
  * \code
  * ev ens tcounter npart test_p modus_l current_t impact_b empty_event
- * pdgcode[npart] charge[npart] t[npart] x[npart] y[npart] z[npart] p0[npart]
+ * id[npart] pdgcode[npart] charge[npart] formation_time[npart]
+ * time_last_collision[npart] t[npart] x[npart] y[npart] z[npart] p0[npart]
  * px[npart] py[npart] pz[npart] E_kinetic_tot E_fields_tot E_tot
  * \endcode
- * The maximal
- * number of particles in one entry is limited to 500000. This is done to limit
- * the buffer size needed for ROOT output. If the number of particles in one
- * block exceeds 500000, then they are written in separate entries with the same
- * \c tcounter and \c ev. The fields have the following meaning:
+ * The maximal number of particles in one entry is limited to 500000. This is
+ * done to limit the buffer size needed for ROOT output. If the number of
+ * particles in one block exceeds 500000, then they are written in separate
+ * entries with the same \c tcounter and \c ev. The entries have the following
+ * meaning:
  *
  * \li \c ev is event number
  * \li \c ens is ensemble number
@@ -79,8 +80,11 @@ const int RootOutput::max_buffer_size_ = 500000;
  * \li \c impact_b is the impact parameter of the event
  * \li \c empty_event indicates whether the projectile did not interact with the
  * target
+ * \li \c id is the unique integer identifier array
  * \li \c pdgcode is PDG id array
  * \li \c charge is the electric charge array
+ * \li \c formation_time is particle formation time array
+ * \li \c time_last_collision is time of the last collision array
  * \li \c p0, \c px, \c py, \c pz are 4-momenta arrays
  * \li \c t, \c x, \c y, \c z are position arrays
  * \li \c E_kinetic_tot is total kinetic energy in the system
@@ -90,14 +94,17 @@ const int RootOutput::max_buffer_size_ = 500000;
  * In case of extended output (see \ref input_output_content_specific_) more
  * fields are added. Their description is the same that in case of OSCAR
  * format, see \ref extended_output_format_.
+ * Note that in contrast to the OSCAR format, the ROOT output includes
+ * formation_time and time_last_collision in the standard (not extended) output.
  *
  * The entries in the \c collisions tree are organized in the same way, but
  * a few additional fields are present:
  * \li \c nin and \c nout are added to characterize number of incoming and
- *     outgoing particles in the reaction, with nin + nout = npart.
+ *     outgoing particles in the reaction, with nin + nout = npart
  * \li \c weight is an action weight, whose meaning depends on the type of
  *     action: For collisions it is the total cross section, for decays it is
- *     the total decay width and for dilepton decays it is the shining weight.
+ *     the total decay width, and for dilepton decays it is the shining weight
+ * \li \c partial_weight is partial weight of the collision
  *
  * Currently writing initial and final configuration to collisions tree is
  * not supported.
@@ -265,7 +272,6 @@ void RootOutput::init_trees() {
     particles_tree_->Branch("id", &id_[0], "id[npart]/I");
     particles_tree_->Branch("pdgcode", &pdgcode_[0], "pdgcode[npart]/I");
     particles_tree_->Branch("charge", &charge_[0], "charge[npart]/I");
-
     particles_tree_->Branch("formation_time", &formation_time_[0],
 			    "formation_time[npart]/D");
     particles_tree_->Branch("time_last_collision", &time_last_collision_[0],
@@ -307,18 +313,18 @@ void RootOutput::init_trees() {
   if (write_collisions_) {
     collisions_tree_ = new TTree("collisions", "collisions");
 
+    collisions_tree_->Branch("ev", &ev_, "ev/I");
+    collisions_tree_->Branch("ens", &ens_, "ens/I");
+
     collisions_tree_->Branch("nin", &nin_, "nin/I");
     collisions_tree_->Branch("nout", &nout_, "nout/I");
     collisions_tree_->Branch("npart", &npart_, "npart/I");
-    collisions_tree_->Branch("ev", &ev_, "ev/I");
-    collisions_tree_->Branch("ens", &ens_, "ens/I");
     collisions_tree_->Branch("weight", &wgt_, "weight/D");
     collisions_tree_->Branch("partial_weight", &par_wgt_, "partial_weight/D");
 
     collisions_tree_->Branch("id", &id_[0], "id[npart]/I");
     collisions_tree_->Branch("pdgcode", &pdgcode_[0], "pdgcode[npart]/I");
     collisions_tree_->Branch("charge", &charge_[0], "charge[npart]/I");
-
     collisions_tree_->Branch("formation_time", &formation_time_[0],
 			     "formation_time[npart]/D");
     collisions_tree_->Branch("time_last_collision", &time_last_collision_[0],
@@ -411,15 +417,16 @@ void RootOutput::at_eventend(const Particles &particles,
                              const EventLabel &event_label,
                              const EventInfo &event) {
   current_ensemble_ = event_label.ensemble_number;
-  modus_l_ = event.modus_length;
   test_p_ = event.test_particles;
+  modus_l_ = event.modus_length;
   current_t_ = event.current_time;
+  impact_b_ = event.impact_parameter;
+  empty_event_ = event.empty_event;
+
   E_kinetic_tot_ = event.total_kinetic_energy;
   E_fields_tot_ = event.total_mean_field_energy;
   E_tot_ = event.total_energy;
 
-  impact_b_ = event.impact_parameter;
-  empty_event_ = event.empty_event;
   if (write_particles_ &&
       !(event.empty_event &&
         particles_only_final_ == OutputOnlyFinal::IfNotEmpty)) {
@@ -493,7 +500,6 @@ void RootOutput::particles_to_tree(T &particles) {
       id_[i] = p.id();
       pdgcode_[i] = p.pdgcode().get_decimal();
       charge_[i] = p.type().charge();
-     
       formation_time_[i] = p.formation_time();     
       time_last_collision_[i] = p.get_history().time_last_collision;
 
@@ -509,8 +515,8 @@ void RootOutput::particles_to_tree(T &particles) {
 
       if (part_extended_ || ic_extended_) {
 	const auto h = p.get_history();
+	coll_per_part_[i] = h.collisions_per_particle;
         xsec_factor_[i] = p.xsec_scaling_factor();
-        coll_per_part_[i] = h.collisions_per_particle;
         proc_id_origin_[i] = h.id_process;
         proc_type_origin_[i] = static_cast<int>(h.process_type);
         pdg_mother1_[i] = h.p1.get_decimal();
@@ -553,7 +559,6 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
       id_[i] = p.id();
       pdgcode_[i] = p.pdgcode().get_decimal();
       charge_[i] = p.type().charge();
-
       formation_time_[i] = p.formation_time();
       time_last_collision_[i] = p.get_history().time_last_collision;
 
@@ -569,8 +574,8 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
 
       if (coll_extended_) {
         const auto h = p.get_history();
+	coll_per_part_[i] = h.collisions_per_particle;
         xsec_factor_[i] = p.xsec_scaling_factor();
-        coll_per_part_[i] = h.collisions_per_particle;
         proc_id_origin_[i] = h.id_process;
         proc_type_origin_[i] = static_cast<int>(h.process_type);
         pdg_mother1_[i] = h.p1.get_decimal();

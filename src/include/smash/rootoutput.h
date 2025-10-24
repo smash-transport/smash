@@ -34,46 +34,83 @@ class Particles;
  * The ROOT framework needs to be installed before building SMASH, otherwise
  * ROOT support will be disabled.
  *
- * This class produces file Particles.root, which contains a
- * ROOT TTree. TTree contains information about particles from all SMASH events
- * comprising a simulation.
- * Output is happening in blocks. All particles in a block
- * are at the same time and in the same event. However, it is possible that
- * different blocks are at the same time and from the same event.
- * Particle information is stored in TBranches.
- * For each particle characteristic there is a separate branch.
- * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum),
- * pdgcode - PDG code of the particle, characterizing its type,
- * charge - electric charge of the particle,
+ * This class produces file Particles.root, which contains a ROOT TTree. The
+ * TTree contains information about particles from all SMASH events comprising a
+ * simulation.
+ * Output is performed in blocks. All particles in a block are at the same time
+ * and in the same event. Due to the division of the output for large buffers,
+ * it is possible that different blocks are at the same time and from the same
+ * event.
+ * Information is stored in TBranches. Each output block contains TBranches with
+ * overall information about the event and the output block:
  * ev - event number in a given block,
+ * ens - ensemble number in a given block,
  * tcounter - number of the output block in a given event,
  * npart - number of particles in the block,
  * test_p - number of testpartciles per particle,
  * modus_l - modus length,
  * current_t - time associated with the output block, in fm,
  * impact_b - impact parameter of the event,
- * empty_event - whether there was no interaction between the projectile and
- * the target,
+ * empty_event - whether the projectile and the target did not collide/interact.
+ * Then, each output block contains information about all particles in the
+ * block. For each particle characteristic there is a separate TBranch. These
+ * TBranches contain arrays of the following quantities:
+ * id - a unique integer identifier of the particle,
+ * pdgcode - PDG code of the particle, characterizing its type,
+ * charge - electric charge of the particle,
+ * formation_time - time when the particle was created,
+ * time_last_collision - time of the last collision before the output time,
+ * p0, px, py, pz - components of the 4-momentum,
+ * t, x, y, z - coordinates.
+ * In each array, the i-th entry corresponds to the i-th particle.
+ * Finally, each output contains information about some of the bulk properties
+ * of the system:
  * E_kinetic_tot - total kinetic energy in the system,
  * E_fields_tot - total mean field energy * test_p,
  * E_total - sum of E_kinetic_tot and E_fields_tot.
  *
- * This class also produces file Collisions.root, organized in the same way,
- * with a few additional fields:
- * nin and nout - characterize number of incoming and outgoing particles in the
- * reaction, with nin + nout = npart,
- * weight - an action weight, whose meaning depends on the type of action: For
- * collisions it is the total cross section, for decays it is the total decay
- * width and for dilepton decays it is the shining weight.
+ * It is possible to request an extended ROOT output, which in addition to these
+ * characteristics also contains
+ * ncoll - number of collisions the particle has undergone,
+ * xsecfac - cross section scaling factor if the particles are not yet fully
+ * formed at the time of interaction, the cross section for the underlying
+ * process is scaled down by the cross section scaling factor),
+ * proc_id_origin - ID of the process of the particle's last interaction,
+ * proc_type_origin - type of the last process the particle has undergone (the
+ * possible process types are listed in \ref doxypage_output_process_types),
+ * pdg_mother1 - PDG code of the 1st mother particle (0 in case the particle is
+ * sampled in a thermal bubble; it is not updated by elastic scatterings);
+ * pdg_mother2 - PDG code of the 2nd mother particle (0 in case the particle
+ * originates from the decay of a resonance or the appearance of a thermal
+ * bubble; in the former case, \key pdg_mother1 is the PDG code of the mother
+ * resonance; it is not updated by elastic scatterings),
+ * baryon_number - baryon number of the particle,
+ * strangeness - strangeness number of the particle.
  *
- * If "Collisions:" section is present, then in addition to a file
- * Particles.root with particles TTree, another file Collisions.root is
- * created. It contains information about each collision, written as one leaf:
- * nin, nout - number of incoming and outgoing particles, ev - event number,
- * weight - total weight of the collision (wgt), partial_weight - partial
- * weight of the collision (par_wgt), (t,x,y,z),
- * (p0,px,py,pz) - arrays of dimension nin+nout
- * that contain coordinates and momenta.
+ * If "Collisions:" section is present in the config file, then in addition to a
+ * file Particles.root with particles TTree, another file Collisions.root is
+ * created. Collisions.root contains information about each collision, written
+ * as one leaf. Similarly to Particles.root, this includes global information
+ * about the event:
+ * ev - event number,
+ * ens - ensemble number,
+ * and information about particles participating in a collision:
+ * id - a unique integer identifier of the particle,
+ * pdgcode - PDG code of the particle, characterizing its type,
+ * charge - electric charge of the particle,
+ * formation_time - time when the particle was created,
+ * time_last_collision - time of the last collision before the output time,
+ * p0, px, py, pz - components of the 4-momentum,
+ * t, x, y, z - coordinates,
+ * where all arrays (id, pdgcode, charge, formation_time, time_last_collision,
+ * p0, px, py, pz, t, x, y, z) are now of dimension nin+nout = npart.
+ * Beyond these, Collisions.root contains a few additional fields:
+ * nin and nout - the number of incoming and outgoing particles in the reaction,
+ * with nin + nout = npart,
+ * wgt - an action weight, whose meaning depends on the type of action: for
+ * collisions it is the total cross section, for decays it is the total decay
+ * width, and for dilepton decays it is the shining weight,
+ * par_wgt - partial weight of the collision.
  */
 class RootOutput : public OutputInterface {
  public:
@@ -186,6 +223,22 @@ class RootOutput : public OutputInterface {
    */
   //@{
   /// Property that is written to ROOT output.
+  int ev_{};
+  int ens_{};
+  int tcounter_{};
+  int npart_{};
+  int test_p_{};
+  double modus_l_{};
+  double current_t_{};
+  double impact_b_{};
+  bool empty_event_{};
+  std::vector<int> id_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<int> pdgcode_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<int> charge_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<double> formation_time_ =
+    std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> time_last_collision_ =
+    std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> p0_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> px_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> py_ = std::vector<double>(max_buffer_size_, 0.0);
@@ -194,25 +247,21 @@ class RootOutput : public OutputInterface {
   std::vector<double> x_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> y_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> z_ = std::vector<double>(max_buffer_size_, 0.0);
-  std::vector<double> formation_time_ =
-    std::vector<double>(max_buffer_size_, 0.0);
-  std::vector<double> xsec_factor_ = std::vector<double>(max_buffer_size_, 0.0);
-  std::vector<double> time_last_collision_ =
-    std::vector<double>(max_buffer_size_, 0.0);
-  std::vector<int> id_ = std::vector<int>(max_buffer_size_, 0);
-  std::vector<int> pdgcode_ = std::vector<int>(max_buffer_size_, 0);
-  std::vector<int> charge_ = std::vector<int>(max_buffer_size_, 0);
+  double E_kinetic_tot_{};
+  double E_fields_tot_{};
+  double E_tot_{};
   std::vector<int> coll_per_part_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<double> xsec_factor_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<int> proc_id_origin_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> proc_type_origin_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> pdg_mother1_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> pdg_mother2_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> baryon_number_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> strangeness_ = std::vector<int>(max_buffer_size_, 0);
-  int npart_, tcounter_, ev_, ens_, nin_, nout_, test_p_;
-  double wgt_, par_wgt_, impact_b_, modus_l_, current_t_;
-  double E_kinetic_tot_, E_fields_tot_, E_tot_;
-  bool empty_event_;
+  int nin_{};
+  int nout_{};
+  double wgt_{};
+  double par_wgt_{};
   //@}
 
   /// Option to write collisions tree.
@@ -224,7 +273,7 @@ class RootOutput : public OutputInterface {
   /// Option to write particles tree for initial conditions
   bool write_initial_conditions_;
 
-  /// Print only final particles in the event, no intermediate output.
+  /// Print only final particles in the event (no intermediate output).
   OutputOnlyFinal particles_only_final_;
 
   /**
@@ -235,7 +284,7 @@ class RootOutput : public OutputInterface {
    * ensembles per event. This makes sense especially in case of a large number
    * of ensembles and, at the same time, it ensures that all ensembles belonging
    * to the same event are saved. The autosave_frequency_ sets this N (at the
-   * moment N=1000 hard-coded). Note that "AutoSave" operation is very
+   * moment N=1000 is hard-coded). Note that "AutoSave" operation is very
    * time-consuming, so the autosave frequency is always a compromise between
    * safety and speed.
    */
