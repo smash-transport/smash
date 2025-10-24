@@ -581,6 +581,7 @@ void RootOutput::collisions_to_tree(const ParticleList &incoming,
         pdg_mother1_[i] = h.p1.get_decimal();
         pdg_mother2_[i] = h.p2.get_decimal();
         baryon_number_[i] = p.type().baryon_number();
+	strangeness_[i] = p.type().strangeness();
       }
 
       i++;
