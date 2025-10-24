@@ -3762,17 +3762,22 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_C_impact_parameter
    * \optional_key{key_MC_impact_sample_,Sample,string,"quadratic"}
    *
+   * Distribution according to which the impact parameter is sampled.
+   * Possible alternatives:
+   *
    * - `"uniform"` &rarr; use uniform sampling of the impact parameter
    *   (uniform in \f$b\f$: \f$dP(b) = db\f$)
    * - `"quadratic"` &rarr; use areal (aka quadratic) input sampling (the
    *   probability of an input parameter range is proportional to the area
    *   corresponding to that range, uniform in \f$b^2\f$:
    *   \f$dP(b) = b\,db\f$).
-   * - `"custom"` &rarr; creates a custom distribution of piecewise linear 
-   *   functions based on the provided impact parameter `Values` and the 
-   *   corresponding `Yields` (likelihood of that impact parameter value 
-   *   to be sampled). This distribution is used to randomly sample the 
-   *   impact parameter using rejection sampling.
+   * - `"custom"` &rarr; creates a custom distribution of piecewise linear
+   *   functions based on the provided impact parameter `Values` and the
+   *   corresponding `Yields` (likelihood of that impact parameter value
+   *   to be sampled). This distribution is used to randomly sample the
+   *   impact parameter using rejection sampling. Note that both these
+   *   keys, `Values` and `Yields` are required when using `Sample:
+   *   "custom"`.
    */
   /**
    * \see_key{key_MC_impact_sample_}
@@ -3799,10 +3804,10 @@ struct InputKeys {
    * \par Custom sampling
    * \required_key_no_line{key_MC_impact_values_,Values,list of doubles}
    *
-   * Impact parameter `Values` \unit{in fm} used to build the custom distribution. 
-   * Each element of `Values` corresponds to an element of `Yields`, 
-   * these are connected through piecewise linear functions to create the
-   * distribution. Must be same length as `Yields`. This key can be omitted 
+   * Impact parameter `Values` \unit{in fm} used to build the custom
+   * distribution. Each element of `Values` corresponds to an element of
+   * `Yields`, these are connected through piecewise linear functions to create
+   * the distribution. Must be same length as `Yields`. This key can be omitted
    * if `Sample` is not set to `"custom"`.
    */
   /**
@@ -3815,11 +3820,11 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_C_impact_parameter
    * \required_key_no_line{key_MC_impact_yields_,Yields,list of doubles}
    *
-   * Each element of `Yields` indicates the likelihood of sampling the corresponding 
-   * impact parameter in `Values`. Between the specified points of `Values` and 
-   * `Yields`, linear interpolation is used to build the custom distribution.
-   * `Yields` must be same length as `Values`. It does not need to be normed.
-   * This key can be omitted if `Sample` is not set to `"custom"`.
+   * Each element of `Yields` indicates the likelihood of sampling the
+   * corresponding impact parameter in `Values`. Between the specified points of
+   * `Values` and `Yields`, linear interpolation is used to build the custom
+   * distribution. `Yields` must be same length as `Values`. It does not need to
+   * be normed. This key can be omitted if `Sample` is not set to `"custom"`.
    */
   /**
    * \see_key{key_MC_impact_sample_}
