@@ -3912,6 +3912,25 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_proper_time_scaling_,Proper_Time_Scaling,double,
+   * 1.0}
+   *
+   * A scaling factor by which the proper time at which the switching
+   * hypersurface is created is multiplied. This parameter is used in the
+   * Bayesian analysis in \iref{Gotz:2025wnv}. It is only used if the constant
+   * tau initial condition is active and the <tt>\ref key_MC_IC_proper_time_
+   * "Proper_Time"</tt> key is not provided.
+   */
+  /**
+   * \see_key{key_MC_IC_proper_time_scaling_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_scaling{
+      InputSections::m_c_initialConditions + "Proper_Time_Scaling",
+      1.0,
+      {"3.3"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_pt_cut_,pT_Cut,double,
    * </tt>No cut is done<tt>}
    *
@@ -6123,6 +6142,7 @@ struct InputKeys {
       std::cref(modi_collider_initialConditions_formTimeFraction),
       std::cref(modi_collider_initialConditions_fluidProcesses),
       std::cref(modi_collider_initialConditions_lowerBound),
+      std::cref(modi_collider_initialConditions_scaling),
       std::cref(modi_collider_initialConditions_maxTime),
       std::cref(modi_collider_initialConditions_minTime),
       std::cref(modi_collider_initialConditions_properTime),

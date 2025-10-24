@@ -30,6 +30,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Input
 * `ListModus` now accepts `Optional_Quantities`, extra to the default values used in Oscar2013.
+* Added the `Proper_Time_Scaling` key in the `Initial_Conditions` section under `Modi: Collider:`, that scales the switching proper time when using constant tau initial conditions.
 
 ### Output
 * `Dileptons` and `Photons` now accept the `ASCII` custom format.

@@ -1110,10 +1110,14 @@ Experiment<Modus>::Experiment(Configuration &config,
         if (IC_parameters.proper_time.has_value()) {
           return IC_parameters.proper_time.value();
         } else {
-          double lower_bound = IC_parameters.lower_bound.value();
-
+          // Scaling factor applied to the switching time and the lower bound
+          const double scaling = IC_parameters.proper_time_scaling.value();
+          // Lower bound for the switching time
+          const double lower_bound =
+              IC_parameters.lower_bound.value() * scaling;
           // Default proper time is the passing time of the two nuclei
-          double default_proper_time = modus_.nuclei_passing_time();
+          const double default_proper_time =
+              modus_.nuclei_passing_time() * scaling;
           if (default_proper_time >= lower_bound) {
             logg[LInitialConditions].info()
                 << "Nuclei passing time is " << default_proper_time << " fm.";
