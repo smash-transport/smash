@@ -804,14 +804,14 @@ void Experiment<Modus>::create_output(const std::string &format,
     printout_lattice_td_ = true;
     outputs_.emplace_back(
         std::make_unique<VtkOutput>(output_path, content, out_par));
-  } else if (content == "Initial_Conditions" && format == "for_vHLLE") {
+  } else if (content == "Initial_Conditions" && format == "For_vHLLE") {
     if (IC_dynamic_) {
       throw std::invalid_argument(
           "Dynamic initial conditions are only available in Oscar2013 and "
           "Binary formats.");
     }
     outputs_.emplace_back(
-        std::make_unique<ICOutput>(output_path, "SMASH_IC_for_vHLLE", out_par));
+        std::make_unique<ICOutput>(output_path, "SMASH_IC_For_vHLLE", out_par));
   } else if ((format == "HepMC") || (format == "HepMC_asciiv3") ||
              (format == "HepMC_treeroot")) {
 #ifdef SMASH_USE_HEPMC
@@ -1111,10 +1111,14 @@ Experiment<Modus>::Experiment(Configuration &config,
         if (IC_parameters.proper_time.has_value()) {
           return IC_parameters.proper_time.value();
         } else {
-          double lower_bound = IC_parameters.lower_bound.value();
-
+          // Scaling factor applied to the switching time and the lower bound
+          const double scaling = IC_parameters.proper_time_scaling.value();
+          // Lower bound for the switching time
+          const double lower_bound =
+              IC_parameters.lower_bound.value() * scaling;
           // Default proper time is the passing time of the two nuclei
-          double default_proper_time = modus_.nuclei_passing_time();
+          const double default_proper_time =
+              modus_.nuclei_passing_time() * scaling;
           if (default_proper_time >= lower_bound) {
             logg[LInitialConditions].info()
                 << "Nuclei passing time is " << default_proper_time << " fm.";
@@ -1264,7 +1268,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   predefined set of quantities.
    * - \b "Oscar2013_bin" - alias for the \b "Binary" format with a predefined
    *   set of quantities.
-   * - \b "for_vHLLE" - an alias for the \b "ASCII" format exclusive to the
+   * - \b "For_vHLLE" - an alias for the \b "ASCII" format exclusive to the
    *   `"Initial_Conditions"` output content, which produces a file compatible
    *   with the vHLLE hydrodynamic evolution code (see \ref
    *   doxypage_output_initial_conditions).
@@ -1367,7 +1371,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * Once initial conditions are enabled, the output file named SMASH_IC
    * (followed by the appropriate suffix) is generated when SMASH is executed.
    * \n The output is available in Oscar1999, Oscar2013, ASCII, Oscar2013_bin
-   * and ROOT format, as well as in an additional "for_vHLLE" format. The latter
+   * and ROOT format, as well as in an additional "For_vHLLE" format. The latter
    * is meant to directly serve as input for the vHLLE hydrodynamics code
    * \iref{Karpenko:2013wva}.\n
    *

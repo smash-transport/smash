@@ -27,6 +27,8 @@ struct InitialConditionParameters {
   std::optional<double> proper_time = std::nullopt;
   /// Lower bound for proper time in IC
   std::optional<double> lower_bound = std::nullopt;
+  /// Scaling factor for proper time in IC
+  std::optional<double> proper_time_scaling = std::nullopt;
   /// Rapidity cut on hypersurface IC
   std::optional<double> rapidity_cut = std::nullopt;
   /// Transverse momentum cut on hypersurface IC

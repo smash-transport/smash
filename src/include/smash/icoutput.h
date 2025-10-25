@@ -25,7 +25,7 @@ namespace smash {
  * \ingroup output
  *
  * SMASH output in a format containing initial conditions for hydrodynamic
- * codes ("for_vHLLE"). Formatted such that it can be directly processed by
+ * codes ("For_vHLLE"). Formatted such that it can be directly processed by
  * vHLLE \iref{Karpenko:2015xea}.
  */
 class ICOutput : public OutputInterface {

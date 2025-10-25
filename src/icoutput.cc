@@ -20,7 +20,7 @@ namespace smash {
  * \page doxypage_output_initial_conditions
  *
  * <h3> Output for vHLLE </h3>
- * The "for_vHLLE" initial conditions output **SMASH_IC_for_vHLLE.dat** contains
+ * The "For_vHLLE" initial conditions output **SMASH_IC_For_vHLLE.dat** contains
  * a list of particles on a hypersurface of constant proper time. This output is
  * formatted such that it is directly compatible with the vHLLE hydrodynamics
  * code \iref{Karpenko:2013wva}. As a consequence, **spectators are not written
@@ -30,7 +30,7 @@ namespace smash {
  * spectators. The particle data is provided in the computational frame. For
  * further details, see \ref doxypage_input_conf_modi_C_initial_conditions. \n
  *
- * The "for_vHLLE" initial conditions output is formatted as follows:
+ * The "For_vHLLE" initial conditions output is formatted as follows:
  *
  * **Header**
  * \code
@@ -102,9 +102,9 @@ namespace smash {
 ICOutput::ICOutput(const std::filesystem::path &path, const std::string &name,
                    const OutputParameters &out_par)
     : OutputInterface(name),
-      file_{path / "SMASH_IC_for_vHLLE.dat", "w"},
+      file_{path / "SMASH_IC_For_vHLLE.dat", "w"},
       out_par_(out_par),
-      formatter_{OutputDefaultQuantities::ic_for_vHLLE} {
+      formatter_{OutputDefaultQuantities::ic_For_vHLLE} {
   std::fprintf(
       file_.get(),
       "# %s initial conditions: hypersurface of constant proper time\n",

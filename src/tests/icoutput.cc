@@ -63,7 +63,7 @@ TEST(particlelist_format) {
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   const std::filesystem::path outputfilepath =
-      testoutputpath / "SMASH_IC_for_vHLLE.dat";
+      testoutputpath / "SMASH_IC_For_vHLLE.dat";
   std::filesystem::path outputfilepath_unfinished = outputfilepath;
   outputfilepath_unfinished += ".unfinished";
 

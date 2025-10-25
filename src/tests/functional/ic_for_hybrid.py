@@ -38,7 +38,7 @@ if not args.skip_smash:
     smash_executable = args.binary + "/smash"
     smash_config_file = args.source + "/input/config.yaml"
     smash_config_output = \
-        "Output: {Initial_Conditions: {Format: [for_vHLLE, Oscar2013_bin, Oscar2013]}}"
+        "Output: {Initial_Conditions: {Format: [For_vHLLE, Oscar2013_bin, Oscar2013]}}"
     smash_config_ic = \
         "Modi: {Collider: {Initial_Conditions: {Type: Constant_Tau}}}"
     run = subp.run([smash_executable, "-i", smash_config_file,
@@ -54,7 +54,7 @@ if not args.skip_smash:
         sys.exit(1)
 
 # Check if output is consistent
-ascii_file = output_directory + '/SMASH_IC_for_vHLLE.dat'
+ascii_file = output_directory + '/SMASH_IC_For_vHLLE.dat'
 oscar_file = output_directory + '/SMASH_IC.oscar'
 
 # Read output files
@@ -77,7 +77,7 @@ oscar['tau'], oscar['eta'] = cartesian_to_milne(oscar['t'], oscar['z'])
 oscar['mt'], oscar['Rap'] = cartesian_to_milne(oscar['p0'], oscar['pz'])
 
 quantities_to_compare_exact = ['x', 'y', 'pdg']
-# px and py are given with default precision in "for_vHLLE", but with %.9 in OSCAR.
+# px and py are given with default precision in "For_vHLLE", but with %.9 in OSCAR.
 # If this changes, they should be compared exactly
 quantities_to_compare_fuzzy = {
     'px': 1.e-5, 'py': 1.e-5, 'eta': 1.e-4, 'tau': 1.e-5, 'mt': 1.e-5, 'Rap': 1.e-5}

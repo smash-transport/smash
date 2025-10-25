@@ -297,9 +297,12 @@ ColliderModus::ColliderModus(Configuration modus_config,
               InputKeys::modi_collider_initialConditions_properTime)) {
         IC_parameters_->proper_time = modus_cfg.take(
             InputKeys::modi_collider_initialConditions_properTime);
+      } else {
+        IC_parameters_->lower_bound = modus_cfg.take(
+            InputKeys::modi_collider_initialConditions_lowerBound);
+        IC_parameters_->proper_time_scaling =
+            modus_cfg.take(InputKeys::modi_collider_initialConditions_scaling);
       }
-      IC_parameters_->lower_bound =
-          modus_cfg.take(InputKeys::modi_collider_initialConditions_lowerBound);
       IC_parameters_->rapidity_cut = modus_cfg.take(
           InputKeys::modi_collider_initialConditions_rapidityCut);
       IC_parameters_->pT_cut =

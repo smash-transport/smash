@@ -3912,6 +3912,25 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_proper_time_scaling_,Proper_Time_Scaling,double,
+   * 1.0}
+   *
+   * A scaling factor by which the proper time at which the switching
+   * hypersurface is created is multiplied. This parameter is used in the
+   * Bayesian analysis in \iref{Gotz:2025wnv}. It is only used if the constant
+   * tau initial condition is active and the <tt>\ref key_MC_IC_proper_time_
+   * "Proper_Time"</tt> key is not provided.
+   */
+  /**
+   * \see_key{key_MC_IC_proper_time_scaling_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_scaling{
+      InputSections::m_c_initialConditions + "Proper_Time_Scaling",
+      1.0,
+      {"3.3"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_pt_cut_,pT_Cut,double,
    * </tt>No cut is done<tt>}
    *
@@ -5104,7 +5123,7 @@ struct InputKeys {
    * <hr>
    * <h3> &diams; Initial_Conditions </h3>
    * &rArr; Only `Oscar1999`, `Oscar2013`, `Oscar2013_bin`, `ROOT` and
-   * `for_vHLLE` formats. The latter is only available for `Constant_Tau`
+   * `For_vHLLE` formats. The latter is only available for `Constant_Tau`
    * fluidizations, see the pages for Output: \ref
    * doxypage_output_initial_conditions and Modi: Collider: \ref
    * doxypage_input_conf_modi_C_initial_conditions.
@@ -6144,6 +6163,7 @@ struct InputKeys {
       std::cref(modi_collider_initialConditions_formTimeFraction),
       std::cref(modi_collider_initialConditions_fluidProcesses),
       std::cref(modi_collider_initialConditions_lowerBound),
+      std::cref(modi_collider_initialConditions_scaling),
       std::cref(modi_collider_initialConditions_maxTime),
       std::cref(modi_collider_initialConditions_minTime),
       std::cref(modi_collider_initialConditions_properTime),
@@ -6840,13 +6860,13 @@ General:
 *
 * The following example configures the initial conditions for hydrodynamics
 * for a Au+Au collision at \f$\sqrt{s_{NN}}=200\ \mathrm{GeV}\f$ at midrapidity
-* (\f$-1<y<1\f$). In addition, the extended OSCAR2013 and "for_vHLLE" outputs
+* (\f$-1<y<1\f$). In addition, the extended OSCAR2013 and "For_vHLLE" outputs
 * are enabled.
 *
 *\verbatim
 Output:
     Initial_Conditions:
-        Format: ["for_vHLLE","Oscar2013"]
+        Format: ["For_vHLLE","Oscar2013"]
         Extended: True
 Modi:
     Collider:
