@@ -294,7 +294,7 @@ class OutputFormatter {
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_.as_double(in.hyperbolic_time());
         });
-      } else if (quantity == "eta") {
+      } else if (quantity == "eta" || quantity == "eta_s") {
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_.as_double(in.spatial_rapidity());
         });
@@ -302,7 +302,8 @@ class OutputFormatter {
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_.as_double(in.transverse_mass());
         });
-      } else if (quantity == "Rap") {  // "Rap" is used for vHLLE IC
+      } else if (quantity == "Rap" || quantity == "y_rap") {
+        // "Rap" is used for compatibility with vHLLE
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_.as_double(in.rapidity());
         });
@@ -406,8 +407,10 @@ class OutputFormatter {
       {"0", "0"},  // for OSCAR1999;
       {"tau", "fm"},
       {"eta", "none"},
+      {"eta_s", "none"},
       {"mt", "GeV"},
-      {"Rap", "none"}};
+      {"Rap", "none"},
+      {"y_rap", "none"}};
 
   /// Checks whether the quantities requested are known and unique
   void validate_quantities() {

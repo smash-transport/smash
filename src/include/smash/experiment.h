@@ -1254,15 +1254,20 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   - The \ref doxypage_output_binary "binary output" is faster to read and
    *     write than text outputs and all floating point numbers are printed with
    *     their full precision.
-   *   - For `"Particles"` and `"Collisions"` contents, it is basically a binary
-   *     version of the corresponding ASCII output.\n Also for binary format it
-   *     is possible to customize the quantities to be printed into the file.
+   *   - For `"Particles"`, `"Collisions"`, `"Dileptons"`, and `"Photons"`
+   *     contents, it is basically a binary version of the corresponding ASCII
+   *     output.\n Also for binary format it is possible to customize the
+   *     quantities to be printed into the file.
    *   - For the other contents the corresponding documentation pages about the
    *     ASCII format contain further information.
-   * - \b "Oscar2013_bin" - alias for the \b "Binary" format with a predefined
-   *   set of quantities.
    * - \b "Oscar1999", \b "Oscar2013" - aliases for the \b "ASCII" format with a
    *   predefined set of quantities.
+   * - \b "Oscar2013_bin" - alias for the \b "Binary" format with a predefined
+   *   set of quantities.
+   * - \b "for_vHLLE" - an alias for the \b "ASCII" format exclusive to the
+   *   `"Initial_Conditions"` output content, which produces a file compatible
+   *   with the vHLLE hydrodynamic evolution code (see \ref
+   *   doxypage_output_initial_conditions).
    * - \b "Root" - binary output in the format used by
    *   <a href="http://root.cern.ch">the ROOT software</a>
    *   - Even faster to read and write, requires less disk space
@@ -1361,25 +1366,28 @@ Experiment<Modus>::Experiment(Configuration &config,
    * \page doxypage_output_initial_conditions
    * Once initial conditions are enabled, the output file named SMASH_IC
    * (followed by the appropriate suffix) is generated when SMASH is executed.
-   * \n The output is available in Oscar1999, Oscar2013, binary and ROOT format,
-   * as well as in an additional "for_vHLLE" format. The latter is meant to
-   * directly serve as input for the vHLLE hydrodynamics code
-   * \iref{Karpenko:2013wva}. \n \n <h3> Oscar output </h3> In case of the
-   * Oscar1999 and Oscar2013 format, the structure is identical to the Oscar
-   * Particles Format (see \ref doxypage_output_oscar_particles). \n In contrast
-   * to the usual particles output however, the initial conditions output
-   * provides a **list of all particles removed from the evolution** at the
-   * time when crossing the hypersurface. This implies that neither the
-   * initial particle list nor the particle list at each time step is printed.
-   * \n The general Oscar structure as described in
-   * \ref doxypage_output_oscar_particles is preserved. \n \n
+   * \n The output is available in Oscar1999, Oscar2013, ASCII, Oscar2013_bin
+   * and ROOT format, as well as in an additional "for_vHLLE" format. The latter
+   * is meant to directly serve as input for the vHLLE hydrodynamics code
+   * \iref{Karpenko:2013wva}.\n
+   *
+   * <h3> Human-readable output </h3> In case of the Oscar1999 and Oscar2013
+   * format, the structure is identical to the Oscar Particles format (see \ref
+   * doxypage_output_oscar_particles), and the custom ASCII format is also
+   * available. \n In contrast to the usual particles output however, the
+   * initial conditions output provides a **list of all particles removed from
+   * the evolution** at the time when crossing the hypersurface. This implies
+   * that neither the initial particle list nor the particle list at each time
+   * step is printed. \n The general Oscar structure as described in \ref
+   * doxypage_output_oscar_particles is preserved.\n
+   *
    * <h3> Binary output </h3>
-   * The binary initial
-   * conditions output also provides a list of all particles removed from the
-   * evolution at the time when crossing the hypersurface. For each removed
-   * particle a 'p' block is created stores the particle data. The general
-   * binary output structure as described in \ref doxypage_output_binary is
-   * preserved.\n \n
+   * The binary initial conditions output also provides a list of all particles
+   * that fluidize. For each particle a 'p' block is created stores the particle
+   * data. The binary output structure as described in \ref
+   * doxypage_output_binary is preserved.\n For now, the custom Binary output is
+   * not available, only the fixed "Oscar2013_bin" format.
+   *
    * <h3> ROOT output </h3>
    * The initial conditions output in shape of a list of all particles removed
    * from the SMASH evolution with a \c "Constant_Tau" fluidization criterion

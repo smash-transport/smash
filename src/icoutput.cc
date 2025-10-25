@@ -19,19 +19,17 @@ namespace smash {
 /*!\Userguide
  * \page doxypage_output_initial_conditions
  *
- * ---
+ * <h3> Output for vHLLE </h3>
  * The "for_vHLLE" initial conditions output **SMASH_IC_for_vHLLE.dat** contains
  * a list of particles on a hypersurface of constant proper time. This output is
  * formatted such that it is directly compatible with the vHLLE hydrodynamics
- * code (I. Karpenko, P. Huovinen, M. Bleicher: Comput. Phys. Commun. 185, 3016
- * (2014)). As a consequence, **spectators are not written to the IC output** as
- * they would need to be excluded anyways in order to initialize the
- * hydrodynamics evolution. Note though that for all other output formats the
- * full particle list is printed to the IC output, including spectators. The
- * particle data is provided in the computational frame. For further details,
- * see \ref doxypage_input_conf_modi_C_initial_conditions. \n
+ * code \iref{Karpenko:2013wva}. As a consequence, **spectators are not written
+ * to the IC output** as they would need to be excluded anyways in order to
+ * initialize the hydrodynamics evolution. Note though that for all other output
+ * formats the full particle list is printed to the IC output, including
+ * spectators. The particle data is provided in the computational frame. For
+ * further details, see \ref doxypage_input_conf_modi_C_initial_conditions. \n
  *
- * \n
  * The "for_vHLLE" initial conditions output is formatted as follows:
  *
  * **Header**

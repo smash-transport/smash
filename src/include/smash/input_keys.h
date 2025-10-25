@@ -5103,10 +5103,11 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * <hr>
    * <h3> &diams; Initial_Conditions </h3>
-   * &rArr; Only `Oscar1999`, `Oscar2013`, `Binary`, `ROOT` and `for_vHLLE`
-   * formats. The latter is only available for `Constant_Tau` fluidizations, see
-   * the pages for Output: \ref doxypage_output_initial_conditions and Modi:
-   * Collider: \ref doxypage_input_conf_modi_C_initial_conditions.
+   * &rArr; Only `Oscar1999`, `Oscar2013`, `Oscar2013_bin`, `ROOT` and
+   * `for_vHLLE` formats. The latter is only available for `Constant_Tau`
+   * fluidizations, see the pages for Output: \ref
+   * doxypage_output_initial_conditions and Modi: Collider: \ref
+   * doxypage_input_conf_modi_C_initial_conditions.
    *
    * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
    *
@@ -5126,9 +5127,9 @@ struct InputKeys {
    * strings,
    * </tt><b>empty list</b><tt>}
    *
-   * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
+   * &rArr; If using the `ASCII` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
-   * specified without including `ASCII` or `Binary` as format.
+   * specified without including `ASCII` as format.
    * See \ref doxypage_output_ascii for the possible values.
    */
   /**
