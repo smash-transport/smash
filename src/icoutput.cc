@@ -19,21 +19,18 @@ namespace smash {
 /*!\Userguide
  * \page doxypage_output_initial_conditions
  *
- * ---
- * The ASCII initial conditions output (SMASH_IC.dat) contains a list of
- * particles on a hypersurface of constant proper time. This output is formatted
- * such that it is directly compatible with the
- * vHLLE hydrodynamics code (I. Karpenko, P. Huovinen, M.
- * Bleicher: Comput. Phys. Commun. 185, 3016 (2014)). As a consequence,
- * **spectators are not written to the ASCII IC output** as they would need to
- * be excluded anyways in order to initialize the hydrodynamics evolution. Note
- * though that for all other output formats the full particle list is printed to
- * the IC output, including spectators. The particle data is provided in the
- * computational frame. For further details, see \ref
- * doxypage_input_conf_modi_C_initial_conditions. \n
+ * <h3> Output for vHLLE </h3>
+ * The "For_vHLLE" initial conditions output **SMASH_IC_For_vHLLE.dat** contains
+ * a list of particles on a hypersurface of constant proper time. This output is
+ * formatted such that it is directly compatible with the vHLLE hydrodynamics
+ * code \iref{Karpenko:2013wva}. As a consequence, **spectators are not written
+ * to the IC output** as they would need to be excluded anyways in order to
+ * initialize the hydrodynamics evolution. Note though that for all other output
+ * formats the full particle list is printed to the IC output, including
+ * spectators. The particle data is provided in the computational frame. For
+ * further details, see \ref doxypage_input_conf_modi_C_initial_conditions. \n
  *
- * \n
- * The ASCII initial conditions output is formatted as follows:
+ * The "For_vHLLE" initial conditions output is formatted as follows:
  *
  * **Header**
  * \code
@@ -49,10 +46,10 @@ namespace smash {
  *
  * **Output block header**
  *
- * The ASCII initial conditions output is, similar to the OSCAR output, based on
- * a block structure, where each block consists of 1 event (multiple ensembles,
- * if used, are separated as well). The header for a new event is structured as
- * follows:
+ * The initial conditions output for vHLLE is, similar to the OSCAR output,
+ * based on a block structure, where each block consists of 1 event (multiple
+ * ensembles, if used, are separated as well). The header for a new event is
+ * structured as follows:
  * \code
  * # event ev_num ensemble ens_num start
  * \endcode
@@ -98,25 +95,22 @@ namespace smash {
  *
  * \note
  * If SMASH is run with test particles (necessary e.g. for potentials), the
- * ASCII output will contain Ntest * Npart particle entries. Remember to weigh
+ * output will contain Ntest * Npart particle entries. Remember to weigh
  * each of those particles with 1/Ntest.
  */
 
 ICOutput::ICOutput(const std::filesystem::path &path, const std::string &name,
                    const OutputParameters &out_par)
     : OutputInterface(name),
-      file_{path / "SMASH_IC.dat", "w"},
-      out_par_(out_par) {
+      file_{path / "SMASH_IC_For_vHLLE.dat", "w"},
+      out_par_(out_par),
+      formatter_{OutputDefaultQuantities::ic_For_vHLLE} {
   std::fprintf(
       file_.get(),
       "# %s initial conditions: hypersurface of constant proper time\n",
       SMASH_VERSION);
-  std::fprintf(file_.get(),
-               "# tau x y eta mt px py Rap pdg charge "
-               "baryon_number strangeness\n");
-  std::fprintf(file_.get(),
-               "# fm fm fm none GeV GeV GeV none none e "
-               "none none\n");
+  std::fprintf(file_.get(), "# %s\n", formatter_.quantities_line().c_str());
+  std::fprintf(file_.get(), "# %s\n", formatter_.unit_line().c_str());
 }
 
 ICOutput::~ICOutput() {}
@@ -154,15 +148,7 @@ void ICOutput::at_interaction(const Action &action, const double) {
          action.get_type() == ProcessType::FluidizationNoRemoval);
   assert(action.incoming_particles().size() == 1);
 
-  ParticleData particle = action.incoming_particles()[0];
-
-  // transverse mass
-  const double m_trans =
-      std::sqrt(particle.effective_mass() * particle.effective_mass() +
-                particle.momentum()[1] * particle.momentum()[1] +
-                particle.momentum()[2] * particle.momentum()[2]);
-  // momentum space rapidity
-  const double rapidity = particle.rapidity();
+  const ParticleData &particle = action.incoming_particles()[0];
 
   // Determine if particle is spectator:
   // Fulfilled if particle is initial nucleon, aka has no prior interactions
@@ -170,21 +156,15 @@ void ICOutput::at_interaction(const Action &action, const double) {
 
   // write particle data excluding spectators
   if (!is_spectator) {
-    std::fprintf(file_.get(), "%g %g %g %g %g %g %g %g %s %i %i %i \n",
-                 particle.position().tau(), particle.position()[1],
-                 particle.position()[2], particle.position().eta(), m_trans,
-                 particle.momentum()[1], particle.momentum()[2], rapidity,
-                 particle.pdgcode().string().c_str(), particle.type().charge(),
-                 particle.type().baryon_number(),
-                 particle.type().strangeness());
+    std::fprintf(file_.get(), "%s\n", formatter_.data_line(particle).c_str());
   }
 
   if (IC_proper_time_ < 0.0) {
     // First particle that is removed, overwrite negative default
-    IC_proper_time_ = particle.position().tau();
+    IC_proper_time_ = particle.hyperbolic_time();
   } else {
     // Verify that all other particles have the same proper time
-    const double next_proper_time = particle.position().tau();
+    const double next_proper_time = particle.hyperbolic_time();
     if (!((next_proper_time - IC_proper_time_) < really_small))
       throw std::runtime_error(
           "Hypersurface proper time changed during evolution.");

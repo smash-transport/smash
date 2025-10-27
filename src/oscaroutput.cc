@@ -789,6 +789,27 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <td> -
  * <td>Prints a column of 0 (for compatibility with OSCAR 1999)
  * </tr>
+ * <tr>
+ * <td>\key tau
+ * <td>\c double
+ * <td>Hyperbolic time \f$\tau=\sqrt{t^2-z^2}\f$
+ * </tr>
+ * <tr>
+ * <td>\key eta,\key eta_s
+ * <td>\c double
+ * <td>Spacetime rapidity \f$\eta_s=\frac{1}{2}\log\frac{t+z}{t-z}\f$
+ * </tr>
+ * <tr>
+ * <td>\key mt
+ * <td>\c double
+ * <td>Transverse mass \f$m_\perp=\sqrt{p_0^2-p_z^2}=\sqrt{m^2+p_x^2+p_y^2}\f$
+ * </tr>
+ * <tr>
+ * <td>\key Rap,\key y_rap
+ * <td>\c double
+ * <td>Momentum rapidity
+ *     \f$y_\mathrm{rap}=\frac{1}{2}\log\frac{p_0+p_z}{p_0-p_z}\f$
+ * </tr>
  * </table>
  *
  * \attention Not all combinations of quantities are allowed and, in particular:
@@ -837,7 +858,7 @@ void OscarOutput<Format, Contents>::write_particledata(
 namespace {
 /**
  * Helper function that creates the oscar output with the format selected by
- * create_oscar_output (except for initial conditions).
+ * create_oscar_output.
  *
  * \tparam Contents Determines what information will be written to the output
  * \param[in] path Path of output
@@ -924,23 +945,9 @@ std::unique_ptr<OutputInterface> create_oscar_output(
         path, "Photons", modern_format, out_par.photons_extended, custom_format,
         quantities);
   } else if (content == "Initial_Conditions") {
-    if (modern_format && !out_par.ic_extended) {
-      return std::make_unique<
-          OscarOutput<OscarFormat2013, OscarParticlesIC | OscarAtEventstart>>(
-          path, "SMASH_IC");
-    } else if (modern_format && out_par.ic_extended) {
-      return std::make_unique<OscarOutput<
-          OscarFormat2013Extended, OscarParticlesIC | OscarAtEventstart>>(
-          path, "SMASH_IC");
-    } else if (!modern_format && !out_par.ic_extended) {
-      return std::make_unique<
-          OscarOutput<OscarFormat1999, OscarParticlesIC | OscarAtEventstart>>(
-          path, "SMASH_IC");
-    } else if (!custom_format && !modern_format && out_par.ic_extended) {
-      logg[LOutput].warn()
-          << "Creating Oscar output: "
-          << "There is no extended Oscar1999 (initial conditions) format.";
-    }
+    return create_selected_format<OscarParticlesIC | OscarAtEventstart>(
+        path, "SMASH_IC", modern_format, out_par.ic_extended, custom_format,
+        quantities);
   }
 
   throw std::invalid_argument("Create_oscar_output got unknown content.");

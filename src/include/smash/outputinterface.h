@@ -117,7 +117,7 @@ class OutputInterface {
   explicit OutputInterface(std::string name)
       : is_dilepton_output_(name == "Dileptons"),
         is_photon_output_(name == "Photons"),
-        is_IC_output_(name == "SMASH_IC") {}
+        is_IC_output_(name.substr(0, 8) == "SMASH_IC") {}
   /**
    * Pure virtual destructor to make class abstract and prevent its
    * instantiation. It needs a definition which is done outside the class.

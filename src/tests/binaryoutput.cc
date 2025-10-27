@@ -496,8 +496,8 @@ TEST(initial_conditions_format) {
     output_par.part_extended = false;
     double density = 0.0;
     /* Create an instance of binary output */
-    auto bin_output = create_binary_output("Binary", "Initial_Conditions",
-                                           testoutputpath, output_par);
+    auto bin_output = create_binary_output(
+        "Oscar2013_bin", "Initial_Conditions", testoutputpath, output_par);
     VERIFY(bool(bin_output));
     VERIFY(std::filesystem::exists(particleoutputpath_unfinished));
 

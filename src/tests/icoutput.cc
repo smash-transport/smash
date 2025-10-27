@@ -35,7 +35,7 @@ TEST(particlelist_format) {
   ParticleData p1 = particles.insert(Test::smashon_random());
   /*
   We need a little trick here to make sure the particle is actually written to
-  the output. By construction, the ASCII IC output does not contain spectator
+  the output. By construction, the IC output does not contain spectator
   particles. This is triggered by whether or not the particle has prior
   interactions (collisions_per_particle in the particle HistoryData). The test
   particle p1 has no prior interactions, so we manually have to change it's
@@ -62,7 +62,8 @@ TEST(particlelist_format) {
   const double impact_parameter = 0.0;
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
-  const std::filesystem::path outputfilepath = testoutputpath / "SMASH_IC.dat";
+  const std::filesystem::path outputfilepath =
+      testoutputpath / "SMASH_IC_For_vHLLE.dat";
   std::filesystem::path outputfilepath_unfinished = outputfilepath;
   outputfilepath_unfinished += ".unfinished";
 
@@ -114,12 +115,12 @@ TEST(particlelist_format) {
       /* Check particle data */
       outputfile >> item;
       // Compare tau
-      COMPARE_ABSOLUTE_ERROR(std::stod(item), p1.position().tau(), 1e-6);
+      COMPARE_ABSOLUTE_ERROR(std::stod(item), p1.hyperbolic_time(), 1e-6);
       outputfile >> item;  // jump over x
       outputfile >> item;  // and also y
       outputfile >> item;
       // Compare eta
-      COMPARE_ABSOLUTE_ERROR(std::stod(item), p1.position().eta(), 1e-6);
+      COMPARE_ABSOLUTE_ERROR(std::stod(item), p1.spatial_rapidity(), 1e-6);
     }
     VERIFY(std::filesystem::remove(outputfilepath));
   }
