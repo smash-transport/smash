@@ -114,7 +114,7 @@ TEST(valid_line_maker) {
   correct_line << p.get_history().p2.string() << " ";
   correct_line << p.pdgcode().baryon_number() << " ";
   correct_line << p.pdgcode().strangeness() << "\n";
-  
+
   VERIFY(correct_line.str() == formatter.particle_line(p));
 }
 
@@ -138,29 +138,87 @@ TEST(binary_particle_line) {
   VERIFY(id == p.id());
 }
 
-TEST(per_particle_binary_particle_line_same_as_particles_chunk) {
+TEST(per_particle_particle_line_same_as_particles_chunk) {
   ParticleList particles;
   const std::size_t N = 33;
   particles.reserve(N);
 
   for (std::size_t i = 0; i < N; ++i) {
-    particles.push_back(Test::smashon_random());  // no default-ctor needed
+    particles.push_back(Test::smashon_random());
   }
 
   std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
-  OutputFormatter<ToBinary> formatter(quantities);
+  OutputFormatter<ToBinary> formatter_binary(quantities);
+  OutputFormatter<ToASCII> formatter_ascii(quantities);
 
-  // Chunk for whole container
-  std::vector<char> particles_chunk = formatter.particles_chunk(particles);
+  // ---- Binary ----
+  const std::vector<char> particles_chunk_binary =
+      formatter_binary.particles_chunk(particles);
 
-  // Chunk by concatenating per-particle
-  std::vector<char> per_particle_chunk;
-  per_particle_chunk.reserve(particles_chunk.size());
+  std::vector<char> per_particle_chunk_binary;
+  per_particle_chunk_binary.reserve(particles_chunk_binary.size());
   for (const auto& p : particles) {
-    auto data = formatter.particle_line(p);
-    per_particle_chunk.insert(per_particle_chunk.end(), data.begin(),
-                              data.end());
+    const auto data = formatter_binary.particle_line(p);
+    per_particle_chunk_binary.insert(per_particle_chunk_binary.end(),
+                                     data.begin(), data.end());
   }
 
-  VERIFY(particles_chunk == per_particle_chunk);
+  VERIFY(particles_chunk_binary == per_particle_chunk_binary);
+
+  // ---- ASCII ----
+  const std::string particles_chunk_ascii =
+      formatter_ascii.particles_chunk(particles);
+
+  std::string per_particle_chunk_ascii;
+  per_particle_chunk_ascii.reserve(particles_chunk_ascii.size());
+  for (const auto& p : particles) {
+    const auto line = formatter_ascii.particle_line(p);
+    per_particle_chunk_ascii.append(line);
+  }
+
+  VERIFY(particles_chunk_ascii == per_particle_chunk_ascii);
+}
+
+TEST(compute_single_size_equals_particle_line_size) {
+  ParticleData p = Test::smashon_random();
+  std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
+
+  OutputFormatter<ToBinary> formatter_binary(quantities);
+  const auto line_binary = formatter_binary.particle_line(p);
+  const std::size_t computed_binary = formatter_binary.compute_single_size(p);
+  VERIFY(computed_binary == line_binary.size());
+
+  OutputFormatter<ToASCII> formatter_ascii(quantities);
+  const auto line_ascii = formatter_ascii.particle_line(p);
+  const std::size_t computed_ascii = formatter_ascii.compute_single_size(p);
+  VERIFY(computed_ascii == line_ascii.size());
+}
+
+TEST(sum_of_single_sizes_equals_particles_chunk_size) {
+  ParticleList particles;
+  const std::size_t N = 33;
+  particles.reserve(N);
+  for (std::size_t i = 0; i < N; ++i) {
+    particles.push_back(Test::smashon_random());
+  }
+
+  std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
+
+  OutputFormatter<ToBinary> formatter_binary(quantities);
+  const auto chunk_binary = formatter_binary.particles_chunk(particles);
+  std::size_t sum_binary = 0;
+  for (const auto& p : particles)
+    sum_binary += formatter_binary.compute_single_size(p);
+  VERIFY(chunk_binary.size() == sum_binary);
+
+  OutputFormatter<ToASCII> formatter_ascii(quantities);
+  const auto chunk_ascii = formatter_ascii.particles_chunk(particles);
+  std::size_t sum_ascii = 0;
+  for (const auto& p : particles)
+    sum_ascii += formatter_ascii.compute_single_size(p);
+  VERIFY(chunk_ascii.size() == sum_ascii);
+
+  const ParticleData sample = Test::smashon_random();
+  VERIFY(formatter_ascii.compute_single_size(sample) ==
+         formatter_ascii.particle_line(sample).size());
 }

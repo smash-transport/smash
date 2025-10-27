@@ -181,7 +181,7 @@ class ToBinary {
  *    value from a \c ParticleData instance.
  * 2. Adding the proper key-value pair to the \c units_ map, specifying the unit
  *    of the quantity.
- * 
+ *
  * \tparam Converter The desired output format. At the moment it must be either
  *                   \c ToASCII or `ToBinary`.
  */
@@ -341,21 +341,40 @@ class OutputFormatter {
   }
 
   /**
-   * Computes and returns the total size of single particle using
-   * all registered getters.
+   * Computes and returns the total size of the formatted representation
+   * of a single particle using all registered getters.
    *
-   * \return Total size of one sample particle´s representation.
+   * The total size consists of:
+   *  - the sum of the sizes of all field strings (from each getter),
+   *  - (n - 1) separator characters if a separator is defined,
+   *    since separators appear only between fields, not after the last one,
+   *  - one end-of-line character if an end-of-line marker is defined.
+   *
+   * This matches exactly what `particle_line()` produces for both ASCII
+   * and binary converters.
+   *
+   * \param[in] sample  A representative particle used to compute the size.
+   * \return Total size of the formatted representation of one particle.
    */
   std::size_t compute_single_size(const ParticleData& sample) const {
     std::size_t size = 0;
+    const std::size_t n = getters_.size();
+
     for (const auto& getter : getters_) {
       const typename Converter::type tmp = getter(sample);
-      size += tmp.size() + static_cast<int>(Converter::separator.has_value()) +
-              static_cast<int>(Converter::end_of_line.has_value());
+      size += tmp.size();
     }
+
+    if (n > 0 && Converter::separator.has_value()) {
+      size += (n - 1);
+    }
+
+    if (n > 0 && Converter::end_of_line.has_value()) {
+      size += 1;
+    }
+
     return size;
   }
-
   /**
    * Produces a data chunk representing a single particle
    * suitable for writing to an output file.
@@ -372,22 +391,24 @@ class OutputFormatter {
   }
 
   /**
-   * Produces a data chunk representing a block of particles
-   * for efficient batched output.
+   * Builds a contiguous data chunk for a block of particles by appending the
+   * Converter::type representation of each particle into a single buffer.
    *
-   * Instead of writing one chunk per particle, this method concatenates the
-   * data for all particles in the container into a single contiguous
-   * buffer. The ASCII policy (if enabled) ensures per-record separators and
-   * end-of-record characters are present in the buffer.
+   * The resulting buffer reflects exactly what the Converter defines (
+   * per-record separators and end-of-line markers, if any). No additional
+   * formatting is applied beyond what the Converter specifies.
    *
-   * \tparam Range Container type — enforced to be either `Particles`
-   *         or `ParticleList`.
-   * \param[in] particles Container of particles whose information is to be
-   *            written.
-   * \return A Converter::type buffer containing the formatted data for the
-   * entire block.
+   * \tparam Range  Container type — constrained to `Particles` or
+   * `ParticleList`.
+   * \param[in] particles  Container of particles whose data should be
+   * serialized.
+   * \return Converter::type  A buffer containing the concatenated
+   * representation of all particles in the block.
    *
-   * \see append_to_buffer(const ParticleData&, typename Converter::type&)
+   * \note Capacity is reserved using a size estimate based on the first
+   * element.
+   *
+   * \see append_to_buffer
    */
   template <class Range,
             std::enable_if_t<std::is_same_v<Range, Particles> ||
@@ -399,7 +420,6 @@ class OutputFormatter {
     if (it == particles.end())
       return chunk;
 
-    /// Estimated chunk size. Precise for Binary
     chunk.reserve(particles.size() * compute_single_size(*it));
 
     for (const ParticleData& p : particles) {
@@ -480,7 +500,7 @@ class OutputFormatter {
       {"pz", "GeV"},
       {"pdg", "none"},
       {"ID", "none"},
-      {"id", "none"},
+      {"id", "none"},  // used in OSCAR1999
       {"charge", "e"},
       {"ncoll", "none"},
       {"form_time", "fm"},
@@ -548,12 +568,15 @@ class OutputFormatter {
   }
 
   /**
-   * Appends the Converter::type representation of a single particle to an
-   * existing buffer, avoiding intermediate allocations when building large
-   * blocks.
+   * Appends the Converter::type representation of a single particle to the
+   * provided buffer.
+   *
+   * The buffer is used exactly as provided by the caller; no assumptions or
+   * modifications are made to its initial state or capacity.
    *
    * \param[in]  p       Particle whose information is to be appended.
-   * \param[out] buffer  Destination buffer to which the data is appended.
+   * \param[out] buffer  Destination buffer to which the converted data is
+   * appended.
    */
   void append_to_buffer(const ParticleData& p,
                         typename Converter::type& buffer) const {
