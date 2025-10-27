@@ -238,7 +238,7 @@ void ListModus::insert_optional_quantities_to_(
       if (0 > weight || weight > 1) {
         error_message << "Particle weight must be between 0 and 1.\n";
       }
-      p.set_perturbative_weight(weight);
+      p.set_perturbative_HF_weight(weight);
     } else {
       error_message << " Unknown quantities given in the configuration.\n";
     }

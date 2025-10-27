@@ -337,9 +337,9 @@ class OutputFormatter {
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_.as_double(in.rapidity());
         });
-      } else if (quantity == "weight") {
+      } else if (quantity == "HF_weight") {
         getters_.push_back([this](const ParticleData& in) {
-          return this->converter_.as_double(in.perturbative_weight());
+          return this->converter_.as_double(in.perturbative_HF_weight());
         });
       }
     }
