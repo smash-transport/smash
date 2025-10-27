@@ -337,6 +337,10 @@ class OutputFormatter {
         getters_.push_back([this](const ParticleData& in) {
           return this->converter_.as_double(in.rapidity());
         });
+      } else if (quantity == "weight") {
+        getters_.push_back([this](const ParticleData& in) {
+          return this->converter_.as_double(in.perturbative_weight());
+        });
       }
     }
   }
@@ -536,6 +540,7 @@ class OutputFormatter {
       {"spinx", "none"},
       {"spiny", "none"},
       {"spinz", "none"}};
+      {"weight", "none"}};
 
   /// Checks whether the quantities requested are known and unique
   void validate_quantities() {
