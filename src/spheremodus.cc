@@ -81,6 +81,16 @@ SphereModus::SphereModus(Configuration modus_config,
         "In order to specify 'Back_To_Back_Separation', 'Back_To_Back' must be "
         "true.");
   }
+  if (radial_velocity_ > 1.0) {
+    throw std::invalid_argument(
+        "Additional velocity cannot be greater than 1!");
+  }
+  if (sphere_temperature_ <= 0.0) {
+    throw std::invalid_argument("Temperature must be positive!");
+  }
+  if (radial_velocity_exponent_ < 0.0) {
+    throw std::invalid_argument("Flow velocity exponent cannot be negative!");
+  }
 }
 
 /* console output on startup of sphere specific parameters */
@@ -242,13 +252,6 @@ double SphereModus::initial_conditions(Particles *particles,
    * u_r = u_0 * (r / R)^n
    */
   if (radial_velocity_ > 0.0) {
-    if (radial_velocity_ > 1.0) {
-      throw std::invalid_argument(
-          "Additional velocity cannot be greater than 1!");
-    }
-    if (radial_velocity_exponent_ < 0.0) {
-      throw std::invalid_argument("Flow velocity exponent cannot be negative!");
-    }
     for (ParticleData &data : *particles) {
       double particle_radius = std::sqrt(data.position().sqr3());
       auto e_r = data.position().threevec() / particle_radius;
