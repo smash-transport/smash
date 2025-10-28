@@ -56,6 +56,8 @@ SphereModus::SphereModus(Configuration modus_config,
       init_distr_(modus_config.take(InputKeys::modi_sphere_initialCondition)),
       radial_velocity_(
           modus_config.take(InputKeys::modi_sphere_addRadialVelocity)),
+      radial_velocity_exponent_(
+          modus_config.take(InputKeys::modi_sphere_addRadialVelocityExponent)),
       /* Note that it is crucial not to take other keys from the Jet section
        * before Jet_PDG, since we want here the take to throw in case the user
        * had a Jet section without the mandatory Jet_PDG key. If all other keys
@@ -78,6 +80,16 @@ SphereModus::SphereModus(Configuration modus_config,
     throw std::invalid_argument(
         "In order to specify 'Back_To_Back_Separation', 'Back_To_Back' must be "
         "true.");
+  }
+  if (radial_velocity_ > 1.0) {
+    throw std::invalid_argument(
+        "Additional velocity cannot be greater than 1!");
+  }
+  if (sphere_temperature_ <= 0.0) {
+    throw std::invalid_argument("Temperature must be positive!");
+  }
+  if (radial_velocity_exponent_ < 0.0) {
+    throw std::invalid_argument("Flow velocity exponent cannot be negative!");
   }
 }
 
@@ -236,18 +248,16 @@ double SphereModus::initial_conditions(Particles *particles,
     data.set_formation_time(start_time_);
   }
 
-  /* boost in radial direction with an underlying velocity field of the form u_r
-   * = u_0 * r / R */
+  /* Boost in radial direction with an underlying velocity field of the form
+   * u_r = u_0 * (r / R)^n
+   */
   if (radial_velocity_ > 0.0) {
-    if (radial_velocity_ > 1.0) {
-      throw std::invalid_argument(
-          "Additional velocity cannot be greater than 1!");
-    }
     for (ParticleData &data : *particles) {
       double particle_radius = std::sqrt(data.position().sqr3());
       auto e_r = data.position().threevec() / particle_radius;
       auto radial_velocity =
-          -1.0 * radial_velocity_ * e_r * particle_radius / radius_;
+          -1.0 * radial_velocity_ * e_r *
+          std::pow(particle_radius / radius_, radial_velocity_exponent_);
       data.set_4momentum(data.momentum().lorentz_boost(radial_velocity));
       momentum_total += data.momentum();
     }
