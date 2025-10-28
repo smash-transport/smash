@@ -78,16 +78,17 @@ TEST(valid_line_maker) {
 
   OutputFormatter<ToASCII> formatter(valid_quantities);
 
-  const auto quantities_line = std::accumulate(
+  auto quantities_line = std::accumulate(
       std::begin(valid_quantities), std::end(valid_quantities), std::string{},
       [](const std::string& ss, const std::string& s) {
         return ss.empty() ? s : ss + " " + s;
       });
+  quantities_line.append("\n");
   VERIFY(quantities_line == formatter.quantities_line());
 
   std::string units_line{
       "fm fm fm fm GeV GeV GeV GeV GeV none none e none fm none none none fm "
-      "none none none none"};
+      "none none none none\n"};
   VERIFY(units_line == formatter.unit_line());
 
   std::stringstream correct_line{};
