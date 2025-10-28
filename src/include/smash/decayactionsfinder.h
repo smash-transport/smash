@@ -69,13 +69,9 @@ class DecayActionsFinder : public ActionFinderInterface {
    * Force all resonances to decay at the end of the simulation.
    *
    * \param[in] search_list All particles at the end of simulation.
-   * \param[in] only_res optional parameter that requests that only actions
-   *                     regarding resonances are considered (disregarding
-   *                     stable particles)
    * \return List with the found (Decay)Action objects.
    */
-  ActionList find_final_actions(const Particles &search_list,
-                                bool only_res = false) const override;
+  ActionList find_final_actions(const Particles &search_list) const override;
 
   /// Multiplicative factor to be applied to resonance lifetimes
   const double res_lifetime_factor_ = 1.;

@@ -111,7 +111,7 @@ bool DynamicFluidizationFinder::is_process_fluidizable(
 }
 
 ActionList DynamicFluidizationFinder::find_final_actions(
-    const Particles &search_list, [[maybe_unused]] bool only_res) const {
+    const Particles &search_list) const {
   ActionList actions;
   const bool are_there_core_particles =
       std::any_of(search_list.begin(), search_list.end(),
@@ -126,6 +126,32 @@ ActionList DynamicFluidizationFinder::find_final_actions(
       }
     }
   } else {
+    for (auto &original : search_list) {
+      if (original.get_history().collisions_per_particle == 0) {
+        // Spectators are not propagated back.
+        continue;
+      }
+      const double t = original.position().x0();
+      double corona_time = original.get_history().time_last_collision;
+      if (t == corona_time) {
+        continue;
+      }
+      // This prevents particles from decays or strings from ending up at the
+      // same position
+      corona_time += 0.01;
+      const ThreeVector r = original.position().threevec() -
+                            (t - corona_time) * original.velocity();
+      ParticleData backpropagated{original.type()};
+      backpropagated.set_4position(FourVector(corona_time, r));
+      backpropagated.set_4momentum(original.momentum());
+      // This is done so no further actions can be found for this particle
+      backpropagated.set_formation_time(t);
+      backpropagated.set_cross_section_scaling_factor(0.0);
+      actions.emplace_back(std::make_unique<FreeforallAction>(
+          ParticleList{original}, ParticleList{}, t));
+      actions.emplace_back(std::make_unique<FreeforallAction>(
+          ParticleList{}, ParticleList{backpropagated}, corona_time));
+    }
     logg[LFluidization].info()
         << particles_in_core_ << " particles were part of the core with energy "
         << energy_in_core_ << " GeV.";

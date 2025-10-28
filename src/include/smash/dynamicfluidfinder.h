@@ -84,8 +84,23 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
     return {};
   }
 
-  /// No final actions after fluidizing
-  ActionList find_final_actions(const Particles &, bool) const override;
+  /**
+   * Prepare corona particles left in the IC for the afterburner.
+   *
+   * - Remove core particles.
+   * - Move corona particles back to their last interaction point so they start
+   *   at the correct spacetime position for afterburner rescattering with
+   *   hadrons sampled from the fluid.
+   * - Do not modify spectators.
+   *
+   * \param[in] search_list All particles at the end of the simulation.
+   * \return ActionList with removals and backpropagation steps.
+   *
+   * \note The backpropagation is encoded as two FreeForAll actions:
+   *       remove the corona particle, then add it at the target spacetime
+   *       point. This will appear in the Collisions output.
+   */
+  ActionList find_final_actions(const Particles &search_list) const override;
 
   /**
    * Determine if fluidization condition is satisfied.
