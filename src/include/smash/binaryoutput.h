@@ -123,31 +123,6 @@ class BinaryOutputBase : public OutputInterface {
    */
   void write_particledata(const ParticleData &p);
 
-  /**
-   * \brief Writes particle data in multiple chunks if the total buffer size
-   *        exceeds a predefined maximum.
-   *
-   * This method avoids creating a single excessively large binary buffer when
-   * writing many particles at once. Instead, it splits the write into several
-   * smaller chunks. This can prevent excessive memory usage and improve
-   * stability on systems or filesystems that may have trouble with very large
-   * write calls.
-   *
-   * The maximum buffer size is currently set to 1 GB (10^9 bytes), but this can
-   * be adapted in the future if needed. If the total data size of the particle
-   * block is below this threshold, the method simply delegates to the regular
-   * `write` function to perform a single write call.
-   *
-   * Otherwise, the data is accumulated particle by particle until the buffer
-   * reaches the threshold. The buffer is then flushed to disk, cleared, and the
-   * process continues.
-   *
-   * \tparam Range Container type — enforced to be either `Particles` or
-   *         `ParticleList`.
-   * \param[in] particles Container of particles whose binary representation
-   *            is to be written.
-   */
-
   /// Binary particles output file path
   RenamingFilePtr file_;
 
