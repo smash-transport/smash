@@ -4177,17 +4177,35 @@ struct InputKeys {
    * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,-1.0}
    *
    * This can be used in order to give each particle in the sphere an additional
-   * velocity in radial direction of the size \f$u_r = u_0 \, \frac{r}{R}\f$
-   * with \f$u_0\f$ being the parameter of this feature, \f$r\f$ the radius of
-   * the particle and \f$R\f$ the total radius of the sphere. \f$u_0\f$ can only
-   * take values in \f$[0, 1]\f$ and specifying a negative value is equivalent
-   * in omitting this key (i.e. not attributing any additional radial velocity).
+   * velocity in radial direction of the size \f$u_r = u_0 \,
+   * \left(\frac{r}{R}\right)^n\f$ with \f$u_0\f$ being the parameter of this
+   * feature, \f$r\f$ the radial coordinate of the particle and \f$R\f$ the
+   * total radius of the sphere. \f$u_0\f$ can only take values in \f$[0, 1]\f$
+   * and a negative value is equivalent to omitting this key (i.e. not
+   * attributing any additional radial velocity). The exponent \f$n\f$ is set
+   * by <tt>\ref key_MS_add_radial_velocity_exponent
+   * "Add_Radial_Velocity_Exponent"</tt>.
    */
   /**
    * \see_key{key_MS_add_radial_velocity_}
    */
   inline static const Key<double> modi_sphere_addRadialVelocity{
       InputSections::m_sphere + "Add_Radial_Velocity", -1.0, {"2.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
+   * \optional_key{key_MS_add_radial_velocity_exponent,
+   * Add_Radial_Velocity_Exponent,double,1.0}
+   *
+   * Exponent in the initial radial flow profile (see <tt>\ref
+   * key_MS_add_radial_velocity_ "Add_Radial_Velocity"</tt>). It cannot be
+   * negative.
+   */
+  /**
+   * \see_key{key_MS_add_radial_velocity_exponent}
+   */
+  inline static const Key<double> modi_sphere_addRadialVelocityExponent{
+      InputSections::m_sphere + "Add_Radial_Velocity_Exponent", 1.0, {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -6176,6 +6194,7 @@ struct InputKeys {
       std::cref(modi_sphere_temperature),
       std::cref(modi_sphere_accountResonanceWidths),
       std::cref(modi_sphere_addRadialVelocity),
+      std::cref(modi_sphere_addRadialVelocityExponent),
       std::cref(modi_sphere_baryonChemicalPotential),
       std::cref(modi_sphere_chargeChemicalPotential),
       std::cref(modi_sphere_initialCondition),
