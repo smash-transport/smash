@@ -778,11 +778,10 @@ struct InputSections {
  * The cell size is 0.8 fm in each direction.
  *
  * <h3>List</h3>
- * The default for the list modus is constructed assuming it is used for an
- * afterburner calculation. As in the case for the collider we take th speed of
- * light for the maximum longitudinal expansion velocity and 0.7 fo the
- * transverse one. The cells size is 0.8 fm in ach direction, meaning they are
- * not lorentz contracted as they would be in the case of the collider setup.
+ * <b>There is no default for the list modus.</b> It is basically impossible to
+ * foresee how such a modus is used and, hence, the region covered by the
+ * lattice has to be actively specified by the user. If an automatic lattice
+ * creation is requested, SMASH will terminate with an error.
  */
 
 /*!\Userguide

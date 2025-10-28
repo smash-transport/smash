@@ -1740,7 +1740,11 @@ Experiment<Modus>::Experiment(Configuration &config,
         std::array<double, 3> l_default{20., 20., 20.};
         std::array<int, 3> n_default{10, 10, 10};
         std::array<double, 3> origin_default{-20., -20., -20.};
-        if (modus_.is_collider() || (modus_.is_list() && !modus_.is_box())) {
+        if (modus_.is_list() && !modus_.is_box()) {
+          logg[LExperiment].fatal(
+              "The lattice in List modus should be manually specified.");
+          throw std::invalid_argument("Invalid Lattice setup.");
+        } else if (modus_.is_collider()) {
           // Estimates on how far particles could get in x, y, z. The
           // default lattice is currently not contracted for afterburner runs
           const double gam = modus_.is_collider()
