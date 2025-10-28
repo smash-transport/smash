@@ -1056,7 +1056,7 @@ Experiment<Modus>::Experiment(Configuration &config,
     }
     action_finders_.emplace_back(std::make_unique<DecayActionsFinder>(
         parameters_.res_lifetime_factor, parameters_.do_non_strong_decays,
-        force_decays_));
+        force_decays_, parameters_.spin_interaction_type));
   }
   bool no_coll = config.take(InputKeys::collTerm_noCollisions);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
@@ -2379,9 +2379,9 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     /* Time in the action constructor is relative to
      * current time of incoming */
     constexpr double action_time = 0.;
-    ScatterActionPhoton photon_act(action.incoming_particles(), action_time,
-                                   n_fractional_photons_,
-                                   action.get_total_weight());
+    ScatterActionPhoton photon_act(
+        action.incoming_particles(), action_time, n_fractional_photons_,
+        action.get_total_weight(), parameters_.spin_interaction_type);
 
     /**
      * Add a completely dummy process to the photon action. The only important
@@ -2408,9 +2408,9 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
      * current time of incoming */
     constexpr double action_time = 0.;
 
-    BremsstrahlungAction brems_act(action.incoming_particles(), action_time,
-                                   n_fractional_photons_,
-                                   action.get_total_weight());
+    BremsstrahlungAction brems_act(
+        action.incoming_particles(), action_time, n_fractional_photons_,
+        action.get_total_weight(), parameters_.spin_interaction_type);
 
     /**
      * Add a completely dummy process to the bremsstrahlung action. The only

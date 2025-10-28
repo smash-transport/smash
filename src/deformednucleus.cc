@@ -20,8 +20,9 @@
 namespace smash {
 
 DeformedNucleus::DeformedNucleus(const std::map<PdgCode, int> &particle_list,
-                                 int nTest)
-    : Nucleus(particle_list, nTest) {}
+                                 int nTest,
+                                 SpinInteractionType spin_interaction_type)
+    : Nucleus(particle_list, nTest, spin_interaction_type) {}
 
 DeformedNucleus::DeformedNucleus(Configuration &config, int nTest,
                                  bool auto_deformation)

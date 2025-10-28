@@ -47,8 +47,11 @@ class Nucleus {
    * \param[in] particle_list std::map, which maps PdgCode and count
    * of this particle.
    * \param[in] nTest Number of test particles.
+   * \param[in] spin_interaction_type whether to use spin interactions.
    */
-  Nucleus(const std::map<PdgCode, int> &particle_list, int nTest);
+  Nucleus(const std::map<PdgCode, int> &particle_list, int nTest,
+          SpinInteractionType spin_interaction_type = SpinInteractionType::Off);
+
   virtual ~Nucleus() = default;
 
   /**

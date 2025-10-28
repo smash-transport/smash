@@ -35,10 +35,13 @@ class DecayActionsFinder : public ActionFinderInterface {
    */
   explicit DecayActionsFinder(double res_lifetime_factor,
                               bool do_non_strong_decays,
-                              bool force_decays_at_end)
+                              bool force_decays_at_end,
+                              SpinInteractionType spin_interaction_type =
+                                  SpinInteractionType::Off)
       : res_lifetime_factor_(res_lifetime_factor),
         do_final_non_strong_decays_(do_non_strong_decays),
-        find_final_decays_(force_decays_at_end) {}
+        find_final_decays_(force_decays_at_end),
+        spin_interaction_type_(spin_interaction_type) {}
 
   /**
    * Check the whole particle list for decays.
@@ -81,6 +84,9 @@ class DecayActionsFinder : public ActionFinderInterface {
 
   /// Whether to find final decay actions
   const bool find_final_decays_;
+
+  /// Spin interaction type
+  SpinInteractionType spin_interaction_type_;
 
   /**
    * Whether to initial state particles can decay. Useful for analyzing

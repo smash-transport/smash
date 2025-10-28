@@ -34,7 +34,9 @@ class DecayAction : public Action {
    * \param[in] p The particle that should decay if the action is performed.
    * \param[in] time Time at which the action is supposed to take place
    */
-  DecayAction(const ParticleData &p, double time);
+  DecayAction(
+      const ParticleData &p, double time,
+      SpinInteractionType spin_interaction_type = SpinInteractionType::Off);
 
   /**
    * Add several new decays at once.
@@ -146,6 +148,10 @@ class DecayAction : public Action {
 
   /// Angular momentum of the decay
   int L_ = 0;
+
+  private:
+  /// Spin interaction type
+  SpinInteractionType spin_interaction_type_;
 };
 
 }  // namespace smash

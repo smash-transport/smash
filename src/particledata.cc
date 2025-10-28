@@ -89,13 +89,8 @@ void ParticleData::set_unpolarized_spin_vector() {
   // so the spin 4-vector cannot be defined via a rest-frame boost.
   // In such cases, we assign a vanishing spin vector to ensure
   // numerical stability and well-defined behavior.
-  if (pole_mass() == 0.0) {
-    spin_vector_ = FourVector(0., 0., 0., 0.);
-    return;
-  }
-
   // For spin-0 particles, the spin 4-vector is physically zero
-  if (spin() == 0) {
+  if (pole_mass() == 0.0 || spin() == 0) {
     spin_vector_ = FourVector(0., 0., 0., 0.);
     return;
   }

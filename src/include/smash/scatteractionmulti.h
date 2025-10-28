@@ -27,8 +27,11 @@ class ScatterActionMulti : public Action {
    *
    * \param[in] in_plist List of reaction partners
    * \param[in] time Time at which the action is supposed to take place
+   * \param[in] spin_interaction_type Type of spin interaction
    */
-  ScatterActionMulti(const ParticleList& in_plist, double time);
+  ScatterActionMulti(const ParticleList& in_plist, double time,
+                     const SpinInteractionType spin_interaction_type =
+                         SpinInteractionType::Off);
 
   /**
    * Generate the final-state of the multi-particle scattering process.
@@ -323,6 +326,9 @@ class ScatterActionMulti : public Action {
 
   /// Partial probability of the chosen outgoing channel
   double partial_probability_;
+
+  /// Spin interaction type
+  SpinInteractionType spin_interaction_type_;
 
   /// List of possible collisions
   CollisionBranchList reaction_channels_;

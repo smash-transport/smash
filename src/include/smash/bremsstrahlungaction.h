@@ -34,12 +34,15 @@ class BremsstrahlungAction : public ScatterAction {
    *                            scattering.
    * \param[in] hadronic_cross_section_input Cross-section of
    *                                          underlying hadronic cross-section.
+   * \param[in] spin_interaction_type Which type of spin interaction to use.
    * \return The constructed object.
    */
 
   BremsstrahlungAction(const ParticleList &in, const double time,
                        const int n_frac_photons,
-                       const double hadronic_cross_section_input);
+                       const double hadronic_cross_section_input,
+                       const SpinInteractionType spin_interaction_type =
+                           SpinInteractionType::Off);
   /**
    * Create the final state and write to output.
    *
@@ -166,6 +169,9 @@ class BremsstrahlungAction : public ScatterAction {
 
   /// Sampled value of theta (angle of the photon)
   double theta_;
+
+  /// Type of spin interaction to use
+  const SpinInteractionType spin_interaction_type_;
 
   /**
    * Create interpolation objects for tabularized cross sections:

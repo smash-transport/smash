@@ -2530,7 +2530,7 @@ struct InputKeys {
   inline static const Key<SpinInteractionType> collTerm_spinInteractions{
       InputSections::collisionTerm + "Spin_Interactions",
       SpinInteractionType::Off,
-      {"3.2"}};
+      {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term

@@ -618,13 +618,17 @@ void ScatterAction::inelastic_scattering() {
   // create new particles
   sample_2body_phasespace();
   assign_formation_time_to_outgoing_particles();
-  assign_unpolarized_spin_vector_to_outgoing_particles();
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    assign_unpolarized_spin_vector_to_outgoing_particles();
+  }
 }
 
 void ScatterAction::two_to_many_scattering() {
   sample_manybody_phasespace();
   assign_formation_time_to_outgoing_particles();
-  assign_unpolarized_spin_vector_to_outgoing_particles();
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    assign_unpolarized_spin_vector_to_outgoing_particles();
+  }
   logg[LScatterAction].debug("2->", outgoing_particles_.size(),
                              " scattering:", incoming_particles_, " -> ",
                              outgoing_particles_);
@@ -644,7 +648,9 @@ void ScatterAction::resonance_formation() {
   outgoing_particles_[0].set_4momentum(
       total_momentum_of_outgoing_particles().abs(), 0., 0., 0.);
   assign_formation_time_to_outgoing_particles();
-  assign_unpolarized_spin_vector_to_outgoing_particles();
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    assign_unpolarized_spin_vector_to_outgoing_particles();
+  }
   /* this momentum is evaluated in the computational frame. */
   logg[LScatterAction].debug("Momentum of the new particle: ",
                              outgoing_particles_[0].momentum());
@@ -792,6 +798,64 @@ void ScatterAction::spin_interaction() {
 
       // Final boost to the outgoing particle momenta
       boost_spin_vectors_after_elastic_scattering();
+    }
+
+    /* 2->1 resonance formation */
+    if (process_type_ == ProcessType::TwoToOne) {
+      /**
+       * @brief Λ+π → Σ* resonance formation with Λ–spin bookkeeping.
+       *
+       * We do not simulate a direct inelastic Λ+π scattering; instead we form a
+       * Σ* resonance and let it decay later. To preserve Λ polarization per
+       * arXiv:2404.15890v2, we treat the Σ* spin vector as a proxy for the
+       * would-be outgoing Λ spin: at formation, we set the Σ* spin to the
+       * incoming Λ spin and apply a possible spin flip according to the
+       * Λ–flip/non-flip fractions extracted from the paper. On Σ* → Λ+π decay,
+       * the Σ* spin vector is copied to the Λ, thus transporting Λ polarization
+       * through the resonance stage.
+       */
+      // Identify if the outgoing resonance is a Σ*
+      if (outgoing_particles_[0].is_sigmastar()) {
+        // Check that one of the incoming particles is a Λ and the other a π
+        bool has_lambda = false;
+        bool has_pion = false;
+        int lambda_index = -1;
+        for (size_t i = 0; i < 2; i++) {
+          if (incoming_particles_[i].is_pion()) {
+            has_pion = true;
+          } else if (incoming_particles_[i].pdgcode().is_Lambda()) {
+            has_lambda = true;
+            lambda_index = i;
+          }
+        }
+        if (has_lambda && has_pion) {
+          // Perform spin flip with probability of 2/9
+          int random_int = random::uniform_int(1, 9);
+          FourVector final_spin_vector;
+          if (random_int <= 7) {
+            // No spin flip
+            final_spin_vector = incoming_particles_[lambda_index].spin_vector();
+            final_spin_vector = final_spin_vector.lorentz_boost(
+                outgoing_particles_[0].velocity());
+            outgoing_particles_[0].set_spin_vector(final_spin_vector);
+          } else {
+            // Spin flip in Lambda rest frame
+            ThreeVector lambda_velocity =
+                incoming_particles_[lambda_index].velocity();
+            final_spin_vector =
+                incoming_particles_[lambda_index].spin_vector().lorentz_boost(
+                    lambda_velocity);
+            final_spin_vector[1] = -final_spin_vector[1];
+            final_spin_vector[2] = -final_spin_vector[2];
+            final_spin_vector[3] = -final_spin_vector[3];
+            final_spin_vector =
+                final_spin_vector.lorentz_boost(-lambda_velocity);
+            final_spin_vector = final_spin_vector.lorentz_boost(
+                outgoing_particles_[0].velocity());
+            outgoing_particles_[0].set_spin_vector(final_spin_vector);
+          }
+        }
+      }
     }
   }
 }

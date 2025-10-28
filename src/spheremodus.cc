@@ -58,6 +58,8 @@ SphereModus::SphereModus(Configuration modus_config,
           modus_config.take(InputKeys::modi_sphere_addRadialVelocity)),
       radial_velocity_exponent_(
           modus_config.take(InputKeys::modi_sphere_addRadialVelocityExponent)),
+      spin_interaction_type_(
+          modus_config.take(InputKeys::collTerm_spinInteractions)),
       /* Note that it is crucial not to take other keys from the Jet section
        * before Jet_PDG, since we want here the take to throw in case the user
        * had a Jet section without the mandatory Jet_PDG key. If all other keys
@@ -263,12 +265,15 @@ double SphereModus::initial_conditions(Particles *particles,
     }
   }
 
-  /* Make total 3-momentum in sphere 0 and set unpolarized spin vector  */
+  /* Make total 3-momentum in sphere 0 and set unpolarized spin vector if spin
+   * interactions are enabled */
   for (ParticleData &data : *particles) {
     data.set_4momentum(data.momentum().abs(),
                        data.momentum().threevec() -
                            momentum_total.threevec() / particles->size());
-    data.set_unpolarized_spin_vector();
+    if (spin_interaction_type_ != SpinInteractionType::Off) {
+      data.set_unpolarized_spin_vector();
+    }
   }
 
   /* Add a single highly energetic particle in the center of the sphere (jet) */
@@ -290,7 +295,9 @@ double SphereModus::initial_conditions(Particles *particles,
       jet_antiparticle.set_4momentum(ParticleType::find(anti_pdg).mass(),
                                      ThreeVector(-jet_mom_, 0., 0.));
     }
-    jet_particle.set_unpolarized_spin_vector();
+    if (spin_interaction_type_ != SpinInteractionType::Off) {
+      jet_particle.set_unpolarized_spin_vector();
+    }
   }
 
   /* Recalculate total momentum */

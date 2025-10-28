@@ -204,6 +204,9 @@ class StringProcess {
    */
   Pythia8::Event event_intermediate_;
 
+  /// Spin interaction type
+  SpinInteractionType spin_interaction_type_;
+
  public:
   // clang-format off
 
@@ -263,7 +266,9 @@ class StringProcess {
                 bool mass_dependent_formation_times,
                 double prob_proton_to_d_uu,
                 bool separate_fragment_baryon, double popcorn_rate,
-                bool use_monash_tune);
+                bool use_monash_tune,
+                SpinInteractionType spin_interaction_type =
+                  SpinInteractionType::Off);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines
