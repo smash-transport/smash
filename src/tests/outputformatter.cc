@@ -151,7 +151,6 @@ TEST(per_particle_particle_line_same_as_particles_chunk) {
   OutputFormatter<ToBinary> formatter_binary(quantities);
   OutputFormatter<ToASCII> formatter_ascii(quantities);
 
-  // ---- Binary ----
   const std::vector<char> particles_chunk_binary =
       formatter_binary.particles_chunk(particles);
 
@@ -165,7 +164,6 @@ TEST(per_particle_particle_line_same_as_particles_chunk) {
 
   VERIFY(particles_chunk_binary == per_particle_chunk_binary);
 
-  // ---- ASCII ----
   const std::string particles_chunk_ascii =
       formatter_ascii.particles_chunk(particles);
 
@@ -221,4 +219,43 @@ TEST(sum_of_single_sizes_equals_particles_chunk_size) {
   const ParticleData sample = Test::smashon_random();
   VERIFY(formatter_ascii.compute_single_size(sample) ==
          formatter_ascii.particle_line(sample).size());
+}
+
+TEST(write_in_chunks_same_as_particles_chunk) {
+  ParticleList particles;
+  const std::size_t N = 33;
+  const std::size_t buffer_size = 10;
+  particles.reserve(N);
+  for (std::size_t i = 0; i < N; ++i) {
+    particles.push_back(Test::smashon_random());
+  }
+
+  std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
+  OutputFormatter<ToBinary> formatter_binary(quantities);
+  OutputFormatter<ToASCII> formatter_ascii(quantities);
+
+  const std::vector<char> one_chunk_binary =
+      formatter_binary.particles_chunk(particles);
+
+  std::vector<char> multiple_chunks_binary;
+  write_in_chunk<ToBinary>(
+      particles, formatter_binary,
+      [&](const ToBinary::type& buf) {
+        multiple_chunks_binary.insert(multiple_chunks_binary.end(), buf.begin(),
+                                      buf.end());
+      },
+      buffer_size);
+
+  VERIFY(one_chunk_binary == multiple_chunks_binary);
+
+  const std::string one_chunk_ascii =
+      formatter_ascii.particles_chunk(particles);
+
+  std::string multiple_chunks_ascii;
+  write_in_chunk<ToASCII>(
+      particles, formatter_ascii,
+      [&](const ToASCII::type& buf) { multiple_chunks_ascii.append(buf); },
+      buffer_size);
+
+  VERIFY(one_chunk_ascii == multiple_chunks_ascii);
 }

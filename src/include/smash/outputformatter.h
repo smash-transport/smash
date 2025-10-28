@@ -597,6 +597,82 @@ class OutputFormatter {
   }
 };
 
+/**
+ * \brief Writes particle data in multiple chunks if the total buffer size
+ *        exceeds a predefined maximum.
+ *
+ * This method avoids creating a single excessively large binary buffer when
+ * writing many particles at once. Instead, it splits the write into several
+ * smaller chunks. This can prevent excessive memory usage and improve
+ * stability on systems or filesystems that may have trouble with very large
+ * write calls.
+ *
+ * The maximum buffer size is currently set to 1 GB (10^9 bytes), but this can
+ * be adapted in the future if needed. If the total data size of the particle
+ * block is below this threshold, the method simply delegates to the regular
+ * `write` function to perform a single write call.
+ *
+ * Otherwise, the data is accumulated particle by particle until the buffer
+ * reaches the threshold. The buffer is then flushed to disk, cleared, and the
+ * process continues.
+ *
+ * \note This utility does not strictly belong in this file. At the moment,
+ *       the objects using it do not have a clean hierarchy that would allow
+ *       both OscarOutput and BinaryOutput to inherit a shared implementation,
+ *       hence it lives here temporarily.
+ *
+ * \todo Once the hierarchy is cleaned up, move this into a common base class
+ *       that OscarOutput and BinaryOutput inherit from.
+ *
+ * \tparam Range Container type — enforced to be either `Particles` or
+ *         `ParticleList`.
+ * \param[in] particles Container of particles whose particle_line
+ *            representation is to be written.
+ */
+
+template <typename Converter, class Range, typename WriteFn,
+          std::enable_if_t<std::is_same_v<Range, Particles> ||
+                               std::is_same_v<Range, ParticleList>,
+                           bool> = true>
+void write_in_chunk(const Range& particles,
+                    const OutputFormatter<Converter>& formatter,
+                    WriteFn&& write,
+                    std::size_t max_buffer_bytes = 1'000'000'000) {
+  const auto first = std::begin(particles);
+  const auto last = std::end(particles);
+  if (first == last)
+    return;
+
+  const std::size_t bytes_per_particle = formatter.compute_single_size(*first);
+
+  if (particles.size() <= max_buffer_bytes / bytes_per_particle) {
+    std::forward<WriteFn>(write)(formatter.particles_chunk(particles));
+    return;
+  }
+
+  using Buffer = typename Converter::type;
+  Buffer buffer;
+  buffer.reserve(max_buffer_bytes);
+  std::size_t current_size = 0;
+
+  for (const auto& particle : particles) {
+    Buffer line = formatter.particle_line(particle);
+    const std::size_t line_size = line.size();
+    if (current_size + line_size > max_buffer_bytes) {
+      std::forward<WriteFn>(write)(buffer);
+      buffer.clear();
+      current_size = 0;
+    }
+    buffer.insert(buffer.end(), std::make_move_iterator(line.begin()),
+                  std::make_move_iterator(line.end()));
+    current_size += line_size;
+  }
+
+  if (!buffer.empty()) {
+    std::forward<WriteFn>(write)(buffer);
+  }
+}
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_OUTPUTFORMATTER_H_

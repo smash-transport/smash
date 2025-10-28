@@ -142,69 +142,6 @@ class OscarOutput : public OutputInterface {
 
   /// Formatter of the output
   OutputFormatter<ToASCII> formatter_;
-
-  /**
-   * \brief Writes particle data in multiple chunks if the total buffer size
-   *        exceeds a predefined maximum.
-   *
-   * This method avoids creating a single excessively large binary buffer when
-   * writing many particles at once. Instead, it splits the write into several
-   * smaller chunks. This can prevent excessive memory usage and improve
-   * stability on systems or filesystems that may have trouble with very large
-   * write calls.
-   *
-   * The maximum buffer size is currently set to 1 GB (10^9 bytes), but this can
-   * be adapted in the future if needed. If the total data size of the particle
-   * block is below this threshold, the method simply delegates to the regular
-   * `write` function to perform a single write call.
-   *
-   * Otherwise, the data is accumulated particle by particle until the buffer
-   * reaches the threshold. The buffer is then flushed to disk, cleared, and the
-   * process continues.
-   *
-   * \tparam Range Container type — enforced to be either `Particles` or
-   *         `ParticleList`.
-   * \param[in] particles Container of particles whose particle_line
-   * representation is to be written.
-   */
-  template <typename Converter, class Range,
-            std::enable_if_t<std::is_same_v<Range, Particles> ||
-                                 std::is_same_v<Range, ParticleList>,
-                             bool> = true>
-  void write_in_chunk(const Range &particles) {
-    const auto first = std::begin(particles);
-    const auto last = std::end(particles);
-    if (first == last)
-      return;
-
-    constexpr std::size_t max_buffer_size = static_cast<std::size_t>(1e9);
-    const std::size_t bytes_per_particle =
-        formatter_.compute_single_size(*first);
-
-    if (particles.size() <= max_buffer_size / bytes_per_particle) {
-      write(formatter_.particles_chunk(particles));
-      return;
-    }
-
-    typename Converter::type buffer;
-    buffer.reserve(max_buffer_size);
-
-    for (const ParticleData &particle : particles) {
-      auto particle_line = formatter_.particle_line(particle);
-      const std::size_t line_size = particle_line.size();
-      if (buffer.size() + line_size > max_buffer_size) {
-        write(buffer);
-        buffer.clear();
-      }
-      buffer.insert(buffer.end(),
-                    std::make_move_iterator(particle_line.begin()),
-                    std::make_move_iterator(particle_line.end()));
-    }
-
-    if (!buffer.empty()) {
-      write(buffer);
-    }
-  }
 };
 
 /**

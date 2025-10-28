@@ -127,7 +127,9 @@ OscarOutput<Format, Contents>::OscarOutput(
 
 template <OscarOutputFormat Format, int Contents>
 inline void OscarOutput<Format, Contents>::write(const Particles &particles) {
-  write_in_chunk<ToASCII>(particles);
+  write_in_chunk<ToASCII>(
+      particles, formatter_,
+      [this](const ToASCII::type &buf) { this->write(buf); });
 }
 
 template <OscarOutputFormat Format, int Contents>
