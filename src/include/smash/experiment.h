@@ -1747,25 +1747,40 @@ Experiment<Modus>::Experiment(Configuration &config,
         } else if (modus_.is_collider()) {
           // Estimates on how far particles could get in x, y, z. The
           // default lattice is currently not contracted for afterburner runs
-          const double gam = modus_.is_collider()
-                                 ? modus_.sqrt_s_NN() / (2.0 * nucleon_mass)
-                                 : 1.0;
-          const double max_z = 5.0 / gam + end_time_;
+          const double gamma = modus_.is_collider()
+                                   ? modus_.sqrt_s_NN() / (2.0 * nucleon_mass)
+                                   : 1.0;
+          const double max_z = 5.0 / gamma + end_time_;
           const double estimated_max_transverse_velocity = 0.7;
           const double max_xy =
               5.0 + estimated_max_transverse_velocity * end_time_;
           origin_default = {-max_xy, -max_xy, -max_z};
           l_default = {2 * max_xy, 2 * max_xy, 2 * max_z};
-          // Go for approximately 0.8 fm cell size and contract
-          // lattice in z by gamma factor
-          const int n_xy = numeric_cast<int>(std::ceil(2 * max_xy / 0.8));
-          int nz = numeric_cast<int>(std::ceil(2 * max_z / 0.8));
-          // Contract lattice by gamma factor in case of smearing where
-          // smearing length is bound to the lattice cell length
-          if (parameters_.smearing_mode == SmearingMode::Discrete ||
-              parameters_.smearing_mode == SmearingMode::Triangular) {
-            nz = numeric_cast<int>(std::ceil(2 * max_z / 0.8 * gam));
+          // For collider modus only, impose a minimum size of 30fm since the
+          // heuristic above for determining the lattice expects the end time to
+          // be large compared to the nucleus size
+          const double minimum_extension = 30.;
+          for (auto i = std::size_t{0}; i < l_default.size(); i++) {
+            if (l_default[i] < minimum_extension) {
+              logg[LExperiment].debug()
+                  << "Automatic lattice extension in direction " << i
+                  << " heuristically determined as " << l_default[i]
+                  << "fm is smaller than " << minimum_extension
+                  << "fm. Imposing minimum size.";
+              l_default[i] = minimum_extension;
+              origin_default[i] = -0.5 * minimum_extension;
+            }
           }
+          // Go for approximately 0.8 fm cell size and contract lattice in z by
+          // gamma factor in case of smearing where smearing length is bound to
+          // the lattice cell length
+          const int n_xy = numeric_cast<int>(std::ceil(l_default[0] / 0.8));
+          const bool to_be_contracted =
+              (parameters_.smearing_mode == SmearingMode::Discrete ||
+               parameters_.smearing_mode == SmearingMode::Triangular);
+          const double contraction_factor = (to_be_contracted) ? gamma : 1.0;
+          const int nz = numeric_cast<int>(
+              std::ceil(l_default[2] / 0.8 * contraction_factor));
           n_default = {n_xy, n_xy, nz};
         } else if (modus_.is_box()) {
           origin_default = {0., 0., 0.};

@@ -762,8 +762,12 @@ struct InputSections {
  * x_{\rm max} = y_{\rm max} = 5\,{\rm fm} + 0.7 t_{\rm end}\,. \f] The lattice
  * then covers the range \f$ -x_{\rm max} < x < x_{\rm max}\f$ , \f$ -y_{\rm
  * max} < y < y_{\rm max}\f$ and \f$ -z_{\rm max} < z < z_{\rm max}\f$ . The
- * cell size in x and y is 0.8 fm and the cell size in z-direction is contracted
- * to \f$\frac{0.8\,{\rm fm}}{\gamma}\f$
+ * cell size in all directions is 0.8 fm. However, in case of \ref
+ * key_gen_smearing_mode_ "smearing" where the smearing length is bound to the
+ * lattice cell length, the cell size in z-direction is contracted to
+ * \f$\frac{0.8\,{\rm fm}}{\gamma}\f$. \note A minimum size of 30 fm is imposed
+ * since the heuristic above for determining the lattice expects the end time to
+ * be large compared to the nucleus size.
  *
  * <h3>Box and ListBox</h3>
  * The lattice covers exactly the entire box from 0 to \ref
