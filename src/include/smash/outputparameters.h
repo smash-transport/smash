@@ -131,6 +131,9 @@ struct OutputParameters {
     const auto photons_quantities =
         conf.take(InputKeys::output_photons_quantities);
     quantities.insert({"Photons", photons_quantities});
+    const auto IC_quantities =
+        conf.take(InputKeys::output_initialConditions_quantities);
+    quantities.insert({"Initial_Conditions", IC_quantities});
     /* In the same spirit, always take also other particles and collisions keys.
      * This makes the class behaviour bounded to the key default value and not
      * to the class member initial value. */
@@ -329,6 +332,10 @@ struct OutputDefaultQuantities {
   /// Quantities output in OSCAR1999 format
   inline static const std::vector<std::string> oscar1999 = {
       "id", "pdg", "0", "px", "py", "pz", "p0", "mass", "x", "y", "z", "t"};
+  /// Quantities output in initial conditions format for vHLLE
+  inline static const std::vector<std::string> ic_For_vHLLE = {
+      "tau", "x",   "y",      "eta",           "mt",         "px", "py",
+      "Rap", "pdg", "charge", "baryon_number", "strangeness"};
 };
 
 }  // namespace smash

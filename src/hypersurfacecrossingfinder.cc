@@ -132,15 +132,15 @@ bool HyperSurfaceCrossActionsFinder::crosses_hypersurface(
 
   if (t_greater_z_before_prop && t_greater_z_after_prop) {
     // proper time before and after propagation
-    const double tau_before = pdata_before_propagation.position().tau();
-    const double tau_after = pdata_after_propagation.position().tau();
+    const double tau_before = pdata_before_propagation.hyperbolic_time();
+    const double tau_after = pdata_after_propagation.hyperbolic_time();
 
     if (tau_before <= tau && tau <= tau_after) {
       hypersurface_is_crossed = true;
     }
   } else if (!t_greater_z_before_prop && t_greater_z_after_prop) {
     // proper time after propagation
-    const double tau_after = pdata_after_propagation.position().tau();
+    const double tau_after = pdata_after_propagation.hyperbolic_time();
     if (tau_after >= tau) {
       hypersurface_is_crossed = true;
     }

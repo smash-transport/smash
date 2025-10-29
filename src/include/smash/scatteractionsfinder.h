@@ -191,14 +191,8 @@ class ScatterActionsFinder : public ActionFinderInterface {
       const ParticleList &search_list, const Particles &surrounding_list,
       double dt, const std::vector<FourVector> &beam_momentum) const override;
 
-  /**
-   * Find some final collisions at the end of the simulation.
-   * \todo Seems to do nothing.
-   */
-  ActionList find_final_actions(const Particles & /*search_list*/,
-                                bool /*only_res*/ = false) const override {
-    return ActionList();
-  }
+  /// No scatterings should be found when the event is over.
+  ActionList find_final_actions(const Particles &) const override { return {}; }
 
   /**
    * If there is only one particle sort, no decays

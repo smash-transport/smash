@@ -3912,6 +3912,25 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_proper_time_scaling_,Proper_Time_Scaling,double,
+   * 1.0}
+   *
+   * A scaling factor by which the proper time at which the switching
+   * hypersurface is created is multiplied. This parameter is used in the
+   * Bayesian analysis in \iref{Gotz:2025wnv}. It is only used if the constant
+   * tau initial condition is active and the <tt>\ref key_MC_IC_proper_time_
+   * "Proper_Time"</tt> key is not provided.
+   */
+  /**
+   * \see_key{key_MC_IC_proper_time_scaling_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_scaling{
+      InputSections::m_c_initialConditions + "Proper_Time_Scaling",
+      1.0,
+      {"3.3"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_pt_cut_,pT_Cut,double,
    * </tt>No cut is done<tt>}
    *
@@ -4158,17 +4177,35 @@ struct InputKeys {
    * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,-1.0}
    *
    * This can be used in order to give each particle in the sphere an additional
-   * velocity in radial direction of the size \f$u_r = u_0 \, \frac{r}{R}\f$
-   * with \f$u_0\f$ being the parameter of this feature, \f$r\f$ the radius of
-   * the particle and \f$R\f$ the total radius of the sphere. \f$u_0\f$ can only
-   * take values in \f$[0, 1]\f$ and specifying a negative value is equivalent
-   * in omitting this key (i.e. not attributing any additional radial velocity).
+   * velocity in radial direction of the size \f$u_r = u_0 \,
+   * \left(\frac{r}{R}\right)^n\f$ with \f$u_0\f$ being the parameter of this
+   * feature, \f$r\f$ the radial coordinate of the particle and \f$R\f$ the
+   * total radius of the sphere. \f$u_0\f$ can only take values in \f$[0, 1]\f$
+   * and a negative value is equivalent to omitting this key (i.e. not
+   * attributing any additional radial velocity). The exponent \f$n\f$ is set
+   * by <tt>\ref key_MS_add_radial_velocity_exponent
+   * "Add_Radial_Velocity_Exponent"</tt>.
    */
   /**
    * \see_key{key_MS_add_radial_velocity_}
    */
   inline static const Key<double> modi_sphere_addRadialVelocity{
       InputSections::m_sphere + "Add_Radial_Velocity", -1.0, {"2.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
+   * \optional_key{key_MS_add_radial_velocity_exponent,
+   * Add_Radial_Velocity_Exponent,double,1.0}
+   *
+   * Exponent in the initial radial flow profile (see <tt>\ref
+   * key_MS_add_radial_velocity_ "Add_Radial_Velocity"</tt>). It cannot be
+   * negative.
+   */
+  /**
+   * \see_key{key_MS_add_radial_velocity_exponent}
+   */
+  inline static const Key<double> modi_sphere_addRadialVelocityExponent{
+      InputSections::m_sphere + "Add_Radial_Velocity_Exponent", 1.0, {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -5103,10 +5140,11 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * <hr>
    * <h3> &diams; Initial_Conditions </h3>
-   * &rArr; Only `Oscar1999`, `Oscar2013`, `Binary`, `ROOT` and `ASCII` formats.
-   * The latter is only available for `Constant_Tau` fluidizations, see the
-   * pages for Output: \ref doxypage_output_initial_conditions and Modi:
-   * Collider: \ref doxypage_input_conf_modi_C_initial_conditions.
+   * &rArr; Only `Oscar1999`, `Oscar2013`, `Oscar2013_bin`, `ROOT` and
+   * `For_vHLLE` formats. The latter is only available for `Constant_Tau`
+   * fluidizations, see the pages for Output: \ref
+   * doxypage_output_initial_conditions and Modi: Collider: \ref
+   * doxypage_input_conf_modi_C_initial_conditions.
    *
    * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
    *
@@ -5119,6 +5157,26 @@ struct InputKeys {
    */
   inline static const Key<bool> output_initialConditions_extended{
       InputSections::o_initialConditions + "Extended", false, {"1.7"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_IC_quantities_,Quantities,list of
+   * strings,
+   * </tt><b>empty list</b><tt>}
+   *
+   * &rArr; If using the `ASCII` format, a non-empty list must be
+   * specified. An error will be produced if a non-empty `Quantities` key is
+   * specified without including `ASCII` as format.
+   * See \ref doxypage_output_ascii for the possible values.
+   */
+  /**
+   * \see_key{key_output_IC_quantities_}
+   */
+  inline static const Key<std::vector<std::string>>
+      output_initialConditions_quantities{
+          InputSections::o_initialConditions + "Quantities",
+          std::vector<std::string>{},
+          {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -6123,6 +6181,7 @@ struct InputKeys {
       std::cref(modi_collider_initialConditions_formTimeFraction),
       std::cref(modi_collider_initialConditions_fluidProcesses),
       std::cref(modi_collider_initialConditions_lowerBound),
+      std::cref(modi_collider_initialConditions_scaling),
       std::cref(modi_collider_initialConditions_maxTime),
       std::cref(modi_collider_initialConditions_minTime),
       std::cref(modi_collider_initialConditions_properTime),
@@ -6135,6 +6194,7 @@ struct InputKeys {
       std::cref(modi_sphere_temperature),
       std::cref(modi_sphere_accountResonanceWidths),
       std::cref(modi_sphere_addRadialVelocity),
+      std::cref(modi_sphere_addRadialVelocityExponent),
       std::cref(modi_sphere_baryonChemicalPotential),
       std::cref(modi_sphere_chargeChemicalPotential),
       std::cref(modi_sphere_initialCondition),
@@ -6192,6 +6252,7 @@ struct InputKeys {
       std::cref(output_photons_extended),
       std::cref(output_photons_quantities),
       std::cref(output_initialConditions_extended),
+      std::cref(output_initialConditions_quantities),
       std::cref(output_initialConditions_lowerBound),
       std::cref(output_initialConditions_properTime),
       std::cref(output_initialConditions_pTCut),
@@ -6818,13 +6879,13 @@ General:
 *
 * The following example configures the initial conditions for hydrodynamics
 * for a Au+Au collision at \f$\sqrt{s_{NN}}=200\ \mathrm{GeV}\f$ at midrapidity
-* (\f$-1<y<1\f$). In addition, the extended OSCAR2013 and ASCII outputs
+* (\f$-1<y<1\f$). In addition, the extended OSCAR2013 and "For_vHLLE" outputs
 * are enabled.
 *
 *\verbatim
 Output:
     Initial_Conditions:
-        Format: ["ASCII","Oscar2013"]
+        Format: ["For_vHLLE","Oscar2013"]
         Extended: True
 Modi:
     Collider:
