@@ -5,7 +5,7 @@
 #
 #    BSD 3-clause license
 #
-#########################################################
+########################################################
 
 # NOTE: If the minimum required version of Doxygen is increased, the documentation configuration
 # files must be updated. To do so, run 'doxygen -u Doxyfile.in' and 'doxygen -u DoxyUser.in' from
@@ -39,6 +39,7 @@ if(DOXYGEN_FOUND)
     # Prepare list of files to be used as input for user guide and development documentation
     set(COMMON_GENERIC_FILES
         "README.md"
+        "LICENSE.md"
         "INSTALL.md"
         "CHANGELOG.md"
         "CONTRIBUTING.md"

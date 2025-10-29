@@ -5,7 +5,7 @@
 #
 #    BSD 3-clause license
 #
-#########################################################
+########################################################
 
 # Add 3rd-party virtest library
 include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rdparty/virtest")

@@ -22,7 +22,7 @@ Modi:
         Temperature: 0.15
         Initial_Condition: "thermal momenta"
         # The box is initialized with the particles listed in particles.txt
-        # according to their expected thermal multiplicities at the termperature
+        # according to their expected thermal multiplicities at the temperature
         # specified above.
         Use_Thermal_Multiplicities: True
 
