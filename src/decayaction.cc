@@ -9,9 +9,6 @@
 
 #include "smash/decayaction.h"
 
-#include <cmath>
-#include <limits>
-
 #include "smash/decaymodes.h"
 #include "smash/logging.h"
 #include "smash/pdgcode.h"
