@@ -439,11 +439,12 @@ static auto get_list_of_binary_quantities(const std::string &content,
   const auto default_quantities =
       (is_extended) ? OutputDefaultQuantities::oscar2013extended
                     : OutputDefaultQuantities::oscar2013;
-  if (format == "Oscar2013_bin" || content == "Dileptons" ||
-      content == "Photons" || content == "Initial_Conditions") {
+  if (format == "Oscar2013_bin") {
     return default_quantities;
   } else if (format == "Binary") {
-    if (content == "Particles" || content == "Collisions") {
+    if (content == "Particles" || content == "Collisions" ||
+        content == "Dileptons" || content == "Photons" ||
+        content == "Initial_Conditions") {
       auto list_of_quantities = parameters.quantities.at(content);
       if (list_of_quantities.empty()) {
         return default_quantities;
@@ -466,18 +467,18 @@ static auto get_list_of_binary_quantities(const std::string &content,
 std::unique_ptr<OutputInterface> create_binary_output(
     const std::string &format, const std::string &content,
     const std::filesystem::path &path, const OutputParameters &out_par) {
+  const auto quantities =
+      get_list_of_binary_quantities(content, format, out_par);
   if (content == "Particles") {
-    return std::make_unique<BinaryOutputParticles>(
-        path, content, out_par,
-        get_list_of_binary_quantities(content, format, out_par));
+    return std::make_unique<BinaryOutputParticles>(path, content, out_par,
+                                                   quantities);
   } else if (content == "Collisions" || content == "Dileptons" ||
              content == "Photons") {
-    return std::make_unique<BinaryOutputCollisions>(
-        path, content, out_par,
-        get_list_of_binary_quantities(content, format, out_par));
+    return std::make_unique<BinaryOutputCollisions>(path, content, out_par,
+                                                    quantities);
   } else if (content == "Initial_Conditions") {
-    return std::make_unique<BinaryOutputInitialConditions>(
-        path, content, get_list_of_binary_quantities(content, format, out_par));
+    return std::make_unique<BinaryOutputInitialConditions>(path, content,
+                                                           quantities);
   } else {
     throw std::invalid_argument("Binary output not available for '" + content +
                                 "' content.");
