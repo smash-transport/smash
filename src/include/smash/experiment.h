@@ -1747,9 +1747,7 @@ Experiment<Modus>::Experiment(Configuration &config,
         } else if (modus_.is_collider()) {
           // Estimates on how far particles could get in x, y, z. The
           // default lattice is currently not contracted for afterburner runs
-          const double gamma = modus_.is_collider()
-                                   ? modus_.sqrt_s_NN() / (2.0 * nucleon_mass)
-                                   : 1.0;
+          const double gamma = modus_.sqrt_s_NN() / (2.0 * nucleon_mass);
           const double max_z = 5.0 / gamma + end_time_;
           const double estimated_max_transverse_velocity = 0.7;
           const double max_xy =
@@ -1765,8 +1763,8 @@ Experiment<Modus>::Experiment(Configuration &config,
               logg[LExperiment].debug()
                   << "Automatic lattice extension in direction " << i
                   << " heuristically determined as " << l_default[i]
-                  << "fm is smaller than " << minimum_extension
-                  << "fm. Imposing minimum size.";
+                  << " fm is smaller than " << minimum_extension
+                  << " fm. Imposing minimum size.";
               l_default[i] = minimum_extension;
               origin_default[i] = -0.5 * minimum_extension;
             }
