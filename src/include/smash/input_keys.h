@@ -756,33 +756,37 @@ struct InputSections {
  * The maximum expected longitudinal velocity is approximated to the speed of
  * light \f$v_z=1\f$ and the maximum expected velocity in each transverse
  * direction is \f$v_x=v_y = 0.7\f$. Assuming an \f$R=5\f$ fm nucleus that is
- * contracted along the z-direction by \f$\gamma = \frac{\sqrt{s}_{NN}}{2m_N}\f$
+ * contracted along the z-direction by \f$\gamma = \frac{\sqrt{s_{NN}}}{2m_N}\f$
  * and the particles propagating until \ref key_gen_end_time_ "end time", we end
- * up with \f[ z_{\rm max} = \frac{5\,{\rm fm}}{\gamma} + t_{\rm end} \f] \f[
- * x_{\rm max} = y_{\rm max} = 5\,{\rm fm} + 0.7 t_{\rm end}\,. \f] The lattice
- * then covers the range \f$ -x_{\rm max} < x < x_{\rm max}\f$ , \f$ -y_{\rm
- * max} < y < y_{\rm max}\f$ and \f$ -z_{\rm max} < z < z_{\rm max}\f$ . The
- * cell size in x and y is 0.8 fm and the cell size in z-direction is contracted
- * to \f$\frac{0.8\,{\rm fm}}{\gamma}\f$
+ * up with
+ * \f[ z_{\rm max} = \frac{5\,{\rm fm}}{\gamma} + t_{\rm end} \f]
+ * \f[ x_{\rm max} = y_{\rm max} = 5\,{\rm fm} + 0.7 t_{\rm end}\,.\f]
+ * The lattice then covers the range \f$ -x_{\rm max} < x < x_{\rm max}\f$,
+ * \f$-y_{\rm max} < y < y_{\rm max}\f$ and \f$-z_{\rm max} <z< z_{\rm max}\f$.
+ * The cell size in all directions is 0.8 fm. However, if \ref
+ * key_gen_smearing_mode_ "a smearing" requiring a lattice (where the smearing
+ * length is bound to the lattice cell length) is used, the cell size in
+ * z-direction is contracted to \f$\frac{0.8\,{\rm fm}}{\gamma}\f$. \note A
+ * minimum size of 30 fm is imposed since the heuristic above for determining
+ * the lattice expects the end time to be large compared to the nucleus size.
  *
  * <h3>Box and ListBox</h3>
- * The lattice covers exactly the entire box from 0 to \ref
- * key_MB_length_ "box length" in x,y and z. The cell size is 0.5 and only in
- * this case the lattice is <tt>\ref key_lattice_periodic_ "periodic"</tt>.
+ * The lattice covers exactly the entire box from 0 to \ref key_MB_length_
+ * "box length" in x, y and z. The cell size is 0.5 fm and only in this case the
+ * lattice is <tt>\ref key_lattice_periodic_ "periodic"</tt>.
  *
  * <h3>Sphere</h3>
- * Since the Sphere has an initial <tt>\ref key_MS_radius_ "Radius"</tt>,
+ * Since the sphere has an initial <tt>\ref key_MS_radius_ "Radius"</tt>,
  * the maximum distance in all directions can be estimated to
  * \f[ x_{\rm max} = y_{\rm max} = z_{\rm max} = R_0 + t_{\rm end} \f]
  * using the speed of light as a maximum expansion velocity.
  * The cell size is 0.8 fm in each direction.
  *
  * <h3>List</h3>
- * The default for the list modus is constructed assuming it is used for an
- * afterburner calculation. As in the case for the collider we take th speed of
- * light for the maximum longitudinal expansion velocity and 0.7 fo the
- * transverse one. The cells size is 0.8 fm in ach direction, meaning they are
- * not lorentz contracted as they would be in the case of the collider setup.
+ * <b>There is no default for the `List` modus.</b> It is basically impossible
+ * to foresee how such a modus is used and, hence, the region covered by the
+ * lattice has to be actively specified by the user. If an automatic lattice
+ * creation is requested, SMASH will terminate with an error.
  */
 
 /*!\Userguide
