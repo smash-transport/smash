@@ -487,7 +487,7 @@ TEST(initial_conditions_format) {
   EventInfo event = Test::default_event_info(impact_parameter, empty_event);
 
   const std::filesystem::path particleoutputpath =
-      testoutputpath / "SMASH_IC.bin";
+      testoutputpath / "SMASH_IC_oscar2013.bin";
   std::filesystem::path particleoutputpath_unfinished = particleoutputpath;
   particleoutputpath_unfinished += ".unfinished";
 
@@ -566,7 +566,7 @@ TEST(custom) {
   const ParticleList initial_particles = particles->copy_to_vector();
 
   const std::filesystem::path particleoutputpath =
-      testoutputpath / "particles_binary.bin";
+      testoutputpath / "particles_custom.bin";
   std::filesystem::path particleoutputpath_unfinished = particleoutputpath;
   particleoutputpath_unfinished += ".unfinished";
   {

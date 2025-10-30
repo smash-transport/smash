@@ -29,13 +29,6 @@ static auto get_binary_filename(const std::string &content,
   if (content == "Particles" || content == "Collisions") {
     std::transform(filename.begin(), filename.end(), filename.begin(),
                    [](unsigned char c) { return std::tolower(c); });
-    if (quantities == OutputDefaultQuantities::oscar2013) {
-      filename += "_oscar2013";
-    } else if (quantities == OutputDefaultQuantities::oscar2013extended) {
-      filename += "_oscar2013_extended";
-    } else {
-      filename += "_binary";
-    }
   } else if (content == "Photons" || content == "Dileptons") {
     // Nothing to be done here
   } else if (content == "Initial_Conditions") {
@@ -43,6 +36,13 @@ static auto get_binary_filename(const std::string &content,
   } else {
     throw std::invalid_argument(
         "Unknown content to get the binary output filename.");
+  }
+  if (quantities == OutputDefaultQuantities::oscar2013) {
+    filename += "_oscar2013";
+  } else if (quantities == OutputDefaultQuantities::oscar2013extended) {
+    filename += "_oscar2013_extended";
+  } else {
+    filename += "_custom";
   }
   return filename + ".bin";
 }
