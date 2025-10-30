@@ -772,11 +772,7 @@ void Experiment<Modus>::create_output(const std::string &format,
     logg[LExperiment].error(
         "Root output requested, but Root support not compiled in");
 #endif
-  } else if (format == "Binary" &&
-             (content == "Collisions" || content == "Particles")) {
-    outputs_.emplace_back(
-        create_binary_output(format, content, output_path, out_par));
-  } else if (format == "Oscar2013_bin" &&
+  } else if ((format == "Binary" || format == "Oscar2013_bin") &&
              (content == "Collisions" || content == "Particles" ||
               content == "Dileptons" || content == "Photons" ||
               content == "Initial_Conditions")) {
