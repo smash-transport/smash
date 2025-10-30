@@ -21,9 +21,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Update to Pythia8.316
 
 ### Added
-* The `SphereModus` now can include thermal heavy flavor particles, via the `Modi: Sphere: Heavy_Flavor_Multiplier` key, a value that multiplies their partial density. 
-* Back to back jets were introduced to the `SphereModus` with the  `Modi: Sphere: Jet: Back_To_Back` and `Modi: Sphere: Jet: Back_To_Back_Separation` keys.
-* The initial `SphereModus` velocity profile can now be tuned with  `Modi: Sphere: Add_Radial_Velocity_Exponent`.
+* The `Sphere` modus now can include thermal heavy flavor particles, via the `Modi: Sphere: Heavy_Flavor_Multiplier` key, a value that multiplies their partial density.
+* Back to back jets were introduced to the `Sphere` modus with the  `Modi: Sphere: Jet: Back_To_Back` and `Modi: Sphere: Jet: Back_To_Back_Separation` keys.
+* The initial `Sphere` modus velocity profile can now be tuned with  `Modi: Sphere: Add_Radial_Velocity_Exponent`.
 
 ### Changed
 * The `ParticleData` class now initially sets the formation time and the time of the last collision to `NAN` and overwrites them with the real values the first time the objects are used. Previously, these values were initially set to `0.0`, which could be misleading if the time evolution started at negative times.
