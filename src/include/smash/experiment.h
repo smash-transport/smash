@@ -1254,10 +1254,10 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   - The \ref doxypage_output_binary "binary output" is faster to read and
    *     write than text outputs and all floating point numbers are printed with
    *     their full precision.
-   *   - For `"Particles"`, `"Collisions"`, `"Dileptons"`, and `"Photons"`
-   *     contents, it is basically a binary version of the corresponding ASCII
-   *     output.\n Also for binary format it is possible to customize the
-   *     quantities to be printed into the file.
+   *   - For `"Particles"`, `"Collisions"`, `"Dileptons"`, `"Photons"`, and
+   *     `"Initial_Conditions"` contents, it is basically a binary version of
+   *     the corresponding ASCII output.\n Also for binary format it is possible
+   *     to customize the quantities to be printed into the file.
    *   - For the other contents the corresponding documentation pages about the
    *     ASCII format contain further information.
    * - \b "Oscar1999", \b "Oscar2013" - aliases for the \b "ASCII" format with a
@@ -1299,9 +1299,9 @@ Experiment<Modus>::Experiment(Configuration &config,
    * configuration file enables the dilepton production. In addition, the
    * dilepton output also needs to be enabled in the output section and dilepton
    * decays have to be uncommented in the used decaymodes.txt file. The output
-   * file named Dileptons (followed by the appropriate suffix) is generated when
-   * SMASH is executed. It's format is identical to the collision output (see
-   * \ref doxypage_output_oscar_collisions), it does however only contain
+   * file named \a Dileptons (followed by the appropriate suffix) is generated
+   * when SMASH is executed. It's format is identical to the collision output
+   * (see \ref doxypage_output_oscar_collisions), it does however only contain
    * information about the dilepton decays. \n Further, the block headers differ
    * from the usual collision output: <div class="fragment"> <div class="line">
    * <span class="preprocessor">
@@ -1333,7 +1333,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * \page doxypage_output_photons
    * The existence of a photon subsection in the output section of the
    * configuration file enables the photon output.
-   * If photons are enabled, the output file named Photons (followed by the
+   * If photons are enabled, the output file named \a Photons (followed by the
    * appropriate suffix) is generated when SMASH is executed. It's format is
    * identical to the collision output (see \ref
    * doxypage_output_oscar_collisions), it does however only contain information
@@ -1364,7 +1364,7 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   /*!\Userguide
    * \page doxypage_output_initial_conditions
-   * Once initial conditions are enabled, the output file named SMASH_IC
+   * Once initial conditions are enabled, the output file named \a SMASH_IC
    * (followed by the appropriate suffix) is generated when SMASH is executed.
    * \n The output is available in Oscar1999, Oscar2013, ASCII, Oscar2013_bin
    * and ROOT format, as well as in an additional "For_vHLLE" format. The latter
@@ -1385,8 +1385,8 @@ Experiment<Modus>::Experiment(Configuration &config,
    * The binary initial conditions output also provides a list of all particles
    * that fluidize. For each particle a 'p' block is created stores the particle
    * data. The binary output structure as described in \ref
-   * doxypage_output_binary is preserved.\n For now, the custom Binary output is
-   * not available, only the fixed "Oscar2013_bin" format.
+   * doxypage_output_binary is preserved.\n The custom `"Binary"` output is also
+   * available and it is an equivalent binary version of the `"ASCII"` one.
    *
    * <h3> ROOT output </h3>
    * The initial conditions output in shape of a list of all particles removed

@@ -165,7 +165,7 @@ static auto get_binary_filename(const std::string &content,
  * <h2> %Particles output </h2>
  *
  * The name of particles output file depends on its content:
- *  \li \c particles_binary.bin &rarr; this is the default;
+ *  \li \c particles_custom.bin &rarr; this is the default;
  *  \li \c particles_oscar2013.bin &rarr;
  *      if the list of quantities corresponds to the OSCAR2013 format;
  *  \li \c particles_oscar2013_extended.bin &rarr;
@@ -179,7 +179,7 @@ static auto get_binary_filename(const std::string &content,
  * <h2> Collisions output </h2>
  *
  * The name of collisions output file depends on its content:
- *  \li \c collisions_binary.bin &rarr; this is the default;
+ *  \li \c collisions_custom.bin &rarr; this is the default;
  *  \li \c collisions_oscar2013.bin &rarr;
  *      if the list of quantities corresponds to the OSCAR2013 format;
  *  \li \c collisions_oscar2013_extended.bin &rarr;

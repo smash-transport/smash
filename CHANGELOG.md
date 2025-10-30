@@ -37,8 +37,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Added the `Proper_Time_Scaling` key in the `Initial_Conditions` section under `Modi: Collider:`, that scales the switching proper time when using constant tau initial conditions.
 
 ### Output
-* `Dileptons`, `Photons`, and `Initial_Conditions` now accept the `ASCII` custom format, and require setting the desired `Quantities`.
-* ⚠️ The previous `ASCII` option for `Output: Initial_Conditions:Format` key was renamed to `For_vHLLE`, and the corresponding file to `SMASH_IC_For_vHLLE.dat`. **This breaks the workflows for hybrid models using SMASH as initial conditions!**
+* `Dileptons`, `Photons`, and `Initial_Conditions` now accept the `ASCII` and `Binary` custom format, and require setting the desired `Quantities`.
+* ⚠️ The previous `<content>_binary.bin` output files are now called `<content>_custom.bin`.
+* ⚠️ The previous `ASCII` option for `Output: Initial_Conditions: Format` key was renamed to `For_vHLLE`, and the corresponding file to `SMASH_IC_For_vHLLE.dat`. **This breaks the workflows for hybrid models using SMASH as initial conditions!**
 
 
 ## SMASH-3.2.2
