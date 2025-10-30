@@ -367,7 +367,7 @@ struct InputSections {
  * interactions. Before describing each possible key in detail, it is useful to
  * give some taste with a couple of examples.
  *
- * ### A real life example
+ * <h3> A real life example </h3>
  *
  * The following section in the input file configures SMASH to include all but
  * strangeness exchange involving 2 &harr; 2 scatterings, to treat N + Nbar
@@ -394,7 +394,7 @@ struct InputSections {
  \endverbatim
  * in the configuration file.
  *
- * ### Configuring deuteron multi-particle reactions
+ * <h3> Configuring deuteron multi-particle reactions </h3>
  *
  * The following example configures SMASH to include deuteron multi-particle
  * reactions scatterings.
@@ -566,7 +566,7 @@ struct InputSections {
 /*!\Userguide
  * \page doxypage_input_conf_modi_C_initial_conditions
  *
- * ## Fluidization conditions
+ * <h2> Fluidization conditions </h2>
  *
  * Currently there are two implemented conditions for selecting hadrons from a
  * collision as input for a hydrodynamic evolution, controlled by \key Type.
@@ -576,7 +576,7 @@ struct InputSections {
  * the fluidization condition are written to the \key Initial_Conditions output,
  * which must be included in the config.
  *
- * ### Constant tau
+ * <h3> Constant tau </h3>
  *
  * The hyperbolic time is taken from the \key Proper_Time field in the
  * \key Initial_Conditions subsection when configuring the output. If this
@@ -601,7 +601,7 @@ struct InputSections {
  * Internally, the particles that cross the hypersurface are removed from the
  * evolution.
  *
- * ### Dynamic with energy density
+ * <h3> Dynamic with energy density </h3>
  *
  * Hydrodynamics is in general applicable for systems in or close to
  * equilibrium. A hadron gas will always be driven towards equilibration, but
@@ -701,7 +701,7 @@ struct InputSections {
  * doxypage_input_conf_modi_list "the \c List modus". Refer to it for more
  * details.
  *
- * ### Configuration example
+ * <h3> Configuration example </h3>
  * \verbatim
  Modi:
      ListBox:
@@ -756,33 +756,37 @@ struct InputSections {
  * The maximum expected longitudinal velocity is approximated to the speed of
  * light \f$v_z=1\f$ and the maximum expected velocity in each transverse
  * direction is \f$v_x=v_y = 0.7\f$. Assuming an \f$R=5\f$ fm nucleus that is
- * contracted along the z-direction by \f$\gamma = \frac{\sqrt{s}_{NN}}{2m_N}\f$
+ * contracted along the z-direction by \f$\gamma = \frac{\sqrt{s_{NN}}}{2m_N}\f$
  * and the particles propagating until \ref key_gen_end_time_ "end time", we end
- * up with \f[ z_{\rm max} = \frac{5\,{\rm fm}}{\gamma} + t_{\rm end} \f] \f[
- * x_{\rm max} = y_{\rm max} = 5\,{\rm fm} + 0.7 t_{\rm end}\,. \f] The lattice
- * then covers the range \f$ -x_{\rm max} < x < x_{\rm max}\f$ , \f$ -y_{\rm
- * max} < y < y_{\rm max}\f$ and \f$ -z_{\rm max} < z < z_{\rm max}\f$ . The
- * cell size in x and y is 0.8 fm and the cell size in z-direction is contracted
- * to \f$\frac{0.8\,{\rm fm}}{\gamma}\f$
+ * up with
+ * \f[ z_{\rm max} = \frac{5\,{\rm fm}}{\gamma} + t_{\rm end} \f]
+ * \f[ x_{\rm max} = y_{\rm max} = 5\,{\rm fm} + 0.7 t_{\rm end}\,.\f]
+ * The lattice then covers the range \f$ -x_{\rm max} < x < x_{\rm max}\f$,
+ * \f$-y_{\rm max} < y < y_{\rm max}\f$ and \f$-z_{\rm max} <z< z_{\rm max}\f$.
+ * The cell size in all directions is 0.8 fm. However, if \ref
+ * key_gen_smearing_mode_ "a smearing" requiring a lattice (where the smearing
+ * length is bound to the lattice cell length) is used, the cell size in
+ * z-direction is contracted to \f$\frac{0.8\,{\rm fm}}{\gamma}\f$. \note A
+ * minimum size of 30 fm is imposed since the heuristic above for determining
+ * the lattice expects the end time to be large compared to the nucleus size.
  *
  * <h3>Box and ListBox</h3>
- * The lattice covers exactly the entire box from 0 to \ref
- * key_MB_length_ "box length" in x,y and z. The cell size is 0.5 and only in
- * this case the lattice is <tt>\ref key_lattice_periodic_ "periodic"</tt>.
+ * The lattice covers exactly the entire box from 0 to \ref key_MB_length_
+ * "box length" in x, y and z. The cell size is 0.5 fm and only in this case the
+ * lattice is <tt>\ref key_lattice_periodic_ "periodic"</tt>.
  *
  * <h3>Sphere</h3>
- * Since the Sphere has an initial <tt>\ref key_MS_radius_ "Radius"</tt>,
+ * Since the sphere has an initial <tt>\ref key_MS_radius_ "Radius"</tt>,
  * the maximum distance in all directions can be estimated to
  * \f[ x_{\rm max} = y_{\rm max} = z_{\rm max} = R_0 + t_{\rm end} \f]
  * using the speed of light as a maximum expansion velocity.
  * The cell size is 0.8 fm in each direction.
  *
  * <h3>List</h3>
- * The default for the list modus is constructed assuming it is used for an
- * afterburner calculation. As in the case for the collider we take th speed of
- * light for the maximum longitudinal expansion velocity and 0.7 fo the
- * transverse one. The cells size is 0.8 fm in ach direction, meaning they are
- * not lorentz contracted as they would be in the case of the collider setup.
+ * <b>There is no default for the `List` modus.</b> It is basically impossible
+ * to foresee how such a modus is used and, hence, the region covered by the
+ * lattice has to be actively specified by the user. If an automatic lattice
+ * creation is requested, SMASH will terminate with an error.
  */
 
 /*!\Userguide
@@ -817,7 +821,7 @@ struct InputSections {
  * needed to compute the potentials. We recommend minimal values of 20 ensembles
  * and 10 testparticles (see \iref{Mohs:2024gyc}).
  *
- * ### Configuring potentials
+ * <h3> Configuring potentials </h3>
  *
  * The following snippet of the configuration file configures SMASH such that
  * the Skyrme as well as the Symmetry potential are activated for the
@@ -838,7 +842,7 @@ struct InputSections {
  * doxypage_input_conf_lattice "Lattice"</tt> while for the other potentials it
  * can be used as an optimisation.
  *
- * ### Configuring VDF Potentials
+ * <h3> Configuring VDF Potentials </h3>
  *
  * The following snippets from the configuration file configure SMASH such
  * that the VDF potential is activated for the simulation.
@@ -870,7 +874,7 @@ struct InputSections {
          Powers: [1.7681391, 3.5293515, 5.4352788, 6.3809822]
          Coeffs: [-8.450948e+01, 3.843139e+01, -7.958557e+00, 1.552594e+00]
  \endverbatim
- * ### Configuring the momentum dependence
+ * <h3> Configuring the momentum dependence </h3>
  * The momentum-dependent term can be added to the Skyrme potential. In order
  * to activate it one has to specify the parameters C and Lambda in MeV and
  * 1/fm respectively in the "Momentum_Dependence" section under "Potentials".
@@ -1103,7 +1107,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_general
    * <hr>
-   * ### Mandatory keys
+   * <h3> Mandatory keys </h3>
    */
 
   /*!\Userguide
@@ -1202,7 +1206,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_general
    * <hr>
-   * ### Optional keys
+   * <h3> Optional keys </h3>
    */
 
   /*!\Userguide
@@ -1563,11 +1567,12 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * <hr>
-   * ### Setting the default for all logging areas
+   * <h3> Setting the default for all logging areas </h3>
    *
    * \optional_key_no_line{key_log_default_,default,string,ALL}
    *
-   * It determines the default logging level for all areas.
+   * It determines the default logging level for all areas. This is annotated by
+   * \key ${default} in each of the following keys.
    */
   /**
    * \see_key{key_log_default_}
@@ -1578,9 +1583,10 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * <hr>
-   * ### Most user-relevant logging areas
+   * <h3> Most user-relevant logging areas </h3>
    *
-   * \optional_key_no_line{key_log_box_,Box,string,$\{default\}}
+   * \optional_key_no_line{key_log_box_,Box,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages specific to the box modus implementation belong to this area.
    */
@@ -1592,7 +1598,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_collider_,Collider,string,$\{default\}}
+   * \optional_key{key_log_collider_,Collider,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages specific to the collider modus implementation belong to this area.
    */
@@ -1604,7 +1611,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_configuration_,%Configuration,string,$\{default\}}
+   * \optional_key{key_log_configuration_,%Configuration,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages about the input configuration file belong to this area.
    */
@@ -1618,7 +1626,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_experiment_,%Experiment,string,$\{default\}}
+   * \optional_key{key_log_experiment_,%Experiment,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages mostly coming from the `Experiment` class belong to this area.
    */
@@ -1630,7 +1639,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{default\}}
+   * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages about the gran-canonical thermalization belong to this area.
    */
@@ -1644,7 +1654,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_initial_conditions_,InitialConditions,string,$\{default\}}
+   * \optional_key{key_log_initial_conditions_,InitialConditions,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages about initial conditions belong to this area.
    */
@@ -1658,7 +1669,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_list_,List,string,$\{default\}}
+   * \optional_key{key_log_list_,List,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages specific to the list modus implementation belong to this area.
    */
@@ -1670,7 +1682,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_main_,Main,string,$\{default\}}
+   * \optional_key{key_log_main_,Main,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages coming from top-level of the application belong to this area.
    */
@@ -1682,7 +1695,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_output_,Output,string,$\{default\}}
+   * \optional_key{key_log_output_,Output,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages output functionality belong to this area.
    */
@@ -1694,7 +1708,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_potentials_,Potentials,string,$\{default\}}
+   * \optional_key{key_log_potentials_,Potentials,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages regarding the potentials belong to this area.
    */
@@ -1706,7 +1721,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_rootsolver_,RootSolver,string,$\{default\}}
+   * \optional_key{key_log_rootsolver_,RootSolver,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages specific to the root finding belong to this area.
    */
@@ -1718,7 +1734,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_sphere_,Sphere,string,$\{default\}}
+   * \optional_key{key_log_sphere_,Sphere,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages specific to the sphere modus implementation belong to this area.
    */
@@ -1731,9 +1748,10 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * <hr>
-   * ### Most technical logging areas (in alphabetical order)
+   * <h3> Most technical logging areas (in alphabetical order) </h3>
    *
-   * \optional_key_no_line{key_log_action_,%Action,string,$\{default\}}
+   * \optional_key_no_line{key_log_action_,%Action,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages mostly coming from the `Action` class belong to this area.
    */
@@ -1745,7 +1763,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_clock_,%Clock,string,$\{default\}}
+   * \optional_key{key_log_clock_,%Clock,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages coming from clock implementation belong to this area.
    */
@@ -1757,7 +1776,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_cross_sections_,%CrossSections,string,$\{default\}}
+   * \optional_key{key_log_cross_sections_,%CrossSections,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages about cross sections belong to this area.
    */
@@ -1771,7 +1791,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_decay_modes_,%DecayModes,string,$\{default\}}
+   * \optional_key{key_log_decay_modes_,%DecayModes,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages coming from decay tools belong to this area.
    */
@@ -1783,7 +1804,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_density_,Density,string,$\{default\}}
+   * \optional_key{key_log_density_,Density,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages coming from density calculations belong to this area.
    */
@@ -1795,7 +1817,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_distributions_,Distributions,string,$\{default\}}
+   * \optional_key{key_log_distributions_,Distributions,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages about quantity distributions belong to this area.
    */
@@ -1809,7 +1832,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_find_scatter_,FindScatter,string,$\{default\}}
+   * \optional_key{key_log_find_scatter_,FindScatter,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages coming from search tools for scattering belong to this area.
    */
@@ -1821,7 +1845,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_fpe_,Fpe,string,$\{default\}}
+   * \optional_key{key_log_fpe_,Fpe,string,$\{\ref key_log_default_ "default"\}}
    *
    * Messages about floating point exceptions belong to this area.
    */
@@ -1833,7 +1857,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_grid_,%Grid,string,$\{default\}}
+   * \optional_key{key_log_grid_,%Grid,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages coming from the grid implementation belong to this area.
    */
@@ -1845,7 +1870,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_hyper_surface_crossing_,HyperSurfaceCrossing,string,$\{default\}}
+   * \optional_key{key_log_hyper_surface_crossing_,HyperSurfaceCrossing,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages about hypersurface crossing belong to this area.
    */
@@ -1859,7 +1885,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_input_parser_,InputParser,string,$\{default\}}
+   * \optional_key{key_log_input_parser_,InputParser,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages coming from input parsing tools belong to this area.
    */
@@ -1871,7 +1898,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_lattice_,Lattice,string,$\{default\}}
+   * \optional_key{key_log_lattice_,Lattice,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages coming from the lattice implementation belong to this area.
    */
@@ -1883,7 +1911,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_nucleus_,%Nucleus,string,$\{default\}}
+   * \optional_key{key_log_nucleus_,%Nucleus,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages coming from the nucleus implementation belong to this area.
    */
@@ -1895,7 +1924,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_particle_type_,%ParticleType,string,$\{default\}}
+   * \optional_key{key_log_particle_type_,%ParticleType,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages coming from particle types implementation belong to this area.
    */
@@ -1909,7 +1939,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_pauli_blocking_,PauliBlocking,string,$\{default\}}
+   * \optional_key{key_log_pauli_blocking_,PauliBlocking,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages about Pauli blocking belong to this area.
    */
@@ -1923,7 +1954,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_propagation_,Propagation,string,$\{default\}}
+   * \optional_key{key_log_propagation_,Propagation,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages about particles propagation belong to this area.
    */
@@ -1937,7 +1969,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_pythia_,Pythia,string,$\{default\}}
+   * \optional_key{key_log_pythia_,Pythia,string,$\{\ref key_log_default_
+   * "default"\}}
    *
    * Messages coming from Pythia usage in SMASH belong to this area.
    */
@@ -1949,7 +1982,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_resonances_,Resonances,string,$\{default\}}
+   * \optional_key{key_log_resonances_,Resonances,string,$\{\ref
+   *key_log_default_ "default"\}}
    *
    ** Messages coming from resonances aspects belong to this area.
    */
@@ -1961,7 +1995,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_scatter_action_,%ScatterAction,string,$\{default\}}
+   * \optional_key{key_log_scatter_action_,%ScatterAction,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages about scattering events belong to this area.
    */
@@ -1975,7 +2010,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_scatter_action_multi_,%ScatterActionMulti,string,$\{default\}}
+   * \optional_key{key_log_scatter_action_multi_,%ScatterActionMulti,string,$\{\ref
+   * key_log_default_ "default"\}}
    *
    * Messages about scattering events with multiple particles belong to this
    * area.
@@ -1990,7 +2026,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_tmn_,Tmn,string,$\{default\}}
+   * \optional_key{key_log_tmn_,Tmn,string,$\{\ref key_log_default_ "default"\}}
    *
    * Messages about the energy momentum tensor belong to this area.
    */
@@ -3407,7 +3443,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
-   * ### Custom nuclei
+   * <h3> Custom nuclei </h3>
    *
    * It is possible to further customize the projectile and/or target using the
    * `Custom` section, which should then contain few required keys, if given.
@@ -3450,7 +3486,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
-   * ### Deformed nuclei
+   * <h3> Deformed nuclei </h3>
    *
    * It is possible to deform the projectile and/or target nuclei using the
    * `Deformed` section, which should then contain some configuration, if given.
@@ -3571,7 +3607,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
-   * ### Alpha-Clustered oxygen nuclei
+   * <h3> Alpha-Clustered oxygen nuclei </h3>
    *
    * It is possible to have alpha-clustered projectile and/or target **oxygen**
    * nuclei using the `Alpha_Clustered` section, which should then contain some
@@ -3635,7 +3671,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
-   * ### Defining orientation
+   * <h3> Defining orientation </h3>
    *
    * In the `Orientation` section it is possible to specify the orientation of
    * the nucleus by rotations which are performed about the axes of a coordinate
@@ -3854,7 +3890,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
-   * ### Parameters for fluidization at constant tau
+   * <h3> Parameters for fluidization at constant tau </h3>
    * \optional_key_no_line{key_MC_IC_lower_bound_,Lower_Bound,double,0.5}
    *
    * Lower bound \unit{in fm} for the IC proper time if
@@ -3889,6 +3925,25 @@ struct InputKeys {
       InputSections::m_c_initialConditions + "Proper_Time",
       DefaultType::Dependent,
       {"3.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_C_initial_conditions
+   * \optional_key_no_line{key_MC_IC_proper_time_scaling_,Proper_Time_Scaling,double,
+   * 1.0}
+   *
+   * A scaling factor by which the proper time at which the switching
+   * hypersurface is created is multiplied. This parameter is used in the
+   * Bayesian analysis in \iref{Gotz:2025wnv}. It is only used if the constant
+   * tau initial condition is active and the <tt>\ref key_MC_IC_proper_time_
+   * "Proper_Time"</tt> key is not provided.
+   */
+  /**
+   * \see_key{key_MC_IC_proper_time_scaling_}
+   */
+  inline static const Key<double> modi_collider_initialConditions_scaling{
+      InputSections::m_c_initialConditions + "Proper_Time_Scaling",
+      1.0,
+      {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
@@ -3929,7 +3984,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * <hr>
-   * ### Parameters for dynamic fluidization
+   * <h3> Parameters for dynamic fluidization </h3>
    * \optional_key_no_line{key_MC_IC_eden_threshold_,Energy_Density_Threshold,double,0.5}
    *
    * Set the minimum energy density \unit{in GeV/fm³} for a particle to be
@@ -4055,7 +4110,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * ### Mandatory keys
+   * <h3> Mandatory keys </h3>
    */
 
   /*!\Userguide
@@ -4114,7 +4169,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * <hr>
-   * ### Optional keys
+   * <h3> Optional keys </h3>
    */
 
   /*!\Userguide
@@ -4138,17 +4193,35 @@ struct InputKeys {
    * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,-1.0}
    *
    * This can be used in order to give each particle in the sphere an additional
-   * velocity in radial direction of the size \f$u_r = u_0 \, \frac{r}{R}\f$
-   * with \f$u_0\f$ being the parameter of this feature, \f$r\f$ the radius of
-   * the particle and \f$R\f$ the total radius of the sphere. \f$u_0\f$ can only
-   * take values in \f$[0, 1]\f$ and specifying a negative value is equivalent
-   * in omitting this key (i.e. not attributing any additional radial velocity).
+   * velocity in radial direction of the size \f$u_r = u_0 \,
+   * \left(\frac{r}{R}\right)^n\f$ with \f$u_0\f$ being the parameter of this
+   * feature, \f$r\f$ the radial coordinate of the particle and \f$R\f$ the
+   * total radius of the sphere. \f$u_0\f$ can only take values in \f$[0, 1]\f$
+   * and a negative value is equivalent to omitting this key (i.e. not
+   * attributing any additional radial velocity). The exponent \f$n\f$ is set
+   * by <tt>\ref key_MS_add_radial_velocity_exponent
+   * "Add_Radial_Velocity_Exponent"</tt>.
    */
   /**
    * \see_key{key_MS_add_radial_velocity_}
    */
   inline static const Key<double> modi_sphere_addRadialVelocity{
       InputSections::m_sphere + "Add_Radial_Velocity", -1.0, {"2.2"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_modi_sphere
+   * \optional_key{key_MS_add_radial_velocity_exponent,
+   * Add_Radial_Velocity_Exponent,double,1.0}
+   *
+   * Exponent in the initial radial flow profile (see <tt>\ref
+   * key_MS_add_radial_velocity_ "Add_Radial_Velocity"</tt>). It cannot be
+   * negative.
+   */
+  /**
+   * \see_key{key_MS_add_radial_velocity_exponent}
+   */
+  inline static const Key<double> modi_sphere_addRadialVelocityExponent{
+      InputSections::m_sphere + "Add_Radial_Velocity_Exponent", 1.0, {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4268,7 +4341,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * <hr>
-   * #### Specifying jets
+   * <h3> Specifying jets </h3>
    *
    * The `Jet` section within the `Sphere` one is used to put a single high
    * energy particle (a "jet") in the center of the system, on an outbound
@@ -4349,7 +4422,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
    * <hr>
-   * ### Mandatory keys
+   * <h3> Mandatory keys </h3>
    */
 
   /*!\Userguide
@@ -4426,7 +4499,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
    * <hr>
-   * ### Optional keys
+   * <h3> Optional keys </h3>
    */
 
   /*!\Userguide
@@ -4525,7 +4598,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
    * <hr>
-   * #### Specifying jets
+   * <h3> Specifying jets </h3>
    *
    * The `Jet` section can be specified in the `Box` section with the same
    * meaning it has for the `Sphere` modus. It is namely possible to put a
@@ -4749,7 +4822,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    *
-   * ## General output configuration parameters
+   * <h2> General output configuration parameters </h2>
    *
    * \optional_key_no_line{key_output_density_type_,Density_Type,string,"none"}
    *
@@ -4809,7 +4882,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    * <hr>
-   * ## Output format independently of the specific output content
+   * <h2> Output format independently of the specific output content </h2>
    *
    * A dedicated subsection in the `Output` section exists for every single
    * output content and dedicated options are described further below. Refer to
@@ -4892,15 +4965,15 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    * <hr>
-   * ## Content-specific output options
+   * <h2> Content-specific output options </h2>
    * \anchor input_output_content_specific_
    *
    * Every possible content-specific section is documented in the following.
-   * Refer to \ref doxypage_output_conf_examples "this page" for concrete output
+   * Refer to \ref config_output_examples "this page" for concrete output
    * configuration examples.
    *
    * <hr>
-   * ### &diams; Particles
+   * <h3> &diams; %Particles </h3>
    *
    * \optional_key_no_line{key_output_particles_extended_,Extended,bool,false}
    *
@@ -4918,7 +4991,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_particles_quantities_,Quantities,list of
-   * strings,[]}
+   * strings,</tt><b>empty list</b><tt>}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
@@ -4929,7 +5002,7 @@ struct InputKeys {
    * \see_key{key_output_particles_quantities_}
    */
   inline static const Key<std::vector<std::string>> output_particles_quantities{
-      {"Output", "Particles", "Quantities"},
+      InputSections::o_particles + "Quantities",
       std::vector<std::string>{},
       {"3.2"}};
 
@@ -4955,7 +5028,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    * <hr>
-   * ### &diams; Collisions
+   * <h3> &diams; Collisions </h3>
    * &rArr; Format `VTK` not available
    *
    * \optional_key_no_line{key_output_collisions_extended_,Extended,bool,false}
@@ -4986,7 +5059,7 @@ struct InputKeys {
    * \see_key{key_output_collisions_quantities_}
    */
   inline static const Key<std::vector<std::string>>
-      output_collisions_quantities{{"Output", "Collisions", "Quantities"},
+      output_collisions_quantities{InputSections::o_collisions + "Quantities",
                                    std::vector<std::string>{},
                                    {"3.2"}};
 
@@ -5008,7 +5081,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    * <hr>
-   * ### &diams; Dileptons
+   * <h3> &diams; Dileptons </h3>
    * &rArr; Only `Oscar1999`, `Oscar2013` and `Binary` formats.
    *
    * \optional_key_no_line{key_output_dileptons_extended_,Extended,bool,false}
@@ -5025,8 +5098,27 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_dileptons_quantities_,Quantities,list of
+   * strings,
+   * </tt><b>empty list</b><tt>}
+   *
+   * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
+   * specified. An error will be produced if a non-empty `Quantities` key is
+   * specified without including `ASCII` or `Binary` as format.
+   * See \ref doxypage_output_ascii for the possible values.
+   */
+  /**
+   * \see_key{key_output_dileptons_quantities_}
+   */
+  inline static const Key<std::vector<std::string>> output_dileptons_quantities{
+      InputSections::o_dileptons + "Quantities",
+      std::vector<std::string>{},
+      {"3.3"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
    * <hr>
-   * ### &diams; Photons
+   * <h3> &diams; Photons </h3>
    * &rArr; Only `Oscar1999`, `Oscar2013` and `Binary` formats.
    *
    * \optional_key_no_line{key_output_photons_extended_,Extended,bool,false}
@@ -5043,12 +5135,32 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_photons_quantities_,Quantities,list of
+   * strings,
+   * </tt><b>empty list</b><tt>}
+   *
+   * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
+   * specified. An error will be produced if a non-empty `Quantities` key is
+   * specified without including `ASCII` or `Binary` as format.
+   * See \ref doxypage_output_ascii for the possible values.
+   */
+  /**
+   * \see_key{key_output_photons_quantities_}
+   */
+  inline static const Key<std::vector<std::string>> output_photons_quantities{
+      InputSections::o_photons + "Quantities",
+      std::vector<std::string>{},
+      {"3.3"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
    * <hr>
-   * ### &diams; Initial_Conditions
-   * &rArr; Only `Oscar1999`, `Oscar2013`, `Binary`, `ROOT` and `ASCII` formats.
-   * The latter is only available for `Constant_Tau` fluidizations, see the
-   * pages for Output: \ref doxypage_output_initial_conditions and Modi:
-   * Collider: \ref doxypage_input_conf_modi_C_initial_conditions.
+   * <h3> &diams; Initial_Conditions </h3>
+   * &rArr; Only `Oscar1999`, `Oscar2013`, `Oscar2013_bin`, `ROOT` and
+   * `For_vHLLE` formats. The latter is only available for `Constant_Tau`
+   * fluidizations, see the pages for Output: \ref
+   * doxypage_output_initial_conditions and Modi: Collider: \ref
+   * doxypage_input_conf_modi_C_initial_conditions.
    *
    * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
    *
@@ -5061,6 +5173,26 @@ struct InputKeys {
    */
   inline static const Key<bool> output_initialConditions_extended{
       InputSections::o_initialConditions + "Extended", false, {"1.7"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_IC_quantities_,Quantities,list of
+   * strings,
+   * </tt><b>empty list</b><tt>}
+   *
+   * &rArr; If using the `ASCII` format, a non-empty list must be
+   * specified. An error will be produced if a non-empty `Quantities` key is
+   * specified without including `ASCII` as format.
+   * See \ref doxypage_output_ascii for the possible values.
+   */
+  /**
+   * \see_key{key_output_IC_quantities_}
+   */
+  inline static const Key<std::vector<std::string>>
+      output_initialConditions_quantities{
+          InputSections::o_initialConditions + "Quantities",
+          std::vector<std::string>{},
+          {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -5125,7 +5257,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    * <hr> \anchor input_output_rivet_
-   * ### &diams; Rivet
+   * <h3> &diams; Rivet </h3>
    * &rArr; Only `YODA` format (see \ref doxypage_output_rivet
    * "here" for more information about the format).
    *
@@ -5220,7 +5352,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    *
-   * #### Weights keys
+   * <h3> Weights keys </h3>
    *
    * Some operations about weights can be customized in the `Weights` section.
    *
@@ -5312,7 +5444,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    * <hr>
-   * ### &diams; Coulomb
+   * <h3> &diams; Coulomb </h3>
    * &rArr; Only `VTK` format.
    *
    * No content-specific output options, apart from the <tt>\ref
@@ -5323,7 +5455,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_output
    * <hr> \anchor input_output_thermodynamics_
-   * ### &diams; Thermodynamics
+   * <h3> &diams; Thermodynamics </h3>
    *
    * The user can print thermodynamical quantities
    * -# on the spatial lattice to VTK output;
@@ -5720,7 +5852,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
    * <hr>
-   * ### Mandatory keys
+   * <h3> Mandatory keys </h3>
    */
 
   /*!\Userguide
@@ -5777,7 +5909,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
    * <hr>
-   * ### Optional keys
+   * <h3> Optional keys </h3>
    */
 
   /*!\Userguide
@@ -6065,6 +6197,7 @@ struct InputKeys {
       std::cref(modi_collider_initialConditions_formTimeFraction),
       std::cref(modi_collider_initialConditions_fluidProcesses),
       std::cref(modi_collider_initialConditions_lowerBound),
+      std::cref(modi_collider_initialConditions_scaling),
       std::cref(modi_collider_initialConditions_maxTime),
       std::cref(modi_collider_initialConditions_minTime),
       std::cref(modi_collider_initialConditions_properTime),
@@ -6077,6 +6210,7 @@ struct InputKeys {
       std::cref(modi_sphere_temperature),
       std::cref(modi_sphere_accountResonanceWidths),
       std::cref(modi_sphere_addRadialVelocity),
+      std::cref(modi_sphere_addRadialVelocityExponent),
       std::cref(modi_sphere_baryonChemicalPotential),
       std::cref(modi_sphere_chargeChemicalPotential),
       std::cref(modi_sphere_initialCondition),
@@ -6130,8 +6264,11 @@ struct InputKeys {
       std::cref(output_collisions_quantities),
       std::cref(output_collisions_printStartEnd),
       std::cref(output_dileptons_extended),
+      std::cref(output_dileptons_quantities),
       std::cref(output_photons_extended),
+      std::cref(output_photons_quantities),
       std::cref(output_initialConditions_extended),
+      std::cref(output_initialConditions_quantities),
       std::cref(output_initialConditions_lowerBound),
       std::cref(output_initialConditions_properTime),
       std::cref(output_initialConditions_pTCut),
@@ -6259,7 +6396,7 @@ struct InputKeys {
 /*!\Userguide
 * \page doxypage_input_conf_general_mne
 * <hr>
-* ### Examples
+* <h3> Examples </h3>
 *
 * In the following example, the number of desired non-empty events is 1000
 * with a maximum number of 2000 events to be calculated. In this case the
@@ -6293,7 +6430,7 @@ General:
 /*!\Userguide
  * \page doxypage_input_conf_logging
  * <hr>
- * ### Example: Configuring the Logging Area
+ * <h3> Example: Configuring the Logging Area </h3>
  *
  * To activate different logging levels for different logging areas, change
  the
@@ -6316,7 +6453,7 @@ General:
 /*!\Userguide
  * \page doxypage_input_conf_ct_string_parameters
  * <hr>
- * ### Example of string parameters customization
+ * <h3> Example of string parameters customization </h3>
  *
  *\verbatim
  Collision_Term:
@@ -6344,7 +6481,7 @@ General:
 /*!\Userguide
  * \page doxypage_input_conf_ct_dileptons
  * <hr>
- * ### Example of dileptons configuration
+ * <h3> Example of dileptons configuration </h3>
  *
  * The following example configures the dilepton production for dileptons
  * originating from resonance decays. In addition, the extended OSCAR2013
@@ -6361,7 +6498,7 @@ General:
  \endverbatim
  *
  * <hr>
- * ## Dilepton production in SMASH
+ * <h2> Dilepton production in SMASH </h2>
  *
  * The treatment of Dilepton Decays is special:
  * - Dileptons are treated via the time integration method, also called
@@ -6398,7 +6535,7 @@ General:
 /*!\Userguide
  * \page doxypage_input_conf_ct_photons
  * <hr>
- * ### Example of photons configuration
+ * <h3> Example of photons configuration </h3>
  *
  * The following example configures the photon production in both binary
  * scatterings and bremsstrahlung processes, where 1000 fractional photons are
@@ -6417,7 +6554,7 @@ General:
  \endverbatim
  *
  * <hr>
- * ## Photon production in SMASH
+ * <h2> Photon production in SMASH </h2>
  *
  * Photons are treated perturbatively and are produced from binary
  * scattering processes. Their production follows the framework from Turbide
@@ -6485,7 +6622,7 @@ General:
 /*!\Userguide
  * \page doxypage_input_conf_modi_collider
  * <hr>
- * ### Example of heavy-ion collision configuration
+ * <h3> Example of heavy-ion collision configuration </h3>
  *
  * The following example configures a Cu63-Cu63 collision at
  * \f$\sqrt{s_{NN}}=3.0\,\mathrm{GeV}\f$ with zero impact parameter and Fermi
@@ -6544,7 +6681,7 @@ General:
  * \page doxypage_input_conf_modi_C_proj_targ
  * <hr>
  * \anchor input_modi_collider_projectile_and_target_ex1_
- * ### p-Pb collisions at the LHC
+ * <h3> p-Pb collisions at the LHC </h3>
  *
  * Note that SMASH performs its calculation in the centre-of-velocity and the
  * particles are returned in the centre-of-mass frame. The particles therefore
@@ -6571,7 +6708,7 @@ General:
  *
  * <hr>
  * \anchor input_modi_collider_projectile_and_target_ex2_
- * ### Configuring custom nuclei from external file
+ * <h3> Configuring custom nuclei from external file </h3>
  *
  * The following example illustrates how to configure a center-of-mass
  heavy-ion
@@ -6644,7 +6781,7 @@ General:
  *
  * <hr>
  * \anchor input_modi_collider_projectile_and_target_ex3_
- * ### Configuring a deformed nucleus
+ * <h3> Configuring a deformed nucleus </h3>
  *
  * To configure a fixed target heavy-ion collision with deformed nuclei, whose
  * spherical deformation is explicitly declared, it can be done according to
@@ -6685,7 +6822,7 @@ General:
  *
  * <hr>
  * \anchor input_modi_collider_projectile_and_target_ex4_
- * ### Configuring an alpha-clustered nucleus
+ * <h3> Configuring an alpha-clustered nucleus </h3>
  *
  * The following example shows how to setup projectile and target using
  * alpha-clustering in an O-O collision. The projectile is automatically
@@ -6713,7 +6850,7 @@ General:
 /*!\Userguide
  * \page doxypage_input_conf_modi_C_impact_parameter
  * <hr>
- * ### Configuring the Impact Parameter
+ * <h3> Configuring the Impact Parameter </h3>
  *
  * The impact parameter can be configured to have a fixed value in the
  * `Collider` subsection of `Modi`. In addition, the initial distance of the
@@ -6754,17 +6891,17 @@ General:
 /*!\Userguide
 * \page doxypage_input_conf_modi_C_initial_conditions
 * <hr>
-* ### Extracting initial conditions for hydrodynamic evolution
+* <h3> Extracting initial conditions for hydrodynamic evolution </h3>
 *
 * The following example configures the initial conditions for hydrodynamics
 * for a Au+Au collision at \f$\sqrt{s_{NN}}=200\ \mathrm{GeV}\f$ at midrapidity
-* (\f$-1<y<1\f$). In addition, the extended OSCAR2013 and ASCII outputs
+* (\f$-1<y<1\f$). In addition, the extended OSCAR2013 and "For_vHLLE" outputs
 * are enabled.
 *
 *\verbatim
 Output:
     Initial_Conditions:
-        Format: ["ASCII","Oscar2013"]
+        Format: ["For_vHLLE","Oscar2013"]
         Extended: True
 Modi:
     Collider:
@@ -6782,7 +6919,7 @@ Modi:
 /*!\Userguide
  * \page doxypage_input_conf_modi_sphere
  * <hr>
- * ### Configuring a sphere simulation
+ * <h3> Configuring a sphere simulation </h3>
  *
  * The following example configures an expanding sphere with a radius of 5 fm
  * at a temperature of 200 MeV. The particles are initialized with thermal
@@ -6845,7 +6982,7 @@ Modi:
 /*!\Userguide
  * \page doxypage_input_conf_modi_box
  * <hr>
- * ### Configuring a Box Simulation
+ * <h3> Configuring a Box Simulation </h3>
  *
  * The following example configures an infinite matter simulation in a Box with
  * 10 fm cube length at a temperature of 200 MeV. The particles are initialized
@@ -6927,7 +7064,7 @@ Modi:
 /*!\Userguide
  * \page doxypage_input_conf_modi_list
  * <hr>
- * ### Configuring an afterburner simulation
+ * <h3> Configuring an afterburner simulation </h3>
  *
  * The following example sets up an afterburner simulation for a set of particle
  * files located in _**particle_lists_in**_ folder. The files are named as
@@ -6952,7 +7089,7 @@ Modi:
  \endverbatim
  *
  * <hr>
- * ## Some information about the structure of input particle file
+ * <h2> Some information about the structure of input particle file </h2>
  *
  * This is how an input particle file might look like:
  * <div class="fragment">
@@ -6992,7 +7129,7 @@ Modi:
 /*!\Userguide
  * \page doxypage_input_conf_lattice
  * <hr>
- * ### Configuring the Lattice
+ * <h3> Configuring the Lattice </h3>
  *
  * The following example configures the lattice with the origin in (0,0,0), 20
  * cells of 10 fm size in each direction and with periodic boundary conditions.
@@ -7034,7 +7171,7 @@ Modi:
 /*!\Userguide
  * \page doxypage_input_conf_forced_therm
  * <hr>
- * ### Configuring forced thermalization
+ * <h3> Configuring forced thermalization </h3>
  *
  * The following example activates forced thermalization in cells in which the
  * energy density is above 0.3 GeV/fm³. The lattice is initialized with 21

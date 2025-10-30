@@ -102,15 +102,15 @@ jobs:
             sudo apt-get install ${{ matrix.packages_to_add }} -y
         fi
         # we download and install Pythia
-        wget https://pythia.org/download/pythia83/pythia8315.tgz && tar xf pythia8315.tgz && rm pythia8315.tgz && cd pythia8315
+        wget https://pythia.org/download/pythia83/pythia8316.tgz && tar xf pythia8316.tgz && rm pythia8316.tgz && cd pythia8316
         ./configure --cxx-common="-std=c++17 -march=native -O3 -fPIC -pthread" && make -j$(nproc) && cd ..
-        export LD_LIBRARY_PATH=${SMASH_ROOT}/pythia8315/lib:${LD_LIBRARY_PATH} # To make sure it can be found at run time
+        export LD_LIBRARY_PATH=${SMASH_ROOT}/pythia8316/lib:${LD_LIBRARY_PATH} # To make sure it can be found at run time
         # we get cpplint
         wget https://raw.githubusercontent.com/cpplint/cpplint/1.6.0/cpplint.py && chmod +x cpplint.py && mkdir -p ${HOME}/bin && mv cpplint.py ${HOME}/bin
         export PATH=${HOME}/bin:${PATH}
         # now we build SMASH
         cd $SMASH_ROOT && mkdir build && cd build
-        cmake -DPythia_CONFIG_EXECUTABLE=${SMASH_ROOT}/pythia8315/bin/pythia8-config ..
+        cmake -DPythia_CONFIG_EXECUTABLE=${SMASH_ROOT}/pythia8316/bin/pythia8-config ..
         make -j$(nproc)
         # we check the building of the documentation for the current and the past Ubuntu LTS releases
         if [ ${SITE} == "ubuntu-24.04-default-gcc" ] || [ ${SITE} == "ubuntu-22.04-oldest-supported-gcc" ]; then make undocumented_test && make user; fi

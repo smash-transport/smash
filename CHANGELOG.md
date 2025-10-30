@@ -18,18 +18,26 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 ## Unreleased
+* Update to Pythia8.316
 
 ### Added
 * The `SphereModus` now can include thermal heavy flavor particles, via the `Modi: Sphere: Heavy_Flavor_Multiplier` key, a value that multiplies their partial density. 
 * Back to back jets were introduced to the `SphereModus` with the  `Modi: Sphere: Jet: Back_To_Back` and `Modi: Sphere: Jet: Back_To_Back_Separation` keys.
+* The initial `SphereModus` velocity profile can now be tuned with  `Modi: Sphere: Add_Radial_Velocity_Exponent`.
 
 ### Changed
 * The `ParticleData` class now initially sets the formation time and the time of the last collision to `NAN` and overwrites them with the real values the first time the objects are used. Previously, these values were initially set to `0.0`, which could be misleading if the time evolution started at negative times.
 * The procedure for dynamic initial conditions was updated, fluidized hadrons are no longer removed from the evolution, in order to provide energy density to the surrounding particles, being internally named as "core" particles. Core and corona (non-core) particles can only interact elastically.
 * ⚠️ The `backpropagate_to_the_same_time` method is now a private member of `ListModus`. It's functionality was moved to the free function `backpropagate_straight_line`, which *does not set* the formation time or cross section scaling of particles.
+* The `only_res` boolean parameter of `find_final_actions` was removed in the base class `ActionsFindersInterface` and all its derived action classes.
 
 ### Input
 * `ListModus` now accepts `Optional_Quantities`, extra to the default values used in Oscar2013.
+* Added the `Proper_Time_Scaling` key in the `Initial_Conditions` section under `Modi: Collider:`, that scales the switching proper time when using constant tau initial conditions.
+
+### Output
+* `Dileptons`, `Photons`, and `Initial_Conditions` now accept the `ASCII` custom format, and require setting the desired `Quantities`.
+* ⚠️ The previous `ASCII` option for `Output: Initial_Conditions:Format` key was renamed to `For_vHLLE`, and the corresponding file to `SMASH_IC_For_vHLLE.dat`. **This breaks the workflows for hybrid models using SMASH as initial conditions!**
 
 
 ## SMASH-3.2.2

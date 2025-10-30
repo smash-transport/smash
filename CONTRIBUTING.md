@@ -623,6 +623,14 @@ commands are installed and found, namely version 1.6.0 for `cpplint` and version
 
 All floating point numbers are represented using doubles.
 
+
+### Not-a-number
+
+There is a built-in type `smash::smash_NaN` which represents a templated [STL
+`quiet_NaN()`](https://en.cppreference.com/w/cpp/types/numeric_limits/quiet_NaN)
+that should be used in the codebase instead of the STL low-level one.
+
+
 ### Guideline to include header files
 
 As a guideline, try to include only those header files in the class which are directly being used by

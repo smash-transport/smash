@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2024
+ *    Copyright (c) 2014-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -85,6 +85,12 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
 }
 
 double ParticleData::xsec_scaling_factor(double delta_time) const {
+  // if formation times are NaNs simply return a NaN to avoid floating-point
+  // FE_INVALID errors (that would be raised by unordered comparisons with NaNs)
+  if (std::isnan(formation_time_) || std::isnan(begin_formation_time_)) {
+    return smash_NaN<double>;
+  }
+
   double time_of_interest = position_.x0() + delta_time;
   // cross section scaling factor at the time_of_interest
   double scaling_factor;

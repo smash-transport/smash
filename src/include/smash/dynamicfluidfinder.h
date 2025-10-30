@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022-2024
+ *    Copyright (c) 2022-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -84,8 +84,23 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
     return {};
   }
 
-  /// No final actions after fluidizing
-  ActionList find_final_actions(const Particles &, bool) const override;
+  /**
+   * Prepare corona particles left in the IC for the afterburner.
+   *
+   * - Remove core particles.
+   * - Move corona particles back to their last interaction point so they start
+   *   at the correct spacetime position for afterburner rescattering with
+   *   hadrons sampled from the fluid.
+   * - Do not modify spectators.
+   *
+   * \param[in] search_list All particles at the end of the simulation.
+   * \return ActionList with removals and backpropagation steps.
+   *
+   * \note The backpropagation is encoded as two FreeForAll actions:
+   *       remove the corona particle, then add it at the target spacetime
+   *       point. This will appear in the Collisions output.
+   */
+  ActionList find_final_actions(const Particles &search_list) const override;
 
   /**
    * Determine if fluidization condition is satisfied.
@@ -120,17 +135,17 @@ class DynamicFluidizationFinder : public ActionFinderInterface {
    */
   const std::map<int32_t, double> &background_;
   /// Minimum energy density surrounding the particle to fluidize it
-  const double energy_density_threshold_ = NAN;
+  const double energy_density_threshold_ = smash_NaN<double>;
   /// Minimum time (in lab frame) in fm to allow fluidization
-  const double min_time_ = NAN;
+  const double min_time_ = smash_NaN<double>;
   /// Maximum time (in lab frame) in fm to allow fluidization
-  const double max_time_ = NAN;
+  const double max_time_ = smash_NaN<double>;
   /// Fraction of formation time after which a particles can fluidize
-  const double formation_time_fraction_ = NAN;
+  const double formation_time_fraction_ = smash_NaN<double>;
   /// Smearing kernel at the position of the particle of interest
-  const double smearing_kernel_at_0_ = NAN;
+  const double smearing_kernel_at_0_ = smash_NaN<double>;
   /// Number of cells to interpolate the energy density
-  const int fluid_cells_ = std::numeric_limits<int>::quiet_NaN();
+  const int fluid_cells_ = smash_NaN<int>;
   /// Processes that create a fluidizable particle
   const FluidizableProcessesBitSet fluidizable_processes_;
   /// Whether the first elastic interaction of an initial nucleon is fluidizable

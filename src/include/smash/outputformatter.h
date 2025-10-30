@@ -290,6 +290,23 @@ class OutputFormatter {
         getters_.push_back([this]([[maybe_unused]] const ParticleData& in) {
           return this->converter_.as_integer(0);
         });
+      } else if (quantity == "tau") {
+        getters_.push_back([this](const ParticleData& in) {
+          return this->converter_.as_double(in.hyperbolic_time());
+        });
+      } else if (quantity == "eta" || quantity == "eta_s") {
+        getters_.push_back([this](const ParticleData& in) {
+          return this->converter_.as_double(in.spatial_rapidity());
+        });
+      } else if (quantity == "mt") {
+        getters_.push_back([this](const ParticleData& in) {
+          return this->converter_.as_double(in.transverse_mass());
+        });
+      } else if (quantity == "Rap" || quantity == "y_rap") {
+        // "Rap" is used for compatibility with vHLLE
+        getters_.push_back([this](const ParticleData& in) {
+          return this->converter_.as_double(in.rapidity());
+        });
       }
     }
   }
@@ -387,7 +404,13 @@ class OutputFormatter {
       {"pdg_mother2", "none"},
       {"baryon_number", "none"},
       {"strangeness", "none"},
-      {"0", "0"}};  // for OSCAR1999};
+      {"0", "0"},  // for OSCAR1999;
+      {"tau", "fm"},
+      {"eta", "none"},
+      {"eta_s", "none"},
+      {"mt", "GeV"},
+      {"Rap", "none"},
+      {"y_rap", "none"}};
 
   /// Checks whether the quantities requested are known and unique
   void validate_quantities() {

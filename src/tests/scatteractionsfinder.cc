@@ -44,6 +44,13 @@ TEST(collision_order) {
   auto particle_d = create_smashon_particle(3);
   auto particle_e = create_smashon_particle(4);
 
+  // set formation times
+  particle_a.set_formation_time(0.);
+  particle_b.set_formation_time(0.);
+  particle_c.set_formation_time(0.);
+  particle_d.set_formation_time(0.);
+  particle_e.set_formation_time(0.);
+
   // set positions
   // particle a is set such that it will miss particles b and c by 0.1 fm
   particle_a.set_4position(FourVector(0., 1., 0.1, 0.));

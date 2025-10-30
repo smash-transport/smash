@@ -32,7 +32,7 @@ class ActionFinderInterface {
    * Abstract function for finding actions, given a list of particles.
    *
    * \param[in] search_list a list of particles where each pair needs to be
-   *                  tested for possible interaction
+   *            tested for possible interaction
    * \param[in] dt duration of the current time step [fm]
    * \param[in] gcell_vol volume of searched grid cell [fm^3]
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
@@ -48,12 +48,12 @@ class ActionFinderInterface {
    * a search list and a neighbors list.
    *
    * \param[in] search_list a list of particles where each particle needs to
-   *                  be tested for possible interactions with the neighbors
+   *            be tested for possible interactions with the neighbors
    * \param[in] neighbors_list a list of particles that need to be tested
-   *                  against particles in search_list for possible interaction
+   *            against particles in search_list for possible interaction
    * \param[in] dt duration of the current time step [fm]
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
-   * only necessary for frozen Fermi motion
+   *            only necessary for frozen Fermi motion
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
@@ -68,13 +68,12 @@ class ActionFinderInterface {
    * Note: The first list can be a subset of the second list.
    *
    * \param[in] search_list a list of particles where each particle needs to be
-   *                    tested for possible interactions with the surrounding
-   *                    particles
+   *            tested for possible interactions with the surrounding particles
    * \param[in] surrounding_list a list of particles that need to be tested
-   *                  against particles in search_list for possible interaction
+   *            against particles in search_list for possible interaction
    * \param[in] dt duration of the current time step [fm]
    * \param[in] beam_momentum [GeV] List of beam momenta for each particle;
-   * only necessary for frozen Fermi motion
+   *            only necessary for frozen Fermi motion
    * \return The function returns a list (std::vector) of Action objects that
    *         could possibly be executed in this time step.
    */
@@ -86,15 +85,10 @@ class ActionFinderInterface {
    * This abstract function finds 'final' actions (for cleaning up at the end
    * of the simulation, e.g. letting the remaining resonances decay).
    * \param[in] search_list a list of particles where each particle needs to be
-   *                    tested for possible interactions with the surrounding
-   *                    particles
-   * \param[in] only_res this optional parameter requests that only actions
-   *                 regarding resonances are considered (disregarding stable
-   *                 particles)
+   *            tested for possible interactions with the surrounding particles
    * \return The function returns a list (std::vector) of Action objects.
    */
-  virtual ActionList find_final_actions(const Particles &search_list,
-                                        bool only_res = false) const = 0;
+  virtual ActionList find_final_actions(const Particles &search_list) const = 0;
 };
 
 }  // namespace smash

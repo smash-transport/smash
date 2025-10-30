@@ -56,7 +56,7 @@ However, it is crucial to be aware of the following needed steps.
 3. Setup your project using CMake in a standard way. For example:
    ```bash
    mkdir build && cd build
-   cmake -DPythia_CONFIG_EXECUTABLE=path/to/pythia8315/bin/pythia8-config "${MY_PROJECT_DIR}"
+   cmake -DPythia_CONFIG_EXECUTABLE=path/to/pythia8316/bin/pythia8-config "${MY_PROJECT_DIR}"
    make
    ```
 

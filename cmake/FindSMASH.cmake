@@ -5,7 +5,7 @@
 #
 #    BSD 3-clause license
 #
-#########################################################
+########################################################
 
 # cmake-format: off
 #===============================================================================
@@ -86,7 +86,7 @@ endif()
 
 find_package(GSL 2.0 REQUIRED)
 find_package(Eigen3 3.0 REQUIRED)
-find_package(Pythia 8.315 EXACT REQUIRED)
+find_package(Pythia 8.316 EXACT REQUIRED)
 set(SMASH_INCLUDE_DIR ${GSL_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR} ${Pythia_INCLUDE_DIRS})
 set(SMASH_LIBRARIES ${GSL_LIBRARY} ${GSL_CBLAS_LIBRARY} ${Pythia_LIBRARIES} ${CMAKE_DL_LIBS})
 

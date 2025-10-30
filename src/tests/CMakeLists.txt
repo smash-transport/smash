@@ -5,7 +5,7 @@
 #
 #    BSD 3-clause license
 #
-#########################################################
+########################################################
 
 # Add 3rd-party virtest library
 include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rdparty/virtest")
@@ -329,6 +329,7 @@ smash_add_unittest(scatteraction)
 smash_add_unittest(scatteractionmulti)
 smash_add_unittest(scatteractionsfinder)
 smash_add_unittest(sha256)
+smash_add_unittest(spheremodus)
 smash_add_unittest(spectral_functions)
 smash_add_unittest(stringfunctions)
 smash_add_unittest(tabulation)

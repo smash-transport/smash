@@ -18,15 +18,15 @@
 #include "outputinterface.h"
 #include "outputparameters.h"
 #include "smash/config.h"
-
+#include "smash/outputformatter.h"
 namespace smash {
 
 /**
  * \ingroup output
  *
- * SMASH output in ASCII format containing initial conditions for hydrodynamic
- * codes. Formatted such that it can be directly processed by vHLLE
- * \iref{Karpenko:2015xea}.
+ * SMASH output in a format containing initial conditions for hydrodynamic
+ * codes ("For_vHLLE"). Formatted such that it can be directly processed by
+ * vHLLE \iref{Karpenko:2015xea}.
  */
 class ICOutput : public OutputInterface {
  public:
@@ -87,6 +87,9 @@ class ICOutput : public OutputInterface {
    * in at_interaction().
    */
   double IC_proper_time_ = -1.0;
+
+  /// Formatter of the output
+  OutputFormatter<ToASCII> formatter_;
 };
 
 }  // namespace smash

@@ -135,11 +135,15 @@ class SphereModus : public ModusDefault {
    */
   const SphereInitialCondition init_distr_;
   /**
-   * Wether to add a constant radial velocity profile to the momenta of the
-   * particles in the sphere. The underlying velocity field has the form
-   * u = u_0 * r / R.
+   * Parameter \f$ u_0\f$ in the initial flow velocity profile of particles in
+   * the sphere, which has the form \f$ u = u_0 (r / R)^n\f$.
    */
   const double radial_velocity_;
+  /**
+   * Parameter \f$ n\f$ in the initial flow velocity profile of particles in
+   * the sphere, which has the form \f$ u = u_0 (r / R)^n\f$.
+   */
+  const double radial_velocity_exponent_;
   /**
    * Optional PDG code of the particle to use as a jet, i.e. a single high
    * energy particle at the center (0,0,0) of the expanding sphere. This
@@ -156,14 +160,16 @@ class SphereModus : public ModusDefault {
    * Initial position of the jet particle; only used if jet_pdg_ is not nullopt
    */
   const ThreeVector jet_pos_;
-  /// Create the back to back jet with the corresponding antiparticle; only used
-  /// if jet_pdg_ is not nullopt
+  /**
+   * Create the back to back jet with the corresponding antiparticle; only used
+   * if jet_pdg_ is not nullopt
+   */
   const bool jet_back_;
   /**
    * Initial separation between the back to back jets; can only be set by the
    * user if jet_back_ is true
    */
-  const double jet_back_separation_ = NAN;
+  const double jet_back_separation_ = smash_NaN<double>;
   /**\ingroup logging
    * Writes the initial state for the Sphere to the output stream.
    *

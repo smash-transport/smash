@@ -773,20 +773,22 @@ void Experiment<Modus>::create_output(const std::string &format,
         "Root output requested, but Root support not compiled in");
 #endif
   } else if (format == "Binary" &&
-             (content == "Collisions" || content == "Dileptons" ||
-              content == "Photons" || content == "Particles" ||
-              content == "Initial_Conditions")) {
+             (content == "Collisions" || content == "Particles")) {
     outputs_.emplace_back(
         create_binary_output(format, content, output_path, out_par));
   } else if (format == "Oscar2013_bin" &&
-             (content == "Collisions" || content == "Particles")) {
+             (content == "Collisions" || content == "Particles" ||
+              content == "Dileptons" || content == "Photons" ||
+              content == "Initial_Conditions")) {
     outputs_.emplace_back(
         create_binary_output(format, content, output_path, out_par));
   } else if (format == "Oscar1999" || format == "Oscar2013") {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
   } else if (format == "ASCII" &&
-             (content == "Particles" || content == "Collisions")) {
+             (content == "Particles" || content == "Collisions" ||
+              content == "Dileptons" || content == "Photons" ||
+              content == "Initial_Conditions")) {
     outputs_.emplace_back(
         create_oscar_output(format, content, output_path, out_par));
   } else if (content == "Thermodynamics" && format == "ASCII") {
@@ -802,14 +804,14 @@ void Experiment<Modus>::create_output(const std::string &format,
     printout_lattice_td_ = true;
     outputs_.emplace_back(
         std::make_unique<VtkOutput>(output_path, content, out_par));
-  } else if (content == "Initial_Conditions" && format == "ASCII") {
+  } else if (content == "Initial_Conditions" && format == "For_vHLLE") {
     if (IC_dynamic_) {
       throw std::invalid_argument(
           "Dynamic initial conditions are only available in Oscar2013 and "
           "Binary formats.");
     }
     outputs_.emplace_back(
-        std::make_unique<ICOutput>(output_path, "SMASH_IC", out_par));
+        std::make_unique<ICOutput>(output_path, "SMASH_IC_For_vHLLE", out_par));
   } else if ((format == "HepMC") || (format == "HepMC_asciiv3") ||
              (format == "HepMC_treeroot")) {
 #ifdef SMASH_USE_HEPMC
@@ -1105,25 +1107,30 @@ Experiment<Modus>::Experiment(Configuration &config,
         kinematic_cuts_for_IC_output_ = true;
       }
 
-      double proper_time = std::numeric_limits<double>::quiet_NaN();
-      if (IC_parameters.proper_time.has_value()) {
-        proper_time = IC_parameters.proper_time.value();
-      } else {
-        double lower_bound = IC_parameters.lower_bound.value();
-
-        // Default proper time is the passing time of the two nuclei
-        double default_proper_time = modus_.nuclei_passing_time();
-        if (default_proper_time >= lower_bound) {
-          proper_time = default_proper_time;
-          logg[LInitialConditions].info()
-              << "Nuclei passing time is " << proper_time << " fm.";
+      const double proper_time = std::invoke([&]() {
+        if (IC_parameters.proper_time.has_value()) {
+          return IC_parameters.proper_time.value();
         } else {
-          logg[LInitialConditions].warn()
-              << "Nuclei passing time is too short, hypersurface proper time "
-              << "set to tau = " << lower_bound << " fm.";
-          proper_time = lower_bound;
+          // Scaling factor applied to the switching time and the lower bound
+          const double scaling = IC_parameters.proper_time_scaling.value();
+          // Lower bound for the switching time
+          const double lower_bound =
+              IC_parameters.lower_bound.value() * scaling;
+          // Default proper time is the passing time of the two nuclei
+          const double default_proper_time =
+              modus_.nuclei_passing_time() * scaling;
+          if (default_proper_time >= lower_bound) {
+            logg[LInitialConditions].info()
+                << "Nuclei passing time is " << default_proper_time << " fm.";
+            return default_proper_time;
+          } else {
+            logg[LInitialConditions].warn()
+                << "Nuclei passing time is too short, hypersurface proper time "
+                << "set to tau = " << lower_bound << " fm.";
+            return lower_bound;
+          }
         }
-      }
+      });
 
       action_finders_.emplace_back(
           std::make_unique<HyperSurfaceCrossActionsFinder>(
@@ -1167,10 +1174,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * means the physical information contained in the output (e.g. list of
    * particles, list of interactions, thermodynamics, etc) and format (e.g.
    * ASCII, binary or ROOT). The same content can be printed out in several
-   * formats _simultaneously_.
-   *
-   * For an example of choosing specific output contents see
-   * \ref doxypage_output_conf_examples.
+   * formats _simultaneously_. See \ref config_output_examples for examples.
    *
    * These are the possible contents offered by SMASH:
    *
@@ -1192,13 +1196,13 @@ Experiment<Modus>::Experiment(Configuration &config,
    * - \b Dileptons:
    *          Special dilepton output, see \ref doxypage_output_dileptons.
    *   - Available formats:
-   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_binary,
-   *         \ref doxypage_output_root.
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_ascii,
+   *         \ref doxypage_output_binary, \ref doxypage_output_root.
    * - \b Photons:
    *          Special photon output, see \ref doxypage_output_photons.
    *   - Available formats:
-   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_binary,
-   *         \ref doxypage_output_root.
+   *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_ascii,
+   *         \ref doxypage_output_binary, \ref doxypage_output_root.
    * - \b Thermodynamics:
    *          This output allows to print out thermodynamic quantities, see \ref
    *          input_output_thermodynamics_.
@@ -1232,15 +1236,16 @@ Experiment<Modus>::Experiment(Configuration &config,
    *
    * \section list_of_output_formats Output formats
    *
-   * For choosing output formats see \ref doxypage_output_conf_examples.
    * Every output content can be printed out in several formats:
    *
    * - \b "ASCII" - a human-readable text-format table of values.
-   *   - For `"Particles"` (\ref doxypage_output_oscar_particles) and
-   *     `"Collisions"` (\ref doxypage_output_oscar_collisions) contents, it
-   *     uses the \ref doxypage_output_oscar "OSCAR block structure".\n In these
-   *     cases it is possible to customize the quantities to be printed into the
-   *     output file (\ref doxypage_output_ascii).
+   *   - For\n
+   *     &emsp;&emsp;`"Particles"` (\ref doxypage_output_oscar_particles),\n
+   *     &emsp;&emsp;`"Collisions"`, `"Dileptons"`, and `"Photons"` (\ref
+   *     doxypage_output_oscar_collisions)\n contents, it uses the \ref
+   *     doxypage_output_oscar "OSCAR block structure".\n In these cases it is
+   *     possible to customize the quantities to be printed into the output file
+   *     (\ref doxypage_output_ascii).
    *   - For `"Initial_Conditions"` content the output has \ref
    *     doxypage_output_initial_conditions "a fixed block structure".
    *   - For `"Thermodynamics"` content the information stored in the output
@@ -1253,15 +1258,20 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   - The \ref doxypage_output_binary "binary output" is faster to read and
    *     write than text outputs and all floating point numbers are printed with
    *     their full precision.
-   *   - For `"Particles"` and `"Collisions"` contents, it is basically a binary
-   *     version of the corresponding ASCII output.\n Also for binary format it
-   *     is possible to customize the quantities to be printed into the file.
+   *   - For `"Particles"`, `"Collisions"`, `"Dileptons"`, and `"Photons"`
+   *     contents, it is basically a binary version of the corresponding ASCII
+   *     output.\n Also for binary format it is possible to customize the
+   *     quantities to be printed into the file.
    *   - For the other contents the corresponding documentation pages about the
    *     ASCII format contain further information.
-   * - \b "Oscar2013_bin" - alias for the \b "Binary" format with a predefined
-   *   set of quantities.
    * - \b "Oscar1999", \b "Oscar2013" - aliases for the \b "ASCII" format with a
    *   predefined set of quantities.
+   * - \b "Oscar2013_bin" - alias for the \b "Binary" format with a predefined
+   *   set of quantities.
+   * - \b "For_vHLLE" - an alias for the \b "ASCII" format exclusive to the
+   *   `"Initial_Conditions"` output content, which produces a file compatible
+   *   with the vHLLE hydrodynamic evolution code (see \ref
+   *   doxypage_output_initial_conditions).
    * - \b "Root" - binary output in the format used by
    *   <a href="http://root.cern.ch">the ROOT software</a>
    *   - Even faster to read and write, requires less disk space
@@ -1360,29 +1370,29 @@ Experiment<Modus>::Experiment(Configuration &config,
    * \page doxypage_output_initial_conditions
    * Once initial conditions are enabled, the output file named SMASH_IC
    * (followed by the appropriate suffix) is generated when SMASH is executed.
-   * \n The output is available in Oscar1999, Oscar2013, binary and ROOT format,
-   * as well as in an additional ASCII format. The latter is meant to directly
-   * serve as input for the vHLLE hydrodynamics code \iref{Karpenko:2013wva}.
-   * \n \n
-   * ### Oscar output
-   * In case
-   * of the Oscar1999 and Oscar2013 format, the structure is identical to the
-   * Oscar Particles Format (see \ref doxypage_output_oscar_particles). \n
-   * In contrast
-   * to the usual particles output however, the initial conditions output
-   * provides a **list of all particles removed from the evolution** at the
-   * time when crossing the hypersurface. This implies that neither the
-   * initial particle list nor the particle list at each time step is printed.
-   * \n The general Oscar structure as described in
-   * \ref doxypage_output_oscar_particles is preserved. \n \n
-   * ### Binary output
-   * The binary initial
-   * conditions output also provides a list of all particles removed from the
-   * evolution at the time when crossing the hypersurface. For each removed
-   * particle a 'p' block is created stores the particle data. The general
-   * binary output structure as described in \ref doxypage_output_binary is
-   * preserved.\n \n
-   * ### ROOT output
+   * \n The output is available in Oscar1999, Oscar2013, ASCII, Oscar2013_bin
+   * and ROOT format, as well as in an additional "For_vHLLE" format. The latter
+   * is meant to directly serve as input for the vHLLE hydrodynamics code
+   * \iref{Karpenko:2013wva}.\n
+   *
+   * <h3> Human-readable output </h3> In case of the Oscar1999 and Oscar2013
+   * format, the structure is identical to the Oscar Particles format (see \ref
+   * doxypage_output_oscar_particles), and the custom ASCII format is also
+   * available. \n In contrast to the usual particles output however, the
+   * initial conditions output provides a **list of all particles removed from
+   * the evolution** at the time when crossing the hypersurface. This implies
+   * that neither the initial particle list nor the particle list at each time
+   * step is printed. \n The general Oscar structure as described in \ref
+   * doxypage_output_oscar_particles is preserved.\n
+   *
+   * <h3> Binary output </h3>
+   * The binary initial conditions output also provides a list of all particles
+   * that fluidize. For each particle a 'p' block is created stores the particle
+   * data. The binary output structure as described in \ref
+   * doxypage_output_binary is preserved.\n For now, the custom Binary output is
+   * not available, only the fixed "Oscar2013_bin" format.
+   *
+   * <h3> ROOT output </h3>
    * The initial conditions output in shape of a list of all particles removed
    * from the SMASH evolution with a \c "Constant_Tau" fluidization criterion
    * is also available in ROOT format. Neither the initial nor the final
@@ -1443,7 +1453,9 @@ Experiment<Modus>::Experiment(Configuration &config,
   const OutputParameters output_parameters(std::move(output_conf));
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
     if (output_contents[i] == "Particles" ||
-        output_contents[i] == "Collisions") {
+        output_contents[i] == "Collisions" ||
+        output_contents[i] == "Dileptons" || output_contents[i] == "Photons" ||
+        output_contents[i] == "Initial_Conditions") {
       assert(output_parameters.quantities.count(output_contents[i]) > 0);
       const bool quantities_given_nonempty =
           !output_parameters.quantities.at(output_contents[i]).empty();
@@ -1728,28 +1740,45 @@ Experiment<Modus>::Experiment(Configuration &config,
         std::array<double, 3> l_default{20., 20., 20.};
         std::array<int, 3> n_default{10, 10, 10};
         std::array<double, 3> origin_default{-20., -20., -20.};
-        if (modus_.is_collider() || (modus_.is_list() && !modus_.is_box())) {
+        if (modus_.is_list() && !modus_.is_box()) {
+          logg[LExperiment].fatal(
+              "The lattice in List modus should be manually specified.");
+          throw std::invalid_argument("Invalid Lattice setup.");
+        } else if (modus_.is_collider()) {
           // Estimates on how far particles could get in x, y, z. The
           // default lattice is currently not contracted for afterburner runs
-          const double gam = modus_.is_collider()
-                                 ? modus_.sqrt_s_NN() / (2.0 * nucleon_mass)
-                                 : 1.0;
-          const double max_z = 5.0 / gam + end_time_;
+          const double gamma = modus_.sqrt_s_NN() / (2.0 * nucleon_mass);
+          const double max_z = 5.0 / gamma + end_time_;
           const double estimated_max_transverse_velocity = 0.7;
           const double max_xy =
               5.0 + estimated_max_transverse_velocity * end_time_;
           origin_default = {-max_xy, -max_xy, -max_z};
           l_default = {2 * max_xy, 2 * max_xy, 2 * max_z};
-          // Go for approximately 0.8 fm cell size and contract
-          // lattice in z by gamma factor
-          const int n_xy = numeric_cast<int>(std::ceil(2 * max_xy / 0.8));
-          int nz = numeric_cast<int>(std::ceil(2 * max_z / 0.8));
-          // Contract lattice by gamma factor in case of smearing where
-          // smearing length is bound to the lattice cell length
-          if (parameters_.smearing_mode == SmearingMode::Discrete ||
-              parameters_.smearing_mode == SmearingMode::Triangular) {
-            nz = numeric_cast<int>(std::ceil(2 * max_z / 0.8 * gam));
+          // For collider modus only, impose a minimum size of 30fm since the
+          // heuristic above for determining the lattice expects the end time to
+          // be large compared to the nucleus size
+          const double minimum_extension = 30.;
+          for (auto i = std::size_t{0}; i < l_default.size(); i++) {
+            if (l_default[i] < minimum_extension) {
+              logg[LExperiment].debug()
+                  << "Automatic lattice extension in direction " << i
+                  << " heuristically determined as " << l_default[i]
+                  << " fm is smaller than " << minimum_extension
+                  << " fm. Imposing minimum size.";
+              l_default[i] = minimum_extension;
+              origin_default[i] = -0.5 * minimum_extension;
+            }
           }
+          // Go for approximately 0.8 fm cell size and contract lattice in z by
+          // gamma factor in case of smearing where smearing length is bound to
+          // the lattice cell length
+          const int n_xy = numeric_cast<int>(std::ceil(l_default[0] / 0.8));
+          const bool to_be_contracted =
+              (parameters_.smearing_mode == SmearingMode::Discrete ||
+               parameters_.smearing_mode == SmearingMode::Triangular);
+          const double contraction_factor = (to_be_contracted) ? gamma : 1.0;
+          const int nz = numeric_cast<int>(
+              std::ceil(l_default[2] / 0.8 * contraction_factor));
           n_default = {n_xy, n_xy, nz};
         } else if (modus_.is_box()) {
           origin_default = {0., 0., 0.};

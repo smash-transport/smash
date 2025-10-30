@@ -40,7 +40,7 @@ SMASH requires the following tools and libraries:
 | [CMake](https://cmake.org) | 3.16 or higher |
 | [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/) | 2.0  or higher |
 | [Eigen3 library](http://eigen.tuxfamily.org) | 3.0  or higher |
-| [Pythia](https://pythia.org) | 8.315 |
+| [Pythia](https://pythia.org) | 8.316 |
 
 Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable version is found on the system:
 
@@ -57,11 +57,11 @@ From within the cloned repository, use the following commands to build the codeb
 ```console
 mkdir build
 cd build
-cmake -DPythia_CONFIG_EXECUTABLE=/path/to/pythia8315/bin/pythia8-config ..
+cmake -DPythia_CONFIG_EXECUTABLE=/path/to/pythia8316/bin/pythia8-config ..
 make
 ```
 Please note that the `make` command builds everything (executables, tests, and libraries) and this might take a while.
-You can use `make smash` if you are interested only in the SMASH executable or use `make smash_shared` to exclusively build the libraries (needed e.g. in another project using SMASH as a library -- refer to the [INSTALL](INSTALL.md) FAQ for more detailed information).
+You can use `make smash` if you are interested only in the SMASH executable or use `make smash_shared` to exclusively build the libraries (needed e.g. in another project using SMASH as a library &ndash; refer to the [INSTALL](INSTALL.md) FAQ for more detailed information).
 
 You can run SMASH with specific settings (e.g. at a given collision energy or impact parameter) by modifying the config.yaml file, for example with
 ```console
@@ -161,9 +161,24 @@ and it might be useful to redirect warnings and error messages, that will still 
 
 ## License
 
-SMASH is licensed under the terms of the GNU General Public License, Version 3 or above.
-The build scripts are licensed under terms of the BSD 3-clause license.
-For more information, see [LICENSE](LICENSE).
+Different licenses apply to different files:
+ - SMASH C++, Python and Bash code is licensed under the terms of the GNU General Public License, Version 3 or above.
+ - The CMake build scripts are licensed under terms of the BSD 3-clause license.
+ - The following auxiliary files are licensed under the terms of the Creative Commons Zero v1.0 Universal license:
+    - example and benchmarks SMASH input configuration files;
+    - further auxiliary material in the 📁 ***input*** folder;
+    - yaml workflow files for CI runners.
+ - The following auxiliary files are licensed under the terms of the Unlicense license:
+    - Docker files;
+    - documentation auxiliary files (`.{xml,html,css,dox,bib}`);
+    - example code in the 📁 ***examples*** folder.
+ - Third-party code included in this codebase complies with its license, which might differ from case to case (see the corresponding license notice in the files to know what applies).
+
+For more information about the licenses, see [LICENSE](LICENSE.md).
+
+> [!CAUTION]
+> All rights for files not explicitly mentioned here above are reserved to the SMASH team.
+> Feel free to contact us in case of doubt or need.
 
 
 ## Projects Using SMASH
@@ -172,4 +187,4 @@ SMASH source and documentation are provided to check and reproduce published res
 Cooperation and joint projects with outside researchers are encouraged and comparison to results by experimental collaborations is supported.
 If you are interested in starting a project, please contact us to avoid interference with current thesis topics.
 If your project involves changes to the code, please refer to [CONTRIBUTING](CONTRIBUTING.md) for coding guidelines and helpful tools.
-SMASH can also be used as a 3rd party library -- refer to the [INSTALL](INSTALL.md) FAQ for more detailed information.
+SMASH can also be used as a 3rd party library &ndash; refer to the [INSTALL](INSTALL.md) FAQ for more detailed information.
