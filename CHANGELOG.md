@@ -18,7 +18,6 @@ The major categories to group changes in this log are:
 Also possible, but for this project less relevant, is `Deprecated` for soon-to-be removed features.
 
 ## Unreleased
-* Update to Pythia8.316
 
 ### Added
 * The `Sphere` modus now can include thermal heavy flavor particles, via the `Modi: Sphere: Heavy_Flavor_Multiplier` key, a value that multiplies their partial density.
@@ -26,6 +25,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * The initial `Sphere` modus velocity profile can now be tuned with  `Modi: Sphere: Add_Radial_Velocity_Exponent`.
 
 ### Changed
+* Update to Pythia8.316
 * The `ParticleData` class now initially sets the formation time and the time of the last collision to `NAN` and overwrites them with the real values the first time the objects are used. Previously, these values were initially set to `0.0`, which could be misleading if the time evolution started at negative times.
 * The procedure for dynamic initial conditions was updated, fluidized hadrons are no longer removed from the evolution, in order to provide energy density to the surrounding particles, being internally named as "core" particles. Core and corona (non-core) particles can only interact elastically.
 * ⚠️ The `backpropagate_to_the_same_time` method is now a private member of `ListModus`. Its functionality was moved to the free function `backpropagate_straight_line`, which *does not set* the formation time or cross section scaling of particles.

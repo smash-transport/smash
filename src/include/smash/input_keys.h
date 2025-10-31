@@ -4983,8 +4983,8 @@ struct InputKeys {
    *
    * \optional_key_no_line{key_output_particles_extended_,Extended,bool,false}
    *
-   * &rArr; Incompatible with `Oscar1999`, `VTK`, `HepMC_asciiv3` and
-   * `HepMC_treeroot` formats.
+   * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary`, `VTK`, `HepMC_asciiv3`
+   * and `HepMC_treeroot` formats.
    * - `true` &rarr; Print extended information for each particle
    * - `false` &rarr; Regular output for each particle
    */
@@ -5016,7 +5016,7 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_particles_only_final_,Only_Final,string,"Yes"}
    *
-   * &rArr; Incompatible with `VTK`, `HepMC_asciiv3` and `HepMC_treeroot`
+   * &rArr; Ignored with `VTK`, `HepMC_asciiv3` and `HepMC_treeroot` formats.
    * - `"Yes"` &rarr; Print only final particle list.
    * - `"IfNotEmpty"` &rarr; Print only final particle list, but only if event
    *   is not empty (i.e. any collisions happened between projectile and
@@ -5039,8 +5039,8 @@ struct InputKeys {
    *
    * \optional_key_no_line{key_output_collisions_extended_,Extended,bool,false}
    *
-   * &rArr; Incompatible with `Oscar1999`, `HepMC_asciiv3` and `HepMC_treeroot`
-   * formats.
+   * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary`, `HepMC_asciiv3` and
+   * `HepMC_treeroot` formats.
    * - `true` &rarr; Print extended information for each particle
    * - `false` &rarr; Regular output for each particle
    */
@@ -5073,8 +5073,7 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_collisions_print_start_end_,Print_Start_End,bool,false}
    *
-   * &rArr; Incompatible with `Root`, `HepMC_asciiv3` and `HepMC_treeroot`
-   * formats.
+   * &rArr; Ignored with `Root`, `HepMC_asciiv3` and `HepMC_treeroot` formats.
    * - `true` &rarr; Initial and final particle list is printed out
    * - `false` &rarr; Initial and final particle list is not printed out
    */
@@ -5088,11 +5087,11 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * <hr>
    * <h3> &diams; Dileptons </h3>
-   * &rArr; Only `Oscar1999`, `Oscar2013` and `Binary` formats.
+   * &rArr; Only `ASCII` and `Binary` formats.
    *
    * \optional_key_no_line{key_output_dileptons_extended_,Extended,bool,false}
    *
-   * &rArr; Incompatible with `Oscar1999` format.
+   * &rArr; Ignored with `Oscar1999`, `ASCII` and `Binary` formats.
    * - `true` &rarr; Print extended information for each particle
    * - `false` &rarr; Regular output for each particle
    */
@@ -5125,11 +5124,11 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * <hr>
    * <h3> &diams; Photons </h3>
-   * &rArr; Only `Oscar1999`, `Oscar2013` and `Binary` formats.
+   * &rArr; Only `ASCII` and `Binary` formats.
    *
    * \optional_key_no_line{key_output_photons_extended_,Extended,bool,false}
    *
-   * &rArr; Incompatible with `Oscar1999` format.
+   * &rArr; Ignored with `Oscar1999`, `ASCII` and `Binary` formats.
    * - `true` &rarr; Print extended information for each particle
    * - `false` &rarr; Regular output for each particle
    */
@@ -5162,15 +5161,11 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * <hr>
    * <h3> &diams; Initial_Conditions </h3>
-   * &rArr; Only `Oscar1999`, `Oscar2013`, `Oscar2013_bin`, `ROOT` and
-   * `For_vHLLE` formats. The latter is only available for `Constant_Tau`
-   * fluidizations, see the pages for Output: \ref
-   * doxypage_output_initial_conditions and Modi: Collider: \ref
-   * doxypage_input_conf_modi_C_initial_conditions.
+   * &rArr; Only `ASCII`, `Binary` and `Root`.
    *
    * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
    *
-   * &rArr; Incompatible with `Oscar1999`, `ROOT` and `ASCII` formats.
+   * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary` and `Root` formats.
    * - `true` &rarr; Print extended information for each particle
    * - `false` &rarr; Regular output for each particle
    */
@@ -5186,9 +5181,9 @@ struct InputKeys {
    * strings,
    * </tt><b>empty list</b><tt>}
    *
-   * &rArr; If using the `ASCII` format, a non-empty list must be
+   * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
-   * specified without including `ASCII` as format.
+   * specified without including `ASCII` or `Binary` as format.
    * See \ref doxypage_output_ascii for the possible values.
    */
   /**
@@ -5264,8 +5259,8 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * <hr> \anchor input_output_rivet_
    * <h3> &diams; Rivet </h3>
-   * &rArr; Only `YODA` format (see \ref doxypage_output_rivet
-   * "here" for more information about the format).
+   * &rArr; Only `YODA` format (see \ref doxypage_output_rivet  "here" for more
+   * information about the format).
    *
    * \note In the following, <b>no default</b> means that, if the key is
    *       omitted, Rivet default behavior will be used.
@@ -6546,12 +6541,12 @@ General:
  * The following example configures the photon production in both binary
  * scatterings and bremsstrahlung processes, where 1000 fractional photons are
  * sampled per single perturbatively produced photon. In addition, the binary
- * photon output is enabled.
+ * photon output with Oscar2013 list of quantities is enabled.
  *
  *\verbatim
  Output:
      Photons:
-         Format: ["Binary"]
+         Format: ["Oscar2013_bin"]
  Collision_Term:
      Photons:
          Fractional_Photons: 1000

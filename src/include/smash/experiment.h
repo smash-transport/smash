@@ -1255,7 +1255,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    *     write than text outputs and all floating point numbers are printed with
    *     their full precision.
    *   - For `"Particles"`, `"Collisions"`, `"Dileptons"`, `"Photons"`, and
-   *     `"Initial_Conditions"` contents, it is basically a binary version of
+   *     `"Initial_Conditions"` contents, it is a binary version equivalent to
    *     the corresponding ASCII output.\n Also for binary format it is possible
    *     to customize the quantities to be printed into the file.
    *   - For the other contents the corresponding documentation pages about the
@@ -1267,7 +1267,8 @@ Experiment<Modus>::Experiment(Configuration &config,
    * - \b "For_vHLLE" - an alias for the \b "ASCII" format exclusive to the
    *   `"Initial_Conditions"` output content, which produces a file compatible
    *   with the vHLLE hydrodynamic evolution code (see \ref
-   *   doxypage_output_initial_conditions).
+   *   doxypage_output_initial_conditions). This is only available for
+   *   <tt>\ref key_MC_IC_type_ "Constant_Tau"</tt> fluidizations.
    * - \b "Root" - binary output in the format used by
    *   <a href="http://root.cern.ch">the ROOT software</a>
    *   - Even faster to read and write, requires less disk space
@@ -1386,7 +1387,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * that fluidize. For each particle a 'p' block is created stores the particle
    * data. The binary output structure as described in \ref
    * doxypage_output_binary is preserved.\n The custom `"Binary"` output is also
-   * available and it is an equivalent binary version of the `"ASCII"` one.
+   * available which is an equivalent binary version of the `"ASCII"` one.
    *
    * <h3> ROOT output </h3>
    * The initial conditions output in shape of a list of all particles removed
