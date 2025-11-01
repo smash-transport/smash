@@ -34,46 +34,14 @@ class Particles;
  * The ROOT framework needs to be installed before building SMASH, otherwise
  * ROOT support will be disabled.
  *
- * This class produces file Particles.root, which contains a
- * ROOT TTree. TTree contains information about particles from all SMASH events
- * comprising a simulation.
- * Output is happening in blocks. All particles in a block
- * are at the same time and in the same event. However, it is possible that
- * different blocks are at the same time and from the same event.
- * Particle information is stored in TBranches.
- * For each particle characteristic there is a separate branch.
- * Currently these are t,x,y,z (coordinates), p0,px,py,pz (4-momentum),
- * pdgcode - PDG code of the particle, characterizing its type,
- * charge - electric charge of the particle,
- * ev - event number in a given block,
- * tcounter - number of the output block in a given event,
- * npart - number of particles in the block,
- * test_p - number of testpartciles per particle,
- * modus_l - modus length,
- * current_t - time associated with the output block, in fm,
- * impact_b - impact parameter of the event,
- * empty_event - whether there was no interaction between the projectile and
- * the target,
- * E_kinetic_tot - total kinetic energy in the system,
- * E_fields_tot - total mean field energy * test_p,
- * E_total - sum of E_kinetic_tot and E_fields_tot.
+ * This class produces a file Particles.root, which contains a ROOT TTree. The
+ * TTree contains information about particles from all SMASH events comprising a
+ * simulation. If Collisions output is requested, this class also produces a
+ * file Collisions.root, which contains a ROOT TTRee with information about all
+ * collisions.
  *
- * This class also produces file Collisions.root, organized in the same way,
- * with a few additional fields:
- * nin and nout - characterize number of incoming and outgoing particles in the
- * reaction, with nin + nout = npart,
- * weight - an action weight, whose meaning depends on the type of action: For
- * collisions it is the total cross section, for decays it is the total decay
- * width and for dilepton decays it is the shining weight.
+ * See \ref doxypage_output_root for more informatioon.
  *
- * If "Collisions:" section is present, then in addition to a file
- * Particles.root with particles TTree, another file Collisions.root is
- * created. It contains information about each collision, written as one leaf:
- * nin, nout - number of incoming and outgoing particles, ev - event number,
- * weight - total weight of the collision (wgt), partial_weight - partial
- * weight of the collision (par_wgt), (t,x,y,z),
- * (p0,px,py,pz) - arrays of dimension nin+nout
- * that contain coordinates and momenta.
  */
 class RootOutput : public OutputInterface {
  public:
@@ -186,6 +154,22 @@ class RootOutput : public OutputInterface {
    */
   //@{
   /// Property that is written to ROOT output.
+  int ev_{};
+  int ens_{};
+  int tcounter_{};
+  int npart_{};
+  int test_p_{};
+  double modus_l_{};
+  double current_t_{};
+  double impact_b_{};
+  bool empty_event_{};
+  std::vector<int> id_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<int> pdgcode_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<int> charge_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<double> formation_time_ =
+      std::vector<double>(max_buffer_size_, 0.0);
+  std::vector<double> time_last_collision_ =
+      std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> p0_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> px_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> py_ = std::vector<double>(max_buffer_size_, 0.0);
@@ -194,24 +178,21 @@ class RootOutput : public OutputInterface {
   std::vector<double> x_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> y_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<double> z_ = std::vector<double>(max_buffer_size_, 0.0);
-  std::vector<double> formation_time_ =
-      std::vector<double>(max_buffer_size_, 0.0);
-  std::vector<double> xsec_factor_ = std::vector<double>(max_buffer_size_, 0.0);
-  std::vector<double> time_last_coll_ =
-      std::vector<double>(max_buffer_size_, 0.0);
-  std::vector<int> pdgcode_ = std::vector<int>(max_buffer_size_, 0);
-  std::vector<int> charge_ = std::vector<int>(max_buffer_size_, 0);
+  double E_kinetic_tot_{};
+  double E_fields_tot_{};
+  double E_tot_{};
   std::vector<int> coll_per_part_ = std::vector<int>(max_buffer_size_, 0);
+  std::vector<double> xsec_factor_ = std::vector<double>(max_buffer_size_, 0.0);
   std::vector<int> proc_id_origin_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> proc_type_origin_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> pdg_mother1_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> pdg_mother2_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> baryon_number_ = std::vector<int>(max_buffer_size_, 0);
   std::vector<int> strangeness_ = std::vector<int>(max_buffer_size_, 0);
-  int npart_, tcounter_, ev_, ens_, nin_, nout_, test_p_;
-  double wgt_, par_wgt_, impact_b_, modus_l_, current_t_;
-  double E_kinetic_tot_, E_fields_tot_, E_tot_;
-  bool empty_event_;
+  int nin_{};
+  int nout_{};
+  double wgt_{};
+  double par_wgt_{};
   //@}
 
   /// Option to write collisions tree.
@@ -223,7 +204,7 @@ class RootOutput : public OutputInterface {
   /// Option to write particles tree for initial conditions
   bool write_initial_conditions_;
 
-  /// Print only final particles in the event, no intermediate output.
+  /// Print only final particles in the event (no intermediate output).
   OutputOnlyFinal particles_only_final_;
 
   /**
@@ -234,7 +215,7 @@ class RootOutput : public OutputInterface {
    * ensembles per event. This makes sense especially in case of a large number
    * of ensembles and, at the same time, it ensures that all ensembles belonging
    * to the same event are saved. The autosave_frequency_ sets this N (at the
-   * moment N=1000 hard-coded). Note that "AutoSave" operation is very
+   * moment N=1000 is hard-coded). Note that "AutoSave" operation is very
    * time-consuming, so the autosave frequency is always a compromise between
    * safety and speed.
    */
