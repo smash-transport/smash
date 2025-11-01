@@ -106,8 +106,9 @@ const int RootOutput::max_buffer_size_ = 500000;
  * (see \ref input_output_content_specific_ "extended output") more fields are
  * added. Their description is the same that in case of OSCAR format, see
  * \ref extended_output_format_ "extended OSCAR format".
- * In contrast to the OSCAR format, the ROOT output includes \c formation_time
- * and \c time_last_collision in the standard (not extended) output.
+ * \note In contrast to the OSCAR format, the ROOT output includes
+ * \c formation_time and \c time_last_collision in the standard (not extended)
+ * output.
  *
  * If "Collisions:" section is present in the config file, then in addition to a
  * file Particles.root with particles TTree, another file Collisions.root is
