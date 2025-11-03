@@ -14,6 +14,7 @@
 #include <map>
 #include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -354,19 +355,21 @@ class OutputFormatter {
    * \return Total size of the formatted representation of one particle.
    */
   std::size_t compute_single_size(const ParticleData& sample) const {
-    std::size_t size = 0;
     const std::size_t n = getters_.size();
-
+    if (n == 0) {
+      return 0;
+    }
+    std::size_t size = 0;
     for (const auto& getter : getters_) {
       const typename Converter::type tmp = getter(sample);
       size += tmp.size();
     }
 
-    if (n > 0 && Converter::separator.has_value()) {
+    if (Converter::separator.has_value()) {
       size += (n - 1);
     }
 
-    if (n > 0 && Converter::end_of_line.has_value()) {
+    if (Converter::end_of_line.has_value()) {
       size += 1;
     }
 
@@ -381,7 +384,7 @@ class OutputFormatter {
    *
    * \see append_to_buffer
    */
-  typename Converter::type particle_line(const ParticleData& p) const {
+  typename Converter::type single_particle_data(const ParticleData& p) const {
     typename Converter::type chunk{};
     append_to_buffer(p, chunk);
     return chunk;
@@ -391,15 +394,15 @@ class OutputFormatter {
    * Builds multiple particle lines for a range of particles by appending the
    * Converter::type representation of each particle into a single buffer.
    *
-   * The resulting buffer reflects exactly what the Converter defines (
+   * The resulting buffer reflects exactly what the Converter defines(
    * per-record separators and end-of-line markers, if any). No additional
    * formatting is applied beyond what the Converter specifies.
    *
-   * \tparam Range  Container type — constrained to `Particles` or
+   * \tparam Range Container type — constrained to `Particles` or
    * `ParticleList`.
-   * \param[in] particles  Container of particles whose data should be
+   * \param[in] particles Container of particles whose data should be
    * formatted and added to the buffer
-   * \return Converter::type  A buffer containing the concatenated
+   * \return Converter::type A buffer containing the concatenated
    * representation of all particles in the block.
    *
    * \note Capacity is reserved using a size estimate based on the first
@@ -413,7 +416,7 @@ class OutputFormatter {
             std::enable_if_t<std::is_same_v<Range, Particles> ||
                                  std::is_same_v<Range, ParticleList>,
                              bool> = true>
-  typename Converter::type particles_chunk(const Range& particles) const {
+  typename Converter::type particles_data_chunk(const Range& particles) const {
     typename Converter::type chunk{};
     if (particles.size() == 0)
       return chunk;
@@ -436,16 +439,21 @@ class OutputFormatter {
    * \return Converter::type
    */
   typename Converter::type quantities_line() const {
-    typename Converter::type out;
+    typename Converter::type out{};
+
+    // Educated size guess to reduce the number of reallocations in push_backs:
+    out.reserve(quantities_.size() * 5);
 
     for (const auto& string_name : quantities_) {
-      if (!out.empty() && Converter::separator) {
-        out.push_back(*Converter::separator);
+      if constexpr (Converter::separator) {
+        if (!out.empty()) {
+          out.push_back(*Converter::separator);
+        }
       }
       typename Converter::type name = converter_.as_string(string_name);
       out.insert(out.end(), name.begin(), name.end());
     }
-    if (Converter::end_of_line) {
+    if constexpr (Converter::end_of_line) {
       out.push_back(*Converter::end_of_line);
     }
     return out;
@@ -461,16 +469,21 @@ class OutputFormatter {
    * \return Converter::type
    */
   typename Converter::type unit_line() const {
-    typename Converter::type out;
+    typename Converter::type out{};
+
+    // Educated size guess to reduce the number of reallocations in push_backs:
+    out.reserve(quantities_.size() * 5);
 
     for (const auto& key : quantities_) {
-      if (!out.empty() && Converter::separator) {
-        out.push_back(*Converter::separator);
+      if constexpr (Converter::separator) {
+        if (!out.empty()) {
+          out.push_back(*Converter::separator);
+        }
       }
-      const auto& unit = converter_.as_string(this->units_.at(key));
+      const auto& unit = converter_.as_string(units_.at(key));
       out.insert(out.end(), unit.begin(), unit.end());
     }
-    if (Converter::end_of_line) {
+    if constexpr (Converter::end_of_line) {
       out.push_back(*Converter::end_of_line);
     }
     return out;
@@ -574,14 +587,14 @@ class OutputFormatter {
    * The buffer is used exactly as provided by the caller; no assumptions or
    * modifications are made to its initial state or capacity.
    *
-   * \param[in]  particle       Particle whose information is to be appended.
-   * \param[out] buffer  Destination buffer to which the converted data is
+   * \param[in] particle Particle whose information is to be appended.
+   * \param[out] buffer Destination buffer to which the converted data is
    * appended.
    */
 
   void append_to_buffer(const ParticleData& particle,
                         typename Converter::type& buffer) const {
-    for (size_t i = 0; i < getters_.size(); ++i) {
+    for (std::size_t i = 0; i < getters_.size(); ++i) {
       if constexpr (Converter::separator) {
         if (i > 0)
           buffer.push_back(*Converter::separator);
@@ -595,6 +608,7 @@ class OutputFormatter {
     }
   }
 };
+namespace details {
 /**
  * \brief Writes particle data in multiple chunks if the total buffer size
  *        exceeds a predefined maximum.
@@ -614,7 +628,7 @@ class OutputFormatter {
  * reaches the threshold. The buffer is then given to the write function which
  * should flush to disk.
  *
- * \note This utility does not strictly belong in this file. At the moment,
+ * \note This utility does not strictly belong to this file. At the moment,
  *       the objects using it do not have a clean hierarchy that would allow
  *       both OscarOutput and BinaryOutput to inherit a shared implementation,
  *       hence it lives here temporarily.
@@ -622,28 +636,46 @@ class OutputFormatter {
  * \todo Once the hierarchy is cleaned up, move this into a common base class
  *       that OscarOutput and BinaryOutput inherit from.
  *
+ * \tparam Converter Converter used by OutputFormatter to produce the
+ *         buffer type (must define Converter::type).
  * \tparam Range Container type — enforced to be either `Particles` or
  *         `ParticleList`.
  * \param[in] particles Container of particles whose particle_line
  *            representation is to be written.
+ * \param[in] formatter Formatter responsible for converting particles into
+ *            the corresponding Converter::type buffer representation.
+ * \param[in] write Callable that receives each filled buffer chunk and
+ *            performs the actual write to the underlying output (e.g. file).
+ * \param[in] max_buffer_bytes Maximum buffer size in bytes before the
+ *            accumulated data is flushed via \p write (default: 1'000'000'000).
  */
 
 template <typename Converter, class Range,
           std::enable_if_t<std::is_same_v<Range, Particles> ||
                                std::is_same_v<Range, ParticleList>,
                            bool> = true>
-void write_in_chunk(const Range& particles,
-                    const OutputFormatter<Converter>& formatter,
-                    std::function<void(const typename Converter::type&)> write,
-                    std::size_t max_buffer_bytes = 1'000'000'000) {
+void write_in_chunk_impl(
+    const Range& particles, const OutputFormatter<Converter>& formatter,
+    std::function<void(const typename Converter::type&)> write,
+    std::size_t max_buffer_bytes = 1'000'000'000) {
   if (particles.size() == 0)
     return;
 
   const std::size_t bytes_per_particle =
       formatter.compute_single_size(particles.front());
 
-  if (particles.size() <= max_buffer_bytes / bytes_per_particle) {
-    write(formatter.particles_chunk(particles));
+  if (2.0 * bytes_per_particle > max_buffer_bytes) {
+    throw std::runtime_error(
+        "write_in_chunk_impl: the estimated size of a single particle line "
+        "exceeds half of the configured max_buffer_bytes.\n"
+        "This effectively means only one particle would fit per chunk, "
+        "which defeats the purpose of chunked writing.\n"
+        "Increase max_buffer_bytes to at least twice the particle line size "
+        "to use this function correctly.");
+  }
+
+  if (particles.size() * bytes_per_particle <= max_buffer_bytes) {
+    write(formatter.particles_data_chunk(particles));
     return;
   }
 
@@ -653,7 +685,7 @@ void write_in_chunk(const Range& particles,
   std::size_t current_size = 0;
 
   for (const auto& particle : particles) {
-    Buffer line = formatter.particle_line(particle);
+    Buffer line = formatter.single_particle_data(particle);
     const std::size_t line_size = line.size();
     if (current_size + line_size > max_buffer_bytes) {
       write(buffer);
@@ -668,6 +700,24 @@ void write_in_chunk(const Range& particles,
   if (!buffer.empty()) {
     write(buffer);
   }
+}
+}  // namespace details
+
+/**
+ * \brief User-facing wrapper for chunked particle writing.
+ *
+ * Forwards the call to the internal implementation.
+ *
+ * \see details::write_in_chunk_impl
+ */
+template <typename Converter, class Range,
+          std::enable_if_t<std::is_same_v<Range, Particles> ||
+                               std::is_same_v<Range, ParticleList>,
+                           bool> = true>
+void write_in_chunk(
+    const Range& particles, const OutputFormatter<Converter>& formatter,
+    std::function<void(const typename Converter::type&)> write) {
+  details::write_in_chunk_impl(particles, formatter, write);
 }
 
 }  // namespace smash

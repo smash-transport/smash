@@ -156,7 +156,8 @@ void ICOutput::at_interaction(const Action &action, const double) {
 
   // write particle data excluding spectators
   if (!is_spectator) {
-    std::fprintf(file_.get(), "%s", formatter_.particle_line(particle).c_str());
+    std::fprintf(file_.get(), "%s",
+                 formatter_.single_particle_data(particle).c_str());
   }
 
   if (IC_proper_time_ < 0.0) {

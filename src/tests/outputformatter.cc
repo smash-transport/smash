@@ -116,15 +116,15 @@ TEST(valid_line_maker) {
   correct_line << p.pdgcode().baryon_number() << " ";
   correct_line << p.pdgcode().strangeness() << "\n";
 
-  VERIFY(correct_line.str() == formatter.particle_line(p));
+  VERIFY(correct_line.str() == formatter.single_particle_data(p));
 }
 
-TEST(binary_particle_line) {
+TEST(binary_single_particle_data) {
   ParticleData p = Test::smashon_random();
   std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
   OutputFormatter<ToBinary> formatter(quantities);
 
-  std::vector<char> chunk = formatter.particle_line(p);
+  std::vector<char> chunk = formatter.single_particle_data(p);
 
   double t = *reinterpret_cast<double*>(chunk.data());
   double x = *reinterpret_cast<double*>(chunk.data() + sizeof(double));
@@ -139,61 +139,57 @@ TEST(binary_particle_line) {
   VERIFY(id == p.id());
 }
 
-TEST(per_particle_particle_line_same_as_particles_chunk) {
+template <typename Converter>
+static bool chunks_are_equal() {
   ParticleList particles;
   const std::size_t N = 33;
   particles.reserve(N);
-
   for (std::size_t i = 0; i < N; ++i) {
     particles.push_back(Test::smashon_random());
   }
 
   std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
-  OutputFormatter<ToBinary> formatter_binary(quantities);
-  OutputFormatter<ToASCII> formatter_ascii(quantities);
+  OutputFormatter<Converter> formatter(quantities);
 
-  const std::vector<char> particles_chunk_binary =
-      formatter_binary.particles_chunk(particles);
+  const typename Converter::type full_chunk =
+      formatter.particles_data_chunk(particles);
 
-  std::vector<char> per_particle_chunk_binary;
-  per_particle_chunk_binary.reserve(particles_chunk_binary.size());
+  typename Converter::type concatenated_chunk;
+  concatenated_chunk.reserve(full_chunk.size());
   for (const auto& p : particles) {
-    const auto data = formatter_binary.particle_line(p);
-    per_particle_chunk_binary.insert(per_particle_chunk_binary.end(),
-                                     data.begin(), data.end());
+    const auto line = formatter.single_particle_data(p);
+    concatenated_chunk.insert(concatenated_chunk.end(), line.begin(),
+                              line.end());
   }
 
-  VERIFY(particles_chunk_binary == per_particle_chunk_binary);
-
-  const std::string particles_chunk_ascii =
-      formatter_ascii.particles_chunk(particles);
-
-  std::string per_particle_chunk_ascii;
-  per_particle_chunk_ascii.reserve(particles_chunk_ascii.size());
-  for (const auto& p : particles) {
-    const auto line = formatter_ascii.particle_line(p);
-    per_particle_chunk_ascii.append(line);
-  }
-
-  VERIFY(particles_chunk_ascii == per_particle_chunk_ascii);
+  return full_chunk == concatenated_chunk;
 }
 
-TEST(compute_single_size_equals_particle_line_size) {
-  ParticleData p = Test::smashon_random();
+TEST(per_particle_single_particle_data_same_as_particles_data_chunk) {
+  VERIFY(chunks_are_equal<ToBinary>());
+  VERIFY(chunks_are_equal<ToASCII>());
+}
+
+template <typename Converter>
+static bool single_size_matches_line_size() {
+  const ParticleData p = Test::smashon_random();
+
   std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
+  OutputFormatter<Converter> formatter(quantities);
 
-  OutputFormatter<ToBinary> formatter_binary(quantities);
-  const auto line_binary = formatter_binary.particle_line(p);
-  const std::size_t computed_binary = formatter_binary.compute_single_size(p);
-  VERIFY(computed_binary == line_binary.size());
+  const auto line = formatter.single_particle_data(p);
+  const std::size_t computed_size = formatter.compute_single_size(p);
 
-  OutputFormatter<ToASCII> formatter_ascii(quantities);
-  const auto line_ascii = formatter_ascii.particle_line(p);
-  const std::size_t computed_ascii = formatter_ascii.compute_single_size(p);
-  VERIFY(computed_ascii == line_ascii.size());
+  return computed_size == line.size();
 }
 
-TEST(sum_of_single_sizes_equals_particles_chunk_size) {
+TEST(compute_single_size_equals_single_particle_data_size) {
+  VERIFY(single_size_matches_line_size<ToBinary>());
+  VERIFY(single_size_matches_line_size<ToASCII>());
+}
+
+template <typename Converter>
+static bool sum_of_single_sizes_equals_chunk_size() {
   ParticleList particles;
   const std::size_t N = 33;
   particles.reserve(N);
@@ -202,61 +198,60 @@ TEST(sum_of_single_sizes_equals_particles_chunk_size) {
   }
 
   std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
+  OutputFormatter<Converter> formatter(quantities);
 
-  OutputFormatter<ToBinary> formatter_binary(quantities);
-  const auto chunk_binary = formatter_binary.particles_chunk(particles);
-  std::size_t sum_binary = 0;
+  const auto chunk = formatter.particles_data_chunk(particles);
+
+  std::size_t total_size = 0;
   for (const auto& p : particles)
-    sum_binary += formatter_binary.compute_single_size(p);
-  VERIFY(chunk_binary.size() == sum_binary);
+    total_size += formatter.compute_single_size(p);
 
-  OutputFormatter<ToASCII> formatter_ascii(quantities);
-  const auto chunk_ascii = formatter_ascii.particles_chunk(particles);
-  std::size_t sum_ascii = 0;
-  for (const auto& p : particles)
-    sum_ascii += formatter_ascii.compute_single_size(p);
-  VERIFY(chunk_ascii.size() == sum_ascii);
-
-  const ParticleData sample = Test::smashon_random();
-  VERIFY(formatter_ascii.compute_single_size(sample) ==
-         formatter_ascii.particle_line(sample).size());
+  return chunk.size() == total_size;
 }
 
-TEST(write_in_chunks_same_as_particles_chunk) {
+TEST(sum_of_single_sizes_equals_particles_data_chunk_size) {
+  VERIFY(sum_of_single_sizes_equals_chunk_size<ToBinary>());
+  VERIFY(sum_of_single_sizes_equals_chunk_size<ToASCII>());
+}
+
+template <typename Converter>
+static bool write_in_chunks_produces_same_output(
+    std::size_t buffer_size, const std::vector<std::string>& quantities) {
   ParticleList particles;
   const std::size_t N = 33;
-  const std::size_t buffer_size = 10;
   particles.reserve(N);
-  for (std::size_t i = 0; i < N; ++i) {
+  for (std::size_t i = 0; i < N; ++i)
     particles.push_back(Test::smashon_random());
-  }
 
-  std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
-  OutputFormatter<ToBinary> formatter_binary(quantities);
-  OutputFormatter<ToASCII> formatter_ascii(quantities);
+  OutputFormatter<Converter> formatter(quantities);
+  const typename Converter::type one_chunk =
+      formatter.particles_data_chunk(particles);
 
-  const std::vector<char> one_chunk_binary =
-      formatter_binary.particles_chunk(particles);
-
-  std::vector<char> multiple_chunks_binary;
-  write_in_chunk<ToBinary>(
-      particles, formatter_binary,
-      [&](const ToBinary::type& buf) {
-        multiple_chunks_binary.insert(multiple_chunks_binary.end(), buf.begin(),
-                                      buf.end());
+  typename Converter::type multi_chunk;
+  details::write_in_chunk_impl<Converter>(
+      particles, formatter,
+      [&](const typename Converter::type& buf) {
+        multi_chunk.insert(multi_chunk.end(), buf.begin(), buf.end());
       },
       buffer_size);
 
-  VERIFY(one_chunk_binary == multiple_chunks_binary);
+  return one_chunk == multi_chunk;
+}
 
-  const std::string one_chunk_ascii =
-      formatter_ascii.particles_chunk(particles);
+TEST(write_in_chunks_same_as_particles_data_chunk) {
+  const std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
+  constexpr std::size_t bytes_per_particle_est =
+      sizeof(double) * 4 + sizeof(int);
+  constexpr std::size_t buffer_size = 3 * bytes_per_particle_est;
+  VERIFY(
+      write_in_chunks_produces_same_output<ToBinary>(buffer_size, quantities));
+  VERIFY(
+      write_in_chunks_produces_same_output<ToASCII>(buffer_size, quantities));
+}
 
-  std::string multiple_chunks_ascii;
-  write_in_chunk<ToASCII>(
-      particles, formatter_ascii,
-      [&](const ToASCII::type& buf) { multiple_chunks_ascii.append(buf); },
-      buffer_size);
-
-  VERIFY(one_chunk_ascii == multiple_chunks_ascii);
+TEST_CATCH(write_in_chunks_throws_if_buffer_too_small, std::runtime_error) {
+  const std::vector<std::string> quantities = {"t", "x", "y", "z", "ID"};
+  const std::size_t tiny_buffer_size = sizeof(double) * 4 + sizeof(int);
+  write_in_chunks_produces_same_output<ToBinary>(tiny_buffer_size, quantities);
+  write_in_chunks_produces_same_output<ToASCII>(tiny_buffer_size, quantities);
 }

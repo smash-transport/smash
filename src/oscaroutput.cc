@@ -852,7 +852,8 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
-  std::fprintf(file_.get(), "%s", formatter_.particle_line(data).c_str());
+  std::fprintf(file_.get(), "%s",
+               formatter_.single_particle_data(data).c_str());
 }
 
 template <OscarOutputFormat Format, int Contents>

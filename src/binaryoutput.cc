@@ -257,7 +257,7 @@ void BinaryOutputBase::write(const ParticleList &particles) {
 }
 
 void BinaryOutputBase::write_particledata(const ParticleData &p) {
-  write(formatter_.particle_line(p));
+  write(formatter_.single_particle_data(p));
 }
 
 BinaryOutputCollisions::BinaryOutputCollisions(
