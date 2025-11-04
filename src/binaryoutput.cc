@@ -89,8 +89,8 @@ static auto get_binary_filename(const std::string &content,
  *
  * At interaction:
  * \code
- * char uint32_t uint32_t double  double   uint32_t
- * 'i'  nin      nout     density xsection process_type
+ * char uint32_t uint32_t double  double  double  uint32_t
+ * 'i'  nin      nout     density xsection partial_xsection process_type
  * \endcode
  * \li \c nin, \c nout are numbers of incoming and outgoing particles
  *

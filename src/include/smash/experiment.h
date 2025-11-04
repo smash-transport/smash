@@ -1382,12 +1382,26 @@ Experiment<Modus>::Experiment(Configuration &config,
    * step is printed. \n The general Oscar structure as described in \ref
    * doxypage_output_oscar_particles is preserved.\n
    *
-   * <h3> Binary output </h3>
+   * <h3>Binary output</h3>
+   *
    * The binary initial conditions output also provides a list of all particles
-   * that fluidize. For each particle a 'p' block is created stores the particle
-   * data. The binary output structure as described in \ref
-   * doxypage_output_binary is preserved.\n The custom `"Binary"` output is also
-   * available which is an equivalent binary version of the `"ASCII"` one.
+   * removed from the evolution at the time when they cross the hypersurface.
+   * For each removed particle a 'p' block is created that stores the particle
+   * data.
+   *
+   * Only the particle block header differs from the standard binary output
+   * structure described in \ref doxypage_output_binary; the individual particle
+   * lines themselves use exactly the same layout as in the regular binary
+   * output.
+   *
+   * The header has the following structure:
+   * \code
+   * char        uint32_t
+   * 'p'      n_part_lines
+   * \endcode
+   *
+   * \n Custom particle quantities are also available; their usage is described
+   * in \ref doxypage_output_binary.
    *
    * <h3> ROOT output </h3>
    * The initial conditions output in shape of a list of all particles removed
