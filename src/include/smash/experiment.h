@@ -1413,22 +1413,25 @@ Experiment<Modus>::Experiment(Configuration &config,
 
   /*!\Userguide
    * \page doxypage_output_spin
-   * The existence of a spin subsection in the output section of the
-   * configuration file enables the spin output. In addition, spin interactions
-   * have to be enabled in the collision term section. If spins are enabled, the
-   * output file named Spin (followed by the appropriate suffix) is generated
-   * when SMASH is executed. Spin output is available in OSCAR2013 format. In
-   * addition to the usual particle information, the spin output contains the
-   * four components of the mean spin (Pauli-Lubanski) vector \f$S^\mu\f$. The
-   * components of the mean spin vector are set in two different ways, depending
-   * on the mode, in which SMASH is used:
+   * In order to enable spin output, two conditions have to be fulfilled:
+   * 1. Spin interactions have to be enabled in the collision term section of
+   * the configuration file.
+   * 2. The spin components `spin0`, `spinx`, `spiny` and `spinz` have to be
+   * specified in the `Quantities` list of the Particles output subsection.
+   * \see_key{key_output_particles_quantities_}
+   *
+   * Spin output is available in OSCAR2013 format. If spins are enabled, the
+   * resulting output file contains the four components of the mean spin
+   * (Pauli-Lubanski) vector \f$S^\mu\f$. The components of the mean spin vector
+   * are set in two different ways, depending on the mode, in which SMASH is
+   * used:
    * #### SMASH IC
    * In the initial conditions mode, the components of the mean spin vector are
-   * sampled from a gaussian distribution with a mean value of 0 to ensure that
-   * the average polarization vanishes. This strategy guarantees that spectators
-   * do not contribute with an artificial polarization, if the
-   * SMASH-vHLLE-hybrid approach is employed, where the physically relevant spin
-   * information is set by the SMASH-hadron-sampler.
+   * sampled from a gaussian distribution with a mean value of 0 in the particle
+   * rest frame to ensure that the average polarization vanishes. This strategy
+   * guarantees that spectators do not contribute with an artificial
+   * polarization, if the SMASH-vHLLE-hybrid approach is employed, where the
+   * physically relevant spin information is set by the SMASH-hadron-sampler.
    * #### SMASH Afterburner
    * In the afterburner mode, the components of the mean spin vector are set by
    * the SMASH-hadron-sampler and passed back to SMASH in the afterburner mode.

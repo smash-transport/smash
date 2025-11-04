@@ -225,21 +225,3 @@ TEST(unpolarized_particle_initialization) {
   VERIFY(mean_polarization.x2() < small_value);
   VERIFY(mean_polarization.x3() < small_value);
 }
-
-// Test that reset_spin_vector correctly sets all components of the spin vector
-// to NaN.
-TEST(reset_spin_vector) {
-  ParticleData p = Test::smashon();
-
-  // Set to known values first
-  p.set_spin_vector(FourVector(1.0, 2.0, 3.0, 4.0));
-  COMPARE(p.spin_vector(), FourVector(1.0, 2.0, 3.0, 4.0));
-
-  // Call reset and check that all components are NaN
-  p.reset_spin_vector();
-  FourVector s = p.spin_vector();
-  VERIFY(std::isnan(s[0]));
-  VERIFY(std::isnan(s[1]));
-  VERIFY(std::isnan(s[2]));
-  VERIFY(std::isnan(s[3]));
-}

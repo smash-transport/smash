@@ -454,6 +454,13 @@ class PdgCode {
     return is_hyperon() && digits_.n_q2_ != 3 && !is_Lambda();
   }
 
+  /// \return whether this is a Sigma* with pdgcodes 3224, 3214, 3114
+  inline bool is_Sigmastar() const {
+    const auto abs_code = std::abs(code());
+    return (abs_code == pdg::Sigma_star_m || abs_code == pdg::Sigma_star_z ||
+            abs_code == pdg::Sigma_star_p);
+  }
+
   /// \return whether this is a kaon (K+, K-, K0, Kbar0)
   inline bool is_kaon() const {
     const auto abs_code = std::abs(code());

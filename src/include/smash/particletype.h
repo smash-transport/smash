@@ -236,6 +236,11 @@ class ParticleType {
   /// \copydoc PdgCode::is_Nstar1535
   bool is_Nstar1535() const { return pdgcode_.is_Nstar1535(); }
 
+  /// \return Is this a Sigma resonance (Sigma*)?
+  inline bool is_Sigmastar() const {
+    return pdgcode_.is_Sigmastar();
+  }
+
   /// \return Is this a Delta resonance (Delta*)?
   inline bool is_Deltastar() const {
     return is_baryon() && isospin() == 3 && !pdgcode_.is_Delta() &&

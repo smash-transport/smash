@@ -111,8 +111,6 @@ class ListModus : public ModusDefault {
    * (for example the mass of neutral pion is artificially forced to be the
    * same as charged pion). On-shellness violation typically comes from the
    * insufficient number of significant digits in the input file + rounding.
-   * The chosen unphysical value of -999.9 for the spin components is a clear
-   * indicator that the spin is not used.
    *
    * \param[in] pdgcode PDG code of added particle
    * \param[in] t       Time of added particle
@@ -211,6 +209,14 @@ class ListModus : public ModusDefault {
    *                      position are found.
    */
   void validate_list_of_particles_of_all_events_() const;
+
+  /**
+   * Validate the optional fields. At the moment, it ensures that if at least one
+   * spin component is given, all four are given.
+   *
+   * \throw std::invalid_argument if not all spin components are given.
+   */
+  void validate_optional_fields_() const;
 
   /**
    * Judge whether times are the same for all the particles; don't do

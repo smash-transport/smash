@@ -44,11 +44,12 @@ class ScatterAction : public Action {
    * collision finding is parametrized
    * \param[in] spin_interaction_type Which type of spin interaction to use
    */
-  ScatterAction(
-      const ParticleData& in_part1, const ParticleData& in_part2, double time,
-      bool isotropic = false, double string_formation_time = 1.0,
-      double box_length = -1.0, bool is_total_parametrized = false,
-      SpinInteractionType spin_interaction_type = SpinInteractionType::Off);
+  ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
+                double time, bool isotropic = false,
+                double string_formation_time = 1.0, double box_length = -1.0,
+                bool is_total_parametrized = false,
+                const SpinInteractionType spin_interaction_type =
+                    SpinInteractionType::Off);
 
   /**
    * Add a new collision channel.
@@ -253,7 +254,10 @@ class ScatterAction : public Action {
    */
   void string_excitation();
 
-  /// Perform spin interaction in binary interactions
+  /**
+   * Perform spin interaction in binary interactions. At the moment, we include
+   * a spin-flip in the y component of elastic scatterings if enabled.
+   */
   void spin_interaction();
 
   /// Boost the spin vectors of the outgoing particles after elastic scattering

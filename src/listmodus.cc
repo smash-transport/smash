@@ -94,6 +94,7 @@ ListModus::ListModus(Configuration modus_config,
   }
   optional_fields_ = modus_config.take(optional_quantities_key);
   validate_list_of_particles_of_all_events_();
+  validate_optional_fields_();
 }
 
 /* console output on startup of List specific parameters */
@@ -154,9 +155,6 @@ void ListModus::insert_optional_quantities_to_(
   HistoryData hist = p.get_history();
   std::ostringstream error_message{"", std::ios_base::ate};
 
-  // Track spin component presence for validation (index 0..3)
-  std::array<bool, 4> has_spin{{false, false, false, false}};
-
   for (size_t i = 0; i < optional_fields_.size(); ++i) {
     size_t len{};
     auto field = optional_fields_[i];
@@ -206,19 +204,15 @@ void ListModus::insert_optional_quantities_to_(
     } else if (field == "spin0") {
       const double s0 = std::stod(quantity, &len);
       p.set_spin_vector_component(0, s0);
-      has_spin[0] = true;
     } else if (field == "spinx") {
       const double s1 = std::stod(quantity, &len);
       p.set_spin_vector_component(1, s1);
-      has_spin[1] = true;
     } else if (field == "spiny") {
       const double s2 = std::stod(quantity, &len);
       p.set_spin_vector_component(2, s2);
-      has_spin[2] = true;
     } else if (field == "spinz") {
       const double s3 = std::stod(quantity, &len);
       p.set_spin_vector_component(3, s3);
-      has_spin[3] = true;
     } else {
       error_message << " Unknown quantities given in the configuration.\n";
     }
@@ -228,17 +222,6 @@ void ListModus::insert_optional_quantities_to_(
       logg[LList].warn()
           << field << "=" << quantity
           << " not read exactly as written in the input particle list.\n";
-    }
-  }
-  // Validate spin components presence if spin interactions are used
-  // If spin interactions are enabled, require all four spin components.
-  if (spin_interaction_type_ != SpinInteractionType::Off) {
-    for (int c = 0; c < 4; ++c) {
-      if (!has_spin[c]) {
-        error_message << "Missing spin component s" << c
-                      << " while spin interactions are enabled. "
-                         "Provide all four (spin0, spinx, spiny, spinz).\n";
-      }
     }
   }
 
@@ -442,6 +425,31 @@ void ListModus::validate_list_of_particles_of_all_events_() const {
     throw InvalidEvents(
         "More than 2 particles with the same 4-position have been found in the "
         "same event.\nPlease, check your particles list file.");
+  }
+}
+
+void ListModus::validate_optional_fields_() const {
+  // If spin interactions are enabled, require all four spin components.
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    std::array<bool, 4> has_spin{{false, false, false, false}};
+    for (const auto &field : optional_fields_) {
+      if (field == "spin0") {
+        has_spin[0] = true;
+      } else if (field == "spinx") {
+        has_spin[1] = true;
+      } else if (field == "spiny") {
+        has_spin[2] = true;
+      } else if (field == "spinz") {
+        has_spin[3] = true;
+      }
+    }
+    for (int c = 0; c < 4; ++c) {
+      if (!has_spin[c]) {
+        throw std::invalid_argument(
+            "When spin interactions are enabled, all four spin components "
+            "(spin0, spinx, spiny, spinz) must be provided in the config file.");
+      }
+    }
   }
 }
 

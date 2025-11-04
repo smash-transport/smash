@@ -353,7 +353,7 @@ class Action {
   /**
    * Assign an unpolarized spin vector to all outgoing particles.
    *
-   * Note: Make sure to assign the spin vectors after the boosted 4-momentum of
+   * \attention Make sure to assign the spin vectors after the boosted 4-momentum of
    * the outgoing particles has been set, as the function includes a boost to
    * the lab frame.
    */

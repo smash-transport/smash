@@ -56,6 +56,12 @@ constexpr int Sigma_p = 0x3222;
 constexpr int Sigma_z = 0x3212;
 /// Σ⁻.
 constexpr int Sigma_m = 0x3112;
+/// Σ*⁺
+constexpr int Sigma_star_p = 0x3224;
+/// Σ*⁰
+constexpr int Sigma_star_z = 0x3214;
+/// Σ*⁻
+constexpr int Sigma_star_m = 0x3114;
 /// Ξ⁰.
 constexpr int Xi_z = 0x3322;
 /// Ξ⁻.

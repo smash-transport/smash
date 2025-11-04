@@ -26,10 +26,12 @@ namespace smash {
 static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
-                             const ParticleData &in_part_b, double time,
-                             bool isotropic, double string_formation_time,
-                             double box_length, bool is_total_parametrized,
-                             SpinInteractionType spin_interaction_type)
+                             const ParticleData &in_part_b, const double time,
+                             const bool isotropic,
+                             const double string_formation_time,
+                             const double box_length,
+                             const bool is_total_parametrized,
+                             const SpinInteractionType spin_interaction_type)
     : Action({in_part_a, in_part_b}, time),
       sum_of_partial_cross_sections_(0.),
       isotropic_(isotropic),

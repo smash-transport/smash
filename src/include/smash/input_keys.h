@@ -417,6 +417,7 @@ struct InputSections {
  * - \ref doxypage_input_conf_ct_dileptons
  * - \ref doxypage_input_conf_ct_photons
  * - \ref doxypage_input_conf_ct_heavy_flavor
+ * - \ref doxypage_input_conf_ct_spin_interactions
  */
 
 /*!\Userguide
@@ -488,6 +489,21 @@ struct InputSections {
      Heavy_Flavor:
          AQM_Bottom_Suppression: 0.93
          AQM_Charm_Suppression: 0.8
+ \endverbatim
+ */
+
+/*!\Userguide
+ * \page doxypage_input_conf_ct_spin_interactions
+ *
+ * The subsection `Spin_Interactions` of the `Collision_Term` section can be
+ * used to modify spin-interactions. The allowed keys are: `On`, which includes
+ * all available spin interactions, `Off`, which excludes all spin interactions,
+ * and `Elastic`, which includes a spin flip in elastic scatterings.
+ *
+ * For example:
+ *\verbatim
+ Collision_Term:
+     Spin_Interactions: On
  \endverbatim
  */
 
@@ -2518,7 +2534,7 @@ struct InputKeys {
       {"1.8"}};
 
   /*!\Userguide
-   * \page doxypage_input_conf_ct_spin
+   * \page doxypage_input_conf_ct_spin_interactions
    * \optional_key{key_CT_spin_interactions_,Spin_Interactions,bool,false}
    *
    * Whether or not to enable spin interactions in binary collisions.
@@ -4735,10 +4751,10 @@ struct InputKeys {
    * - "time_last_coll" &rarr; Time when the last interaction happened.
    * - "pdg_mother1" &rarr; Parent of the particle.
    * - "pdg_mother2" &rarr; Second parent of the particle.
-   * - "spin0" &rarr; 0-th component of the spin vector (if contained).
-   * - "spin1" &rarr; 1-st component of the spin vector (if contained).
-   * - "spin2" &rarr; 2-nd component of the spin vector (if contained).
-   * - "spin3" &rarr; 3-rd component of the spin vector (if contained).
+   * - "spin0" &rarr; 0-th component of the spin vector.
+   * - "spin1" &rarr; 1-st component of the spin vector.
+   * - "spin2" &rarr; 2-nd component of the spin vector.
+   * - "spin3" &rarr; 3-rd component of the spin vector.
    *
    * Optional quantities that are not provided by the user as extra column in
    * the input file are set to their default value when SMASH reads in the input

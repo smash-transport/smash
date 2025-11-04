@@ -109,6 +109,9 @@ class ParticleData {
   /// \copydoc PdgCode::is_pion
   bool is_pion() const { return pdgcode().is_pion(); }
 
+  /// \copydoc PdgCode::is_sigmastar
+  bool is_sigmastar() const { return pdgcode().is_Sigmastar(); }
+
   /**
    * Get the particle's pole mass ("on-shell").
    * \return pole mass of the particle [GeV]
@@ -383,14 +386,6 @@ class ParticleData {
    * particles at creation.
    */
   void set_unpolarized_spin_vector();
-
-  /// Reset the spin vector to NaN
-  void reset_spin_vector() {
-    spin_vector_[0] = std::numeric_limits<double>::quiet_NaN();
-    spin_vector_[1] = std::numeric_limits<double>::quiet_NaN();
-    spin_vector_[2] = std::numeric_limits<double>::quiet_NaN();
-    spin_vector_[3] = std::numeric_limits<double>::quiet_NaN();
-  }
   /// Setter for belongs_to label
   void set_belongs_to(BelongsTo label) { belongs_to_ = label; }
   /// Getter for belongs_to label
@@ -532,7 +527,7 @@ class ParticleData {
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
   /**
-   * The mean spin 4-vector (Pauli-Lubanski vector) of the particle. Each
+   * Pauli-Lubanski vector (mean spin 4-vector) of the particle. Each
    * component is initialized with NaN (double) to indicate that the spin vector
    * has not been set.
    */

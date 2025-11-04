@@ -99,7 +99,6 @@ static void compare_extended_particledata(
   COMPARE(std::atoi(datastring.at(20).c_str()),
           particle.type().baryon_number());
   COMPARE(std::atoi(datastring.at(21).c_str()), particle.type().strangeness());
-  // COMPARE(std::atoi(datastring.at(22).c_str()), particle.spin_projection());
 }
 
 TEST(full2013_format) {
