@@ -2336,6 +2336,12 @@ struct InputKeys {
    * then the default is increased to 2000 mb to function correctly (see
    * \iref{Oliinychenko:2018ugs}). The maximal cross section is scaled with
    * <tt>\ref key_CT_cs_scaling_ "Cross_Section_Scaling"</tt> factor.
+   *
+   * \attention This cutoff breaks detailed balance, so when investigating
+   * thermal properties with the "Geometric" or "Covariant" options for the
+   * <tt>\ref key_CT_collision_criterion_ "Collision_Criterion"</tt>, it might
+   * be important to set this key to a higher value. For a box of
+   * \f$(10\ \mathrm{fm})^3\f$ in volume, the value of 750 mb is recommended.
    */
   /**
    * \see_key{key_CT_max_cs_}

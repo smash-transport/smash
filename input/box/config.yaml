@@ -27,6 +27,12 @@ Modi:
         Use_Thermal_Multiplicities: True
 
 Collision_Term:
+    Collision_Criterion: "Covariant"
+    # Limiting the Maximum_Cross_Section is a way to effectively decrease the
+    # combinatorics in the collision finding within the geometric/covariant
+    # criterion, but it may break detailed balance. Using 750 mb instead of the
+    # default (200 mb) improves this breaking.
+    Maximum_Cross_Section: 750
     Force_Decays_At_End: False
     Strings: False
     NNbar_Treatment: "resonances"
