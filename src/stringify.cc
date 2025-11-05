@@ -229,8 +229,6 @@ std::string to_string(SpinInteractionType type) {
       return "On";
     case SpinInteractionType::Off:
       return "Off";
-    case SpinInteractionType::Elastic:
-      return "Elastic";
   }
   throw_unhandled_enum("SpinInteractionType", static_cast<int>(type));
 }

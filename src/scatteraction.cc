@@ -771,40 +771,29 @@ void ScatterAction::string_excitation() {
   }
 }
 
+static void boost_spin_vectors_after_elastic_scattering(
+    ParticleData &outgoing_particle_a, ParticleData &outgoing_particle_b) {
+  // Boost spin vectors
+  outgoing_particle_a.set_spin_vector(
+      outgoing_particle_a.spin_vector().lorentz_boost(
+          outgoing_particle_a.velocity()));
+  outgoing_particle_b.set_spin_vector(
+      outgoing_particle_b.spin_vector().lorentz_boost(
+          outgoing_particle_b.velocity()));
+}
+
 void ScatterAction::spin_interaction() {
   if (spin_interaction_type_ != SpinInteractionType::Off) {
     /* 2->2 elastic scattering */
-    if (process_type_ == ProcessType::Elastic &&
-        spin_interaction_type_ == SpinInteractionType::Elastic) {
-      //  Spin flip as a first spin interaction
-      //  Store a copy of the spin vectors to boost them to the particle's rest
-      //  frame
-      FourVector spin_a = outgoing_particles_[0].spin_vector();
-      FourVector spin_b = outgoing_particles_[1].spin_vector();
-
-      // Boost the spin vectors to the lab frame using the particle's velocity
-      spin_a = spin_a.lorentz_boost(outgoing_particles_[0].velocity());
-      spin_b = spin_b.lorentz_boost(outgoing_particles_[1].velocity());
-
-      // Flip the y component of the spin vectors
-      spin_a.set_x2(-spin_a.x2());
-      spin_b.set_x2(-spin_b.x2());
-
-      // Boost the spin vectors back to the computational frame
-      spin_a = spin_a.lorentz_boost(-outgoing_particles_[0].velocity());
-      spin_b = spin_b.lorentz_boost(-outgoing_particles_[1].velocity());
-
-      // Set the new spin vectors
-      outgoing_particles_[0].set_spin_vector(spin_a);
-      outgoing_particles_[1].set_spin_vector(spin_b);
-
+    if (process_type_ == ProcessType::Elastic) {
       // Final boost to the outgoing particle momenta
-      boost_spin_vectors_after_elastic_scattering();
+      boost_spin_vectors_after_elastic_scattering(outgoing_particles_[0],
+                                                  outgoing_particles_[1]);
     }
 
     /* 2->1 resonance formation */
     if (process_type_ == ProcessType::TwoToOne) {
-      /**
+      /*
        * @brief Λ+π → Σ* resonance formation with Λ–spin bookkeeping.
        *
        * We do not simulate a direct inelastic Λ+π scattering; instead we form a
@@ -819,58 +808,47 @@ void ScatterAction::spin_interaction() {
       // Identify if the outgoing resonance is a Σ*
       if (outgoing_particles_[0].is_sigmastar()) {
         // Check that one of the incoming particles is a Λ and the other a π
-        bool has_lambda = false;
-        bool has_pion = false;
-        int lambda_index = -1;
-        for (size_t i = 0; i < 2; i++) {
-          if (incoming_particles_[i].is_pion()) {
-            has_pion = true;
-          } else if (incoming_particles_[i].pdgcode().is_Lambda()) {
-            has_lambda = true;
-            lambda_index = i;
-          }
-        }
+        const bool has_lambda = incoming_particles_[0].pdgcode().is_Lambda() ||
+                                incoming_particles_[1].pdgcode().is_Lambda();
+        const bool has_pion = incoming_particles_[0].is_pion() ||
+                              incoming_particles_[1].is_pion();
         if (has_lambda && has_pion) {
+          auto &lambda = (incoming_particles_[0].pdgcode().is_Lambda())
+                             ? incoming_particles_[0]
+                             : incoming_particles_[1];
+          auto &sigma_star = outgoing_particles_[0];
+
           // Perform spin flip with probability of 2/9
           int random_int = random::uniform_int(1, 9);
-          FourVector final_spin_vector;
+          FourVector final_spin_vector = lambda.spin_vector();
+
           if (random_int <= 7) {
             // No spin flip
-            final_spin_vector = incoming_particles_[lambda_index].spin_vector();
             final_spin_vector = final_spin_vector.lorentz_boost(
                 outgoing_particles_[0].velocity());
             outgoing_particles_[0].set_spin_vector(final_spin_vector);
           } else {
             // Spin flip in Lambda rest frame
-            ThreeVector lambda_velocity =
-                incoming_particles_[lambda_index].velocity();
+            ThreeVector lambda_velocity = lambda.velocity();
             final_spin_vector =
-                incoming_particles_[lambda_index].spin_vector().lorentz_boost(
-                    lambda_velocity);
+                final_spin_vector.lorentz_boost(lambda_velocity);
+
+            // Flip the spatial spin vector components
             final_spin_vector[1] = -final_spin_vector[1];
             final_spin_vector[2] = -final_spin_vector[2];
             final_spin_vector[3] = -final_spin_vector[3];
+
+            // Boost back to computational frame and to Sigma* frame
             final_spin_vector =
                 final_spin_vector.lorentz_boost(-lambda_velocity);
-            final_spin_vector = final_spin_vector.lorentz_boost(
-                outgoing_particles_[0].velocity());
-            outgoing_particles_[0].set_spin_vector(final_spin_vector);
+            final_spin_vector =
+                final_spin_vector.lorentz_boost(sigma_star.velocity());
+            sigma_star.set_spin_vector(final_spin_vector);
           }
         }
       }
     }
   }
-}
-
-void ScatterAction::boost_spin_vectors_after_elastic_scattering() {
-  // Boost spin vectors
-  outgoing_particles_[0].set_spin_vector(
-      outgoing_particles_[0].spin_vector().lorentz_boost(
-          outgoing_particles_[0].velocity()));
-
-  outgoing_particles_[1].set_spin_vector(
-      outgoing_particles_[1].spin_vector().lorentz_boost(
-          outgoing_particles_[1].velocity()));
 }
 
 void ScatterAction::format_debug_output(std::ostream &out) const {

@@ -1425,16 +1425,15 @@ Experiment<Modus>::Experiment(Configuration &config,
    * (Pauli-Lubanski) vector \f$S^\mu\f$. The components of the mean spin vector
    * are set in two different ways, depending on the mode, in which SMASH is
    * used:
-   * #### SMASH IC
-   * In the initial conditions mode, the components of the mean spin vector are
-   * sampled from a gaussian distribution with a mean value of 0 in the particle
-   * rest frame to ensure that the average polarization vanishes. This strategy
+   * #### SMASH Collider Modus
+   * In the collider mode, the components of the mean spin vector are sampled
+   * from a gaussian distribution with a mean value of 0 in the particle rest
+   * frame to ensure that the average polarization vanishes. This strategy
    * guarantees that spectators do not contribute with an artificial
-   * polarization, if the SMASH-vHLLE-hybrid approach is employed, where the
-   * physically relevant spin information is set by the SMASH-hadron-sampler.
-   * #### SMASH Afterburner
-   * In the afterburner mode, the components of the mean spin vector are set by
-   * the SMASH-hadron-sampler and passed back to SMASH in the afterburner mode.
+   * polarization.
+   * #### SMASH List Mode
+   * In the list mode, the components of the mean spin vector are read from the
+   * input file.
    */
 
   // create outputs

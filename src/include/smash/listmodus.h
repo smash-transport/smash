@@ -282,7 +282,8 @@ class ListModus : public ModusDefault {
    */
   bool verbose_ = true;
 
-  /**\ingroup logging
+  /**
+   * \ingroup logging
    * Writes the initial state for the List to the output stream.
    *
    * \param[in] out The ostream into which to output

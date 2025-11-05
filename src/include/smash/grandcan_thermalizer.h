@@ -331,6 +331,7 @@ class GrandCanThermalizer {
    * bool condition(int strangeness, int baryon_number, int charge);
    * \param[in] time Current time in simulation
    * \param[in] condition Specifies the actual mode (1 to 7)
+   * \param[in] spin_interaction_type Type of spin interactions to be considered
    */
   template <typename F>
   ParticleData sample_in_random_cell_mode_algo(

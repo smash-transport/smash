@@ -564,11 +564,9 @@ TEST(try_create_particle_func) {
   }
 }
 
-// Test that try_create_particle correctly stores the provided spin vector
-// when spin interactions are enabled.
 TEST(try_create_particle_with_spin_func) {
   // Create a ListModus with spin interactions enabled
-  ExperimentParameters parameters_with_spin{
+  const ExperimentParameters parameters_with_spin{
       std::make_unique<UniformClock>(0., 0.1, 300.0),
       std::make_unique<UniformClock>(0., 1., 300.0),
       1,  // ensembles
@@ -612,18 +610,18 @@ TEST(try_create_particle_with_spin_func) {
       std::vector<std::string>{"spin0", "spinx", "spiny", "spinz"});
   ListModus list_modus = ListModus(std::move(config), parameters_with_spin);
   Particles particles;
-  ParticleData smashon = Test::smashon_random();
-  FourVector r = smashon.position(), p = smashon.momentum();
-  PdgCode pdg = smashon.pdgcode();
+  const ParticleData smashon = Test::smashon_random();
+  const FourVector r = smashon.position(), p = smashon.momentum();
+  const PdgCode pdg = smashon.pdgcode();
   // Spin vector components as 4-vector and optional values
-  FourVector spin_vec(0.1, 0.2, 0.3, 0.4);
-  std::vector<std::string> opt_vals = {"0.1", "0.2", "0.3", "0.4"};
+  const FourVector spin_vec(0.1, 0.2, 0.3, 0.4);
+  const std::vector<std::string> opt_vals = {"0.1", "0.2", "0.3", "0.4"};
   list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(), r.x3(),
                                  Test::smashon_mass, p.x0(), p.x1(), p.x2(),
                                  p.x3(), opt_vals);
 
-  ParticleList plist = particles.copy_to_vector();
-  ParticleData created = plist.back();
+  const ParticleList plist = particles.copy_to_vector();
+  const ParticleData created = plist.back();
   compare_fourvector(created.spin_vector(), spin_vec);
 }
 

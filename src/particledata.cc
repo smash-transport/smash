@@ -13,6 +13,7 @@
 #include <iostream>
 #include <optional>
 #include <vector>
+#include <cassert>
 
 #include "smash/constants.h"
 #include "smash/iomanipulators.h"
@@ -95,20 +96,9 @@ void ParticleData::set_unpolarized_spin_vector() {
     return;
   }
 
-  // Check whether the spin vector is already set
-  if (!std::isnan(spin_vector_.x0()) || !std::isnan(spin_vector_.x1()) ||
-      !std::isnan(spin_vector_.x2()) || !std::isnan(spin_vector_.x3())) {
-    std::cout << "Spin vector already set for particle with index: " << index_
-              << std::endl;
-  }
-
   // Check whether the velocity of a particle is set and not nan
   const ThreeVector v = velocity();
-  if (std::isnan(v.x1()) || std::isnan(v.x2()) || std::isnan(v.x3())) {
-    throw std::runtime_error("Cannot set spin vector for particle with index " +
-                             std::to_string(index_) +
-                             " because velocity is not set.");
-  }
+  assert(!(std::isnan(v.x1()) || std::isnan(v.x2()) || std::isnan(v.x3())));
 
   /**
    * For finite-spin particles, we assign unpolarized spin vectors by sampling

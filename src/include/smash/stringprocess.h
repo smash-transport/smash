@@ -247,6 +247,7 @@ class StringProcess {
    * \param[in] use_monash_tune whether to use the monash tune for all string
    *            processes. This is recommended if one runs smash at LHC
    *            energies
+   * \param[in] spin_interaction_type Which type of spin interaction to use
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)

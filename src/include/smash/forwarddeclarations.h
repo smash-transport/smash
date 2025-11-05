@@ -261,9 +261,7 @@ enum class SpinInteractionType {
   /// All spin interactions
   On,
   /// No spin interactions
-  Off,
-  /// Spin flips in elastic collisions only
-  Elastic,
+  Off
 };
 
 /**

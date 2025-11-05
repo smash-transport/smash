@@ -359,15 +359,20 @@ class ParticleData {
    */
   int spin() const { return pdgcode().spin(); }
   /**
-   * Get the mean spin 4-vector (Pauli-Lubanski vector) of the particle.
-   * \return particle's mean spin 4-vector
+   * Get the mean spin 4-vector (Pauli–Lubanski vector) of the particle (const
+   * reference, no copy). \return particle's mean spin 4-vector
    */
-  FourVector spin_vector() const { return spin_vector_; }
+  const FourVector &spin_vector() const { return spin_vector_; }
   /**
-   * Set the mean spin 4-vector (Pauli-Lubanski vector) of the particle.
+   * Get the mean spin 4-vector (Pauli–Lubanski vector) of the particle (non
+   * const reference). \return particle's mean spin 4-vector
+   */
+  FourVector &spin_vector() { return spin_vector_; }
+  /**
+   * Set the mean spin 4-vector (Pauli–Lubanski vector) of the particle.
    * \param[in] s particle's mean spin 4-vector
    */
-  void set_spin_vector(const FourVector s) { spin_vector_ = s; }
+  void set_spin_vector(const FourVector &s) { spin_vector_ = s; }
   /**
    * Set a single component of the mean spin 4-vector (Pauli-Lubanski vector).
    * \param[in] index component index (0-3)

@@ -50,7 +50,6 @@ class ScatterAction : public Action {
                 bool is_total_parametrized = false,
                 const SpinInteractionType spin_interaction_type =
                     SpinInteractionType::Off);
-
   /**
    * Add a new collision channel.
    *
@@ -259,9 +258,6 @@ class ScatterAction : public Action {
    * a spin-flip in the y component of elastic scatterings if enabled.
    */
   void spin_interaction();
-
-  /// Boost the spin vectors of the outgoing particles after elastic scattering
-  void boost_spin_vectors_after_elastic_scattering();
 
   /**
    * \ingroup logging

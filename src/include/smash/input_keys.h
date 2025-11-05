@@ -497,8 +497,8 @@ struct InputSections {
  *
  * The subsection `Spin_Interactions` of the `Collision_Term` section can be
  * used to modify spin-interactions. The allowed keys are: `On`, which includes
- * all available spin interactions, `Off`, which excludes all spin interactions,
- * and `Elastic`, which includes a spin flip in elastic scatterings.
+ * all available spin interactions and `Off`, which excludes all spin
+ * interactions.
  *
  * For example:
  *\verbatim
@@ -2535,7 +2535,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_spin_interactions
-   * \optional_key{key_CT_spin_interactions_,Spin_Interactions,bool,false}
+   * \optional_key{key_CT_spin_interactions_,Spin_Interactions,string,"Off"}
    *
    * Whether or not to enable spin interactions in binary collisions.
    * \note So far we only include a spin flip in elastic scatterings.
