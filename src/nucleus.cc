@@ -25,15 +25,21 @@
 namespace smash {
 static constexpr int LNucleus = LogArea::Nucleus::id;
 
-Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest) {
+Nucleus::Nucleus(const std::map<PdgCode, int> &particle_list, int nTest,
+                 SpinInteractionType spin_interaction_type) {
   fill_from_list(particle_list, nTest);
   set_parameters_automatic();
   set_saturation_density(calculate_saturation_density());
+  if (spin_interaction_type != SpinInteractionType::Off) {
+    make_nucleus_unpolarized();
+  }
 }
 
 Nucleus::Nucleus(Configuration &config, int nTest) {
   assert(has_projectile_or_target(config));
   const bool is_projectile = is_about_projectile(config);
+  const SpinInteractionType spin_interaction_type =
+      config.take(InputKeys::collTerm_spinInteractions);
   const auto &[particles_key, diffusiveness_key, radius_key,
                saturation_key] = [&is_projectile]() {
     return is_projectile
@@ -51,6 +57,9 @@ Nucleus::Nucleus(Configuration &config, int nTest) {
   // Fill nuclei with particles.
   std::map<PdgCode, int> part = config.take(particles_key);
   fill_from_list(part, nTest);
+  if (spin_interaction_type != SpinInteractionType::Off) {
+    make_nucleus_unpolarized();
+  }
   // Look for user-defined values or take the default parameters.
   const bool is_diffusiveness_given = config.has_value(diffusiveness_key),
              is_radius_given = config.has_value(radius_key),

@@ -26,7 +26,8 @@ StringProcess::StringProcess(
     double stringz_a_leading, double stringz_b_leading, double stringz_a,
     double stringz_b, double string_sigma_T, double factor_t_form,
     bool mass_dependent_formation_times, double prob_proton_to_d_uu,
-    bool separate_fragment_baryon, double popcorn_rate, bool use_monash_tune)
+    bool separate_fragment_baryon, double popcorn_rate, bool use_monash_tune,
+    SpinInteractionType spin_interaction_type)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -48,7 +49,8 @@ StringProcess::StringProcess(
       mass_dependent_formation_times_(mass_dependent_formation_times),
       prob_proton_to_d_uu_(prob_proton_to_d_uu),
       separate_fragment_baryon_(separate_fragment_baryon),
-      use_monash_tune_(use_monash_tune) {
+      use_monash_tune_(use_monash_tune),
+      spin_interaction_type_(spin_interaction_type) {
   // setup and initialize pythia for fragmentation
   pythia_hadron_ = std::make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
@@ -306,6 +308,14 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
     NpartString_[0] = 0;
     return false;
   }
+
+  // Set an unpolarized spin vector for the new intermediate particles
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    for (ParticleData &new_particle : new_intermediate_particles) {
+      new_particle.set_unpolarized_spin_vector();
+    }
+  }
+
   NpartString_[0] =
       append_final_state(new_intermediate_particles, ustrXcom, evec);
 
@@ -315,6 +325,9 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
   new_particle.set_4momentum(pstrHcom);
   new_particle.set_cross_section_scaling_factor(1.);
   new_particle.set_formation_time(time_collision_);
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    new_particle.set_unpolarized_spin_vector();
+  }
   final_state_.push_back(new_particle);
 
   NpartFinal_ = NpartString_[0] + NpartString_[1];
@@ -379,6 +392,14 @@ bool StringProcess::make_final_state_2strings(
       NpartString_[i] = 0;
       return false;
     }
+
+    // Set an unpolarized spin vector for the new intermediate particles
+    if (spin_interaction_type_ != SpinInteractionType::Off) {
+      for (ParticleData &new_particle : new_intermediate_particles) {
+        new_particle.set_unpolarized_spin_vector();
+      }
+    }
+
     NpartString_[i] =
         append_final_state(new_intermediate_particles, ustr_com[i], evec);
     assert(nfrag == NpartString_[i]);
@@ -751,6 +772,13 @@ bool StringProcess::next_NDiffHard() {
       break;
     }
 
+    // Set an unpolarized spin vector for the new intermediate particles
+    if (spin_interaction_type_ != SpinInteractionType::Off) {
+      for (ParticleData &new_particle : new_intermediate_particles) {
+        new_particle.set_unpolarized_spin_vector();
+      }
+    }
+
     FourVector uString = FourVector(1., 0., 0., 0.);
     ThreeVector evec = find_forward_string ? evecBasisAB_[0] : -evecBasisAB_[0];
     int nfrag = append_final_state(new_intermediate_particles, uString, evec);
@@ -764,6 +792,9 @@ bool StringProcess::next_NDiffHard() {
     for (ParticleData data : new_non_hadron_particles) {
       data.set_cross_section_scaling_factor(1.);
       data.set_formation_time(time_collision_);
+      if (spin_interaction_type_ != SpinInteractionType::Off) {
+        data.set_unpolarized_spin_vector();
+      }
       final_state_.push_back(data);
     }
   } else {
@@ -1567,6 +1598,9 @@ bool StringProcess::next_BBbarAnn() {
       new_particle.set_4momentum(pcom_[i]);
       new_particle.set_cross_section_scaling_factor(1.);
       new_particle.set_formation_time(time_collision_);
+      if (spin_interaction_type_ != SpinInteractionType::Off) {
+        new_particle.set_unpolarized_spin_vector();
+      }
       final_state_.push_back(new_particle);
     }
     NpartFinal_ = NpartString_[0] + NpartString_[1];
@@ -1626,6 +1660,13 @@ bool StringProcess::next_BBbarAnn() {
       NpartString_[i] = 0;
       return false;
     }
+    // Set an unpolarized spin vector for the new intermediate particles
+    if (spin_interaction_type_ != SpinInteractionType::Off) {
+      for (ParticleData &intermediate_particle : new_intermediate_particles) {
+        intermediate_particle.set_unpolarized_spin_vector();
+      }
+    }
+
     NpartString_[i] =
         append_final_state(new_intermediate_particles, ustrcom[i], evec);
   }

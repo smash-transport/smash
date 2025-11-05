@@ -170,6 +170,16 @@ std::string to_string(ThermalizationAlgorithm algo);
 std::string to_string(CollisionCriterion c);
 
 /**
+ * Convert a SpinInteractionType enum value to its corresponding string.
+ *
+ * \param[in] type The SpinInteractionType enum value to convert.
+ *
+ * \return std::string Corresponding string representation.
+ * \throws std::invalid_argument If the enum value is unhandled.
+ */
+std::string to_string(SpinInteractionType type);
+
+/**
  * Convert a TotalCrossSectionStrategy enum value to its corresponding string.
  *
  * \param[in] s The TotalCrossSectionStrategy enum value to convert.

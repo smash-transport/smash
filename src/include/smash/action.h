@@ -350,6 +350,15 @@ class Action {
       double sqrts, const std::vector<double> &m,
       std::vector<FourVector> &sampled_momenta);
 
+  /**
+   * Assign an unpolarized spin vector to all outgoing particles.
+   *
+   * \attention Make sure to assign the spin vectors after the boosted
+   * 4-momentum of the outgoing particles has been set, as the function includes
+   * a boost to the lab frame.
+   */
+  void assign_unpolarized_spin_vector_to_outgoing_particles();
+
  protected:
   /// List with data of incoming particles.
   ParticleList incoming_particles_;

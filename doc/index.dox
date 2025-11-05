@@ -72,6 +72,7 @@
             \subpage doxypage_input_conf_ct_dileptons
             \subpage doxypage_input_conf_ct_photons
             \subpage doxypage_input_conf_ct_heavy_flavor
+            \subpage doxypage_input_conf_ct_spin_interactions
             </div>
             \page doxypage_input_conf_ct_pauliblocker Pauli blocking
             \page doxypage_input_conf_ct_string_transition String transition
@@ -79,6 +80,7 @@
             \page doxypage_input_conf_ct_dileptons Dileptons
             \page doxypage_input_conf_ct_photons Photons
             \page doxypage_input_conf_ct_heavy_flavor Heavy flavor
+            \page doxypage_input_conf_ct_spin_interactions Spin interactions
         \page doxypage_input_conf_modi Modi
             <div class="invisible-content">
             \subpage doxypage_input_conf_modi_collider
@@ -162,6 +164,8 @@
     \page doxypage_output_thermodyn ASCII thermodynamics output
     \page doxypage_output_thermodyn_lattice Thermodynamics lattice output
     \page doxypage_output_collisions_box_modus Collision output in box modus
+    \page doxypage_output_spin Spin output
+
 \page doxypage_smash_invocation SMASH invocation
 \ifnot user
 \page doxypage_unit_testing Unit testing

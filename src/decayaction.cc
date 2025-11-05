@@ -18,8 +18,11 @@ namespace smash {
 
 static constexpr int LDecayModes = LogArea::DecayModes::id;
 
-DecayAction::DecayAction(const ParticleData &p, double time)
-    : Action({p}, time), total_width_(0.) {}
+DecayAction::DecayAction(const ParticleData &p, double time,
+                         SpinInteractionType spin_interaction_type)
+    : Action({p}, time),
+      total_width_(0.),
+      spin_interaction_type_(spin_interaction_type) {}
 
 void DecayAction::add_decays(DecayBranchList pv) {
   add_processes<DecayBranch>(std::move(pv), decay_channels_, total_width_);
@@ -91,6 +94,11 @@ void DecayAction::generate_final_state() {
     if (core_in_incoming) {
       p.fluidize();
     }
+  }
+
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    // Set unpolarized spin vectors
+    assign_unpolarized_spin_vector_to_outgoing_particles();
   }
 }
 

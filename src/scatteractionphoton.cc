@@ -25,13 +25,15 @@ static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
 ScatterActionPhoton::ScatterActionPhoton(
     const ParticleList &in, const double time, const int n_frac_photons,
-    const double hadronic_cross_section_input)
+    const double hadronic_cross_section_input,
+    const SpinInteractionType spin_interaction_type)
     : ScatterAction(in[0], in[1], time),
       reac_(photon_reaction_type(in)),
       number_of_fractional_photons_(n_frac_photons),
       hadron_out_t_(outgoing_hadron_type(in)),
       hadron_out_mass_(sample_out_hadron_mass(hadron_out_t_)),
-      hadronic_cross_section_(hadronic_cross_section_input) {}
+      hadronic_cross_section_(hadronic_cross_section_input),
+      spin_interaction_type_(spin_interaction_type) {}
 
 ScatterActionPhoton::ReactionType ScatterActionPhoton::photon_reaction_type(
     const ParticleList &in) {
@@ -254,6 +256,10 @@ void ScatterActionPhoton::generate_final_state() {
     new_particle.set_4position(middle_point);
     new_particle.boost_momentum(
         -total_momentum_of_outgoing_particles().velocity());
+  }
+  // Set unpolarized spin vector for outgoing particles
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    assign_unpolarized_spin_vector_to_outgoing_particles();
   }
 
   const double E_Photon = outgoing_particles_[1].momentum()[0];

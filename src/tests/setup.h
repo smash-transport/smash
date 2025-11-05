@@ -128,6 +128,7 @@ inline ParticleData smashon(const Position &position, const Momentum &momentum,
   p.set_4position(position);
   p.set_4momentum(momentum);
   p.set_formation_time(position[0]);
+  p.set_unpolarized_spin_vector();
   return p;
 }
 /**
@@ -143,6 +144,7 @@ inline ParticleData smashon(const Momentum &momentum, const Position &position,
   p.set_4position(position);
   p.set_4momentum(momentum);
   p.set_formation_time(position[0]);
+  p.set_unpolarized_spin_vector();
   return p;
 }
 /**
@@ -253,16 +255,17 @@ inline ExperimentParameters default_parameters(
       strings,
       1.0,
       nnbar_treatment,
-      0.,           // low energy sigma_NN cut-off
-      false,        // potential_affect_threshold
-      -1.0,         // box_length
-      200.0,        // max. cross section
-      2.5,          // fixed min. cell length
-      1.0,          // cross section scaling
-      false,        // in thermodynamics outputs spectators are included
-      false,        // do non-strong decays
-      true,         // decay initial particles
-      std::nullopt  // use monash tune, not known
+      0.,     // low energy sigma_NN cut-off
+      false,  // potential_affect_threshold
+      -1.0,   // box_length
+      200.0,  // max. cross section
+      2.5,    // fixed min. cell length
+      1.0,    // cross section scaling
+      false,  // in thermodynamics outputs spectators are included
+      false,  // do weak decays
+      true,   // decay initial particles
+      SpinInteractionType::Off,  // no spin interactions
+      std::nullopt               // use monash tune, not known
   };
 }
 
@@ -292,6 +295,7 @@ inline ScatterActionsFinderParameters default_finder_parameters(
   config.set_value(InputKeys::collTerm_useAQM, use_AQM);
   config.set_value(InputKeys::collTerm_stringsWithProbability,
                    strings_with_probability);
+
   if (xs_strategy == TotalCrossSectionStrategy::BottomUp) {
     config.merge_yaml(InputKeys::collTerm_totXsStrategy.as_yaml("BottomUp"));
   } else if (xs_strategy == TotalCrossSectionStrategy::TopDown) {

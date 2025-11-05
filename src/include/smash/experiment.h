@@ -1056,7 +1056,7 @@ Experiment<Modus>::Experiment(Configuration &config,
     }
     action_finders_.emplace_back(std::make_unique<DecayActionsFinder>(
         parameters_.res_lifetime_factor, parameters_.do_non_strong_decays,
-        force_decays_));
+        force_decays_, parameters_.spin_interaction_type));
   }
   bool no_coll = config.take(InputKeys::collTerm_noCollisions);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
@@ -1409,6 +1409,31 @@ Experiment<Modus>::Experiment(Configuration &config,
    * is also available in ROOT format. Neither the initial nor the final
    * particle lists are printed, but the general structure for particle TTrees,
    * as described in \ref doxypage_output_root, is preserved.
+   */
+
+  /*!\Userguide
+   * \page doxypage_output_spin
+   * In order to enable spin output, two conditions have to be fulfilled:
+   * 1. Spin interactions have to be enabled in the collision term section of
+   * the configuration file.
+   * 2. The spin components `spin0`, `spinx`, `spiny` and `spinz` have to be
+   * specified in the `Quantities` list of the Particles output subsection.
+   * \see_key{key_output_particles_quantities_}
+   *
+   * Spin output is available in OSCAR2013 format. If spins are enabled, the
+   * resulting output file contains the four components of the mean spin
+   * (Pauli-Lubanski) vector \f$S^\mu\f$. The components of the mean spin vector
+   * are set in two different ways, depending on the mode, in which SMASH is
+   * used:
+   * #### SMASH Collider Modus
+   * In the collider mode, the components of the mean spin vector are sampled
+   * from a gaussian distribution with a mean value of 0 in the particle rest
+   * frame to ensure that the average polarization vanishes. This strategy
+   * guarantees that spectators do not contribute with an artificial
+   * polarization.
+   * #### SMASH List Mode
+   * In the list mode, the components of the mean spin vector are read from the
+   * input file.
    */
 
   // create outputs
@@ -2356,9 +2381,9 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     /* Time in the action constructor is relative to
      * current time of incoming */
     constexpr double action_time = 0.;
-    ScatterActionPhoton photon_act(action.incoming_particles(), action_time,
-                                   n_fractional_photons_,
-                                   action.get_total_weight());
+    ScatterActionPhoton photon_act(
+        action.incoming_particles(), action_time, n_fractional_photons_,
+        action.get_total_weight(), parameters_.spin_interaction_type);
 
     /**
      * Add a completely dummy process to the photon action. The only important
@@ -2385,9 +2410,9 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
      * current time of incoming */
     constexpr double action_time = 0.;
 
-    BremsstrahlungAction brems_act(action.incoming_particles(), action_time,
-                                   n_fractional_photons_,
-                                   action.get_total_weight());
+    BremsstrahlungAction brems_act(
+        action.incoming_particles(), action_time, n_fractional_photons_,
+        action.get_total_weight(), parameters_.spin_interaction_type);
 
     /**
      * Add a completely dummy process to the bremsstrahlung action. The only

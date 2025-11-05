@@ -475,6 +475,12 @@ void Action::sample_manybody_phasespace() {
   }
 }
 
+void Action::assign_unpolarized_spin_vector_to_outgoing_particles() {
+  for (ParticleData &p : outgoing_particles_) {
+    p.set_unpolarized_spin_vector();
+  }
+}
+
 double Action::check_conservation(const uint32_t id_process) const {
   QuantumNumbers before(incoming_particles_);
   QuantumNumbers after(outgoing_particles_);

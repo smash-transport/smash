@@ -1383,6 +1383,24 @@ class Configuration {
     }
 
     /**
+     * Set spin interaction type from configuration values.
+     *
+     * \return SpinInteractionType.
+     * \throw IncorrectTypeInAssignment in case a spin interaction type that is
+     * not available is provided as a configuration value.
+     */
+    operator SpinInteractionType() const {
+      const std::string s = operator std::string();
+      if (s == "On")
+        return SpinInteractionType::On;
+      if (s == "Off")
+        return SpinInteractionType::Off;
+      throw IncorrectTypeInAssignment("The value for key \"" +
+                                      std::string(key_) + "\" should be " +
+                                      "\"On\", \"Off\" " + "or \"Elastic\".");
+    }
+
+    /**
      * Set total cross section strategy from configuration values.
      *
      * \return TotalCrossSectionStrategy.

@@ -74,7 +74,9 @@ SphereModus::SphereModus(Configuration modus_config,
       jet_back_separation_(
           jet_back_ ? modus_config.take(
                           InputKeys::modi_sphere_jet_backToBackSeparation)
-                    : 0) {
+                    : 0),
+      spin_interaction_type_(
+          modus_config.take(InputKeys::collTerm_spinInteractions)) {
   if (!jet_back_ &&
       modus_config.has_value(InputKeys::modi_sphere_jet_backToBackSeparation)) {
     throw std::invalid_argument(
@@ -263,11 +265,15 @@ double SphereModus::initial_conditions(Particles *particles,
     }
   }
 
-  /* Make total 3-momentum 0 */
+  /* Make total 3-momentum in sphere 0 and set unpolarized spin vector if spin
+   * interactions are enabled */
   for (ParticleData &data : *particles) {
     data.set_4momentum(data.momentum().abs(),
                        data.momentum().threevec() -
                            momentum_total.threevec() / particles->size());
+    if (spin_interaction_type_ != SpinInteractionType::Off) {
+      data.set_unpolarized_spin_vector();
+    }
   }
 
   /* Add a single highly energetic particle in the center of the sphere (jet) */
@@ -288,6 +294,9 @@ double SphereModus::initial_conditions(Particles *particles,
           FourVector(start_time_, jet_pos_ - displacement));
       jet_antiparticle.set_4momentum(ParticleType::find(anti_pdg).mass(),
                                      ThreeVector(-jet_mom_, 0., 0.));
+    }
+    if (spin_interaction_type_ != SpinInteractionType::Off) {
+      jet_particle.set_unpolarized_spin_vector();
     }
   }
 

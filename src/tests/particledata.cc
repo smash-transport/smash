@@ -115,6 +115,9 @@ TEST(set_get) {
   ThreeVector M(1.1, 1.3, 1.5);
   p.set_4momentum(1.0, M);
   COMPARE(p.momentum(), FourVector(sqrt(1.0 + M.sqr()), 1.1, 1.3, 1.5));
+  const FourVector spin(1.1, 1.3, 1.5, 1.7);
+  p.set_spin_vector(spin);
+  COMPARE(p.spin_vector(), spin);
 }
 
 TEST(set_get2) {
@@ -172,4 +175,39 @@ TEST(parity) {
   COMPARE(p * n, n);
   COMPARE(p * p, p);
   COMPARE(n * n, p);
+}
+
+TEST(set_and_get_spin_vector_component) {
+  ParticleData p{ParticleType::find(smash::pdg::p)};
+  const std::array<double, 4> expected_components = {0.7, -13.4, 99.9, -0.01};
+  for (int i = 0; i < 4; i++) {
+    p.set_spin_vector_component(i, expected_components[i]);
+    COMPARE(p.spin_vector()[i], expected_components[i]);
+  }
+}
+
+// Test that setting unpolarized spin vectors results in a vanishing mean
+// (spatial) polarization in the particle rest frame.
+TEST(unpolarized_particle_initialization) {
+  const int number_samples = 1000000;
+  const double tolerance = 0.01;
+  FourVector mean_polarization;
+
+  for (int i = 0; i < number_samples; i++) {
+    ParticleData proton{ParticleType::find(smash::pdg::p)};
+    const ThreeVector three_mom(1.1 + random::normal(0.0, 0.5),
+                                1.3 + random::normal(0.0, 0.5),
+                                30.5 + random::normal(0.0, 0.5));
+    proton.set_4momentum(2.0, three_mom.x1(), three_mom.x2(), three_mom.x3());
+    proton.set_unpolarized_spin_vector();
+    // Boost to particle rest frame
+    FourVector restframe_polarization =
+        proton.spin_vector().lorentz_boost(-proton.velocity());
+    mean_polarization.operator+=(restframe_polarization);
+  }
+  mean_polarization.operator/=(number_samples);
+
+  VERIFY(mean_polarization.x1() < tolerance);
+  VERIFY(mean_polarization.x2() < tolerance);
+  VERIFY(mean_polarization.x3() < tolerance);
 }

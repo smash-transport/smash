@@ -417,6 +417,7 @@ struct InputSections {
  * - \ref doxypage_input_conf_ct_dileptons
  * - \ref doxypage_input_conf_ct_photons
  * - \ref doxypage_input_conf_ct_heavy_flavor
+ * - \ref doxypage_input_conf_ct_spin_interactions
  */
 
 /*!\Userguide
@@ -488,6 +489,21 @@ struct InputSections {
      Heavy_Flavor:
          AQM_Bottom_Suppression: 0.93
          AQM_Charm_Suppression: 0.8
+ \endverbatim
+ */
+
+/*!\Userguide
+ * \page doxypage_input_conf_ct_spin_interactions
+ *
+ * The subsection `Spin_Interactions` of the `Collision_Term` section can be
+ * used to modify spin-interactions. The allowed keys are: `On`, which includes
+ * all available spin interactions and `Off`, which excludes all spin
+ * interactions.
+ *
+ * For example:
+ *\verbatim
+ Collision_Term:
+     Spin_Interactions: On
  \endverbatim
  */
 
@@ -2516,6 +2532,21 @@ struct InputKeys {
       InputSections::collisionTerm + "Resonance_Lifetime_Modifier",
       1.0,
       {"1.8"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_spin_interactions
+   * \optional_key{key_CT_spin_interactions_,Spin_Interactions,string,"Off"}
+   *
+   * Whether or not to enable spin interactions in binary collisions.
+   * \note So far we only include a spin flip in elastic scatterings.
+   */
+  /**
+   * \see_key{key_CT_spin_interactions_}
+   */
+  inline static const Key<SpinInteractionType> collTerm_spinInteractions{
+      InputSections::collisionTerm + "Spin_Interactions",
+      SpinInteractionType::Off,
+      {"3.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -4720,6 +4751,10 @@ struct InputKeys {
    * - "time_last_coll" &rarr; Time when the last interaction happened.
    * - "pdg_mother1" &rarr; Parent of the particle.
    * - "pdg_mother2" &rarr; Second parent of the particle.
+   * - "spin0" &rarr; 0-th component of the spin vector.
+   * - "spin1" &rarr; 1-st component of the spin vector.
+   * - "spin2" &rarr; 2-nd component of the spin vector.
+   * - "spin3" &rarr; 3-rd component of the spin vector.
    *
    * Optional quantities that are not provided by the user as extra column in
    * the input file are set to their default value when SMASH reads in the input
@@ -6004,6 +6039,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<FluidizableProcessesBitSet>>,
       std::reference_wrapper<const Key<FluidizationType>>,
       std::reference_wrapper<const Key<MultiParticleReactionsBitSet>>,
+      std::reference_wrapper<const Key<SpinInteractionType>>,
       std::reference_wrapper<const Key<NNbarTreatment>>,
       std::reference_wrapper<const Key<OutputOnlyFinal>>,
       std::reference_wrapper<const Key<PdgCode>>,
@@ -6097,6 +6133,7 @@ struct InputKeys {
       std::cref(collTerm_noCollisions),
       std::cref(collTerm_onlyWarnForHighProbability),
       std::cref(collTerm_resonanceLifetimeModifier),
+      std::cref(collTerm_spinInteractions),
       std::cref(collTerm_strings),
       std::cref(collTerm_stringsWithProbability),
       std::cref(collTerm_twoToOne),

@@ -109,6 +109,9 @@ class ParticleData {
   /// \copydoc PdgCode::is_pion
   bool is_pion() const { return pdgcode().is_pion(); }
 
+  /// \copydoc PdgCode::is_Sigmastar
+  bool is_sigmastar() const { return pdgcode().is_Sigmastar(); }
+
   /**
    * Get the particle's pole mass ("on-shell").
    * \return pole mass of the particle [GeV]
@@ -355,7 +358,39 @@ class ParticleData {
    * \return particle's spin in multiples of 1/2
    */
   int spin() const { return pdgcode().spin(); }
+  /**
+   * Get the mean spin 4-vector (Pauli–Lubanski vector) of the particle (const
+   * reference, no copy). \return particle's mean spin 4-vector
+   */
+  const FourVector &spin_vector() const { return spin_vector_; }
+  /**
+   * Get the mean spin 4-vector (Pauli–Lubanski vector) of the particle (non
+   * const reference). \return particle's mean spin 4-vector
+   */
+  FourVector &spin_vector() { return spin_vector_; }
+  /**
+   * Set the mean spin 4-vector (Pauli–Lubanski vector) of the particle.
+   * \param[in] s particle's mean spin 4-vector
+   */
+  void set_spin_vector(const FourVector &s) { spin_vector_ = s; }
+  /**
+   * Set a single component of the mean spin 4-vector (Pauli-Lubanski vector).
+   * \param[in] index component index (0-3)
+   * \param[in] value component value
+   */
+  void set_spin_vector_component(int index, double value) {
+    if (index < 0 || index > 3) {
+      throw std::out_of_range("Invalid spin vector component index");
+    }
+    spin_vector_[index] = value;
+  }
 
+  /**
+   * Set the 4 components of the spin vector such that the particle is
+   * unpolarized. This function is used only to initialize the spin vector of
+   * particles at creation.
+   */
+  void set_unpolarized_spin_vector();
   /// Setter for belongs_to label
   void set_belongs_to(BelongsTo label) { belongs_to_ = label; }
   /// Getter for belongs_to label
@@ -439,6 +474,7 @@ class ParticleData {
     dst.history_ = history_;
     dst.momentum_ = momentum_;
     dst.position_ = position_;
+    dst.spin_vector_ = spin_vector_;
     dst.formation_time_ = formation_time_;
     dst.initial_xsec_scaling_factor_ = initial_xsec_scaling_factor_;
     dst.begin_formation_time_ = begin_formation_time_;
@@ -495,6 +531,13 @@ class ParticleData {
   FourVector momentum_;
   /// position in space: x0, x1, x2, x3 as t, x, y, z
   FourVector position_;
+  /**
+   * Pauli-Lubanski vector (mean spin 4-vector) of the particle. Each
+   * component is initialized with NaN (double) to indicate that the spin vector
+   * has not been set.
+   */
+  FourVector spin_vector_ = FourVector(smash_NaN<double>, smash_NaN<double>,
+                                       smash_NaN<double>, smash_NaN<double>);
   /** Formation time at which the particle is fully formed
    *  given as an absolute value in the computational frame
    */

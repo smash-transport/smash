@@ -18,11 +18,13 @@ static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
 BremsstrahlungAction::BremsstrahlungAction(
     const ParticleList &in, const double time, const int n_frac_photons,
-    const double hadronic_cross_section_input)
+    const double hadronic_cross_section_input,
+    const SpinInteractionType spin_interaction_type)
     : ScatterAction(in[0], in[1], time),
       reac_(bremsstrahlung_reaction_type(in)),
       number_of_fractional_photons_(n_frac_photons),
-      hadronic_cross_section_(hadronic_cross_section_input) {}
+      hadronic_cross_section_(hadronic_cross_section_input),
+      spin_interaction_type_(spin_interaction_type) {}
 
 BremsstrahlungAction::ReactionType
 BremsstrahlungAction::bremsstrahlung_reaction_type(const ParticleList &in) {
@@ -134,6 +136,11 @@ void BremsstrahlungAction::generate_final_state() {
     new_particle.set_4position(interaction_point);
     new_particle.boost_momentum(
         -total_momentum_of_outgoing_particles().velocity());
+  }
+
+  // Set unpolarized spin vectors
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    assign_unpolarized_spin_vector_to_outgoing_particles();
   }
 
   // Photons are not really part of the normal processes, so we have to set a

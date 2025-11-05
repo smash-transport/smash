@@ -564,6 +564,67 @@ TEST(try_create_particle_func) {
   }
 }
 
+TEST(try_create_particle_with_spin_func) {
+  // Create a ListModus with spin interactions enabled
+  const ExperimentParameters parameters_with_spin{
+      std::make_unique<UniformClock>(0., 0.1, 300.0),
+      std::make_unique<UniformClock>(0., 1., 300.0),
+      1,  // ensembles
+      1,  // testparticles
+      DerivativesMode::CovariantGaussian,
+      RestFrameDensityDerivativesMode::Off,
+      FieldDerivativesMode::ChainRule,
+      SmearingMode::CovariantGaussian,
+      1.0,
+      4.0,
+      0.333333,
+      2.0,
+      CollisionCriterion::Geometric,
+      true,
+      Test::all_reactions_included(),
+      Test::no_multiparticle_reactions(),
+      false,  // strings
+      1.0,
+      NNbarTreatment::NoAnnihilation,
+      0.,
+      false,
+      -1.0,
+      200.0,
+      2.5,
+      1.0,
+      false,
+      false,
+      true,
+      SpinInteractionType::On,
+      std::nullopt};
+
+  Configuration config{R"(
+    Modi:
+      List:
+        File_Directory: ToBeSet
+        File_Prefix: event
+    )"};
+  config.set_value(InputKeys::modi_list_fileDirectory, testoutputpath.string());
+  config.set_value(
+      InputKeys::modi_list_optionalQuantities,
+      std::vector<std::string>{"spin0", "spinx", "spiny", "spinz"});
+  ListModus list_modus = ListModus(std::move(config), parameters_with_spin);
+  Particles particles;
+  const ParticleData smashon = Test::smashon_random();
+  const FourVector r = smashon.position(), p = smashon.momentum();
+  const PdgCode pdg = smashon.pdgcode();
+  // Spin vector components as 4-vector and optional values
+  const FourVector spin_vec(0.1, 0.2, 0.3, 0.4);
+  const std::vector<std::string> opt_vals = {"0.1", "0.2", "0.3", "0.4"};
+  list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(), r.x3(),
+                                 Test::smashon_mass, p.x0(), p.x1(), p.x2(),
+                                 p.x3(), opt_vals);
+
+  const ParticleList plist = particles.copy_to_vector();
+  const ParticleData created = plist.back();
+  compare_fourvector(created.spin_vector(), spin_vec);
+}
+
 TEST_CATCH(create_particle_with_nan, std::invalid_argument) {
   ListModus list_modus = create_list_modus_for_test();
   Particles particles;

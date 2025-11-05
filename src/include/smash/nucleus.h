@@ -47,8 +47,11 @@ class Nucleus {
    * \param[in] particle_list std::map, which maps PdgCode and count
    * of this particle.
    * \param[in] nTest Number of test particles.
+   * \param[in] spin_interaction_type whether to use spin interactions.
    */
-  Nucleus(const std::map<PdgCode, int> &particle_list, int nTest);
+  Nucleus(const std::map<PdgCode, int> &particle_list, int nTest,
+          SpinInteractionType spin_interaction_type = SpinInteractionType::Off);
+
   virtual ~Nucleus() = default;
 
   /**
@@ -273,6 +276,13 @@ class Nucleus {
   double proton_radius_ = 1.2;
   /// Number of testparticles per physical particle
   size_t testparticles_ = 1;
+
+  /// Set unpolarized spin vectors for all particles in the nucleus
+  void make_nucleus_unpolarized() {
+    for (auto &particle : particles_) {
+      particle.set_unpolarized_spin_vector();
+    }
+  }
 
  protected:
   /// Particles associated with this nucleus.

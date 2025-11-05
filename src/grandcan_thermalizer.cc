@@ -402,7 +402,8 @@ void GrandCanThermalizer::thermalize_BF_algo(QuantumNumbers &conserved_initial,
 }
 
 void GrandCanThermalizer::thermalize_mode_algo(
-    QuantumNumbers &conserved_initial, double time) {
+    QuantumNumbers &conserved_initial, double time,
+    SpinInteractionType spin_interaction_type) {
   double energy = 0.0;
   int S_plus = 0, S_minus = 0, B_plus = 0, B_minus = 0, E_plus = 0, E_minus = 0;
   // Mode 1: sample until energy is conserved, take only strangeness < 0
@@ -410,7 +411,8 @@ void GrandCanThermalizer::thermalize_mode_algo(
   compute_N_in_cells_mode_algo(condition1);
   while (conserved_initial.momentum().x0() > energy ||
          S_plus < conserved_initial.strangeness()) {
-    ParticleData p = sample_in_random_cell_mode_algo(time, condition1);
+    ParticleData p = sample_in_random_cell_mode_algo(time, condition1,
+                                                     spin_interaction_type);
     energy += p.momentum().x0();
     if (p.pdgcode().strangeness() > 0) {
       sampled_list_.push_back(p);
@@ -422,7 +424,8 @@ void GrandCanThermalizer::thermalize_mode_algo(
   auto condition2 = [](int S, int, int) { return (S < 0); };
   compute_N_in_cells_mode_algo(condition2);
   while (S_plus + S_minus > conserved_initial.strangeness()) {
-    ParticleData p = sample_in_random_cell_mode_algo(time, condition2);
+    ParticleData p = sample_in_random_cell_mode_algo(time, condition2,
+                                                     spin_interaction_type);
     const int s_part = p.pdgcode().strangeness();
     // Do not allow particles with S = -2 or -3 spoil the total sum
     if (S_plus + S_minus + s_part >= conserved_initial.strangeness()) {
@@ -439,7 +442,8 @@ void GrandCanThermalizer::thermalize_mode_algo(
   compute_N_in_cells_mode_algo(condition3);
   while (conserved_remaining.momentum().x0() > energy ||
          B_plus < conserved_remaining.baryon_number()) {
-    ParticleData p = sample_in_random_cell_mode_algo(time, condition3);
+    ParticleData p = sample_in_random_cell_mode_algo(time, condition3,
+                                                     spin_interaction_type);
     energy += p.momentum().x0();
     if (p.pdgcode().baryon_number() > 0) {
       sampled_list_.push_back(p);
@@ -451,7 +455,8 @@ void GrandCanThermalizer::thermalize_mode_algo(
   auto condition4 = [](int S, int B, int) { return (S == 0) && (B < 0); };
   compute_N_in_cells_mode_algo(condition4);
   while (B_plus + B_minus > conserved_remaining.baryon_number()) {
-    ParticleData p = sample_in_random_cell_mode_algo(time, condition4);
+    ParticleData p = sample_in_random_cell_mode_algo(time, condition4,
+                                                     spin_interaction_type);
     const int bar = p.pdgcode().baryon_number();
     if (B_plus + B_minus + bar >= conserved_remaining.baryon_number()) {
       sampled_list_.push_back(p);
@@ -466,7 +471,8 @@ void GrandCanThermalizer::thermalize_mode_algo(
   compute_N_in_cells_mode_algo(condition5);
   while (conserved_remaining.momentum().x0() > energy ||
          E_plus < conserved_remaining.charge()) {
-    ParticleData p = sample_in_random_cell_mode_algo(time, condition5);
+    ParticleData p = sample_in_random_cell_mode_algo(time, condition5,
+                                                     spin_interaction_type);
     energy += p.momentum().x0();
     if (p.pdgcode().charge() > 0) {
       sampled_list_.push_back(p);
@@ -480,7 +486,8 @@ void GrandCanThermalizer::thermalize_mode_algo(
   };
   compute_N_in_cells_mode_algo(condition6);
   while (E_plus + E_minus > conserved_remaining.charge()) {
-    ParticleData p = sample_in_random_cell_mode_algo(time, condition6);
+    ParticleData p = sample_in_random_cell_mode_algo(time, condition6,
+                                                     spin_interaction_type);
     const int charge = p.pdgcode().charge();
     if (E_plus + E_minus + charge >= conserved_remaining.charge()) {
       sampled_list_.push_back(p);
@@ -496,14 +503,16 @@ void GrandCanThermalizer::thermalize_mode_algo(
   energy = 0.0;
   compute_N_in_cells_mode_algo(condition7);
   while (conserved_remaining.momentum().x0() > energy) {
-    ParticleData p = sample_in_random_cell_mode_algo(time, condition7);
+    ParticleData p = sample_in_random_cell_mode_algo(time, condition7,
+                                                     spin_interaction_type);
     sampled_list_.push_back(p);
     energy += p.momentum().x0();
   }
 }
 
-void GrandCanThermalizer::thermalize(const Particles &particles, double time,
-                                     int ntest) {
+void GrandCanThermalizer::thermalize(
+    const Particles &particles, double time, int ntest,
+    SpinInteractionType spin_interaction_type) {
   logg[LGrandcanThermalizer].info("Starting forced thermalization, time ", time,
                                   " fm");
   to_remove_.clear();
@@ -556,7 +565,7 @@ void GrandCanThermalizer::thermalize(const Particles &particles, double time,
       thermalize_BF_algo(conserved_initial, time, ntest);
       break;
     case ThermalizationAlgorithm::ModeSampling:
-      thermalize_mode_algo(conserved_initial, time);
+      thermalize_mode_algo(conserved_initial, time, spin_interaction_type);
       break;
     default:
       throw std::invalid_argument(

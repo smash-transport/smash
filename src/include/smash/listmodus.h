@@ -211,6 +211,14 @@ class ListModus : public ModusDefault {
   void validate_list_of_particles_of_all_events_() const;
 
   /**
+   * Validate the optional fields. At the moment, it ensures that if at least
+   * one spin component is given, all four are given.
+   *
+   * \throw std::invalid_argument if not all spin components are given.
+   */
+  void validate_optional_fields_() const;
+
+  /**
    * Judge whether times are the same for all the particles; don't do
    * anti-freestreaming if all particles start already at the same time.
    *
@@ -263,6 +271,9 @@ class ListModus : public ModusDefault {
   /// Auxiliary flag to warn about off-shell particles only once per instance
   bool warn_about_off_shell_particles_ = true;
 
+  /// Auxiliary flag to indicate the type of spin interaction used
+  SpinInteractionType spin_interaction_type_ = SpinInteractionType::Off;
+
   /**
    * Flag to suppress some error messages. This is used during the validation
    * of particles in all events, because there we do not know how many events
@@ -273,7 +284,6 @@ class ListModus : public ModusDefault {
 
   /**
    * \ingroup logging
-   *
    * Writes the initial state for the List to the output stream.
    *
    * \param[in] out The ostream into which to output

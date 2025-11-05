@@ -204,6 +204,9 @@ class StringProcess {
    */
   Pythia8::Event event_intermediate_;
 
+  /// Spin interaction type
+  SpinInteractionType spin_interaction_type_;
+
  public:
   // clang-format off
 
@@ -244,6 +247,7 @@ class StringProcess {
    * \param[in] use_monash_tune whether to use the monash tune for all string
    *            processes. This is recommended if one runs smash at LHC
    *            energies
+   * \param[in] spin_interaction_type Which type of spin interaction to use
    *
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
@@ -263,7 +267,9 @@ class StringProcess {
                 bool mass_dependent_formation_times,
                 double prob_proton_to_d_uu,
                 bool separate_fragment_baryon, double popcorn_rate,
-                bool use_monash_tune);
+                bool use_monash_tune,
+                SpinInteractionType spin_interaction_type =
+                  SpinInteractionType::Off);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines

@@ -35,12 +35,15 @@ class ScatterActionPhoton : public ScatterAction {
    *                            scattering.
    * \param[in] hadronic_cross_section_input Cross-section of
    *                                          underlying hadronic cross-section.
+   * \param[in] spin_interaction_type Which type of spin interaction to use
    * \return The constructed object.
    */
 
   ScatterActionPhoton(const ParticleList &in, const double time,
                       const int n_frac_photons,
-                      const double hadronic_cross_section_input);
+                      const double hadronic_cross_section_input,
+                      const SpinInteractionType spin_interaction_type =
+                          SpinInteractionType::Off);
 
   /**
    * Create the photon final state and write to output.
@@ -227,6 +230,9 @@ class ScatterActionPhoton : public ScatterAction {
 
   /// Total hadronic cross section
   const double hadronic_cross_section_;
+
+  /// Type of spin interaction to use
+  const SpinInteractionType spin_interaction_type_;
 
   /**
    * Find the mass of the participating rho-particle.

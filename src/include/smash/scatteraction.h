@@ -42,12 +42,14 @@ class ScatterAction : public Action {
    *            the wall in a box. If negative, then there is no wrapping.
    * \param[in] is_total_parametrized Whether the total cross section used for
    * collision finding is parametrized
+   * \param[in] spin_interaction_type Which type of spin interaction to use
    */
   ScatterAction(const ParticleData& in_part1, const ParticleData& in_part2,
                 double time, bool isotropic = false,
                 double string_formation_time = 1.0, double box_length = -1.0,
-                bool is_total_parametrized = false);
-
+                bool is_total_parametrized = false,
+                const SpinInteractionType spin_interaction_type =
+                    SpinInteractionType::Off);
   /**
    * Add a new collision channel.
    *
@@ -252,6 +254,12 @@ class ScatterAction : public Action {
   void string_excitation();
 
   /**
+   * Perform spin interaction in binary interactions. At the moment, we include
+   * a spin-flip in the y component of elastic scatterings if enabled.
+   */
+  void spin_interaction();
+
+  /**
    * \ingroup logging
    * Writes information about this scatter action to the \p out stream.
    */
@@ -317,6 +325,9 @@ class ScatterAction : public Action {
 
   /// If cross section is parametrized, store the value
   std::optional<double> parametrized_total_cross_section_ = std::nullopt;
+
+  /// What kind of spin interaction to use
+  SpinInteractionType spin_interaction_type_ = SpinInteractionType::Off;
 
   /// Lock for calling add_all_scatterings only once
   bool were_processes_added_ = false;

@@ -41,9 +41,13 @@ class DeformedNucleus : public Nucleus {
    * Constructor for DeformedNucles which takes a particle list and the number
    * of testparticles. This constructor is only used for testing purposes.
    * \param[in] particle_list Map with PDGCode and number of particles which
-   * make up the nucleus \param[in] nTest number of testparticles
+   * make up the nucleus
+   * \param[in] nTest number of testparticles
+   * \param[in] spin_interaction_type which type of spin interaction to use
    */
-  DeformedNucleus(const std::map<PdgCode, int> &particle_list, int nTest);
+  DeformedNucleus(
+      const std::map<PdgCode, int> &particle_list, int nTest,
+      SpinInteractionType spin_interaction_type = SpinInteractionType::Off);
   /**
    * Constructor for DeformedNucleus, that needs the configuration parameters
    * from the inputfile and the number of testparticles

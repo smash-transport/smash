@@ -170,6 +170,8 @@ class SphereModus : public ModusDefault {
    * user if jet_back_ is true
    */
   const double jet_back_separation_ = smash_NaN<double>;
+  /// Spin interaction type
+  const SpinInteractionType spin_interaction_type_;
   /**\ingroup logging
    * Writes the initial state for the Sphere to the output stream.
    *

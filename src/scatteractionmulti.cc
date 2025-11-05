@@ -22,9 +22,12 @@
 namespace smash {
 static constexpr int LScatterActionMulti = LogArea::ScatterActionMulti::id;
 
-ScatterActionMulti::ScatterActionMulti(const ParticleList& in_plist,
-                                       double time)
-    : Action(in_plist, time), total_probability_(0.) {}
+ScatterActionMulti::ScatterActionMulti(
+    const ParticleList& in_plist, double time,
+    const SpinInteractionType spin_interaction_type)
+    : Action(in_plist, time),
+      total_probability_(0.),
+      spin_interaction_type_(spin_interaction_type) {}
 
 void ScatterActionMulti::add_reaction(CollisionBranchPtr p) {
   add_process<CollisionBranch>(p, reaction_channels_, total_probability_);
@@ -590,6 +593,9 @@ void ScatterActionMulti::annihilation() {
       total_momentum_of_outgoing_particles().abs(), 0., 0., 0.);
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    assign_unpolarized_spin_vector_to_outgoing_particles();
+  }
 
   logg[LScatterActionMulti].debug("Momentum of the new particle: ",
                                   outgoing_particles_[0].momentum());
@@ -599,6 +605,9 @@ void ScatterActionMulti::n_to_two() {
   sample_2body_phasespace();
   // Make sure to assign formation times before boost to the computational frame
   assign_formation_time_to_outgoing_particles();
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    assign_unpolarized_spin_vector_to_outgoing_particles();
+  }
   logg[LScatterActionMulti].debug(incoming_particles_.size(),
                                   "->2 scattering:", incoming_particles_,
                                   " -> ", outgoing_particles_);

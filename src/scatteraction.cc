@@ -26,14 +26,18 @@ namespace smash {
 static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
 ScatterAction::ScatterAction(const ParticleData &in_part_a,
-                             const ParticleData &in_part_b, double time,
-                             bool isotropic, double string_formation_time,
-                             double box_length, bool is_total_parametrized)
+                             const ParticleData &in_part_b, const double time,
+                             const bool isotropic,
+                             const double string_formation_time,
+                             const double box_length,
+                             const bool is_total_parametrized,
+                             const SpinInteractionType spin_interaction_type)
     : Action({in_part_a, in_part_b}, time),
       sum_of_partial_cross_sections_(0.),
       isotropic_(isotropic),
       string_formation_time_(string_formation_time),
-      is_total_parametrized_(is_total_parametrized) {
+      is_total_parametrized_(is_total_parametrized),
+      spin_interaction_type_(spin_interaction_type) {
   box_length_ = box_length;
   if (is_total_parametrized_) {
     parametrized_total_cross_section_ = smash_NaN<double>;
@@ -71,6 +75,7 @@ void ScatterAction::generate_final_state() {
     case ProcessType::Elastic:
       /* 2->2 elastic scattering */
       elastic_scattering();
+      spin_interaction();
       break;
     case ProcessType::TwoToOne:
       /* resonance formation */
@@ -80,6 +85,7 @@ void ScatterAction::generate_final_state() {
       /* 2->2 inelastic scattering */
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
+      spin_interaction();
       break;
     case ProcessType::TwoToThree:
     case ProcessType::TwoToFour:
@@ -614,11 +620,17 @@ void ScatterAction::inelastic_scattering() {
   // create new particles
   sample_2body_phasespace();
   assign_formation_time_to_outgoing_particles();
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    assign_unpolarized_spin_vector_to_outgoing_particles();
+  }
 }
 
 void ScatterAction::two_to_many_scattering() {
   sample_manybody_phasespace();
   assign_formation_time_to_outgoing_particles();
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    assign_unpolarized_spin_vector_to_outgoing_particles();
+  }
   logg[LScatterAction].debug("2->", outgoing_particles_.size(),
                              " scattering:", incoming_particles_, " -> ",
                              outgoing_particles_);
@@ -638,6 +650,9 @@ void ScatterAction::resonance_formation() {
   outgoing_particles_[0].set_4momentum(
       total_momentum_of_outgoing_particles().abs(), 0., 0., 0.);
   assign_formation_time_to_outgoing_particles();
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    assign_unpolarized_spin_vector_to_outgoing_particles();
+  }
   /* this momentum is evaluated in the computational frame. */
   logg[LScatterAction].debug("Momentum of the new particle: ",
                              outgoing_particles_[0].momentum());
@@ -752,6 +767,86 @@ void ScatterAction::string_excitation() {
       }
     } else {
       create_string_final_state();
+    }
+  }
+}
+
+static void boost_spin_vectors_after_elastic_scattering(
+    ParticleData &outgoing_particle_a, ParticleData &outgoing_particle_b) {
+  // Boost spin vectors
+  outgoing_particle_a.set_spin_vector(
+      outgoing_particle_a.spin_vector().lorentz_boost(
+          outgoing_particle_a.velocity()));
+  outgoing_particle_b.set_spin_vector(
+      outgoing_particle_b.spin_vector().lorentz_boost(
+          outgoing_particle_b.velocity()));
+}
+
+void ScatterAction::spin_interaction() {
+  if (spin_interaction_type_ != SpinInteractionType::Off) {
+    /* 2->2 elastic scattering */
+    if (process_type_ == ProcessType::Elastic) {
+      // Final boost to the outgoing particle momenta
+      boost_spin_vectors_after_elastic_scattering(outgoing_particles_[0],
+                                                  outgoing_particles_[1]);
+    }
+
+    /* 2->1 resonance formation */
+    if (process_type_ == ProcessType::TwoToOne) {
+      /*
+       * @brief Λ+π → Σ* resonance formation with Λ–spin bookkeeping.
+       *
+       * We do not simulate a direct inelastic Λ+π scattering; instead we form a
+       * Σ* resonance and let it decay later. To preserve Λ polarization per
+       * arXiv:2404.15890v2, we treat the Σ* spin vector as a proxy for the
+       * would-be outgoing Λ spin: at formation, we set the Σ* spin to the
+       * incoming Λ spin and apply a possible spin flip according to the
+       * Λ–flip/non-flip fractions extracted from the paper. On Σ* → Λ+π decay,
+       * the Σ* spin vector is copied to the Λ, thus transporting Λ polarization
+       * through the resonance stage.
+       */
+      // Identify if the outgoing resonance is a Σ*
+      if (outgoing_particles_[0].is_sigmastar()) {
+        // Check that one of the incoming particles is a Λ and the other a π
+        const bool has_lambda = incoming_particles_[0].pdgcode().is_Lambda() ||
+                                incoming_particles_[1].pdgcode().is_Lambda();
+        const bool has_pion = incoming_particles_[0].is_pion() ||
+                              incoming_particles_[1].is_pion();
+        if (has_lambda && has_pion) {
+          auto &lambda = (incoming_particles_[0].pdgcode().is_Lambda())
+                             ? incoming_particles_[0]
+                             : incoming_particles_[1];
+          auto &sigma_star = outgoing_particles_[0];
+
+          // Perform spin flip with probability of 2/9
+          int random_int = random::uniform_int(1, 9);
+          FourVector final_spin_vector = lambda.spin_vector();
+
+          if (random_int <= 7) {
+            // No spin flip
+            final_spin_vector = final_spin_vector.lorentz_boost(
+                outgoing_particles_[0].velocity());
+            outgoing_particles_[0].set_spin_vector(final_spin_vector);
+          } else {
+            // Spin flip in Lambda rest frame
+            ThreeVector lambda_velocity = lambda.velocity();
+            final_spin_vector =
+                final_spin_vector.lorentz_boost(lambda_velocity);
+
+            // Flip the spatial spin vector components
+            final_spin_vector[1] = -final_spin_vector[1];
+            final_spin_vector[2] = -final_spin_vector[2];
+            final_spin_vector[3] = -final_spin_vector[3];
+
+            // Boost back to computational frame and to Sigma* frame
+            final_spin_vector =
+                final_spin_vector.lorentz_boost(-lambda_velocity);
+            final_spin_vector =
+                final_spin_vector.lorentz_boost(sigma_star.velocity());
+            sigma_star.set_spin_vector(final_spin_vector);
+          }
+        }
+      }
     }
   }
 }

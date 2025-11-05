@@ -223,6 +223,16 @@ std::string to_string(CollisionCriterion c) {
   throw_unhandled_enum("CollisionCriterion", static_cast<int>(c));
 }
 
+std::string to_string(SpinInteractionType type) {
+  switch (type) {
+    case SpinInteractionType::On:
+      return "On";
+    case SpinInteractionType::Off:
+      return "Off";
+  }
+  throw_unhandled_enum("SpinInteractionType", static_cast<int>(type));
+}
+
 std::string to_string(TotalCrossSectionStrategy s) {
   switch (s) {
     case TotalCrossSectionStrategy::BottomUp:
