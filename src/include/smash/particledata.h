@@ -109,7 +109,7 @@ class ParticleData {
   /// \copydoc PdgCode::is_pion
   bool is_pion() const { return pdgcode().is_pion(); }
 
-  /// \copydoc PdgCode::is_sigmastar
+  /// \copydoc PdgCode::is_Sigmastar
   bool is_sigmastar() const { return pdgcode().is_Sigmastar(); }
 
   /**

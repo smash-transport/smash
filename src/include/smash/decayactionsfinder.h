@@ -32,6 +32,7 @@ class DecayActionsFinder : public ActionFinderInterface {
    *                                resonance lifetimes; default is 1
    * \param[in] do_non_strong_decays whether to do non-strong decays at the end
    * \param[in] force_decays_at_end whether to enforce decays at the end
+   * \param[in] spin_interaction_type Which type of spin interaction to use
    */
   explicit DecayActionsFinder(double res_lifetime_factor,
                               bool do_non_strong_decays,

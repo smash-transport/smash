@@ -33,6 +33,7 @@ class DecayAction : public Action {
    *
    * \param[in] p The particle that should decay if the action is performed.
    * \param[in] time Time at which the action is supposed to take place
+   * \param[in] spin_interaction_type Which type of spin interaction to use
    */
   DecayAction(
       const ParticleData &p, double time,
