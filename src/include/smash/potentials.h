@@ -125,47 +125,54 @@ class Potentials {
     };
     RootSolver1D root_solver{root_equation};
     constexpr std::size_t max_number_root_solver_iterations = 100000;
-    constexpr double half_interval_width = 300;  // GeV
+    constexpr double half_interval_width = 100;  // GeV
     constexpr std::array<double, 3> scanning_resolutions = {1.0, 0.5, 0.1};
     const double initial_guess = std::sqrt(mass * mass + momentum * momentum);
-    const double upper_bound = initial_guess - half_interval_width;
-    const double lower_bound = initial_guess + half_interval_width;
+    const double upper_bound = initial_guess + half_interval_width;
+    const double lower_bound = initial_guess - half_interval_width;
+    logg[LPotentials].debug() << "Trying to find a root for potentials around "
+                              << initial_guess << " GeV in the range ["
+                              << lower_bound << ", " << upper_bound << "] GeV";
     for (const auto &scan_resolution : scanning_resolutions) {
-      logg[LPotentials].debug()
-          << "Trying to find a root for potentials around " << initial_guess
-          << " GeV using a resolution of " << scan_resolution << " GeV.";
+      logg[LPotentials].debug() << "Exploring interval with a resolution of "
+                                << scan_resolution << " GeV";
       std::pair<double, double> x_range = {initial_guess - scan_resolution,
                                            initial_guess + scan_resolution};
+      logg[LPotentials].debug()
+          << "x_range: [" << x_range.first << ", " << x_range.second << "] GeV";
       while (true) {
         auto calc_frame_energy = root_solver.try_find_root(
             x_range.first, x_range.second, max_number_root_solver_iterations);
         if (calc_frame_energy) {
           return *calc_frame_energy;
         } else {
-          logg[LPotentials].trace() << "Adjusting x_range: [" << x_range.first
-                                    << ", " << x_range.second << "]  --->  ";
-          bool go_right = (x_range.second >= lower_bound)
-                              ? false
-                              : random::uniform_int(0, 1);
-          if (go_right) {
-            x_range.second += scan_resolution;
-            logg[LPotentials].trace()
-                << "[" << x_range.first << ", " << x_range.second << "]\n";
-          } else if (x_range.first <= upper_bound) {
+          const bool is_possible_to_go_right = (x_range.second < upper_bound);
+          const bool is_possible_to_go_left = (x_range.first > lower_bound);
+          // The following logic might be compacted, but it would be much harder
+          // to read and follow, hence accept here a trivial duplication of code
+          if (!is_possible_to_go_left && !is_possible_to_go_right) {
             break;
-          } else {
+          } else if (!is_possible_to_go_left) {
+            x_range.second += scan_resolution;
+          } else if (!is_possible_to_go_right) {
             x_range.first -= scan_resolution;
-            logg[LPotentials].trace()
-                << "[" << x_range.first << ", " << x_range.second << "]\n";
+          } else {
+            const bool go_right = random::uniform_int(0, 1);
+            if (go_right) {
+              x_range.second += scan_resolution;
+            } else {
+              x_range.first -= scan_resolution;
+            }
           }
+          logg[LPotentials].trace() << "x_range: [" << x_range.first << ", "
+                                    << x_range.second << "] GeV";
         }
       }
       logg[LPotentials].debug()
-          << "Did not find any sub-range with a root in the interval ["
-          << x_range.first << " GeV ," << x_range.second << " GeV].";
+          << "Did not find any sub-range with a root scanning the interval ["
+          << x_range.first << ", " << x_range.second << "] GeV";
     }
-
-    logg[LPotentials].fatal(
+    logg[LPotentials].error(
         "Failed to find root for momentum-dependent potentials.");
     throw std::runtime_error("Unable to continue simulation.");
   }
