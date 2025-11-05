@@ -98,9 +98,9 @@ OscarOutput<Format, Contents>::OscarOutput(
   }
   if (Format == ASCII || Format == OscarFormat2013 ||
       Format == OscarFormat2013Extended) {
-    std::fprintf(file_.get(), "#!%s %s %s\n", format_name.c_str(), name.c_str(),
+    std::fprintf(file_.get(), "#!%s %s %s", format_name.c_str(), name.c_str(),
                  formatter_.quantities_line().c_str());
-    std::fprintf(file_.get(), "# Units: %s\n", formatter_.unit_line().c_str());
+    std::fprintf(file_.get(), "# Units: %s", formatter_.unit_line().c_str());
     std::fprintf(file_.get(), "# %s\n", SMASH_VERSION);
   } else {
     const std::string &oscar_name =
@@ -117,7 +117,7 @@ OscarOutput<Format, Contents>::OscarOutput(
     } else {
       std::fprintf(file_.get(), "# nin nout event_number ensemble_number\n");
     }
-    std::fprintf(file_.get(), "# %s\n", formatter_.quantities_line().c_str());
+    std::fprintf(file_.get(), "# %s", formatter_.quantities_line().c_str());
     std::fprintf(
         file_.get(),
         "# End of event: 0 0 event_number ensemble_number impact_parameter\n");
@@ -127,9 +127,9 @@ OscarOutput<Format, Contents>::OscarOutput(
 
 template <OscarOutputFormat Format, int Contents>
 inline void OscarOutput<Format, Contents>::write(const Particles &particles) {
-  for (const ParticleData &data : particles) {
-    write_particledata(data);
-  }
+  write_in_chunk<ToASCII>(
+      particles, formatter_,
+      [this](const ToASCII::type &buf) { this->write(buf); });
 }
 
 template <OscarOutputFormat Format, int Contents>
@@ -852,7 +852,13 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
     const ParticleData &data) {
-  std::fprintf(file_.get(), "%s\n", formatter_.data_line(data).c_str());
+  std::fprintf(file_.get(), "%s",
+               formatter_.single_particle_data(data).c_str());
+}
+
+template <OscarOutputFormat Format, int Contents>
+void OscarOutput<Format, Contents>::write(const ToASCII::type &buffer) {
+  std::fprintf(file_.get(), "%s", buffer.c_str());
 }
 
 namespace {

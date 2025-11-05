@@ -126,6 +126,12 @@ class OscarOutput : public OutputInterface {
   void write_particledata(const ParticleData &data);
 
   /**
+   * Write a ToASCII::type buffer to the output.
+   * \param[in] buffer Buffer containing the ASCII-formatted data to be written
+   */
+  void write(const ToASCII::type &buffer);
+
+  /**
    * Write the particle information of a list of particles to the output.
    * One line per particle.
    * \param[in] particles List of particles to be written

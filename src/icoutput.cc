@@ -109,8 +109,8 @@ ICOutput::ICOutput(const std::filesystem::path &path, const std::string &name,
       file_.get(),
       "# %s initial conditions: hypersurface of constant proper time\n",
       SMASH_VERSION);
-  std::fprintf(file_.get(), "# %s\n", formatter_.quantities_line().c_str());
-  std::fprintf(file_.get(), "# %s\n", formatter_.unit_line().c_str());
+  std::fprintf(file_.get(), "# %s", formatter_.quantities_line().c_str());
+  std::fprintf(file_.get(), "# %s", formatter_.unit_line().c_str());
 }
 
 ICOutput::~ICOutput() {}
@@ -156,7 +156,8 @@ void ICOutput::at_interaction(const Action &action, const double) {
 
   // write particle data excluding spectators
   if (!is_spectator) {
-    std::fprintf(file_.get(), "%s\n", formatter_.data_line(particle).c_str());
+    std::fprintf(file_.get(), "%s",
+                 formatter_.single_particle_data(particle).c_str());
   }
 
   if (IC_proper_time_ < 0.0) {
