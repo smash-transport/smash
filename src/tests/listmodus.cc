@@ -625,13 +625,27 @@ TEST(try_create_particle_with_spin_func) {
   compare_fourvector(created.spin_vector(), spin_vec);
 }
 
+TEST_CATCH(insert_optional_quantities_to_func, std::out_of_range) {
+  ListModus list_modus = create_list_modus_for_test();
+  Particles particles;
+  const double m0 = Test::smashon_mass;
+  const ParticleData smashon = Test::smashon_random();
+  const FourVector r = smashon.position(), p = smashon.momentum();
+  const PdgCode pdg = smashon.pdgcode();
+
+  // Create a particle with any optional_quantities handed to the function as
+  // last argument other than the default {} to trigger an out_of_range error.
+  list_modus.try_create_particle(particles, pdg, r.x0(), r.x1(), r.x2(), r.x3(),
+                                 m0, p.x0(), p.x1(), p.x2(), p.x3(), {"ID"});
+}
+
 TEST_CATCH(create_particle_with_nan, std::invalid_argument) {
   ListModus list_modus = create_list_modus_for_test();
   Particles particles;
   const double m0 = Test::smashon_mass;
-  ParticleData smashon = Test::smashon_random();
-  FourVector r = smashon.position(), p = smashon.momentum();
-  PdgCode pdg = smashon.pdgcode();
+  const ParticleData smashon = Test::smashon_random();
+  const FourVector r = smashon.position(), p = smashon.momentum();
+  const PdgCode pdg = smashon.pdgcode();
 
   // Create a particle with either a NAN value in the position
   // to trigger an invalid_argument error.
