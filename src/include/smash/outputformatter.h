@@ -426,7 +426,7 @@ class OutputFormatter {
       {"eta_s", "none"},
       {"mt", "GeV"},
       {"Rap", "none"},
-      {"y_rap", "none"}};
+      {"y_rap", "none"},
       {"spin0", "none"},
       {"spinx", "none"},
       {"spiny", "none"},

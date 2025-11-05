@@ -58,8 +58,6 @@ SphereModus::SphereModus(Configuration modus_config,
           modus_config.take(InputKeys::modi_sphere_addRadialVelocity)),
       radial_velocity_exponent_(
           modus_config.take(InputKeys::modi_sphere_addRadialVelocityExponent)),
-      spin_interaction_type_(
-          modus_config.take(InputKeys::collTerm_spinInteractions)),
       /* Note that it is crucial not to take other keys from the Jet section
        * before Jet_PDG, since we want here the take to throw in case the user
        * had a Jet section without the mandatory Jet_PDG key. If all other keys
@@ -76,7 +74,9 @@ SphereModus::SphereModus(Configuration modus_config,
       jet_back_separation_(
           jet_back_ ? modus_config.take(
                           InputKeys::modi_sphere_jet_backToBackSeparation)
-                    : 0) {
+                    : 0),
+      spin_interaction_type_(
+          modus_config.take(InputKeys::collTerm_spinInteractions)) {
   if (!jet_back_ &&
       modus_config.has_value(InputKeys::modi_sphere_jet_backToBackSeparation)) {
     throw std::invalid_argument(

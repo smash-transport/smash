@@ -536,11 +536,8 @@ class ParticleData {
    * component is initialized with NaN (double) to indicate that the spin vector
    * has not been set.
    */
-  FourVector spin_vector_ =
-      FourVector(std::numeric_limits<double>::quiet_NaN(),
-                 std::numeric_limits<double>::quiet_NaN(),
-                 std::numeric_limits<double>::quiet_NaN(),
-                 std::numeric_limits<double>::quiet_NaN());
+  FourVector spin_vector_ = FourVector(smash_NaN<double>, smash_NaN<double>,
+                                       smash_NaN<double>, smash_NaN<double>);
   /** Formation time at which the particle is fully formed
    *  given as an absolute value in the computational frame
    */
