@@ -150,7 +150,7 @@ class DecayAction : public Action {
   /// Angular momentum of the decay
   int L_ = 0;
 
-  private:
+ private:
   /// Spin interaction type
   SpinInteractionType spin_interaction_type_;
 };

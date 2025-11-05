@@ -447,7 +447,8 @@ void ListModus::validate_optional_fields_() const {
       if (!has_spin[c]) {
         throw std::invalid_argument(
             "When spin interactions are enabled, all four spin components "
-            "(spin0, spinx, spiny, spinz) must be provided in the config file.");
+            "(spin0, spinx, spiny, spinz) must be provided in the config "
+            "file.");
       }
     }
   }

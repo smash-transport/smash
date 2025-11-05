@@ -211,8 +211,8 @@ class ListModus : public ModusDefault {
   void validate_list_of_particles_of_all_events_() const;
 
   /**
-   * Validate the optional fields. At the moment, it ensures that if at least one
-   * spin component is given, all four are given.
+   * Validate the optional fields. At the moment, it ensures that if at least
+   * one spin component is given, all four are given.
    *
    * \throw std::invalid_argument if not all spin components are given.
    */

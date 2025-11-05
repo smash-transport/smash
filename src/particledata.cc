@@ -9,11 +9,11 @@
 
 #include "smash/particledata.h"
 
+#include <cassert>
 #include <iomanip>
 #include <iostream>
 #include <optional>
 #include <vector>
-#include <cassert>
 
 #include "smash/constants.h"
 #include "smash/iomanipulators.h"

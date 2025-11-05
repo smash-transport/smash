@@ -41,7 +41,7 @@ class DeformedNucleus : public Nucleus {
    * Constructor for DeformedNucles which takes a particle list and the number
    * of testparticles. This constructor is only used for testing purposes.
    * \param[in] particle_list Map with PDGCode and number of particles which
-   * make up the nucleus 
+   * make up the nucleus
    * \param[in] nTest number of testparticles
    * \param[in] spin_interaction_type which type of spin interaction to use
    */
