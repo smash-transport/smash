@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2023
+ *    Copyright (c) 2023,2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -53,7 +53,7 @@ class RootSolver1D {
                                       size_t itermax) {
     // check if root is in the given interval
     if ((*root_eq_)(initial_guess_low) * (*root_eq_)(initial_guess_high) > 0) {
-      logg[LRootSolver].debug()
+      logg[LRootSolver].trace()
           << "Function has same sign at both ends of the interval ["
           << initial_guess_low << ", " << initial_guess_high
           << "]. Root can't be found in this interval.";

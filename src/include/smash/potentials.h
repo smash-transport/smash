@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2024
+ *    Copyright (c) 2014-2015,2017-2025
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -124,26 +124,50 @@ class Potentials {
                                 mom_dependence_Lambda_);
     };
     RootSolver1D root_solver{root_equation};
-    const std::array<double, 4> starting_interval_width = {0.1, 1.0, 10.0,
-                                                           100.0};
-    for (double width : starting_interval_width) {
-      const double initial_guess = std::sqrt(mass * mass + momentum * momentum);
-      auto calc_frame_energy = root_solver.try_find_root(
-          initial_guess - width / 2, initial_guess + width / 2, 100000);
-      if (calc_frame_energy) {
-        return *calc_frame_energy;
-      } else {
-        logg[LPotentials].debug()
-            << "Did not find a root for potentials in the interval ["
-            << initial_guess - width / 2 << " GeV ,"
-            << initial_guess + width / 2 << " GeV]. Trying a wider interval";
+    constexpr std::size_t max_number_root_solver_iterations = 100000;
+    constexpr double half_interval_width = 300;  // GeV
+    constexpr std::array<double, 3> scanning_resolutions = {1.0, 0.5, 0.1};
+    const double initial_guess = std::sqrt(mass * mass + momentum * momentum);
+    const double upper_bound = initial_guess - half_interval_width;
+    const double lower_bound = initial_guess + half_interval_width;
+    for (const auto &scan_resolution : scanning_resolutions) {
+      logg[LPotentials].debug()
+          << "Trying to find a root for potentials around " << initial_guess
+          << " GeV using a resolution of " << scan_resolution << " GeV.";
+      std::pair<double, double> x_range = {initial_guess - scan_resolution,
+                                           initial_guess + scan_resolution};
+      while (true) {
+        auto calc_frame_energy = root_solver.try_find_root(
+            x_range.first, x_range.second, max_number_root_solver_iterations);
+        if (calc_frame_energy) {
+          return *calc_frame_energy;
+        } else {
+          logg[LPotentials].trace() << "Adjusting x_range: [" << x_range.first
+                                    << ", " << x_range.second << "]  --->  ";
+          bool go_right = (x_range.second >= lower_bound)
+                              ? false
+                              : random::uniform_int(0, 1);
+          if (go_right) {
+            x_range.second += scan_resolution;
+            logg[LPotentials].trace()
+                << "[" << x_range.first << ", " << x_range.second << "]\n";
+          } else if (x_range.first <= upper_bound) {
+            break;
+          } else {
+            x_range.first -= scan_resolution;
+            logg[LPotentials].trace()
+                << "[" << x_range.first << ", " << x_range.second << "]\n";
+          }
+        }
       }
+      logg[LPotentials].debug()
+          << "Did not find any sub-range with a root in the interval ["
+          << x_range.first << " GeV ," << x_range.second << " GeV].";
     }
-    logg[LPotentials].debug(
-        "Root for potentials was not found in any of the intervals "
-        "tried.");
-    throw std::runtime_error(
-        "Failed to find root for momentum-dependent potentials");
+
+    logg[LPotentials].fatal(
+        "Failed to find root for momentum-dependent potentials.");
+    throw std::runtime_error("Unable to continue simulation.");
   }
 
   /**
