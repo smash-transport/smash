@@ -29,13 +29,6 @@ static auto get_binary_filename(const std::string &content,
   if (content == "Particles" || content == "Collisions") {
     std::transform(filename.begin(), filename.end(), filename.begin(),
                    [](unsigned char c) { return std::tolower(c); });
-    if (quantities == OutputDefaultQuantities::oscar2013) {
-      filename += "_oscar2013";
-    } else if (quantities == OutputDefaultQuantities::oscar2013extended) {
-      filename += "_oscar2013_extended";
-    } else {
-      filename += "_binary";
-    }
   } else if (content == "Photons" || content == "Dileptons") {
     // Nothing to be done here
   } else if (content == "Initial_Conditions") {
@@ -43,6 +36,13 @@ static auto get_binary_filename(const std::string &content,
   } else {
     throw std::invalid_argument(
         "Unknown content to get the binary output filename.");
+  }
+  if (quantities == OutputDefaultQuantities::oscar2013) {
+    filename += "_oscar2013";
+  } else if (quantities == OutputDefaultQuantities::oscar2013extended) {
+    filename += "_oscar2013_extended";
+  } else {
+    filename += "_custom";
   }
   return filename + ".bin";
 }
@@ -89,8 +89,8 @@ static auto get_binary_filename(const std::string &content,
  *
  * At interaction:
  * \code
- * char uint32_t uint32_t double  double   uint32_t
- * 'i'  nin      nout     density xsection process_type
+ * char uint32_t uint32_t double  double  double  uint32_t
+ * 'i'  nin      nout     density xsection partial_xsection process_type
  * \endcode
  * \li \c nin, \c nout are numbers of incoming and outgoing particles
  *
@@ -165,7 +165,7 @@ static auto get_binary_filename(const std::string &content,
  * <h2> %Particles output </h2>
  *
  * The name of particles output file depends on its content:
- *  \li \c particles_binary.bin &rarr; this is the default;
+ *  \li \c particles_custom.bin &rarr; this is the default;
  *  \li \c particles_oscar2013.bin &rarr;
  *      if the list of quantities corresponds to the OSCAR2013 format;
  *  \li \c particles_oscar2013_extended.bin &rarr;
@@ -179,7 +179,7 @@ static auto get_binary_filename(const std::string &content,
  * <h2> Collisions output </h2>
  *
  * The name of collisions output file depends on its content:
- *  \li \c collisions_binary.bin &rarr; this is the default;
+ *  \li \c collisions_custom.bin &rarr; this is the default;
  *  \li \c collisions_oscar2013.bin &rarr;
  *      if the list of quantities corresponds to the OSCAR2013 format;
  *  \li \c collisions_oscar2013_extended.bin &rarr;
@@ -439,11 +439,12 @@ static auto get_list_of_binary_quantities(const std::string &content,
   const auto default_quantities =
       (is_extended) ? OutputDefaultQuantities::oscar2013extended
                     : OutputDefaultQuantities::oscar2013;
-  if (format == "Oscar2013_bin" || content == "Dileptons" ||
-      content == "Photons" || content == "Initial_Conditions") {
+  if (format == "Oscar2013_bin") {
     return default_quantities;
   } else if (format == "Binary") {
-    if (content == "Particles" || content == "Collisions") {
+    if (content == "Particles" || content == "Collisions" ||
+        content == "Dileptons" || content == "Photons" ||
+        content == "Initial_Conditions") {
       auto list_of_quantities = parameters.quantities.at(content);
       if (list_of_quantities.empty()) {
         return default_quantities;
@@ -466,18 +467,18 @@ static auto get_list_of_binary_quantities(const std::string &content,
 std::unique_ptr<OutputInterface> create_binary_output(
     const std::string &format, const std::string &content,
     const std::filesystem::path &path, const OutputParameters &out_par) {
+  const auto quantities =
+      get_list_of_binary_quantities(content, format, out_par);
   if (content == "Particles") {
-    return std::make_unique<BinaryOutputParticles>(
-        path, content, out_par,
-        get_list_of_binary_quantities(content, format, out_par));
+    return std::make_unique<BinaryOutputParticles>(path, content, out_par,
+                                                   quantities);
   } else if (content == "Collisions" || content == "Dileptons" ||
              content == "Photons") {
-    return std::make_unique<BinaryOutputCollisions>(
-        path, content, out_par,
-        get_list_of_binary_quantities(content, format, out_par));
+    return std::make_unique<BinaryOutputCollisions>(path, content, out_par,
+                                                    quantities);
   } else if (content == "Initial_Conditions") {
-    return std::make_unique<BinaryOutputInitialConditions>(
-        path, content, get_list_of_binary_quantities(content, format, out_par));
+    return std::make_unique<BinaryOutputInitialConditions>(path, content,
+                                                           quantities);
   } else {
     throw std::invalid_argument("Binary output not available for '" + content +
                                 "' content.");

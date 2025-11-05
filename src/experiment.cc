@@ -64,25 +64,26 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
      Output_Interval: 1.0
      Density_Type: "baryon"
      Particles:
-         Format:    ["Oscar1999", "VTK", "Root"]
+         Format: ["Oscar1999", "VTK", "Root"]
          Extended: False
          Only_Final: No
      Collisions:
-         Format:    ["Oscar2013"]
+         Format: ["Oscar2013"]
          Extended: True
          Print_Start_End: True
  \endverbatim
  *
  * In addition, the photon and dilepton output can be enabled as follows, where
- * the dilepton output is generated in extended "Oscar2013" and "Binary" format
- * and the photon output is printed in "Oscar2013" format.
+ * the dilepton output is generated in extended "Oscar2013" and the
+ * corresponding binary version of it, while the photon output is printed in
+ * "Oscar2013" format only.
  *\verbatim
  Output:
      Dileptons:
-         Format:    ["Oscar2013", "Binary"]
+         Format: ["Oscar2013", "Oscar2013_bin"]
          Extended: True
      Photons:
-         Format:    ["Oscar2013"]
+         Format: ["Oscar2013"]
  \endverbatim
  *
  * Additionally, the thermodynamics output can be activated. In this example,
@@ -94,23 +95,24 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  *\verbatim
  Output:
      Thermodynamics:
-         Format:    ["ASCII", "VTK"]
+         Format: ["ASCII", "VTK"]
          Type: "hadron"
-         Quantities:    ["rho_eckart", "tmn_landau"]
-         Position:    [0.0, 0.0, 0.0]
+         Quantities: ["rho_eckart", "tmn_landau"]
+         Position: [0.0, 0.0, 0.0]
          Smearing: False
  \endverbatim
  * SMASH can further be applied to extract initial conditions for hydrodynamic
  * simulations, either in a hypersurface of constant hyperbolic time or based on
  * the local energy density, as controlled by the key <tt>\ref key_MC_IC_type_
  * "Modi: Collider: Initial_Conditions: Type"</tt>. The "For_vHLLE" output
- format
- * is only available in conjunction with the iso-tau hypersurface option.\n
- * The initial conditions output can be enabled as follows:
+ * format is only available in conjunction with the iso-tau hypersurface
+ * option.\n The initial conditions output can be enabled as follows (for
+ * further possible formats, see the \ref list_of_output_formats
+ * "corresponding documentation"):
  *\verbatim
  Output:
      Initial_Conditions:
-         Format:    ["For_vHLLE", "Oscar1999", "Oscar2013", "Binary", "Root"]
+         Format: ["For_vHLLE", "Oscar2013", "Oscar2013_bin", "Root"]
          Extended: False
  \endverbatim
  * The HepMC_asciiv3 and/or HepMC_treeroot ouputs are enabled by specifying
@@ -119,16 +121,16 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  *\verbatim
  Output:
      Particles:
-         Format:  ["HepMC_asciiv3","HepMC_treeroot"]
+         Format: ["HepMC_asciiv3","HepMC_treeroot"]
      Collisions:
-         Format:  ["HepMC_asciiv3","HepMC_treeroot"]
+         Format: ["HepMC_asciiv3","HepMC_treeroot"]
  \endverbatim
  * If a lattice is configured and coulomb potentials are enabled, a VTK output
  * for the electric and magnetic fields is available. It can be obtained by
  * adding the following to the output section of the configuration:
  *\verbatim
      Coulomb:
-         Format:   ["VTK"]
+         Format: ["VTK"]
  \endverbatim
  */
 

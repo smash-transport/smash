@@ -13,7 +13,7 @@ Output:
     Particles:
         Format:          ["Oscar2013"]
     Dileptons:
-        Format:          ["Binary"]
+        Format:          ["Oscar2013_bin"]
         Extended:        True
 
 Collision_Term:
