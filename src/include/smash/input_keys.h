@@ -678,11 +678,14 @@ struct InputSections {
 /*!\Userguide
  * \page doxypage_input_conf_modi_list
  * The `List` modus provides a modus for hydro afterburner calculations. It
- * takes files with a list of particles in \ref oscar2013_format
- * "Oscar 2013 format" as an input. These particles are treated as a starting
- * setup. Multiple events per file are supported. In the following, the input
- * keys are listed with a short description, an example is given and some
- * information about the input particle files is provided.
+ * takes per default files with a list of particles in \ref oscar2013_format
+ * "Oscar 2013 format" as an input. The input format can be adapted to a certain
+ * extent using the key
+ * <tt>\ref key_ML_optional_quantities_ "Optional_Quantities"</tt>.
+ * The provided particles are treated as a starting setup. Multiple events per
+ * file are supported. In the following, the input keys are listed with a short
+ * description, an example is given and some information about the input
+ * particle files is provided.
  *
  * \warning
  * Because of how interactions between particles are found, SMASH might get
@@ -4732,7 +4735,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
    * \optional_key{key_ML_optional_quantities_,Optional_Quantities,list of
-   * strings,{}}
+   * strings,["ID"\, "charge"]}
    *
    * Extra columns to be expected in the input file containing the list of
    * particles. This is useful to e.g. continue a SMASH run that was paused
@@ -4740,10 +4743,21 @@ struct InputKeys {
    * properly.
    *
    * The order of the quantities in the key value should respect the order of
-   * the extra columns in the input file. Available quantities:
+   * the extra columns in the input file.
+   *
+   * \attention It will cause wrong read-ins to leave out columns in between and
+   * there is no safety mechanism in place.
+   *
+   * Available quantities:
+   * - "ID" &rarr; Particle identifier represented by an integer, unique for
+   *    each particle in an event. Even if provided, the IDs will be set
+   *    during the SMASH run in the order the particles are initialized.
+   * - "charge" &rarr; The particle's electric charge in units of the elementary
+   *    charge e. This is only used for a consistency check and the charge will
+   *    be set according to the PDG code data.
    * - "ncoll" &rarr; Number of collisions the particle already went through.
    * - "form_time" &rarr;  Formation time. By default it is set to the time
-   *   coordinate (first column in the input).
+   *    coordinate (first column in the input).
    * - "xsecfac" &rarr;  Scaling factor for the cross section, limited between 0
    *    and 1. By default it is 1.
    * - "proc_type" &rarr; Type of the last interaction (See
@@ -4756,6 +4770,10 @@ struct InputKeys {
    * - "spin2" &rarr; 2-nd component of the spin vector.
    * - "spin3" &rarr; 3-rd component of the spin vector.
    *
+   * Be aware that the default setting of this key considers "ID" and "charge",
+   * which also have to be set by the user if these quantities are in the
+   * provided particle lists and other optional quantities are included as well.
+   * Hence, it is possible to leave out "ID" and "charge" in the input lists.
    * Optional quantities that are not provided by the user as extra column in
    * the input file are set to their default value when SMASH reads in the input
    * file with the list of particles. Unless stated differently, this default
@@ -4775,7 +4793,7 @@ struct InputKeys {
   inline static const Key<std::vector<std::string>>
       modi_list_optionalQuantities{
           InputSections::m_list + "Optional_Quantities",
-          std::vector<std::string>{},
+          std::vector<std::string>{"ID", "charge"},
           {"3.3"}};
 
   /*!\Userguide
@@ -4846,7 +4864,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
    * \optional_key{key_MLB_optional_quantities_,Optional_Quantities,list of
-   * strings,{}}
+   * strings,["ID"\, "charge"]}
    *
    * See &nbsp;
    * <tt>\ref key_ML_optional_quantities_ "List: Optional_Quantities"</tt>.
@@ -4857,7 +4875,7 @@ struct InputKeys {
   inline static const Key<std::vector<std::string>>
       modi_listBox_optionalQuantities{
           InputSections::m_listBox + "Optional_Quantities",
-          std::vector<std::string>{},
+          std::vector<std::string>{"ID", "charge"},
           {"3.3"}};
 
   /*!\Userguide
@@ -7135,6 +7153,7 @@ Modi:
  * t x y z mass p0 px py pz pdg ID charge</span></div>
  * <div class="line"><span class="preprocessor">\# Units: fm fm fm fm
  * GeV GeV GeV GeV GeV none none none</span></div>
+ * <div class="line"><span class="preprocessor">\# event 0</span></div>
  * <div class="line"><span class="preprocessor">0.1 6.42036 1.66473 9.38499
  * 0.138 0.232871 0.116953 -0.115553 0.090303 111 0 0</span></div>
  * <div class="line"><span class="preprocessor">\# event 0 end</span></div>
@@ -7146,9 +7165,9 @@ Modi:
  * Each colum contains the described quantities. In particular, in the example
  * above, one \f$\pi^0\f$ with spatial coordinates
  * \f[(t, x, y, z) = (0.1, 6.42036, 1.66473, 9.38499)\,\mathrm{fm}\f]
- * and and 4-momenta
+ * and 4-momentum
  * \f[(p_0,p_x,p_y,p_z)=(0.232871,0.116953,-0.115553,0.090303)\,\mathrm{GeV}\f]
- * with mass = 0.138 GeV, pdg = 111, id = 0 and charge 0 will be initialized for
+ * with mass = 0.138 GeV, pdg = 111, ID = 0 and charge 0 will be initialized for
  * the first event (and also for the second event).
  *
  * \note

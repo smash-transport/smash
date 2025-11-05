@@ -373,7 +373,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \li \key p0, \key px, \key py, \key pz: Energy and 3-momentum
  * \li \key pdg: PDG code of the particle (see http://pdg.lbl.gov/).
  * It contains all quantum numbers and uniquely identifies its type
- * \li \key id: Particle identifier in terms of an integer, it is
+ * \li \key ID: Particle identifier in terms of an integer, it is
  * unique for each particle in the event
  * \li \key charge: the electric charge of the particle in units of the
  * elementary charge e

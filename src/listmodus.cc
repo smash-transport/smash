@@ -152,6 +152,14 @@ void ListModus::try_create_particle(
 void ListModus::insert_optional_quantities_to_(
     ParticleData &p,
     const std::vector<std::string> &optional_quantities) const {
+  if (optional_quantities.empty()) {
+    return;
+  } else if (optional_quantities.size() != optional_fields_.size()) {
+    using namespace std::string_literals;  // NOLINT(build/namespaces)
+    throw std::out_of_range("Unexpected size mismatch in "s + __func__ +
+                            " between the list of optional quantities values "
+                            "passed in and the class member optional_fields_");
+  }
   HistoryData hist = p.get_history();
   std::ostringstream error_message{"", std::ios_base::ate};
 
@@ -159,7 +167,19 @@ void ListModus::insert_optional_quantities_to_(
     size_t len{};
     auto field = optional_fields_[i];
     auto quantity = optional_quantities[i];
-    if (field == "ncoll") {
+    if (field == "ID") {
+      // ID information is not relevant
+      continue;
+    } else if (field == "charge") {
+      const PdgCode pdgcode = p.pdgcode();
+      const int charge = std::stoi(optional_quantities[i], &len);
+      // Charge consistency check
+      if (pdgcode.charge() != charge) {
+        error_message << "Charge of pdg = " << pdgcode << " != " << charge
+                      << ".\n";
+        throw std::invalid_argument("Inconsistent input (charge).");
+      }
+    } else if (field == "ncoll") {
       const int ncoll = std::stoi(optional_quantities[i], &len);
       if (ncoll < 0) {
         error_message << "ncoll < 0.\n";
@@ -255,10 +275,8 @@ void ListModus::read_particles_from_next_event_(Particles &particles) {
   for (const Line &line : line_parser(particle_list)) {
     std::istringstream lineinput(line.text);
     double t, x, y, z, mass, E, px, py, pz;
-    int id, charge;
     std::string pdg_string;
-    lineinput >> t >> x >> y >> z >> mass >> E >> px >> py >> pz >>
-        pdg_string >> id >> charge;
+    lineinput >> t >> x >> y >> z >> mass >> E >> px >> py >> pz >> pdg_string;
     std::vector<std::string> optional_quantities(optional_fields_.size());
     for (size_t i = 0; i < optional_fields_.size(); ++i) {
       std::string opt{};
@@ -276,14 +294,6 @@ void ListModus::read_particles_from_next_event_(Particles &particles) {
     logg[LList].debug("Particle ", pdgcode, " (x,y,z)= (", x, ", ", y, ", ", z,
                       ")");
 
-    // Charge consistency check
-    if (pdgcode.charge() != charge) {
-      if (verbose_) {
-        logg[LList].error()
-            << "Charge of pdg = " << pdgcode << " != " << charge;
-      }
-      throw std::invalid_argument("Inconsistent input (charge).");
-    }
     try_create_particle(particles, pdgcode, t, x, y, z, mass, E, px, py, pz,
                         optional_quantities);
   }
