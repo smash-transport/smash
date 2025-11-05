@@ -125,53 +125,67 @@ class Potentials {
     };
     RootSolver1D root_solver{root_equation};
     constexpr std::size_t max_number_root_solver_iterations = 100000;
-    constexpr double half_interval_width = 100;  // GeV
-    constexpr std::array<double, 3> scanning_resolutions = {1.0, 0.5, 0.1};
     const double initial_guess = std::sqrt(mass * mass + momentum * momentum);
+    const std::array<double, 4> interval_half_widths = {0.05, 0.5, 5.0, 50.0};
+    for (const double half_width : interval_half_widths) {
+      const std::pair<double, double> x_range = {initial_guess - half_width,
+                                                 initial_guess + half_width};
+      const auto calc_frame_energy = root_solver.try_find_root(
+          x_range.first, x_range.second, max_number_root_solver_iterations);
+      if (calc_frame_energy) {
+        return *calc_frame_energy;
+      } else {
+        logg[LPotentials].debug()
+            << "Did not find a root for potentials in the interval ["
+            << x_range.first << " GeV ," << x_range.second << " GeV].";
+      }
+    }
+    /* If the above attempts failed, try a scan in a larger interval with a fine
+     * resolution. This is a compromise between trying to be sure to find a root
+     * and not introduce a too large overhead. As plan B it should be fine. */
+    constexpr double half_interval_width = 100;  // GeV
+    constexpr double scanning_resolution = 0.1;  // GeV
     const double upper_bound = initial_guess + half_interval_width;
     const double lower_bound = initial_guess - half_interval_width;
-    logg[LPotentials].debug() << "Trying to find a root for potentials around "
-                              << initial_guess << " GeV in the range ["
-                              << lower_bound << ", " << upper_bound << "] GeV";
-    for (const auto &scan_resolution : scanning_resolutions) {
-      logg[LPotentials].debug() << "Exploring interval with a resolution of "
-                                << scan_resolution << " GeV";
-      std::pair<double, double> x_range = {initial_guess - scan_resolution,
-                                           initial_guess + scan_resolution};
-      logg[LPotentials].debug()
-          << "x_range: [" << x_range.first << ", " << x_range.second << "] GeV";
-      while (true) {
-        auto calc_frame_energy = root_solver.try_find_root(
-            x_range.first, x_range.second, max_number_root_solver_iterations);
-        if (calc_frame_energy) {
-          return *calc_frame_energy;
+    std::pair<double, double> x_range = {initial_guess - scanning_resolution,
+                                         initial_guess + scanning_resolution};
+    logg[LPotentials].debug()
+        << "Trying to find a root for potentials around " << initial_guess
+        << " GeV in the range [" << lower_bound << ", " << upper_bound
+        << "] GeV\nExploring interval with a resolution of "
+        << scanning_resolution << " GeV, starting with x_range: ["
+        << x_range.first << ", " << x_range.second << "] GeV";
+    while (true) {
+      const auto calc_frame_energy = root_solver.try_find_root(
+          x_range.first, x_range.second, max_number_root_solver_iterations);
+      if (calc_frame_energy) {
+        return *calc_frame_energy;
+      } else {
+        const bool is_possible_to_go_right = (x_range.second < upper_bound);
+        const bool is_possible_to_go_left = (x_range.first > lower_bound);
+        // The following logic might be compacted, but it would be much harder
+        // to read and follow, hence accept here a trivial duplication of code
+        if (!is_possible_to_go_left && !is_possible_to_go_right) {
+          break;
+        } else if (!is_possible_to_go_left) {
+          x_range.second += scanning_resolution;
+        } else if (!is_possible_to_go_right) {
+          x_range.first -= scanning_resolution;
         } else {
-          const bool is_possible_to_go_right = (x_range.second < upper_bound);
-          const bool is_possible_to_go_left = (x_range.first > lower_bound);
-          // The following logic might be compacted, but it would be much harder
-          // to read and follow, hence accept here a trivial duplication of code
-          if (!is_possible_to_go_left && !is_possible_to_go_right) {
-            break;
-          } else if (!is_possible_to_go_left) {
-            x_range.second += scan_resolution;
-          } else if (!is_possible_to_go_right) {
-            x_range.first -= scan_resolution;
+          const bool go_right = random::uniform_int(0, 1);
+          if (go_right) {
+            x_range.second += scanning_resolution;
           } else {
-            const bool go_right = random::uniform_int(0, 1);
-            if (go_right) {
-              x_range.second += scan_resolution;
-            } else {
-              x_range.first -= scan_resolution;
-            }
+            x_range.first -= scanning_resolution;
           }
-          logg[LPotentials].trace() << "x_range: [" << x_range.first << ", "
-                                    << x_range.second << "] GeV";
         }
+        logg[LPotentials].trace() << "x_range: [" << x_range.first << ", "
+                                  << x_range.second << "] GeV";
       }
-      logg[LPotentials].debug()
-          << "Did not find any sub-range with a root scanning the interval ["
-          << x_range.first << ", " << x_range.second << "] GeV";
     }
+    logg[LPotentials].debug()
+        << "Did not find any sub-range with a root scanning the interval ["
+        << x_range.first << ", " << x_range.second << "] GeV";
     logg[LPotentials].error(
         "Failed to find root for momentum-dependent potentials.");
     throw std::runtime_error("Unable to continue simulation.");
