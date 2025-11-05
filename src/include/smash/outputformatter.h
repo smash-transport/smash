@@ -608,7 +608,9 @@ class OutputFormatter {
     }
   }
 };
+
 namespace details {
+
 /**
  * \brief Writes particle data in multiple chunks if the total buffer size
  *        exceeds a predefined maximum.
@@ -648,8 +650,11 @@ namespace details {
  *            performs the actual write to the underlying output (e.g. file).
  * \param[in] max_buffer_bytes Maximum buffer size in bytes before the
  *            accumulated data is flushed via \p write (default: 1'000'000'000).
+ * \throws std::runtime_error If the estimated size of a single particle line
+ *         exceeds half of \p max_buffer_bytes. In that case, only one particle
+ *         would fit per chunk, which defeats the purpose of chunked writing,
+ *         and the caller must increase \p max_buffer_bytes accordingly.
  */
-
 template <typename Converter, class Range,
           std::enable_if_t<std::is_same_v<Range, Particles> ||
                                std::is_same_v<Range, ParticleList>,
