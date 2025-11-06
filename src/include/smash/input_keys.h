@@ -4769,6 +4769,8 @@ struct InputKeys {
    * - "spin1" &rarr; 1-st component of the spin vector.
    * - "spin2" &rarr; 2-nd component of the spin vector.
    * - "spin3" &rarr; 3-rd component of the spin vector.
+   * - "perturbative_weight" &rarr; weight for treating heavy flavor hadrons
+   * perturbatively.
    *
    * Be aware that the default setting of this key considers "ID" and "charge",
    * which also have to be set by the user if these quantities are in the

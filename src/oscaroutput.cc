@@ -810,6 +810,16 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <td>Momentum rapidity
  *     \f$y_\mathrm{rap}=\frac{1}{2}\log\frac{p_0+p_z}{p_0-p_z}\f$
  * </tr>
+ * <tr>
+ * <td>\key spin0, \key spinx, \key spiny, \key spinz
+ * <td> \c double
+ * <td>Components of the Pauli-Lubanski vector
+ * </tr>
+ * <tr>
+ * <td>\key perturbative_weight
+ * <td> \c double
+ * <td>Weight for treating particles perturbatively
+ * </tr>
  * </table>
  *
  * \attention Not all combinations of quantities are allowed and, in particular:

@@ -80,9 +80,7 @@ void DecayAction::generate_final_state() {
       break;
   }
 
-  const bool core_in_incoming =
-      std::any_of(incoming_particles_.begin(), incoming_particles_.end(),
-                  [](const ParticleData &p) { return p.is_core(); });
+  const bool core_in_incoming = incoming_particles_[0].is_core();
   // Set formation time.
   for (auto &p : outgoing_particles_) {
     logg[LDecayModes].debug("particle momenta in lrf ", p);
@@ -93,6 +91,9 @@ void DecayAction::generate_final_state() {
     logg[LDecayModes].debug("particle momenta in comp ", p);
     if (core_in_incoming) {
       p.fluidize();
+    }
+    if (p.type().pdgcode().is_heavy_flavor()) {
+      p.set_perturbative_weight(incoming_particles_[0].perturbative_weight());
     }
   }
 

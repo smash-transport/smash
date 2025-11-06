@@ -233,6 +233,12 @@ void ListModus::insert_optional_quantities_to_(
     } else if (field == "spinz") {
       const double s3 = std::stod(quantity, &len);
       p.set_spin_vector_component(3, s3);
+    } else if (field == "perturbative_weight") {
+      const double weight = std::stod(quantity, &len);
+      if (0 > weight || weight > 1) {
+        error_message << "Perturbative weight must be between 0 and 1.\n";
+      }
+      p.set_perturbative_weight(weight);
     } else {
       error_message << " Unknown quantities given in the configuration.\n";
     }

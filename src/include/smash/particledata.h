@@ -410,6 +410,17 @@ class ParticleData {
   double rapidity() const { return momentum_.eta(); }
 
   /**
+   * Set the perturbative weight
+   */
+  void set_perturbative_weight(const double weight) {
+    perturbative_weight_ = weight;
+  }
+  /**
+   * Get the perturbative weight
+   */
+  double perturbative_weight() const { return perturbative_weight_; }
+
+  /**
    * Check whether two particles have the same id
    * \param[in] a particle to compare to
    * \return whether the particles have the same id
@@ -480,6 +491,7 @@ class ParticleData {
     dst.begin_formation_time_ = begin_formation_time_;
     dst.belongs_to_ = belongs_to_;
     dst.core_ = core_;
+    dst.perturbative_weight_ = perturbative_weight_;
   }
 
   /**
@@ -549,6 +561,8 @@ class ParticleData {
    * 1 by default, since a particle is fully formed in this case.
    */
   double initial_xsec_scaling_factor_ = 1.0;
+  /// Perturbative weight attributed to heavy flavor particles
+  double perturbative_weight_ = 1.0;
   /// history information
   HistoryData history_;
   /// is it part of projectile or target nuclei?

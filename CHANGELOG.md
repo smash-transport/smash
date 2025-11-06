@@ -25,6 +25,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * The initial `Sphere` modus velocity profile can now be tuned with  `Modi: Sphere: Add_Radial_Velocity_Exponent`.
 * All particles are assigned a full spin 4-vector. The spin vector is by default initialized unpolarized in the `Initial_Conditions` mode. In the `List` mode it is initialized according to the given input.
 * Added a new key `Collision_Term: Spin_Interactions` in config to enable spin interactions with values `On`and `Off`.
+* Added `perturbative_weight` property to particles, meant to propagate the information from the input in `List` modus. At the moment, only heavy flavor particles inherit this behavior when interacting inelastically.
 
 ### Changed
 * Update to Pythia8.316
