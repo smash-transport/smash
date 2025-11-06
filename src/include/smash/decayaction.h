@@ -36,7 +36,7 @@ class DecayAction : public Action {
    * \param[in] spin_interaction_type Which type of spin interaction to use
    */
   DecayAction(
-      const ParticleData &p, double time,
+      const ParticleData& p, double time,
       SpinInteractionType spin_interaction_type = SpinInteractionType::Off);
 
   /**
@@ -125,12 +125,40 @@ class DecayAction : public Action {
   std::optional<bool> was_2body_phase_space_sampled_with_potentials_as_valid_ =
       std::nullopt;
 
+  // Returns true if: parent is Σ* AND daughters are {Λ, π} and sets the output
+  // indices.
+  static inline bool is_sigmastar_to_lambda_pion_decay(
+      const ParticleData& parent, const ParticleData& daughter0,
+      const ParticleData& daughter1, int& lambda_idx, int& pion_idx) {
+    // Fast rejections first
+    if (!parent.is_sigmastar())
+      return false;
+
+    const bool lambda0 = daughter0.pdgcode().is_Lambda();
+    const bool lambda1 = daughter1.pdgcode().is_Lambda();
+    const bool pion0 = daughter0.pdgcode().is_pion();
+    const bool pion1 = daughter1.pdgcode().is_pion();
+
+    // Check if one daughter is a lambda and the other a pion
+    if (lambda0 && pion1 && !lambda1 && !pion0) {
+      lambda_idx = 0;
+      pion_idx = 1;
+      return true;
+    } else if (lambda1 && pion0 && !lambda0 && !pion1) {
+      lambda_idx = 1;
+      pion_idx = 0;
+      return true;
+    } else {
+      return false;
+    }
+  }
+
  protected:
   /**
    * \ingroup logging
    * Writes information about this decay action to the \p out stream.
    */
-  void format_debug_output(std::ostream &out) const override;
+  void format_debug_output(std::ostream& out) const override;
 
   /**
    * Sample outgoing particle types, masses and angles
