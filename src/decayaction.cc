@@ -97,7 +97,40 @@ void DecayAction::generate_final_state() {
     }
   }
 
-  if (spin_interaction_type_ != SpinInteractionType::Off) {
+  /*
+   * @brief Σ* → Λ + π decay: propagate Λ polarization from the intermediate
+   * resonance.
+   *
+   * During Λ+π → Σ* formation we stored the incoming Λ polarization by
+   * writing it into the Σ* spin 4-vector (optionally applying a Λ spin-flip
+   * probability, cf. arXiv:2404.15890v2). At decay, we must hand this
+   * polarization back to the outgoing Λ to transport Λ polarization through the
+   * resonance stage.
+   */
+  if (spin_interaction_type_ != SpinInteractionType::Off &&
+      outgoing_particles_.size() == 2) {
+    // Check for Σ* → Λ + π decay channel
+    int lambda_idx = -1;
+    int pion_idx = -1;
+    const bool is_sigmastar_decay = is_sigmastar_to_lambda_pion_decay(
+        incoming_particles_[0], outgoing_particles_[0], outgoing_particles_[1],
+        lambda_idx, pion_idx);
+
+    if (is_sigmastar_decay) {
+      auto &sigma_star = incoming_particles_[0];
+      auto &lambda = outgoing_particles_[lambda_idx];
+      auto &pion = outgoing_particles_[pion_idx];
+      // Copy spin vector from Σ* to Λ and boost it to the Λ frame
+      FourVector final_spin_vector =
+          sigma_star.spin_vector().lorentz_boost(lambda.velocity());
+      lambda.set_spin_vector(final_spin_vector);
+      pion.set_spin_vector(FourVector{0., 0., 0., 0.});
+    } else {
+      // Set unpolarized spin vectors
+      assign_unpolarized_spin_vector_to_outgoing_particles();
+    }
+  } else if (spin_interaction_type_ != SpinInteractionType::Off &&
+             outgoing_particles_.size() != 2) {
     // Set unpolarized spin vectors
     assign_unpolarized_spin_vector_to_outgoing_particles();
   }
