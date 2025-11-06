@@ -19,6 +19,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+## SMASH-3.3rc
+Date:
+
 ### Added
 * Added spin 4-vectors (Pauli-Lubanski) to particles including spin interactions. At the moment, spin interactions are treated in elastic scatterings and in inelastic scatterings through `Σ* → Λπ` formation. The spin vector is by default initialized unpolarized.
 * Heavy flavour particles can be treated as perturbative particles in inelastic interactions.
@@ -28,6 +31,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Cross sections for baryon-antibaryon interactions are now shifted w.r.t. the effective mass threshold in AQM rescaling.
 * The `ParticleData` class now initially sets the formation time and the time of the last collision to `NAN` and overwrites them with the real values the first time the objects are used. Previously, these values were initially set to `0.0`, which could be misleading if the time evolution started at negative times.
 * The procedure for dynamic initial conditions was updated, fluidized hadrons are no longer removed from the evolution, in order to provide energy density to the surrounding particles, being internally named as "core" particles. Core and corona (non-core) particles can only interact elastically.
+* The automatic lattice heuristic determination uses a minimum lattice size and has been disabled in `List` modus.
 * ⚠️ The `backpropagate_to_the_same_time` method is now a private member of `ListModus`. Its functionality was moved to the free function `backpropagate_straight_line`, which *does not set* the formation time or cross section scaling of particles.
 * The `only_res` boolean parameter of `find_final_actions` was removed in the base class `ActionsFindersInterface` and all its derived action classes.
 
@@ -51,6 +55,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Added `tau`, `eta_s`, `mt`, `y_rap`, `spin0`, `spinx`, `spiny`, `spinz`, and `perturbative_weight` as custom ASCII/binary quantity.
 * Improve writing performance of both ASCII and binary output formats by buffering information event by event.
 * The `formation_time` and `time_last_collision` TBranches in the ROOT output have been moved from the extended to the ordinary (default) output.
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-3.2.2...SMASH-3.3)
 
 
 ## SMASH-3.2.2
