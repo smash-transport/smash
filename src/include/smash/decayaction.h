@@ -125,8 +125,16 @@ class DecayAction : public Action {
   std::optional<bool> was_2body_phase_space_sampled_with_potentials_as_valid_ =
       std::nullopt;
 
-  // Returns true if: parent is Σ* AND daughters are {Λ, π} and sets the output
-  // indices.
+  /**
+   * Check for the decay Σ*→Λπ. In this case it sets the output indices.
+   *
+   * \param[in] parent Particle decaying
+   * \param[in] daughter0 First decay product
+   * \param[in] daughter1 Second decay product
+   * \param[out] lambda_idx Possible index for Λ in the decay channel
+   * \param[out] pion_idx Possible index for π in the decay channel
+   * \return true if parent is Σ* and daughters are {Λ, π}
+   */
   static inline bool is_sigmastar_to_lambda_pion_decay(
       const ParticleData& parent, const ParticleData& daughter0,
       const ParticleData& daughter1, int& lambda_idx, int& pion_idx) {

@@ -144,7 +144,7 @@
       "last name": "Mohs",
       "first name": "Justin",
       "email": "jmohs@itp.uni-frankfurt.de",
-      "years": "2017-",
+      "years": "2017-2025",
       "affiliation": "Institute for Theoretical Physics, Goethe University Frankfurt, Max-von-Laue-Straße 1, 60438 Frankfurt am Main, Germany",
       "orcid": "0000-0001-8437-0946"
     },
@@ -222,7 +222,7 @@
       "last name": "Götz",
       "first name": "Niklas",
       "email": "goetz@itp.uni-frankfurt.de",
-      "years": "2021-",
+      "years": "2021-2025",
       "affiliation": "Institute for Theoretical Physics, Goethe University Frankfurt, Max-von-Laue-Straße 1, 60438 Frankfurt am Main, Germany",
       "orcid": "0000-0002-5992-1643"
     },
@@ -237,6 +237,12 @@
       "first name": "Oscar",
       "email": "garcia@fias.uni-frankfurt.de",
       "years": "2020-2021"
+    },
+    {
+      "last name": "Engel",
+      "first name": "Manou",
+      "email": "mengel@itp.uni-frankfurt.de",
+      "years": "2025-"
     },
     {
       "last name": "Elfner",

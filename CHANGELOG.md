@@ -20,33 +20,37 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## Unreleased
 
 ### Added
-* The `Sphere` modus now can include thermal heavy flavor particles, via the `Modi: Sphere: Heavy_Flavor_Multiplier` key, a value that multiplies their partial density.
-* Back to back jets were introduced to the `Sphere` modus with the  `Modi: Sphere: Jet: Back_To_Back` and `Modi: Sphere: Jet: Back_To_Back_Separation` keys.
-* The initial `Sphere` modus velocity profile can now be tuned with  `Modi: Sphere: Add_Radial_Velocity_Exponent`.
-* All particles are assigned a full spin 4-vector. The spin vector is by default initialized unpolarized in the `Initial_Conditions` mode. In the `List` mode it is initialized according to the given input.
-* Added a new key `Collision_Term: Spin_Interactions` in config to enable spin interactions with values `On`and `Off`.
-* Added `perturbative_weight` property to particles, meant to propagate the information from the input in `List` modus. At the moment, only heavy flavor particles inherit this behavior when interacting inelastically.
+* Added spin 4-vectors (Pauli-Lubanski) to particles including spin interactions. At the moment, spin interactions are treated in elastic scatterings and in inelastic scatterings through `Σ* → Λπ` formation. The spin vector is by default initialized unpolarized.
+* Heavy flavour particles can be treated as perturbative particles in inelastic interactions.
 
 ### Changed
-* Update to Pythia8.316
+* Update to Pythia8.316.
+* Cross sections for baryon-antibaryon interactions are now shifted w.r.t. the effective mass threshold in AQM rescaling.
 * The `ParticleData` class now initially sets the formation time and the time of the last collision to `NAN` and overwrites them with the real values the first time the objects are used. Previously, these values were initially set to `0.0`, which could be misleading if the time evolution started at negative times.
 * The procedure for dynamic initial conditions was updated, fluidized hadrons are no longer removed from the evolution, in order to provide energy density to the surrounding particles, being internally named as "core" particles. Core and corona (non-core) particles can only interact elastically.
 * ⚠️ The `backpropagate_to_the_same_time` method is now a private member of `ListModus`. Its functionality was moved to the free function `backpropagate_straight_line`, which *does not set* the formation time or cross section scaling of particles.
 * The `only_res` boolean parameter of `find_final_actions` was removed in the base class `ActionsFindersInterface` and all its derived action classes.
-* The `formation_time` and `time_last_collision` TBranches in the ROOT output have been moved from the extended to the ordinary (default) output.
+
+### Fixed
+* Properly take into account potentials at threshold in resonances decay channels selection.
+* Add better root finding for momentum dependent potentials.
 
 ### Input
+* The `Sphere` modus now can include thermal heavy flavor particles, via the `Modi: Sphere: Heavy_Flavor_Multiplier` key, a value that multiplies their partial density.
+* Back to back jets were introduced to the `Sphere` modus with the  `Modi: Sphere: Jet: Back_To_Back` and `Modi: Sphere: Jet: Back_To_Back_Separation` keys.
+* The initial `Sphere` modus velocity profile can now be tuned with  `Modi: Sphere: Add_Radial_Velocity_Exponent`.
 * `ListModus` now accepts `Optional_Quantities`, extra to the default values used in Oscar2013.
-* Added the `Proper_Time_Scaling` key in the `Initial_Conditions` section under `Modi: Collider:`, that scales the switching proper time when using constant tau initial conditions.
-* If `Spin_Interactions` is not `Off`, the `List` modus will read four additional columns expected to be the components of the spin 4-vector (s_0, s_1, s_2, s_3).
+* Added the `Proper_Time_Scaling` key in the `Initial_Conditions` section under `Modi: Collider:` to scale the switching proper time when using constant tau initial conditions.
+* Added a new key `Collision_Term: Spin_Interactions` to enable spin interactions with values `On` and `Off`.
+* If `Spin_Interactions` is `On`, the `List` modus requires four additional columns representing the components of the spin 4-vector (s_0, s_1, s_2, s_3) and these shall be specified in the `Optional_Quantities` list.
 
 ### Output
-* Added the spin (Pauli-Lubanski) components to the user defined `Quantities` list for the customizable `ASCII` output. The keys are `spin0`, `spinx`, `spiny`, `spinz`
-
-### Output
-* `Dileptons`, `Photons`, and `Initial_Conditions` now accept the `ASCII` and `Binary` custom format, and require setting the desired `Quantities`.
 * ⚠️ The previous `<content>_binary.bin` output files are now called `<content>_custom.bin`.
 * ⚠️ The previous `ASCII` option for `Output: Initial_Conditions: Format` key was renamed to `For_vHLLE`, and the corresponding file to `SMASH_IC_For_vHLLE.dat`. **This breaks the workflows for hybrid models using SMASH as initial conditions!**
+* `Dileptons`, `Photons`, and `Initial_Conditions` now accept the `ASCII` and `Binary` custom format, and require setting the desired `Quantities`.
+* Added `tau`, `eta_s`, `mt`, `y_rap`, `spin0`, `spinx`, `spiny`, `spinz`, and `perturbative_weight` as custom ASCII/binary quantity.
+* Improve writing performance of both ASCII and binary output formats by buffering information event by event.
+* The `formation_time` and `time_last_collision` TBranches in the ROOT output have been moved from the extended to the ordinary (default) output.
 
 
 ## SMASH-3.2.2
