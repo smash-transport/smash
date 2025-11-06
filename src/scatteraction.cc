@@ -124,12 +124,12 @@ void ScatterAction::generate_final_state() {
       }
       if (new_particle.type().pdgcode().is_heavy_flavor()) {
         // New particle HF weight is the product of incoming weights
-        const double HF_weight = std::accumulate(
+        const double perturbative_weight = std::accumulate(
             incoming_particles_.begin(), incoming_particles_.end(), 1.0,
             [](double w, const ParticleData &p) {
-              return w * p.perturbative_HF_weight();
+              return w * p.perturbative_weight();
             });
-        new_particle.set_perturbative_HF_weight(HF_weight);
+        new_particle.set_perturbative_weight(perturbative_weight);
       }
     }
   }
