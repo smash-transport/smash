@@ -31,7 +31,6 @@ TEST(init_particle_types) {
   sha256::Hash hash;
   hash.fill(0);
   IsoParticleType::tabulate_integrals(hash, "");
-  Test::create_stable_smashon_particletypes();
 }
 
 constexpr double r_x = 0.1;
@@ -485,35 +484,33 @@ TEST(particle_ordering) {
   }
 }
 
-TEST(perturbative_weight) {
+TEST(perturbative_weight_propagated_collision) {
+  const double weight = 0.5;
   // put particles in list
   Particles particles;
-  ParticleData a{ParticleType::find(0x211)};  // pi+
-  a.set_4position(pos_a);
-  a.set_4momentum(Momentum{1.1, 1.0, 0., 0.});
+  ParticleData heavy{ParticleType::find(0x411)};  // D+
+  heavy.set_4position(pos_a);
+  heavy.set_4momentum(Momentum{2.6, 1.0, 0., 0.});
+  heavy.set_perturbative_weight(weight);
 
-  ParticleData b{ParticleType::find(0x211)};  // pi+
-  b.set_4position(pos_b);
-  b.set_4momentum(Momentum{1.1, -1.0, 0., 0.});
+  ParticleData light{ParticleType::find(-0x211)};  // pi-
+  light.set_4position(pos_b);
+  light.set_4momentum(Momentum{1.1, -1.0, 0., 0.});
 
-  a = particles.insert(a);
-  b = particles.insert(b);
+  heavy = particles.insert(heavy);
+  light = particles.insert(light);
 
   // create action
   constexpr double time = 0.2;
-  ScatterAction act(a, b, time);
-  VERIFY(act.is_valid(particles));
-
-  // add elastic channel
+  ScatterAction act(heavy, light, time);
   act.add_all_scatterings(Test::default_finder_parameters());
 
-  // change the position of one of the particles
-  const FourVector new_position(0.1, 0., 0., 0.);
-  particles.front().set_4position(new_position);
-
-  // update the action
-  act.update_incoming(particles);
-  COMPARE(act.incoming_particles()[0].position(), new_position);
+  const ParticleList& out = act.outgoing_particles();
+  for (const ParticleData& p : out) {
+    if (p.type().pdgcode().is_heavy_flavor()) {
+      COMPARE(p.perturbative_weight(), weight);
+    }
+  }
 }
 
 TEST_CATCH(set_parametrized_total_bottomup, std::logic_error) {

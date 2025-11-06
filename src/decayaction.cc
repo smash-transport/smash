@@ -93,8 +93,7 @@ void DecayAction::generate_final_state() {
       p.fluidize();
     }
     if (p.type().pdgcode().is_heavy_flavor()) {
-      p.set_perturbative_weight(
-          incoming_particles_[0].perturbative_weight());
+      p.set_perturbative_weight(incoming_particles_[0].perturbative_weight());
     }
   }
 

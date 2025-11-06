@@ -123,7 +123,7 @@ void ScatterAction::generate_final_state() {
         new_particle.fluidize();
       }
       if (new_particle.type().pdgcode().is_heavy_flavor()) {
-        // New particle HF weight is the product of incoming weights
+        // Particle weight is the product of incoming weights
         const double perturbative_weight = std::accumulate(
             incoming_particles_.begin(), incoming_particles_.end(), 1.0,
             [](double w, const ParticleData &p) {
