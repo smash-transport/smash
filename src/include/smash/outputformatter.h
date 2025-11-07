@@ -493,6 +493,30 @@ class OutputFormatter {
     return out;
   }
 
+  /**
+   * \ingroup exception
+   * Thrown when a not existing quantity is used.
+   */
+  struct UnknownQuantity : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+
+  /**
+   * \ingroup exception
+   * Thrown when the same quantity is repeated.
+   */
+  struct RepeatedQuantity : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+
+  /**
+   * \ingroup exception
+   * Thrown when the synonym quantities are used.
+   */
+  struct AliasesQuantity : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+
  private:
   /// Member to convert data into the correct output format.
   Converter converter_{};
@@ -548,7 +572,6 @@ class OutputFormatter {
       throw std::invalid_argument(
           "OutputFormatter: Empty quantities handed over to the class.");
     }
-    std::string error_message{};
     std::string repeated{};
     for (const std::string& quantity : quantities_) {
       if (std::count(quantities_.begin(), quantities_.end(), quantity) > 1) {
@@ -556,8 +579,8 @@ class OutputFormatter {
       }
     }
     if (!repeated.empty()) {
-      error_message += "Repeated \"Quantities\": " + repeated +
-                       " please fix the configuration file.\n";
+      throw RepeatedQuantity("Repeated \"Quantities\": " + repeated +
+                             " please fix the configuration file.\n");
     }
     std::string unknown{};
     for (const std::string& quantity : quantities_) {
@@ -566,12 +589,9 @@ class OutputFormatter {
       }
     }
     if (!unknown.empty()) {
-      error_message += "Unknown \"Quantities\": " + unknown +
-                       " please fix the configuration file.\n";
+      throw UnknownQuantity("Unknown \"Quantities\": " + unknown +
+                            " please fix the configuration file.\n");
     }
-    if (!repeated.empty() || !unknown.empty())
-      throw std::invalid_argument(error_message);
-
     const bool oscar1999_id_is_given =
         std::find(quantities_.begin(), quantities_.end(), "id") !=
         quantities_.end();
@@ -579,7 +599,7 @@ class OutputFormatter {
         std::find(quantities_.begin(), quantities_.end(), "ID") !=
         quantities_.end();
     if (oscar1999_id_is_given && oscar2013_id_is_given) {
-      throw std::invalid_argument(
+      throw AliasesQuantity(
           "Both 'id' and 'ID' cannot be provided in the \"Quantities\" key "
           "together. Please, fix the configuration file.");
     }
