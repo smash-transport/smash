@@ -16,6 +16,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "smash/particledata.h"
@@ -566,6 +567,10 @@ class OutputFormatter {
       {"spinz", "none"},
       {"perturbative_weight", "none"}};
 
+  /// Map with known quantities and corresponding units.
+  const std::vector<std::pair<std::string, std::string>> aliases_ = {
+      {"ID", "id"}, {"eta_s", "eta"}, {"y_rap", "Rap"}};
+
   /// Checks whether the quantities requested are known and unique
   void validate_quantities() {
     if (quantities_.empty()) {
@@ -592,16 +597,19 @@ class OutputFormatter {
       throw UnknownQuantity("Unknown \"Quantities\": " + unknown +
                             " please fix the configuration file.\n");
     }
-    const bool oscar1999_id_is_given =
-        std::find(quantities_.begin(), quantities_.end(), "id") !=
-        quantities_.end();
-    const bool oscar2013_id_is_given =
-        std::find(quantities_.begin(), quantities_.end(), "ID") !=
-        quantities_.end();
-    if (oscar1999_id_is_given && oscar2013_id_is_given) {
-      throw AliasesQuantity(
-          "Both 'id' and 'ID' cannot be provided in the \"Quantities\" key "
-          "together. Please, fix the configuration file.");
+    for (const auto& alias : aliases_) {
+      const bool first_quantity_is_given =
+          std::find(quantities_.begin(), quantities_.end(), alias.first) !=
+          quantities_.end();
+      const bool second_quantity_is_given =
+          std::find(quantities_.begin(), quantities_.end(), alias.second) !=
+          quantities_.end();
+      if (first_quantity_is_given && second_quantity_is_given) {
+        throw AliasesQuantity(
+            "Both '" + alias.first + "' and '" + alias.second +
+            "' cannot be provided in the \"Quantities\" key together. Please, "
+            "fix the configuration file.");
+      }
     }
   }
 
