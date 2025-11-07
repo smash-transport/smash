@@ -49,6 +49,16 @@ TEST_CATCH(incompatible_quantity_1, OutputFormatter<ToASCII>::AliasesQuantity) {
   OutputFormatter<ToASCII> formatter(repeated_quantities);
 }
 
+TEST_CATCH(incompatible_quantity_2, OutputFormatter<ToASCII>::AliasesQuantity) {
+  std::vector<std::string> repeated_quantities = {"eta", "eta_s"};
+  OutputFormatter<ToASCII> formatter(repeated_quantities);
+}
+
+TEST_CATCH(incompatible_quantity_3, OutputFormatter<ToASCII>::AliasesQuantity) {
+  std::vector<std::string> repeated_quantities = {"Rap", "y_rap"};
+  OutputFormatter<ToASCII> formatter(repeated_quantities);
+}
+
 TEST(valid_line_maker) {
   Test::create_smashon_particletypes();
   ParticleData p = Test::smashon_random();
