@@ -122,7 +122,7 @@ class ToBinary {
    * \param[in] value number to convert
    * \return a vector of char representing the binary format of the integer
    */
-  type as_integer(int value) const { return as_binary_data(value); }
+  type as_integer(int32_t value) const { return as_binary_data(value); }
 
   /**
    * Converts a double to binary format.
