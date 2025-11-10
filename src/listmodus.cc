@@ -278,7 +278,16 @@ double ListModus::initial_conditions(Particles *particles,
 
 void ListModus::read_particles_from_next_event_(Particles &particles) {
   std::string particle_list = next_event_();
-  for (const Line &line : line_parser(particle_list)) {
+  const std::vector<Line> event_content = line_parser(particle_list);
+  if (event_content.empty()) {
+    if (verbose_) {
+      logg[LList].warn(
+          "Encountered empty event while reading input particle lists data, "
+          "which will result in empty events in the output file!");
+    }
+    return;
+  }
+  for (const Line &line : event_content) {
     std::istringstream lineinput(line.text);
     double t, x, y, z, mass, E, px, py, pz;
     std::string pdg_string;
@@ -353,9 +362,9 @@ std::string ListModus::next_event_() {
 
   // read one event. events marked by line # event end i in case of Oscar
   // output. Assume one event per file for all other output formats
-  std::string event_string;
-  const std::string needle = "end";
-  std::string line;
+  std::string event_string{};
+  const std::string needle = " end ";
+  std::string line{};
   while (getline(ifs, line)) {
     if (line.find(needle) == std::string::npos) {
       event_string += line + "\n";
