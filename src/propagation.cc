@@ -98,6 +98,8 @@ void backpropagate_straight_line(Particles *particles, double to_time) {
     const double dt = to_time - t;
     const ThreeVector r = data.position().threevec() + dt * data.velocity();
     data.set_4position(FourVector(to_time, r));
+    data.set_formation_time(t);
+    data.set_cross_section_scaling_factor(0.0);
   }
 }
 
