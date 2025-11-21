@@ -34,18 +34,28 @@ TEST_CATCH(empty_quantities, std::invalid_argument) {
   OutputFormatter<ToASCII> formatter(empty);
 }
 
-TEST_CATCH(invalid_quantity, std::invalid_argument) {
+TEST_CATCH(invalid_quantity, OutputFormatter<ToASCII>::UnknownQuantity) {
   std::vector<std::string> invalid_quantities = {"gibberish"};
   OutputFormatter<ToASCII> formatter(invalid_quantities);
 }
 
-TEST_CATCH(repeated_quantity, std::invalid_argument) {
+TEST_CATCH(repeated_quantity, OutputFormatter<ToASCII>::RepeatedQuantity) {
   std::vector<std::string> repeated_quantities = {"t", "t"};
   OutputFormatter<ToASCII> formatter(repeated_quantities);
 }
 
-TEST_CATCH(incompatible_quantity, std::invalid_argument) {
+TEST_CATCH(incompatible_quantity_1, OutputFormatter<ToASCII>::AliasesQuantity) {
   std::vector<std::string> repeated_quantities = {"id", "ID"};
+  OutputFormatter<ToASCII> formatter(repeated_quantities);
+}
+
+TEST_CATCH(incompatible_quantity_2, OutputFormatter<ToASCII>::AliasesQuantity) {
+  std::vector<std::string> repeated_quantities = {"eta", "eta_s"};
+  OutputFormatter<ToASCII> formatter(repeated_quantities);
+}
+
+TEST_CATCH(incompatible_quantity_3, OutputFormatter<ToASCII>::AliasesQuantity) {
+  std::vector<std::string> repeated_quantities = {"Rap", "y_rap"};
   OutputFormatter<ToASCII> formatter(repeated_quantities);
 }
 

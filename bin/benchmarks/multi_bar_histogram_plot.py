@@ -110,11 +110,13 @@ def make_multi_bar_histogram_plot(data, colors=None, total_width=0.8,
                 previous_bar_height = list(data.values())[i-1][x][0]
                 if y != 0:
                     delta = (y-previous_bar_height)/y*100
-                    plt.annotate(f'{delta:.1f}%', xy=(x + x_offset, y+dy),
+                    extra_x_offset = i * bar_width * (1 - single_width) / 2
+                    plt.annotate(f'{delta:.1f}%',
+                                 xy=(x + x_offset + extra_x_offset, y+dy),
                                  xytext=(0, 5), textcoords='offset points',
                                  ha='center', va='bottom', rotation=90,
                                  color='red' if delta > 0 else 'green',
-                                 fontsize='small', fontweight='bold')
+                                 fontsize='x-small', fontweight='bold')
 
         # Add a handle to the last drawn bar, which we'll need for the legend
         bars.append(bar[0])
