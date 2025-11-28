@@ -99,6 +99,7 @@ jobs:
         if [ ${SITE} == "mac" ]; then
             brew install ${{ matrix.packages_to_add }}
         else
+            sudo apt-get update -y
             sudo apt-get install ${{ matrix.packages_to_add }} -y
         fi
         # we download and install Pythia
