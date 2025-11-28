@@ -52,7 +52,7 @@ jobs:
         # 5th matrix element, recent osx with default clang
         - os: macos-latest
           site: "mac"
-          packages_to_add: "gsl coreutils eigen"
+          packages_to_add: "gsl coreutils eigen@3"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
     steps:
