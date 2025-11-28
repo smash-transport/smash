@@ -98,6 +98,7 @@ jobs:
         # we install the missing packages
         if [ ${SITE} == "mac" ]; then
             brew install ${{ matrix.packages_to_add }}
+            printf "%s\n" "Eigen3_ROOT=$(brew --prefix eigen@3)" >> ${GITHUB_ENV}
         else
             sudo apt-get update -y
             sudo apt-get install ${{ matrix.packages_to_add }} -y
