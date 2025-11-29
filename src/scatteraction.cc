@@ -871,11 +871,11 @@ void ScatterAction::string_spin_interaction() {
   const bool is_AB_to_XB =
       (process_type_ == ProcessType::StringSoftSingleDiffractiveXB);
 
-  // This logic relies on the assumption that the surviving hadron is
-  // always appended as the final element in the outgoing particle list.
-  // This ordering is guaranteed by StringProcess::next_SDiff(bool
-  // is_AB_to_AX). If that implementation changes, the behavior here must
-  // be re-evaluated.
+  /* This logic relies on the assumption that the surviving hadron is
+   * always appended as the final element in the outgoing particle list.
+   * This ordering is guaranteed by StringProcess::next_SDiff(bool
+   * is_AB_to_AX). If that implementation changes, the behavior here must
+   * be re-evaluated. */
   if (is_AB_to_AX || is_AB_to_XB) {
     const std::size_t idx_hadron_in = is_AB_to_AX ? 0 : 1;
 
@@ -886,8 +886,8 @@ void ScatterAction::string_spin_interaction() {
 
     outgoing_particles_.back().set_spin_vector(final_spin_vector);
 
-    // Set unpolarized spin vector for all newly created particles (all but
-    // the last one)
+    /* Set unpolarized spin vector for all newly created particles (all but
+     * the last one) */
     for (auto it = outgoing_particles_.begin();
          it != outgoing_particles_.end() - 1; ++it) {
       it->set_unpolarized_spin_vector();
