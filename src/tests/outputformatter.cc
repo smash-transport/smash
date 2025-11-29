@@ -279,8 +279,7 @@ TEST(valid_line_maker_with_spin) {
 
   std::vector<std::string> quantities = {"spin0", "spinx", "spiny", "spinz"};
   OutputFormatter<ToASCII> formatter(quantities);
-  const std::string one_chunk =
-      formatter.single_particle_data(smashon);
+  const std::string one_chunk = formatter.single_particle_data(smashon);
   std::stringstream correct_line{};
   correct_line << spin_vector.x0() << " ";
   correct_line << spin_vector.x1() << " ";
