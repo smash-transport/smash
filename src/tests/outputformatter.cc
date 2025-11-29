@@ -102,7 +102,7 @@ TEST(valid_line_maker) {
 
   std::string units_line{
       "fm fm fm fm GeV GeV GeV GeV GeV none none e none fm none none none fm "
-      "none none none none\n"};
+      "none none none none none none none none\n"};
   VERIFY(units_line == formatter.unit_line());
 
   std::stringstream correct_line{};
@@ -128,7 +128,11 @@ TEST(valid_line_maker) {
   correct_line << p.get_history().p1.string() << " ";
   correct_line << p.get_history().p2.string() << " ";
   correct_line << p.pdgcode().baryon_number() << " ";
-  correct_line << p.pdgcode().strangeness() << "\n";
+  correct_line << p.pdgcode().strangeness() << " ";
+  correct_line << p.spin_vector().x0() << " ";
+  correct_line << p.spin_vector().x1() << " ";
+  correct_line << p.spin_vector().x2() << " ";
+  correct_line << p.spin_vector().x3() << "\n";
 
   VERIFY(correct_line.str() == formatter.single_particle_data(p));
 }
