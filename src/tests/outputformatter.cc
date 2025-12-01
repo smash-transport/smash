@@ -84,7 +84,11 @@ TEST(valid_line_maker) {
                                                "pdg_mother1",
                                                "pdg_mother2",
                                                "baryon_number",
-                                               "strangeness"};
+                                               "strangeness",
+                                               "spin0",
+                                               "spinx",
+                                               "spiny",
+                                               "spinz"};
 
   OutputFormatter<ToASCII> formatter(valid_quantities);
 
@@ -98,7 +102,7 @@ TEST(valid_line_maker) {
 
   std::string units_line{
       "fm fm fm fm GeV GeV GeV GeV GeV none none e none fm none none none fm "
-      "none none none none\n"};
+      "none none none none none none none none\n"};
   VERIFY(units_line == formatter.unit_line());
 
   std::stringstream correct_line{};
@@ -124,7 +128,11 @@ TEST(valid_line_maker) {
   correct_line << p.get_history().p1.string() << " ";
   correct_line << p.get_history().p2.string() << " ";
   correct_line << p.pdgcode().baryon_number() << " ";
-  correct_line << p.pdgcode().strangeness() << "\n";
+  correct_line << p.pdgcode().strangeness() << " ";
+  correct_line << p.spin_vector().x0() << " ";
+  correct_line << p.spin_vector().x1() << " ";
+  correct_line << p.spin_vector().x2() << " ";
+  correct_line << p.spin_vector().x3() << "\n";
 
   VERIFY(correct_line.str() == formatter.single_particle_data(p));
 }
@@ -264,4 +272,22 @@ TEST_CATCH(write_in_chunks_throws_if_buffer_too_small, std::runtime_error) {
   const std::size_t tiny_buffer_size = sizeof(double) * 4 + sizeof(int);
   write_in_chunks_produces_same_output<ToBinary>(tiny_buffer_size, quantities);
   write_in_chunks_produces_same_output<ToASCII>(tiny_buffer_size, quantities);
+}
+
+// Create a particle with spin and ensure it is written correctly in ASCII
+// format.
+TEST(valid_line_maker_with_spin) {
+  ParticleData smashon = Test::smashon_random();
+  const FourVector spin_vector{0.1, 0.2, 0.3, 0.4};
+  smashon.set_spin_vector(spin_vector);
+
+  std::vector<std::string> quantities = {"spin0", "spinx", "spiny", "spinz"};
+  OutputFormatter<ToASCII> formatter(quantities);
+  const std::string one_chunk = formatter.single_particle_data(smashon);
+  std::stringstream correct_line{};
+  correct_line << spin_vector.x0() << " ";
+  correct_line << spin_vector.x1() << " ";
+  correct_line << spin_vector.x2() << " ";
+  correct_line << spin_vector.x3() << "\n";
+  assert(one_chunk == correct_line.str());
 }

@@ -123,8 +123,7 @@ ScatterActionsFinder::ScatterActionsFinder(
         config.take(InputKeys::collTerm_stringParam_separateFragmentBaryon),
         config.take(InputKeys::collTerm_stringParam_popcornRate),
         config.take(InputKeys::collTerm_stringParam_useMonashTune,
-                    parameters.use_monash_tune_default.value()),
-        config.take(InputKeys::collTerm_spinInteractions));
+                    parameters.use_monash_tune_default.value()));
   }
 }
 
