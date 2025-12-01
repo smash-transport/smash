@@ -263,7 +263,7 @@ class ScatterAction : public Action {
    * Perform spin interaction in string excitations. At the moment, we assign
    * unpolarized spin vectors to the outgoing particles, unless the process is
    * single diffractive, in which case we copy the spin vector of the
-   * non-diffracted particle to the corresponding outgoing particle.
+   * elastically scattered particle to the corresponding outgoing particle.
    */
   void string_spin_interaction();
 
