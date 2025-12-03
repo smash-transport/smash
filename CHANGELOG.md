@@ -19,8 +19,9 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
-## SMASH-3.3rc
-Date:
+
+## SMASH-3.3
+Date: 2025-12-03
 
 ### Added
 * Added spin 4-vectors (Pauli-Lubanski) to particles including spin interactions. At the moment, spin interactions are treated in elastic scatterings and in inelastic scatterings through `Σ* → Λπ` formation. The spin vector is by default initialized unpolarized.
