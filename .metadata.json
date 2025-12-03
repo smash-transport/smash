@@ -2,9 +2,9 @@
   "Citation metadata": {
     "cff-version": "1.2.0",
     "message": "If you use this software, please cite it using these metadata.",
-    "title": "smash-transport/smash: SMASH-3.2.2",
-    "version": "SMASH-3.2.2",
-    "date-released": "2025-09-19",
+    "title": "smash-transport/smash: SMASH-3.3",
+    "version": "SMASH-3.3",
+    "date-released": "2025-12-03",
     "doi": "10.5281/zenodo.3484711",
     "license": "GPL-3.0-or-later",
     "repository-code": "https://github.com/smash-transport/smash",
@@ -49,7 +49,7 @@
       "first name": "Agnieszka",
       "email": "agnieszka.sorensen@gmail.com",
       "years": "2019-",
-      "affiliation": "Institute for Nuclear Theory, University of Washington, Box 351550, Seattle, Washington 98195, USA",
+      "affiliation": "Facility for Rare Isotope Beams, Michigan State University, East Lansing, MI 48824 USA",
       "orcid": "0000-0002-1984-8023"
     },
     {
@@ -144,9 +144,7 @@
       "last name": "Mohs",
       "first name": "Justin",
       "email": "jmohs@itp.uni-frankfurt.de",
-      "years": "2017-2025",
-      "affiliation": "Institute for Theoretical Physics, Goethe University Frankfurt, Max-von-Laue-Straße 1, 60438 Frankfurt am Main, Germany",
-      "orcid": "0000-0001-8437-0946"
+      "years": "2017-2025"
     },
     {
       "last name": "Mitrovic",
@@ -188,9 +186,7 @@
       "last name": "Inghirami",
       "first name": "Gabriele",
       "email": "inghirami@fias.uni-frankfurt.de",
-      "years": "2021-",
-      "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung, Planckstraße 1, 64291 Darmstadt, Germany",
-      "orcid": "0000-0002-4059-120X"
+      "years": "2021-2025"
     },
     {
       "last name": "Góes-Hirayama",
@@ -222,9 +218,7 @@
       "last name": "Götz",
       "first name": "Niklas",
       "email": "goetz@itp.uni-frankfurt.de",
-      "years": "2021-2025",
-      "affiliation": "Institute for Theoretical Physics, Goethe University Frankfurt, Max-von-Laue-Straße 1, 60438 Frankfurt am Main, Germany",
-      "orcid": "0000-0002-5992-1643"
+      "years": "2021-2025"
     },
     {
       "last name": "Geiger",
@@ -242,7 +236,8 @@
       "last name": "Engel",
       "first name": "Manou",
       "email": "mengel@itp.uni-frankfurt.de",
-      "years": "2025-"
+      "years": "2025-",
+      "affiliation": "Institute for Theoretical Physics, Goethe University Frankfurt, Max-von-Laue-Straße 1, 60438 Frankfurt am Main, Germany"
     },
     {
       "last name": "Elfner",

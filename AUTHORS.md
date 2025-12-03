@@ -29,7 +29,7 @@ Feng Li | [✉️](mailto:fengli@fias.uni-frankfurt.de) | `2016-2018`
 Natey Kübler | [✉️](mailto:kuebler@fias.uni-frankfurt.de) | `2020-2021`
 Matthias Kretz | [✉️](mailto:kretz@compeng.uni-frankfurt.de) | `2014-2015,2020`
 Thomas Kehrenberg | [✉️](mailto:kehrenberg@fias.uni-frankfurt.de) | `2015`
-Gabriele Inghirami | [✉️](mailto:inghirami@fias.uni-frankfurt.de) | `2021-`
+Gabriele Inghirami | [✉️](mailto:inghirami@fias.uni-frankfurt.de) | `2021-2025`
 Jan Hammelmann | [✉️](mailto:hammelmann@itp.uni-frankfurt.de) | `2019-2023`
 Niklas Götz | [✉️](mailto:goetz@itp.uni-frankfurt.de) | `2021-2025`
 Renan Góes-Hirayama | [✉️](mailto:hirayama@itp.uni-frankfurt.de) | `2021-`
