@@ -52,7 +52,7 @@ jobs:
         # 5th matrix element, recent osx with default clang
         - os: macos-latest
           site: "mac"
-          packages_to_add: "gsl coreutils eigen"
+          packages_to_add: "gsl coreutils eigen@3"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
     steps:
@@ -81,6 +81,19 @@ jobs:
         ./bin/codebase-format-helper.bash C++ -t
         ./bin/codebase-format-helper.bash CMake -t
         ./bin/codebase-format-helper.bash Python -t
+    - name: install_missing_packages
+      env:
+        SITE: ${{ matrix.site }}
+      # This is done as dedicated step as the step that creates or updates the environment variable
+      # does not have access to the new value, but all subsequent steps in a job will have
+      run: |
+        if [ ${SITE} == "mac" ]; then
+            brew install ${{ matrix.packages_to_add }}
+            printf "%s\n" "Eigen3_ROOT=$(brew --prefix eigen@3)" >> ${GITHUB_ENV}
+        else
+            sudo apt-get update -y
+            sudo apt-get install ${{ matrix.packages_to_add }} -y
+        fi
     # We now prepare the OS, compile SMASH and run all the tests except those about formatting
     - name: code_check
       # we set some environment variables for the specific OS version
@@ -95,12 +108,6 @@ jobs:
         export SMASH_ROOT=${PWD}
         # we set the TERM environment variable (Pythia installation uses tput)
         export TERM="xterm"
-        # we install the missing packages
-        if [ ${SITE} == "mac" ]; then
-            brew install ${{ matrix.packages_to_add }}
-        else
-            sudo apt-get install ${{ matrix.packages_to_add }} -y
-        fi
         # we download and install Pythia
         wget https://pythia.org/download/pythia83/pythia8316.tgz && tar xf pythia8316.tgz && rm pythia8316.tgz && cd pythia8316
         ./configure --cxx-common="-std=c++17 -march=native -O3 -fPIC -pthread" && make -j$(nproc) && cd ..

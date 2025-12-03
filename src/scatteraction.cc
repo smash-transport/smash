@@ -100,6 +100,7 @@ void ScatterAction::generate_final_state() {
     case ProcessType::StringSoftNonDiffractive:
     case ProcessType::StringHard:
       string_excitation();
+      string_spin_interaction();
       break;
     default:
       throw InvalidScatterAction(
@@ -856,6 +857,44 @@ void ScatterAction::spin_interaction() {
           }
         }
       }
+    }
+  }
+}
+
+void ScatterAction::string_spin_interaction() {
+  // Check if spin interaction is disabled
+  if (spin_interaction_type_ == SpinInteractionType::Off) {
+    return;
+  }
+  const bool is_AB_to_AX =
+      (process_type_ == ProcessType::StringSoftSingleDiffractiveAX);
+  const bool is_AB_to_XB =
+      (process_type_ == ProcessType::StringSoftSingleDiffractiveXB);
+
+  /* This logic relies on the assumption that the surviving hadron is
+   * always appended as the final element in the outgoing particle list.
+   * This ordering is guaranteed by StringProcess::next_SDiff(bool
+   * is_AB_to_AX). If that implementation changes, the behavior here must
+   * be re-evaluated. */
+  if (is_AB_to_AX || is_AB_to_XB) {
+    const std::size_t idx_hadron_in = is_AB_to_AX ? 0 : 1;
+
+    // Boost spin vector of surviving hadron to outgoing frame
+    const FourVector final_spin_vector =
+        incoming_particles_[idx_hadron_in].spin_vector().lorentz_boost(
+            outgoing_particles_.back().velocity());
+
+    outgoing_particles_.back().set_spin_vector(final_spin_vector);
+
+    /* Set unpolarized spin vector for all newly created particles (all but
+     * the last one) */
+    for (auto it = outgoing_particles_.begin();
+         it != outgoing_particles_.end() - 1; ++it) {
+      it->set_unpolarized_spin_vector();
+    }
+  } else {
+    for (auto &particle : outgoing_particles_) {
+      particle.set_unpolarized_spin_vector();
     }
   }
 }

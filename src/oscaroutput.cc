@@ -786,7 +786,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * </tr>
  * <tr>
  * <td>\key 0
- * <td> -
+ * <td>\c int32_t
  * <td>Prints a column of 0 (for compatibility with OSCAR 1999)
  * </tr>
  * <tr>
@@ -795,7 +795,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <td>Hyperbolic time \f$\tau=\sqrt{t^2-z^2}\f$
  * </tr>
  * <tr>
- * <td>\key eta,\key eta_s
+ * <td>\key eta, \key eta_s
  * <td>\c double
  * <td>Spacetime rapidity \f$\eta_s=\frac{1}{2}\log\frac{t+z}{t-z}\f$
  * </tr>
@@ -805,7 +805,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * <td>Transverse mass \f$m_\perp=\sqrt{p_0^2-p_z^2}=\sqrt{m^2+p_x^2+p_y^2}\f$
  * </tr>
  * <tr>
- * <td>\key Rap,\key y_rap
+ * <td>\key Rap, \key y_rap
  * <td>\c double
  * <td>Momentum rapidity
  *     \f$y_\mathrm{rap}=\frac{1}{2}\log\frac{p_0+p_z}{p_0-p_z}\f$
@@ -823,7 +823,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * </table>
  *
  * \attention Not all combinations of quantities are allowed and, in particular:
- *  - `id` and `ID` cannot be given together;
+ *  - synonym quantities cannot be given together;
  *  - the same quantity cannot be repeated.
  *
  * **Example**
