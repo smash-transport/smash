@@ -115,6 +115,11 @@ if(EIGEN3_INCLUDE_DIR)
     _eigen3_check_version()
     set(EIGEN3_FOUND ${EIGEN3_VERSION_OK})
 
+    # Abort if the version could not be extracted or wasn't matching requirements
+    if(NOT EIGEN3_FOUND)
+        message(FATAL_ERROR "Unsuitable Eigen3 version '${EIGEN3_VERSION}' found.")
+    endif()
+
 else(EIGEN3_INCLUDE_DIR)
 
     find_path(EIGEN3_INCLUDE_DIR
