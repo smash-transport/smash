@@ -1,3 +1,16 @@
+########################################################
+#
+#    Copyright (c) 2025
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+########################################################
+
+# cmake-format: off
+#=============================================================================
+# This file was taken from the original Eigen3 repository and it has later
+# been modified to support new library versions (when version 5.x has come out)
 #=============================================================================
 # - Try to find Eigen3 lib
 #
@@ -12,7 +25,7 @@
 #  EIGEN3_VERSION - eigen version
 #
 # This module reads hints about search locations from
-# the following enviroment variables:
+# the following environment variables:
 #
 # EIGEN3_ROOT
 # EIGEN3_ROOT_DIR
@@ -22,7 +35,38 @@
 # Copyright (c) 2009 Benoit Jacob <jacob.benoit.1@gmail.com>
 # Redistribution and use is allowed according to the terms of the 2-clause BSD license.
 #=============================================================================
+# cmake-format: on
 
+# --- NEW: First try config mode (Eigen >= 5) --------------------------------
+find_package(Eigen3 5.0 QUIET CONFIG)
+
+if(Eigen3_FOUND)
+    # Map modern variables to legacy Find-module variables
+    get_target_property(_eigen_inc Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
+
+    set(EIGEN3_INCLUDE_DIR "${_eigen_inc}")
+
+    # Extract version from Eigen3_VERSION or Eigen3_VERSION_STRING
+    if(DEFINED Eigen3_VERSION)
+        set(EIGEN3_VERSION "${Eigen3_VERSION}")
+    elseif(DEFINED Eigen3_VERSION_STRING)
+        set(EIGEN3_VERSION "${Eigen3_VERSION_STRING}")
+    else()
+        message(FATAL_ERROR " \n"
+                            " Eigen3 was found via CONFIG mode, but no version information was provided.\n"
+                            " A valid Eigen3Config.cmake must define Eigen3_VERSION or Eigen3_VERSION_STRING.\n"
+        )
+    endif()
+
+    set(EIGEN3_FOUND TRUE)
+    mark_as_advanced(EIGEN3_INCLUDE_DIR)
+
+    # Done — skip legacy detection
+    message(STATUS "Eigen3 found via CONFIG mode (version ${EIGEN3_VERSION})")
+    return()
+endif()
+
+# --- FALLBACK: Legacy Eigen 3.x detection -----------------------------------
 if(NOT Eigen3_FIND_VERSION)
     if(NOT Eigen3_FIND_VERSION_MAJOR)
         set(Eigen3_FIND_VERSION_MAJOR 2)
