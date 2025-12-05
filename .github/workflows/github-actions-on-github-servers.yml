@@ -52,7 +52,7 @@ jobs:
         # 5th matrix element, recent osx with default clang
         - os: macos-latest
           site: "mac"
-          packages_to_add: "gsl coreutils eigen@3"
+          packages_to_add: "gsl coreutils eigen"
           c_compiler_to_use: "clang"
           cxx_compiler_to_use: "clang++"
     steps:
@@ -85,11 +85,11 @@ jobs:
       env:
         SITE: ${{ matrix.site }}
       # This is done as dedicated step as the step that creates or updates the environment variable
-      # does not have access to the new value, but all subsequent steps in a job will have
+      # does not have access to the new value, but all subsequent steps in a job will have. Just in
+      # case any change in the environment is needed at some point.
       run: |
         if [ ${SITE} == "mac" ]; then
             brew install ${{ matrix.packages_to_add }}
-            printf "%s\n" "Eigen3_ROOT=$(brew --prefix eigen@3)" >> ${GITHUB_ENV}
         else
             sudo apt-get update -y
             sudo apt-get install ${{ matrix.packages_to_add }} -y
