@@ -37,36 +37,52 @@
 #=============================================================================
 # cmake-format: on
 
-# --- NEW: First try config mode (Eigen >= 5) --------------------------------
-find_package(Eigen3 5.0 QUIET CONFIG)
+# ------------------ NEW: First try config mode (Eigen >= 5) -------------------
+
+# Note that it is safe to use find_package here, and no infinite recursion occurs, because we are
+# calling find_package() in CONFIG mode, which explicitly bypasses the module search. Furthermore,
+# it is important to stress that the requested version here should be 5 and not 5.0 as the latter
+# would reject versions 5.1, 5.2 and so on and this is not what we want to achieve. For the record,
+# this module will need to be adjusted when Eigen3 version 6 or higher comes out. If the version
+# requirement is dropped and simply find_package(Eigen3 QUIET CONFIG) is issued, then this will
+# inherit the requirement from the parent scope and this is not wished. It can be patched unsetting
+# and later restoring the Eigen3_FIND_VERSION_COMPLETE variable, but this has not yet been done
+# because when version 6 of Eigen3 comes out it will probably possible to drop this entire file and
+# simply rely on configuration mode finding requiring version 5 as minimum one.
+find_package(Eigen3 5 QUIET CONFIG)
 
 if(Eigen3_FOUND)
-    # Map modern variables to legacy Find-module variables
-    get_target_property(_eigen_inc Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
-
-    set(EIGEN3_INCLUDE_DIR "${_eigen_inc}")
-
-    # Extract version from Eigen3_VERSION or Eigen3_VERSION_STRING
-    if(DEFINED Eigen3_VERSION)
-        set(EIGEN3_VERSION "${Eigen3_VERSION}")
-    elseif(DEFINED Eigen3_VERSION_STRING)
-        set(EIGEN3_VERSION "${Eigen3_VERSION_STRING}")
+    if(NOT DEFINED Eigen3_VERSION AND NOT DEFINED Eigen3_VERSION_STRING)
+        message(FATAL_ERROR " \n" " Eigen3 was found via CONFIG mode, but no version"
+                            " information was provided.\n A valid Eigen3Config.cmake"
+                            " must define Eigen3_VERSION or Eigen3_VERSION_STRING.\n")
     else()
-        message(FATAL_ERROR " \n"
-                            " Eigen3 was found via CONFIG mode, but no version information was provided.\n"
-                            " A valid Eigen3Config.cmake must define Eigen3_VERSION or Eigen3_VERSION_STRING.\n"
-        )
+        # Weird corner case, but it does not harm and allows later to just use Eigen3_VERSION
+        if(NOT DEFINED Eigen3_VERSION)
+            set(Eigen3_VERSION "${Eigen3_VERSION_STRING}")
+        endif()
     endif()
+    if(Eigen3_VERSION VERSION_LESS Eigen3_FIND_VERSION)
+        message(FATAL_ERROR " \n " "Found Eigen3 version ${Eigen3_VERSION}, but "
+                            "version ${Eigen3_FIND_VERSION} or newer is required.\n")
+    else()
+        # Map modern variables to legacy Find-module variables
+        get_target_property(_eigen_inc Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
 
-    set(EIGEN3_FOUND TRUE)
-    mark_as_advanced(EIGEN3_INCLUDE_DIR)
+        set(EIGEN3_INCLUDE_DIR "${_eigen_inc}")
+        set(EIGEN3_VERSION "${Eigen3_VERSION}")
+        set(EIGEN3_FOUND TRUE)
+        mark_as_advanced(EIGEN3_INCLUDE_DIR)
 
-    # Done — skip legacy detection
-    message(STATUS "Eigen3 found via CONFIG mode (version ${EIGEN3_VERSION})")
-    return()
+        # Done — skip legacy detection
+        message(STATUS "Eigen3 found via CONFIG mode (version ${EIGEN3_VERSION})")
+        return()
+    endif()
 endif()
 
-# --- FALLBACK: Legacy Eigen 3.x detection -----------------------------------
+# -------------------- FALLBACK: Legacy Eigen 3.x detection --------------------
+
+# Set the requested minimum to a proper version variable if not already the case
 if(NOT Eigen3_FIND_VERSION)
     if(NOT Eigen3_FIND_VERSION_MAJOR)
         set(Eigen3_FIND_VERSION_MAJOR 2)
