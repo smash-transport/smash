@@ -80,21 +80,43 @@ make
 ```
 
 
-### Installing Eigen
+### Installing Eigen3
 
-Usually it is possible to install Eigen with a package manager (it requires admin privileges) and in this case CMake should be able to find the header files without the need of any additional option.
-For example, on an Apple machine you have the possibility to install Eigen via `brew install eigen`, while, under GNU/Linux Ubuntu, via `sudo apt-get install libeigen3-dev`.
+Usually it is possible to install Eigen3 with a package manager (it requires admin privileges) and in this case CMake should be able to find the header files without the need of any additional option.
+For example, on an Apple machine you have the possibility to install Eigen3 via `brew install eigen`, while, under GNU/Linux Ubuntu, via `sudo apt-get install libeigen3-dev`.
 
 If for some reason this is not a viable approach, then you can still proceed to a manual installation as described in the following.
 
-#### Getting Eigen header files into a custom location
+#### Getting Eigen3 header files into a custom location
 
-Let's assume Eigen headers will be unpacked in `${HOME}`.
-Download the latest stable release of `Eigen` from [the official website](http://eigen.tuxfamily.org) and unpack it via
+Let's assume Eigen3 headers will be unpacked in `${HOME}`.
+Download the latest stable release of Eigen3 from [the official website](http://eigen.tuxfamily.org) and unpack it via
 ```console
 tar -xf "[latest-eigen].tar.gz" -C "${HOME}"
 ```
-To tell CMake where to find Eigen header files while building SMASH, pass the path to them adding the option `-DCMAKE_PREFIX_PATH=$HOME/[latest-eigen]/` to the `cmake` command in the SMASH setup (cf. [Building SMASH](#building) section).
+
+If you downloaded Eigen3 version `3.x`, you are ready to go and you can skip the installation part of the library and directly run `cmake` to setup SMASH (see below).
+From version `5.x` on, simply unpacking the release tarball is not enough to make SMASH find and use the library.
+You need to install it at a given location, for example in a dedicated subfolder of the downloaded codebase.
+For example:
+```console
+cd "${HOME}/eigen-5.0.1"
+mkdir Installation build_dir
+cd build_dir
+cmake -DCMAKE_INSTALL_PREFIX="${HOME}/eigen-5.0.1/Installation" ..
+make install
+```
+This will place some needed configuration files in the `${HOME}/eigen-5.0.1/Installation/share/eigen3/cmake/` subfolder which are needed by SMASH.
+
+To tell CMake where to find Eigen3 while preparing SMASH build, pass the corresponding path adding
+* either the option `-DCMAKE_PREFIX_PATH="${HOME}/[latest-eigen]"` for versions `3.x`
+* or the option `-DCMAKE_PREFIX_PATH="${HOME}/[latest-eigen]/Installation"` for versions `≥ 5.x`
+
+to the `cmake` command in the SMASH setup (cf. [Building SMASH](#building) section).
+
+Note that for versions `≥ 5.x`, the Eigen3 installation should have put the Eigen3 package in the user package registry (on Linux/Unix OS this is by default located at `~/.cmake/packages/`), which makes build trees automatically discoverable.
+This means that it should not be strictly necessary to set the `CMAKE_PREFIX_PATH` variable when running `cmake`.
+However, setting it is not harmful and actually makes the behavior more deterministic.
 
 
 ### Installing and enabling Rivet support
