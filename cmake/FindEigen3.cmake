@@ -1,3 +1,16 @@
+########################################################
+#
+#    Copyright (c) 2025
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+########################################################
+
+# cmake-format: off
+#=============================================================================
+# This file was taken from the original Eigen3 repository and it has later
+# been modified to support new library versions (when version 5.x has come out)
 #=============================================================================
 # - Try to find Eigen3 lib
 #
@@ -12,7 +25,7 @@
 #  EIGEN3_VERSION - eigen version
 #
 # This module reads hints about search locations from
-# the following enviroment variables:
+# the following environment variables:
 #
 # EIGEN3_ROOT
 # EIGEN3_ROOT_DIR
@@ -22,7 +35,54 @@
 # Copyright (c) 2009 Benoit Jacob <jacob.benoit.1@gmail.com>
 # Redistribution and use is allowed according to the terms of the 2-clause BSD license.
 #=============================================================================
+# cmake-format: on
 
+# ------------------ NEW: First try config mode (Eigen >= 5) -------------------
+
+# Note that it is safe to use find_package here, and no infinite recursion occurs, because we are
+# calling find_package() in CONFIG mode, which explicitly bypasses the module search. Furthermore,
+# it is important to stress that the requested version here should be 5 and not 5.0 as the latter
+# would reject versions 5.1, 5.2 and so on and this is not what we want to achieve. For the record,
+# this module will need to be adjusted when Eigen3 version 6 or higher comes out. If the version
+# requirement is dropped and simply find_package(Eigen3 QUIET CONFIG) is issued, then this will
+# inherit the requirement from the parent scope and this is not wished. It can be patched unsetting
+# and later restoring the Eigen3_FIND_VERSION_COMPLETE variable, but this has not yet been done
+# because when version 6 of Eigen3 comes out it will probably possible to drop this entire file and
+# simply rely on configuration mode finding requiring version 5 as minimum one.
+find_package(Eigen3 5 QUIET CONFIG)
+
+if(Eigen3_FOUND)
+    if(NOT DEFINED Eigen3_VERSION AND NOT DEFINED Eigen3_VERSION_STRING)
+        message(FATAL_ERROR " \n" " Eigen3 was found via CONFIG mode, but no version"
+                            " information was provided.\n A valid Eigen3Config.cmake"
+                            " must define Eigen3_VERSION or Eigen3_VERSION_STRING.\n")
+    else()
+        # Weird corner case, but it does not harm and allows later to just use Eigen3_VERSION
+        if(NOT DEFINED Eigen3_VERSION)
+            set(Eigen3_VERSION "${Eigen3_VERSION_STRING}")
+        endif()
+    endif()
+    if(Eigen3_VERSION VERSION_LESS Eigen3_FIND_VERSION)
+        message(FATAL_ERROR " \n " "Found Eigen3 version ${Eigen3_VERSION}, but "
+                            "version ${Eigen3_FIND_VERSION} or newer is required.\n")
+    else()
+        # Map modern variables to legacy Find-module variables
+        get_target_property(_eigen_inc Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
+
+        set(EIGEN3_INCLUDE_DIR "${_eigen_inc}")
+        set(EIGEN3_VERSION "${Eigen3_VERSION}")
+        set(EIGEN3_FOUND TRUE)
+        mark_as_advanced(EIGEN3_INCLUDE_DIR)
+
+        # Done — skip legacy detection
+        message(STATUS "Eigen3 found via CONFIG mode (version ${EIGEN3_VERSION})")
+        return()
+    endif()
+endif()
+
+# -------------------- FALLBACK: Legacy Eigen 3.x detection --------------------
+
+# Set the requested minimum to a proper version variable if not already the case
 if(NOT Eigen3_FIND_VERSION)
     if(NOT Eigen3_FIND_VERSION_MAJOR)
         set(Eigen3_FIND_VERSION_MAJOR 2)
@@ -70,6 +130,11 @@ if(EIGEN3_INCLUDE_DIR)
     # in cache already
     _eigen3_check_version()
     set(EIGEN3_FOUND ${EIGEN3_VERSION_OK})
+
+    # Abort if the version could not be extracted or wasn't matching requirements
+    if(NOT EIGEN3_FOUND)
+        message(FATAL_ERROR "Unsuitable Eigen3 version '${EIGEN3_VERSION}' found.")
+    endif()
 
 else(EIGEN3_INCLUDE_DIR)
 
