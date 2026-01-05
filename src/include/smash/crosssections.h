@@ -23,7 +23,7 @@
 namespace smash {
 
 /**
- * The cross section class assembels everything that is needed to
+ * The cross section class assembles everything that is needed to
  * calculate the cross section and returns a list of all possible reactions
  * for the incoming particles at the given energy with the calculated cross
  * sections.
@@ -33,9 +33,9 @@ class CrossSections {
   /**
    * Construct CrossSections instance.
    *
-   * \param[in] incoming_particles Particles that are reacting.
+   * \param[in] incoming_particles Particles that are interacting.
    * \param[in] sqrt_s Center-of-mass energy of the reaction.
-   * \param[in] potentials Potentials at the interacting point. they are
+   * \param[in] potentials Potentials at the interacting point. They are
    *            used to calculate the corrections on the thresholds.
    */
   CrossSections(const ParticleList& incoming_particles, double sqrt_s,
@@ -44,7 +44,7 @@ class CrossSections {
   /**
    * Generate a list of all possible collisions between the incoming particles
    * with the given c.m. energy and the calculated cross sections.
-   * The string processes are not added at this step if it's not triggerd
+   * The string processes are not added at this step if it is not triggerd
    * according to the probability. It will then be added in
    * add_all_scatterings in scatteraction.cc
    *
