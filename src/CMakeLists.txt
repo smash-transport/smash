@@ -324,10 +324,14 @@ set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated
 
 target_link_libraries(smash ${SMASH_LIBRARIES})
 
-# Create a shared library out of the whole SMASH
+# Create a shared library out of the whole SMASH. Note that, since "the build-tree runtime path will
+# not be used for binaries in the install tree" (CMake documentation), we request here to set the
+# INSTALL_RPATH in the library to ensure that projects linking to SMASH finds at run time libraries
+# like Pythia, which are likely to be in not standard places.
 add_library(smash_shared SHARED $<TARGET_OBJECTS:objlib>)
 target_link_libraries(smash_shared ${SMASH_LIBRARIES})
-set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash)
+set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
+                                              INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # tests:
 if(BUILD_TESTING)
