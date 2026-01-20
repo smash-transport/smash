@@ -21,8 +21,8 @@
 # This module gives more informative information about the outcome if run
 # using the --log-level=VERBOSE CMake command line option.
 #
-# The environment variable SMASH_INSTALL_DIR must be properly set to succeed
-# and, in particular, refer to where SMASH has been intalled via 'make install'.
+# The environment variable SMASH_INSTALL_DIR must be properly set to succeed and
+# refer to where SMASH has been installed via 'make install'.
 # For instance, use
 #   export SMASH_INSTALL_DIR="${HOME}/.local/"
 # if SMASH has been installed via
@@ -94,7 +94,7 @@ if(DEFINED ENV{SMASH_INSTALL_DIR})
 
     if(DEFINED ENV{SMASH_VERSION})
         set(smash_folder "smash-$ENV{SMASH_VERSION}")
-        if(NOT IS_DIRECTORY "$ENV{SMASH_INSTALL_DIR}/include/${smash_folder}")
+        if(NOT IS_DIRECTORY "$ENV{SMASH_INSTALL_DIR}/${smash_folder}")
             message(FATAL_ERROR " \n"
                                 " No (complete) SMASH installation for version $ENV{SMASH_VERSION} found at\n"
                                 " $ENV{SMASH_INSTALL_DIR}\n")
@@ -103,12 +103,14 @@ if(DEFINED ENV{SMASH_INSTALL_DIR})
         # Use 'include' installation folder to locate all installed versions, then consider last one
         file(GLOB smash_folders
              LIST_DIRECTORIES true
-             RELATIVE "$ENV{SMASH_INSTALL_DIR}/include"
-             "$ENV{SMASH_INSTALL_DIR}/include/smash-*")
+             RELATIVE "$ENV{SMASH_INSTALL_DIR}"
+             "$ENV{SMASH_INSTALL_DIR}/smash-*")
         foreach(folder ${smash_folders})
-            if(NOT IS_DIRECTORY "$ENV{SMASH_INSTALL_DIR}/include/${folder}")
-                list(REMOVE_ITEM smash_folders "${folder}")
-            endif()
+            foreach(installation_folder "bin" "lib" "include" "share")
+                if(NOT IS_DIRECTORY "$ENV{SMASH_INSTALL_DIR}/${folder}/${installation_folder}")
+                    list(REMOVE_ITEM smash_folders "${folder}")
+                endif()
+            endforeach()
         endforeach()
         list(LENGTH smash_folders number_of_versions)
         if(number_of_versions EQUAL 0)
@@ -122,21 +124,15 @@ if(DEFINED ENV{SMASH_INSTALL_DIR})
         unset(number_of_versions)
         unset(smash_folders)
     endif()
-    if(NOT IS_DIRECTORY "$ENV{SMASH_INSTALL_DIR}/lib/${smash_folder}")
-        message(FATAL_ERROR " \n"
-                            " Inconsistent installation of SMASH detected! Folder '${smash_folder}'\n"
-                            " existing in 'include' but not found in 'lib' sub-folder\n"
-                            " at $ENV{SMASH_INSTALL_DIR}\n")
-    endif()
     # Now we can look for header files and libraries!
     list(APPEND
          SMASH_INCLUDE_DIR
-         "$ENV{SMASH_INSTALL_DIR}/include/${smash_folder}/cuba"
-         "$ENV{SMASH_INSTALL_DIR}/include/${smash_folder}/einhard"
-         "$ENV{SMASH_INSTALL_DIR}/include/${smash_folder}/yaml-cpp"
-         "$ENV{SMASH_INSTALL_DIR}/include/${smash_folder}")
-    set(SMASH_INPUT_FILES_DIR "$ENV{SMASH_INSTALL_DIR}/share/${smash_folder}/input_files")
-    set(path_for_libraries "$ENV{SMASH_INSTALL_DIR}/lib/${smash_folder}")
+         "$ENV{SMASH_INSTALL_DIR}/${smash_folder}/include/cuba"
+         "$ENV{SMASH_INSTALL_DIR}/${smash_folder}/include/einhard"
+         "$ENV{SMASH_INSTALL_DIR}/${smash_folder}/include/yaml-cpp"
+         "$ENV{SMASH_INSTALL_DIR}/${smash_folder}/include")
+    set(SMASH_INPUT_FILES_DIR "$ENV{SMASH_INSTALL_DIR}/${smash_folder}/share/input_files")
+    set(path_for_libraries "$ENV{SMASH_INSTALL_DIR}/${smash_folder}/lib")
     find_library(SMASH_LIBRARY NAMES smash PATHS "${path_for_libraries}")
     find_library(EINHARD_LIBRARY NAMES einhard PATHS "${path_for_libraries}")
     find_library(CPPYAML_LIBRARY NAMES yaml-cpp PATHS "${path_for_libraries}")
