@@ -43,9 +43,19 @@ with section("parse"):
         "MIC_CXX_RESULT": 1,
       }
     },
+    "check_compiler_flag_is_supported": {
+      "pargs": 0,
+      "flags": [],
+      "kwargs": {
+        "LANGUAGE": 1,
+        "FLAG": 1,
+        "RESULT": 1,
+        "COMPILER": 1,
+      }
+    },
     "add_compiler_flags_if_supported": {
       "pargs": '+',
-      "flags": ["VERBOSE"],
+      "flags": ["VERBOSE", "ADD_IF_PRESENT"],
       "kwargs": {
         "C_FLAGS": 1,
         "CXX_FLAGS": 1,
