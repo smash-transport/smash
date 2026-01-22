@@ -941,3 +941,115 @@ TEST(nucleus_components) {
   VERIFY(H3L.nucleus_an() == 0);
   VERIFY(H3L.nucleus_aLa() == 0);
 }
+
+TEST(contains_quark) {
+  PdgCode pim(-0x211);
+  PdgCode pip(0x211);
+  VERIFY(pim.contains_quark(1) && pim.contains_quark(-2));
+  VERIFY(pip.contains_quark(-1) && pip.contains_quark(2));
+
+  PdgCode kp(0x321);
+  PdgCode km(-0x321);
+  VERIFY(kp.contains_quark(2) && kp.contains_quark(-3));
+  VERIFY(km.contains_quark(-2) && km.contains_quark(3));
+
+  PdgCode p(0x2212);
+  PdgCode pbar(-0x2212);
+  VERIFY(p.contains_quark(2) && p.contains_quark(1));
+  VERIFY(!p.contains_quark(3) && !p.contains_quark(-3));
+  VERIFY(pbar.contains_quark(-2) && pbar.contains_quark(-1));
+
+  PdgCode n(0x2112);
+  PdgCode nbar(-0x2112);
+  VERIFY(n.contains_quark(2) && n.contains_quark(1));
+  VERIFY(nbar.contains_quark(-2) && nbar.contains_quark(-1));
+
+  PdgCode lam(0x3122);
+  PdgCode alam(-0x3122);
+  VERIFY(lam.contains_quark(2) && lam.contains_quark(1) &&
+         lam.contains_quark(3));
+  VERIFY(alam.contains_quark(-2) && alam.contains_quark(-1) &&
+         alam.contains_quark(-3));
+
+  PdgCode sigp(0x3222);
+  PdgCode sigm(0x3112);
+  VERIFY(sigp.contains_quark(2) && sigp.contains_quark(3) &&
+         !sigp.contains_quark(1));
+  VERIFY(sigm.contains_quark(1) && sigm.contains_quark(3) &&
+         !sigm.contains_quark(2));
+
+  PdgCode delpp(0x2224);
+  PdgCode delm(0x1114);
+  VERIFY(delpp.contains_quark(2) && !delpp.contains_quark(1) &&
+         !delpp.contains_quark(3));
+  VERIFY(delm.contains_quark(1) && !delm.contains_quark(2) &&
+         !delm.contains_quark(3));
+
+  PdgCode dplus(0x411);
+  PdgCode dminus(-0x411);
+  VERIFY(dplus.contains_quark(4) && dplus.contains_quark(-1));
+  VERIFY(dminus.contains_quark(-4) && dminus.contains_quark(1));
+
+  PdgCode pi0(0x111);
+  PdgCode rho0(0x113);
+  PdgCode omega(0x223);
+  VERIFY(pi0.contains_quark(1) && pi0.contains_quark(-1));
+  VERIFY(pi0.contains_quark(2) && pi0.contains_quark(-2));
+  VERIFY(!pi0.contains_quark(3) && !pi0.contains_quark(-3));
+
+  VERIFY(rho0.contains_quark(1) && rho0.contains_quark(-1));
+  VERIFY(rho0.contains_quark(2) && rho0.contains_quark(-2));
+  VERIFY(!rho0.contains_quark(3) && !rho0.contains_quark(-3));
+
+  VERIFY(omega.contains_quark(1) && omega.contains_quark(-1));
+  VERIFY(omega.contains_quark(2) && omega.contains_quark(-2));
+  VERIFY(!omega.contains_quark(3) && !omega.contains_quark(-3));
+
+  PdgCode eta(0x221);
+  PdgCode etap(0x331);
+  VERIFY(eta.contains_quark(1) && eta.contains_quark(-1));
+  VERIFY(eta.contains_quark(2) && eta.contains_quark(-2));
+  VERIFY(!eta.contains_quark(3) && !eta.contains_quark(-3));
+
+  VERIFY(etap.contains_quark(1) && etap.contains_quark(-1));
+  VERIFY(etap.contains_quark(2) && etap.contains_quark(-2));
+  VERIFY(!etap.contains_quark(3) && !etap.contains_quark(-3));
+
+  PdgCode phi(0x333);
+  VERIFY(phi.contains_quark(3) && phi.contains_quark(-3));
+  VERIFY(!phi.contains_quark(2) && !phi.contains_quark(-2));
+  VERIFY(!phi.contains_quark(1) && !phi.contains_quark(-1));
+
+  PdgCode jpsi(0x443);
+  VERIFY(jpsi.contains_quark(4) && jpsi.contains_quark(-4));
+  VERIFY(!jpsi.contains_quark(1) && !jpsi.contains_quark(-1));
+  VERIFY(!jpsi.contains_quark(2) && !jpsi.contains_quark(-2));
+  VERIFY(!jpsi.contains_quark(3) && !jpsi.contains_quark(-3));
+  VERIFY(!jpsi.contains_quark(5) && !jpsi.contains_quark(-5));
+  VERIFY(!jpsi.contains_quark(6) && !jpsi.contains_quark(-6));
+
+  PdgCode ups(0x553);
+  VERIFY(ups.contains_quark(5) && ups.contains_quark(-5));
+  VERIFY(!ups.contains_quark(4) && !ups.contains_quark(-4));
+  VERIFY(!ups.contains_quark(3) && !ups.contains_quark(-3));
+
+  PdgCode k0(0x311);
+  PdgCode k0bar(-0x311);
+  VERIFY(k0.contains_quark(1) && k0.contains_quark(-3));
+  VERIFY(k0bar.contains_quark(-1) && k0bar.contains_quark(3));
+
+  PdgCode d0(0x421);
+  PdgCode d0bar(-0x421);
+  VERIFY(d0.contains_quark(4) && d0.contains_quark(-2));
+  VERIFY(d0bar.contains_quark(-4) && d0bar.contains_quark(2));
+
+  PdgCode b0(0x511);
+  PdgCode b0bar(-0x511);
+  VERIFY(b0.contains_quark(1) && b0.contains_quark(-5));
+  VERIFY(b0bar.contains_quark(-1) && b0bar.contains_quark(5));
+
+  PdgCode bs0(0x531);
+  PdgCode bs0bar(-0x531);
+  VERIFY(bs0.contains_quark(3) && bs0.contains_quark(-5));
+  VERIFY(bs0bar.contains_quark(-3) && bs0bar.contains_quark(5));
+}

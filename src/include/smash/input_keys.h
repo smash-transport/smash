@@ -3115,6 +3115,40 @@ struct InputKeys {
       {"3.0"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_leading_hadron_treatment_,Leading_Hadron_Treatment,
+   *               string,All_Strings}
+   *
+   * Selects the algorithm used to assign leading hadrons in string
+   * fragmentation.
+   *
+   * Allowed values:
+   * - `All_Strings`:
+   *   Use the previous (legacy) leading-hadron assignment for all string
+   *   topologies.
+   * - `Only_ValenceEndpoints`:
+   *   For open strings, determine which string endpoints carry valence quarks
+   *   (queried from Pythia) and select leading hadrons with matching flavour
+   *   content closest in longitudinal momentum to the corresponding endpoint,
+   *   evaluated in the string rest frame oriented along the \f$p_z\f$ axis.
+   *   This reduces unphysical leading-hadron production at mid-rapidity.
+   *
+   * Notes:
+   * - The valence-endpoint procedure is applied only to open strings.
+   * - For junction topologies with at least one leading hadron, SMASH falls
+   * back to the legacy algorithm.
+   * - Closed strings do not receive leading-hadron assignment.
+   */
+  /**
+   * \see_key{key_CT_SP_leading_hadron_treatment_}
+   */
+  inline static const Key<std::string>
+      collTerm_stringParam_leadingHadronTreatment{
+          InputSections::c_stringParameters + "Leading_Hadron_Treatment",
+          "All_Strings",
+          {"3.4"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_decays_,Decays,bool,false}
    *
@@ -6188,6 +6222,7 @@ struct InputKeys {
       std::cref(collTerm_stringParam_stringZB),
       std::cref(collTerm_stringParam_stringZBLeading),
       std::cref(collTerm_stringParam_useMonashTune),
+      std::cref(collTerm_stringParam_leadingHadronTreatment),
       std::cref(collTerm_dileptons_decays),
       std::cref(collTerm_photons_twoToTwoScatterings),
       std::cref(collTerm_photons_bremsstrahlung),
