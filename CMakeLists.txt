@@ -57,7 +57,7 @@ if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
 endif()
 
 # Before starting, tell cmake where to find our modules and include utilities
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Utilities)
 
 # The variable SMASH_VERSION is already set via the project() command, since we specify there a
