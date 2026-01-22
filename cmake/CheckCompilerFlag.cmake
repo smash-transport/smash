@@ -79,12 +79,15 @@ function(check_compiler_flag_is_supported)
         # to enforce it here and in this way it is obvious that this function is caching the result.
         set(${_cache_var} ${${_cache_var}} CACHE BOOL
                                                  "Whether compiler supports flag ${arg_of_FLAG}")
+        if(NOT ${_cache_var})
+            message(ATTENTION "Flag ${arg_of_FLAG} not supported by ${_lang} compiler."
+                              " It will not be used.")
+        endif()
     endif()
 
     if(${_cache_var})
         set(${arg_of_RESULT} TRUE PARENT_SCOPE)
     else()
-        message(DEBUG "Flag ${arg_of_FLAG} not supported by ${_lang} compiler.")
         set(${arg_of_RESULT} FALSE PARENT_SCOPE)
     endif()
 endfunction()

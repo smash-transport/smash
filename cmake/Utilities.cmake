@@ -49,6 +49,85 @@ function(message)
     endif()
 endfunction()
 
+# Add function to add a compiler flag to a target only if the compiler supports it. Syntax:
+# ~~~
+# target_add_compiler_flag_if_supported(TARGETS   <target> [<target> ...]   # One or more targets
+#                                       LANGUAGE <C|CXX>                    # Language of the flags
+#                                       FLAGS    <flag> [<flag> ...]        # Flags to test and add
+#                                       [COMPILER <AUTO|MIC>]               # Default AUTO
+#                                       [SCOPE <PRIVATE|INTERFACE|PUBLIC>]) # Default PRIVATE
+# For each target and each flag:
+# 1. If the target already has the flag, skip and print a message
+# 2. Else, check if the compiler supports the flag using check_compiler_flag_is_supported()
+# 3. If supported, add the flag to the target with target_compile_options()
+# 4. SCOPE is applied to all targets uniformly
+# ~~~
+include("${CMAKE_CURRENT_LIST_DIR}/CheckCompilerFlag.cmake")
+function(target_add_compiler_flag_if_supported)
+    cmake_parse_arguments(arg_of
+                          ""
+                          "LANGUAGE;COMPILER;SCOPE"
+                          "TARGETS;FLAGS"
+                          ${ARGN})
+
+    if(NOT arg_of_TARGETS)
+        message(FATAL_ERROR "TARGETS is required")
+    endif()
+    if(NOT arg_of_LANGUAGE)
+        message(FATAL_ERROR "LANGUAGE is required (C or CXX)")
+    endif()
+    if(NOT arg_of_FLAGS)
+        message(FATAL_ERROR "FLAGS must contain at least one flag")
+    endif()
+
+    if(arg_of_SCOPE)
+        string(TOUPPER "${arg_of_SCOPE}" _scope)
+    else()
+        set(_scope PRIVATE)
+    endif()
+    if(NOT _scope MATCHES "^(PRIVATE|INTERFACE|PUBLIC)$")
+        message(FATAL_ERROR "SCOPE must be PRIVATE, PUBLIC, or INTERFACE")
+    endif()
+
+    if(arg_of_COMPILER)
+        set(_compiler "${arg_of_COMPILER}")
+    else()
+        set(_compiler AUTO)
+    endif()
+
+    foreach(_target IN LISTS arg_of_TARGETS)
+        get_target_property(_existing_opts ${_target} COMPILE_OPTIONS)
+        if(_existing_opts STREQUAL "_existing_opts-NOTFOUND")
+            set(_existing_opts "")
+        endif()
+
+        foreach(_flag IN LISTS arg_of_FLAGS)
+            list(FIND _existing_opts "${_flag}" _found_index)
+            if(_found_index GREATER -1)
+                message(ATTENTION "The target '${_target}' already has the flag '${_flag}',"
+                                  " skipping it.")
+                continue()
+            endif()
+            set(MESSAGE_QUIET ON)
+            check_compiler_flag_is_supported(LANGUAGE ${arg_of_LANGUAGE}
+                                             FLAG "${_flag}"
+                                             RESULT _flag_supported
+                                             COMPILER ${_compiler})
+            unset(MESSAGE_QUIET)
+            if(NOT _flag_supported)
+                continue()
+            else()
+                # Note that the generator expression is expanded as late as possible and the
+                # following one is meant to avoid passing C-only options to C++ compiler when
+                # compiling C++ sources and vice versa. For pure C or C++ targets it is irrelevant,
+                # but for mixed one it would be wrong not do do so.
+                target_compile_options(${_target} ${_scope}
+                                       $<$<COMPILE_LANGUAGE:${arg_of_LANGUAGE}>:${_flag}>)
+            endif()
+        endforeach()
+    endforeach()
+endfunction()
+
 # Add utility function to add a compiler flag in a sound way (i.e. testing if it is supported) and
 # possibly warn or fail if it is not. Syntax:
 # ~~~
@@ -75,9 +154,10 @@ endfunction()
 #    function would also not naively work, since its <...>_RESULT variables have to be set in the
 #    calling scope. This is possible using set(... PARENT_SCOPE) but was not done. As convention,
 #    local variables here have been prefixed with a double underscore "__".
-get_filename_component(_currentDir "${CMAKE_CURRENT_LIST_FILE}" PATH)
-include("${_currentDir}/AddCompilerFlag.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/AddCompilerFlag.cmake")
 function(add_compiler_flags_if_supported)
+    message(WARNING " \n" " add_compiler_flags_if_supported() is deprecated.\n"
+                    " Use target_add_compiler_flag_if_supported() instead.\n")
     # Parse arguments and do logic to set up needed variables
     cmake_parse_arguments(PARSE_ARGV
                           0

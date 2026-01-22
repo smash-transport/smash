@@ -53,6 +53,17 @@ with section("parse"):
         "COMPILER": 1,
       }
     },
+    "target_add_compiler_flag_if_supported": {
+      "pargs": 0,
+      "flags": [],
+      "kwargs": {
+        "TARGETS": '+',
+        "FLAGS": '+',
+        "LANGUAGE": 1,
+        "COMPILER": 1,
+        "SCOPE": 1,
+      }
+    },
     "add_compiler_flags_if_supported": {
       "pargs": '+',
       "flags": ["VERBOSE", "ADD_IF_PRESENT"],
