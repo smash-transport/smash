@@ -9,3 +9,15 @@ target_add_compiler_flag_if_supported(
   FLAGS     "-std=c++11" "-march=native"
   SCOPE     PRIVATE
 )
+
+target_sources(einhard PUBLIC
+    FILE_SET HEADERS
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+    FILES einhard.hpp stacktrace.h
+)
+
+target_include_directories(einhard
+    PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+      $<INSTALL_INTERFACE:include/einhard>
+)

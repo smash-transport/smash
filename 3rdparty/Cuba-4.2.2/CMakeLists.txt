@@ -58,9 +58,16 @@ target_add_compiler_flag_if_supported(TARGETS ${CUBA_TARGETS}
 foreach(_target IN LISTS CUBA_TARGETS)
 
     target_include_directories(${_target}
-                               PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/${_target}>
-                                      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/common>
+                               PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/${_target}>
+                                       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/common>
+                               PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
                                       $<INSTALL_INTERFACE:include/cuba>)
+
+    target_sources(${_target}
+                   PUBLIC
+                   FILE_SET HEADERS
+                   BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+                   FILES cuba.h)
 
     target_compile_definitions(${_target} PRIVATE ${CUBA_COMPILE_DEFINITIONS})
 

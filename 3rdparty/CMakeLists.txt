@@ -10,27 +10,27 @@
 # Let 3rd-party library use their own C++ standard
 unset(CMAKE_CXX_STANDARD)
 
-message(STATUS "Setting up Cuba library") # From v3.17 one should use message(CHECK_START ...)
+message(CHECK_START "Setting up Cuba library")
 list(APPEND CMAKE_MESSAGE_INDENT "   ")
 add_subdirectory(Cuba-4.2.2)
 list(POP_BACK CMAKE_MESSAGE_INDENT)
-message(STATUS "Setting up Cuba library - done")
+message(CHECK_PASS "done")
 
-message(STATUS "Setting up Einhard library")
+message(CHECK_START "Setting up Einhard library")
 list(APPEND CMAKE_MESSAGE_INDENT "   ")
 add_subdirectory(einhard)
 list(POP_BACK CMAKE_MESSAGE_INDENT)
-message(STATUS "Setting up Einhard library - done")
+message(CHECK_PASS "done")
 
-# Avoid YAML to build unnecessary parts of it
-message(STATUS "Setting up YAML library")
+message(CHECK_START "Setting up YAML library")
 list(APPEND CMAKE_MESSAGE_INDENT "   ")
+# Avoid YAML to build unnecessary parts of it
 set(YAML_CPP_BUILD_TESTS OFF CACHE INTERNAL "")
 set(YAML_CPP_BUILD_TOOLS OFF CACHE INTERNAL "")
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE INTERNAL "")
 add_subdirectory(yaml-cpp-0.8.0)
 list(POP_BACK CMAKE_MESSAGE_INDENT)
-message(STATUS "Setting up YAML library - done")
+message(CHECK_PASS "done")
 
 # Restore SMASH C++ standard
 set(CMAKE_CXX_STANDARD ${CXX_SMASH_STANDARD})

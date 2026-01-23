@@ -93,6 +93,19 @@ with section("parse"):
         "CHECK_FAIL": '+',
       }
     },
+    "target_sources": {
+      "pargs": 1,
+      "flags": [],
+      "kwargs": {
+        "PUBLIC": '+',
+        "INTERFACE": '+',
+        "PRIVATE": '+',
+        "FILE_SET": 1,
+        "TYPE": 1,
+        "BASE_DIRS": '+',
+        "FILES": '+',
+      }
+    },
   }
 
   # Override configurations per-command where available
