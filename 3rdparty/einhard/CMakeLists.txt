@@ -16,7 +16,7 @@ target_sources(einhard PUBLIC
     FILES einhard.hpp stacktrace.h
 )
 
-target_include_directories(einhard
+target_include_directories(einhard SYSTEM
     PUBLIC
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
       $<INSTALL_INTERFACE:include/einhard>

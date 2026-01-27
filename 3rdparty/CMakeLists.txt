@@ -35,6 +35,12 @@ message(CHECK_PASS "done")
 # Restore SMASH C++ standard
 set(CMAKE_CXX_STANDARD ${CXX_SMASH_STANDARD})
 
+# To make sure that we do not get warnings from YAML, we want to treat its include as SYSTEM. For
+# Einhard and Cuba we have changed their CMakeLists files and set it up there already, but for YAML
+# we do not want do so and hence we adjust the target here.
+set_property(TARGET yaml-cpp PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
+                                      $<TARGET_PROPERTY:yaml-cpp,INTERFACE_INCLUDE_DIRECTORIES>)
+
 # Install 3rdparty libraries building their targets first. Note that libraries are installed both as
 # static (ARCHIVE) and as shared (LIBRARY) so that whatever built versions get copied.
 install(CODE "execute_process(COMMAND ${CMAKE_COMMAND}

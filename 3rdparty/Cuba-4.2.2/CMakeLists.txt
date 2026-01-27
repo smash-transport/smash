@@ -57,7 +57,7 @@ target_add_compiler_flag_if_supported(TARGETS ${CUBA_TARGETS}
 
 foreach(_target IN LISTS CUBA_TARGETS)
 
-    target_include_directories(${_target}
+    target_include_directories(${_target} SYSTEM
                                PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/${_target}>
                                        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/common>
                                PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
