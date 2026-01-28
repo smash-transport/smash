@@ -27,6 +27,9 @@ evaluation. This is useful e.g. in afterburner calculations.
 * Minimum supported CMake version is now version 3.28
 * The `make install` target has been standardized to create an enclosing version-specific folder inside which the standard `bin`, `lib`, `include` and `share` directories are created (previously, the version specific folder was created inside the standard ones).
 
+### Deprecated
+* CMake utility function `add_compiler_flags_if_supported` should not be used any more as it sets flags globally
+
 ## SMASH-3.3
 Date: 2025-12-03
 
