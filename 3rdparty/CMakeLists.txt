@@ -40,11 +40,10 @@ set(CMAKE_CXX_STANDARD ${CXX_SMASH_STANDARD})
 install(CODE "execute_process(COMMAND ${CMAKE_COMMAND}
                                       --build ${CMAKE_BINARY_DIR}
                                       --target cuhre divonne suave vegas einhard yaml-cpp)")
-install(FILES Cuba-4.2.2/cuba.h DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}/cuba")
-install(FILES einhard/einhard.hpp einhard/stacktrace.h
-        DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}/einhard")
+install(FILES Cuba-4.2.2/cuba.h DESTINATION "include/cuba")
+install(FILES einhard/einhard.hpp einhard/stacktrace.h DESTINATION "include/einhard")
 install(DIRECTORY yaml-cpp-0.8.0/include/yaml-cpp
-        DESTINATION "include/${SMASH_INSTALLATION_SUBFOLDER}"
+        DESTINATION "include"
         FILES_MATCHING
         PATTERN "*.h")
 install(TARGETS cuhre
@@ -53,5 +52,5 @@ install(TARGETS cuhre
                 vegas
                 einhard
                 yaml-cpp
-        ARCHIVE DESTINATION "lib/${SMASH_INSTALLATION_SUBFOLDER}"
-        LIBRARY DESTINATION "lib/${SMASH_INSTALLATION_SUBFOLDER}")
+        ARCHIVE DESTINATION "lib"
+        LIBRARY DESTINATION "lib")
