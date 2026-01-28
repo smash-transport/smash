@@ -6,9 +6,11 @@ add_library(einhard STATIC einhard.cpp)
 target_add_compiler_flag_if_supported(
   TARGETS   einhard
   LANGUAGE  CXX
-  FLAGS     "-std=c++11" "-march=native"
+  FLAGS     "-march=native"
   SCOPE     PRIVATE
 )
+
+set_target_properties(einhard PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED ON)
 
 target_sources(einhard PUBLIC
     FILE_SET HEADERS
