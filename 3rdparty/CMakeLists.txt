@@ -41,22 +41,22 @@ set(CMAKE_CXX_STANDARD ${CXX_SMASH_STANDARD})
 set_property(TARGET yaml-cpp PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
                                       $<TARGET_PROPERTY:yaml-cpp,INTERFACE_INCLUDE_DIRECTORIES>)
 
-# Install 3rdparty libraries building their targets first. Note that libraries are installed both as
-# static (ARCHIVE) and as shared (LIBRARY) so that whatever built versions get copied.
-install(CODE "execute_process(COMMAND ${CMAKE_COMMAND}
-                                      --build ${CMAKE_BINARY_DIR}
-                                      --target cuhre divonne suave vegas einhard yaml-cpp)")
-install(FILES Cuba-4.2.2/cuba.h DESTINATION "include/cuba")
-install(FILES einhard/einhard.hpp einhard/stacktrace.h DESTINATION "include/einhard")
+# Install third-party libraries relying on targets only. Note that header files are attached to
+# targets for Cuba and Einhard and therefore we can refer to that. YAML library is a "vendored
+# dependency" and it needs to be installed here as well and it would be wrong to use their shipped
+# installation because we want that users using SMASH as a library link to the frozen YAML library
+# shipped with SMASH.
 install(DIRECTORY yaml-cpp-0.8.0/include/yaml-cpp
         DESTINATION "include"
         FILES_MATCHING
         PATTERN "*.h")
-install(TARGETS cuhre
-                divonne
-                suave
-                vegas
-                einhard
-                yaml-cpp
-        ARCHIVE DESTINATION "lib"
-        LIBRARY DESTINATION "lib")
+install(TARGETS yaml-cpp EXPORT SMASH-targets)
+install(TARGETS cuhre divonne suave vegas
+        EXPORT SMASH-targets
+        FILE_SET HEADERS
+        DESTINATION include/cuba)
+install(TARGETS einhard
+        EXPORT SMASH-targets
+        FILE_SET HEADERS
+        DESTINATION include/einhard)
+install(EXPORT SMASH-targets NAMESPACE SMASH:: DESTINATION lib/cmake)
