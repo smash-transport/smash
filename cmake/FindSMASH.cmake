@@ -100,7 +100,8 @@ if(DEFINED ENV{SMASH_INSTALL_DIR})
                                 " $ENV{SMASH_INSTALL_DIR}\n")
         endif()
     else()
-        # Use 'include' installation folder to locate all installed versions, then consider last one
+        # Use matching 'smash-*' installation folders to locate all installed versions, then
+        # consider last one in case more than one was found.
         file(GLOB smash_folders
              LIST_DIRECTORIES true
              RELATIVE "$ENV{SMASH_INSTALL_DIR}"
@@ -108,13 +109,17 @@ if(DEFINED ENV{SMASH_INSTALL_DIR})
         foreach(folder ${smash_folders})
             foreach(installation_folder "bin" "lib" "include" "share")
                 if(NOT IS_DIRECTORY "$ENV{SMASH_INSTALL_DIR}/${folder}/${installation_folder}")
+                    message(WARNING " \n" " Installation of SMASH at\n"
+                                    " $ENV{SMASH_INSTALL_DIR}/${folder}\n"
+                                    " detected as incomplete, not considering it!")
                     list(REMOVE_ITEM smash_folders "${folder}")
                 endif()
             endforeach()
         endforeach()
         list(LENGTH smash_folders number_of_versions)
         if(number_of_versions EQUAL 0)
-            message(FATAL_ERROR " \n" " No SMASH installation found at $ENV{SMASH_INSTALL_DIR}\n")
+            message(FATAL_ERROR " \n"
+                                " No valid SMASH installation found at $ENV{SMASH_INSTALL_DIR}\n")
         elseif(number_of_versions GREATER 1)
             message(STATUS "Multiple SMASH versions installed, CMake 3.18 needed to find last one")
             cmake_minimum_required(VERSION 3.18) # Required to sort versions in a natural way

@@ -198,7 +198,7 @@ To check which environment variables related to PYTHIA are currently set, use e.
 ## SMASH installation
 
 Installing SMASH gives the advantage that it is possible to simply use the `smash` command from anywhere in order to run SMASH (provided that the installation `bin` directory is contained in the `PATH` system environment variable).
-Users planning to use SMASH as a library are encouraged to install SMASH, in order to disentangle the SMASH codebase source code from the version used as a library from other software.
+Users planning to use SMASH as a library are **strongly encouraged** to install SMASH, in order to disentangle the SMASH codebase source code from the version used as a library from other software.
 
 The default installation done via `make install` installs SMASH into `/usr/local`.
 If you want to change the installation directory, use the `CMAKE_INSTALL_PREFIX` CMake option to specify a new location.
@@ -207,16 +207,17 @@ For example, if you want to install SMASH in `~/.local`, use
 cmake -DCMAKE_INSTALL_PREFIX=${HOME}/.local ..
 make install
 ```
+from a build folder inside the SMASH codebase.
 You might need to use `sudo` for a system-wide installation.
 
 By specifying `-DCMAKE_INSTALL_PREFIX=prefix`,
-* `prefix/bin` will contain programs - e.g., `smash`,
-* `prefix/lib/smash-X.Y-suffix` will contain libraries - e.g., `libsmash.so`,
-* `prefix/include/smash-X.Y-suffix` will contain headers, and
-* `prefix/share/smash-X.Y-suffix` will contain data files.
+* `prefix/smash-X.Y-suffix/bin` will contain programs - e.g., `smash`,
+* `prefix/smash-X.Y-suffix/lib` will contain libraries - e.g., `libsmash.so`,
+* `prefix/smash-X.Y-suffix/include` will contain headers, and
+* `prefix/smash-X.Y-suffix/share` will contain data files.
 
 The string `X.Y-suffix` refers to the SMASH version and the `-suffix` to the Git commit at which the codebase was installed.
-This won't appear for SMASH stable releases.
+The latter won't appear for SMASH stable releases.
 Such a suffix is also used for the executable, but a symbolic link to it named `smash` is also created in the binary folder, so that the `smash` command can be used after the installation.
 
 On Unix OS you might be used to use [the `DESTDIR` mechanism](https://cmake.org/cmake/help/latest/envvar/DESTDIR.html) to relocate the whole installation, but refer to the CMake documentation to be sure that this is what you want.
