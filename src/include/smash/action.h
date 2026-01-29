@@ -351,6 +351,16 @@ class Action {
       std::vector<FourVector> &sampled_momenta);
 
   /**
+   * Duplicated function (for now) that generalizes the usage to receive
+   * resonances, instead of fixed masses. Implementation of the full n-body
+   * phase-space sampling (masses, momenta, angles) in the center-of-mass frame
+   * for the final state particles. Function is static for convenient testing.
+   */
+  static void sample_manybody_phasespace_impl(
+      double sqrts, const ParticleTypePtrList &types,
+      std::vector<FourVector> &sampled_momenta);
+
+  /**
    * Assign an unpolarized spin vector to all outgoing particles.
    *
    * \attention Make sure to assign the spin vectors after the boosted

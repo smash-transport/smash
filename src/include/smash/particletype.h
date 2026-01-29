@@ -7,8 +7,10 @@
 #ifndef SRC_INCLUDE_SMASH_PARTICLETYPE_H_
 #define SRC_INCLUDE_SMASH_PARTICLETYPE_H_
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -385,13 +387,6 @@ class ParticleType {
   double spectral_function_no_norm(double m) const;
 
   /**
-   * \todo unused
-   * The spectral function with a constant width (= width at pole).
-   * It is guaranteed to be normalized to 1, when integrated from 0 to inf.
-   */
-  double spectral_function_const_width(double m) const;
-
-  /**
    * This one is the most simple form of the spectral function, using a
    * Cauchy distribution (non-relativistic Breit-Wigner with constant width).
    * It can be integrated analytically, and is normalized to 1 when integrated
@@ -402,6 +397,37 @@ class ParticleType {
    * \return the Cauchy spectral function at mass m
    */
   double spectral_function_simple(double m) const;
+
+  /**
+   * Sample mass from the simple spectral function (Breit-Wigner/Cauchy
+   * distribution).
+   *
+   * \param[in] energy Maximum energy from which the mass should be sampled.
+   * \return sampled mass
+   */
+  double sample_spectral_function_simple(double energy) const;
+
+  /**
+   * Caclulate the ratio between the full spectral function and simple one.
+   *
+   * \param[in] m Mass of the resonance where the ratio is to be evaluated.
+   * \return ratio between spectral functions
+   */
+  double ratio_spectral(double m) const;
+
+  /**
+   * Getter used in the resonance mass sampling functions.
+   * If the member is not yet initialized, it runs the algorithm to find the
+   * value.
+   *
+   * \return maximum ratio between full spectral function and simple
+   */
+  double max_ratio_spectral() const {
+    if (!max_ratio_spectral_.has_value()) {
+      calculate_max_ratio_spectral();
+    }
+    return max_ratio_spectral_.value();
+  };
 
   /**
    * Resonance mass sampling for 2-particle final state with one resonance
@@ -662,6 +688,25 @@ class ParticleType {
   mutable double max_factor1_ = 1.;
   /// Maximum factor for double-res mass sampling, cf. sample_resonance_masses.
   mutable double max_factor2_ = 1.;
+
+  /**
+   * Maximum ratio between full spectral function and the mass-independent
+   * Breit-Wigner. This is used for rejection sampling.
+   */
+  mutable std::optional<double> max_ratio_spectral_ = std::nullopt;
+
+  /**
+   * Calculates the maximum ratio between full spectral function and simple one.
+   * Usually it will be at the right edge of a mass range, but numerically this
+   * might be a problem since at very large masses both spectral functions go to
+   * zero, so we take a fixed maximal value.
+   * For some resonances the full spectral function has peaks beyond the pole
+   * mass, which will give the largest ratio, so this algorithm scans for this
+   * case from the right, until the regular pole mass peak.
+   * The actual value is the maximum between the ratio at the last found peak,
+   * the ratio at the mass limit, and 1 as a fallback.
+   */
+  void calculate_max_ratio_spectral() const;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.
