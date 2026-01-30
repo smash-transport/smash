@@ -159,7 +159,7 @@ warnings are however still reported.
 
 The following tools can be helpful for development:
 - clang-format = 13.0.x
-- doxygen >= 1.9 (not 1.9.4 or 1.9.5)
+- doxygen >= 1.9 (only version 1.9.[1-2] have been tested to work as expected)
 - valgrind
 - cpplint
 - cppcheck
@@ -277,7 +277,8 @@ You need to have Doxygen installed. Then, from your build directory, just call:
 
     make doc
 
-and you'll find `doc/html/index.html` in your build directory. Open e.g. with
+and you will find `doc/html/index.html` in your build directory. Open it, e.g.,
+with
 
     firefox doc/html/index.html
 
