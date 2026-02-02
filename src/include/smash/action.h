@@ -342,15 +342,6 @@ class Action {
   };
 
   /**
-   * Implementation of the full n-body phase-space sampling
-   * (masses, momenta, angles) in the center-of-mass frame for
-   * the final state particles. Function is static for convenient testing.
-   */
-  static void sample_manybody_phasespace_impl(
-      double sqrts, const std::vector<double> &m,
-      std::vector<FourVector> &sampled_momenta);
-
-  /**
    * Duplicated function (for now) that generalizes the usage to receive
    * resonances, instead of fixed masses. Implementation of the full n-body
    * phase-space sampling (masses, momenta, angles) in the center-of-mass frame

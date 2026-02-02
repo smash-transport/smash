@@ -314,137 +314,62 @@ void Action::sample_2body_phasespace() {
   sample_angles(masses, cm_kin_energy);
 }
 
-void Action::sample_manybody_phasespace_impl(
-    double sqrts, const std::vector<double> &m,
+static void sample_manybody_phasespace_MCMC(
+    const ParticleTypePtrList &types,
     std::vector<FourVector> &sampled_momenta) {
-  /**
-   *  Using the M-method from CERN-68-15 report, paragraph 9.6
-   *  1) Generate invariant masses M12, M123, M1234, etc from
-   *      distribution dM12 x dM123 x dM1234 x ...
-   *      This is not trivial because of the integration limits.
-   *      Here the idea is to change variables to T12 = M12 - (m1 + m2),
-   *      T123 = M123 - (m1 + m2 + m3), etc. Then we need to generate
-   *      uniform T such that 0 <= T12 <= T123 <= T1234 <= ... <= sqrts - sum
-   * (m_i). For the latter there is a trick: generate values uniformly in [0,
-   * sqrts - sum (m_i)] and then sort the values. 2) accept or reject this
-   * combination of invariant masses with weight proportional to R2(sqrt,
-   * M_{n-1}, m_n) x R2(M_{n-1}, M_{n-2}, m_{n-1}) x
-   *     ... x R2(M2, m1, m2) x (prod M_i). Maximum weight is estmated
-   * heuristically, here I'm using an idea by Scott Pratt that maximum is close
-   * to T12 = T123 = T1234 = ... = (sqrts - sum (m_i)) / (n - 1)
-   */
-  const size_t n = m.size();
-  assert(n > 1);
-  sampled_momenta.resize(n);
-
-  // Arrange a convenient vector of m1, m1 + m2, m1 + m2 + m3, ...
-  std::vector<double> msum(n);
-  std::partial_sum(m.begin(), m.end(), msum.begin());
-  const double msum_all = msum[n - 1];
-  int rejection_counter = -1;
-  if (sqrts <= msum_all) {
-    logg[LAction].error()
-        << "An interaction requiring " << sqrts
-        << "GeV was attempted below the minimum energy threshold" << msum_all
-        << " GeV, but was ignored.\nThis is a known internal error which does "
-           "not significantly affect physical results, and will be fixed in a "
-           "near-future release.";
-    throw StochasticBelowEnergyThreshold("Ignoring this action.");
+  constexpr int burn_in = 1000;
+  // Initialize sample with pole masses and equal kinetic energies
+  // in the center-of-momentum frame
+  const int n = types.size();
+  std::vector<double> m(n);
+  for (int i = 0; i < n; i++) {
+    m[i] = sampled_momenta[i].abs();
   }
+  int idx1, idx2;
+  for (int i = 0; i < burn_in; i++) {
+    // Pick random pair of particles and resample their masses
+    do {
+      idx1 = random::uniform_int(0, n - 1);
+      do {
+        idx2 = random::uniform_int(0, n - 1);
+      } while (idx2 == idx1);
+    } while (types[idx1]->is_stable() && types[idx2]->is_stable());
 
-  double w, r01;
-  std::vector<double> Minv(n);
-
-  double weight_sqr_max = 1;
-  const double Ekin_share = (sqrts - msum_all) / (n - 1);
-  for (size_t i = 1; i < n; i++) {
-    // This maximum estimate idea is due Scott Pratt: maximum should be
-    // roughly at equal kinetic energies
-    weight_sqr_max *= pCM_sqr(i * Ekin_share + msum[i],
-                              (i - 1) * Ekin_share + msum[i - 1], m[i]);
-  }
-  // Maximum estimate is rough and can be wrong. We multiply it by additional
-  // factor to be on the safer side.
-  const double safety_factor = 1.1 + (n - 2) * 0.2;
-  weight_sqr_max *= (safety_factor * safety_factor);
-  bool first_warning = true;
-
-  do {
-    // Generate invariant masses of 1, 12, 123, 1243, etc.
-    // Minv = {m1, M12, M123, ..., M123n-1, sqrts}
-    Minv[0] = 0.0;
-    Minv[n - 1] = sqrts - msum_all;
-    for (size_t i = 1; i < n - 1; i++) {
-      Minv[i] = random::uniform(0.0, sqrts - msum_all);
+    // Energy of the pair in the CM frame
+    const FourVector p_sum = sampled_momenta[idx1] + sampled_momenta[idx2];
+    const ThreeVector beta = p_sum.velocity();
+    const double sqrts_12 = p_sum.abs();
+    double m1, m2;
+    do {
+      m1 = types[idx1]->sample_spectral_function(sqrts_12);
+      m2 = types[idx2]->sample_spectral_function(sqrts_12);
+    } while (sqrts_12 < m1 + m2);
+    const double pcm = pCM(sqrts_12, m1, m2);
+    Angles angle;
+    angle.distribute_isotropically();
+    auto p1 =
+        FourVector(std::sqrt(m1 * m1 + pcm * pcm), pcm * angle.threevec())
+            .lorentz_boost(-beta);
+    auto p2 =
+        FourVector(std::sqrt(m2 * m2 + pcm * pcm), -pcm * angle.threevec())
+            .lorentz_boost(-beta);
+    // Metropolis–Hastings acceptance
+    double acc = 1.0;
+    if (!types[idx1]->is_stable()) {
+      acc *= types[idx1]->ratio_spectral(m1) /
+             types[idx1]->ratio_spectral(sampled_momenta[idx1].abs());
     }
-    std::sort(Minv.begin(), Minv.end());
-    for (size_t i = 0; i < n; i++) {
-      Minv[i] += msum[i];
-    }
-
-    double weight_sqr = 1;
-    for (size_t i = 1; i < n; i++) {
-      weight_sqr *= pCM_sqr(Minv[i], Minv[i - 1], m[i]);
+    if (!types[idx2]->is_stable()) {
+      acc *= types[idx2]->ratio_spectral(m2) /
+             types[idx2]->ratio_spectral(sampled_momenta[idx2].abs());
     }
 
-    rejection_counter++;
-    r01 = random::canonical();
-    w = weight_sqr / weight_sqr_max;
-    if (w > 1.0) {
-      logg[LAction].warn()
-          << "sample_manybody_phasespace_impl: alarm, weight > 1, w^2 = " << w
-          << ". Increase safety factor." << std::endl;
-    }
-    if (rejection_counter > 20 && first_warning) {
-      logg[LAction].warn() << "sample_manybody_phasespace_impl: "
-                           << "likely hanging, way too many rejections,"
-                           << " n = " << n << ", sqrts = " << sqrts
-                           << ", msum = " << msum_all;
-      first_warning = false;
-    }
-  } while (w < r01 * r01);
-
-  // Boost particles to the right frame
-  std::vector<ThreeVector> beta(n);
-  for (size_t i = n - 1; i > 0; i--) {
-    const double pcm = pCM(Minv[i], Minv[i - 1], m[i]);
-    Angles phitheta;
-    phitheta.distribute_isotropically();
-    const ThreeVector isotropic_unitvector = phitheta.threevec();
-    sampled_momenta[i] = FourVector(std::sqrt(m[i] * m[i] + pcm * pcm),
-                                    pcm * isotropic_unitvector);
-    if (i >= 2) {
-      beta[i - 2] = pcm * isotropic_unitvector /
-                    std::sqrt(pcm * pcm + Minv[i - 1] * Minv[i - 1]);
-    }
-    if (i == 1) {
-      sampled_momenta[0] = FourVector(std::sqrt(m[0] * m[0] + pcm * pcm),
-                                      -pcm * isotropic_unitvector);
+    if (random::canonical() < acc) {
+      // accept
+      sampled_momenta[idx1] = p1;
+      sampled_momenta[idx2] = p2;
     }
   }
-
-  for (size_t i = 0; i < n - 2; i++) {
-    // After each boost except the last one the sum of 3-momenta should be 0
-    FourVector ptot = FourVector(0.0, 0.0, 0.0, 0.0);
-    for (size_t j = 0; j <= i + 1; j++) {
-      ptot += sampled_momenta[j];
-    }
-    logg[LAction].debug() << "Total momentum of 0.." << i + 1 << " = "
-                          << ptot.threevec() << " and should be (0, 0, 0). "
-                          << std::endl;
-
-    // Boost the first i+1 particles to the next CM frame
-    for (size_t j = 0; j <= i + 1; j++) {
-      sampled_momenta[j] = sampled_momenta[j].lorentz_boost(beta[i]);
-    }
-  }
-
-  FourVector ptot_all = FourVector(0.0, 0.0, 0.0, 0.0);
-  for (size_t j = 0; j < n; j++) {
-    ptot_all += sampled_momenta[j];
-  }
-  logg[LAction].debug() << "Total 4-momentum = " << ptot_all << ", should be ("
-                        << sqrts << ", 0, 0, 0)" << std::endl;
 }
 
 void Action::sample_manybody_phasespace_impl(
@@ -471,20 +396,21 @@ void Action::sample_manybody_phasespace_impl(
   sampled_momenta.resize(n);
   std::vector<double> m, msum(n), Minv(n);
   // Maximum estimate is rough and can be wrong. We multiply it by additional
-  // factor to be on the safer side.
+  // factor to be on the safer side, and increase it if needed.
   double safety_factor = 1.1 + (n - 2) * 0.2;
+  constexpr double multiplier = 1.2;
   int rejection_counter = 0;
+  constexpr int rejection_limit = 200;
   double available_energy =
       sqrts - std::accumulate(types.begin(), types.end(), 0.0,
                               [](double sum, const ParticleTypePtr &type) {
                                 return sum + type->min_mass_spectral();
                               });
-  static int counter = 0;
-  double r01, w = 2;
-  while (w > 1) {
+  double r01, w;
+  do {
     do {
       // Mass sampling from spectral functions
-      double weight_sqr_max = (safety_factor * safety_factor);
+      double weight_sqr_max = safety_factor * safety_factor;
       m.clear();
       msum.clear();
       for (const auto &type : types) {
@@ -521,34 +447,25 @@ void Action::sample_manybody_phasespace_impl(
       }
 
       double weight_sqr = 1;
-      for (size_t i = 1; i < n; i++) {
+      for (size_t i = 0; i < n; i++) {
         const double ratio =
             types[i]->is_stable() ? 1 : types[i]->ratio_spectral(m[i]);
-        weight_sqr *= ratio * ratio * pCM_sqr(Minv[i], Minv[i - 1], m[i]);
+        weight_sqr *= ratio * ratio;
+      }
+      for (size_t i = 1; i < n; i++) {
+        weight_sqr *= pCM_sqr(Minv[i], Minv[i - 1], m[i]);
       }
       w = weight_sqr / weight_sqr_max;
       rejection_counter++;
-      if (rejection_counter % 500 == 0) {
-        available_energy *= 0.8;
-        logg[LAction].warn()
-            << "sample_manybody_phasespace_impl: hanging with too many "
-            << "rejections, reducing energy available for mass sampling to "
-            << available_energy << ". n = " << n << ", sqrts = " << sqrts;
-        counter++;
-      }
       r01 = random::canonical();
-    } while (w < r01 * r01);
-    if (rejection_counter > 500) {
-      std::cout << rejection_counter << " rejections." << std::endl;
-      std::cout << "counter = " << counter << std::endl;
-    }
+    } while (w < r01 * r01 && rejection_counter < rejection_limit);
     if (w > 1) {
-      logg[LAction].warn()
+      logg[LAction].debug()
           << "sample_manybody_phasespace_impl: alarm, weight > 1, w^2 = " << w
           << ". Increasing safety factor." << std::endl;
-      safety_factor *= 1.5;
+      safety_factor *= multiplier;
     }
-  }
+  } while (w > 1);
 
   // Boost particles to the right frame
   std::vector<ThreeVector> beta(n);
@@ -591,6 +508,17 @@ void Action::sample_manybody_phasespace_impl(
   }
   logg[LAction].debug() << "Total 4-momentum = " << ptot_all << ", should be ("
                         << sqrts << ", 0, 0, 0)" << std::endl;
+  if (rejection_counter >= rejection_limit) {
+    logg[LAction].debug() << "using MCMC fallback for manybody phase space of "
+                          << std::accumulate(types.begin(), types.end(),
+                                             std::string(),
+                                             [](const std::string &a,
+                                                const ParticleTypePtr &b) {
+                                               return a + b->name();
+                                             })
+                          << " with energy " << sqrts << " GeV." << std::endl;
+    sample_manybody_phasespace_MCMC(types, sampled_momenta);
+  }
 }
 
 void Action::sample_manybody_phasespace() {

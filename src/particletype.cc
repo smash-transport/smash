@@ -625,6 +625,33 @@ double ParticleType::sample_spectral_function_simple(double energy) const {
                         energy);
 }
 
+double ParticleType::sample_spectral_function(double energy) const {
+  if (is_stable()) {
+    return mass();
+  }
+  double m, acceptance = 0;
+  double sf_ratio_max = 1.01 * std::max(max_ratio_spectral(),
+                                        spectral_function(energy) /
+                                            spectral_function_simple(energy));
+  while (true) {
+    do {
+      m = sample_spectral_function_simple(energy);
+      acceptance = spectral_function(m) / spectral_function_simple(m);
+    } while (acceptance < random::uniform(0., sf_ratio_max));
+    if (acceptance - sf_ratio_max > really_small) [[unlikely]] {
+      std::cout
+          << "Warning: maximum is being increased in sample_spectral_function: "
+          << acceptance / sf_ratio_max << " " << sf_ratio_max << " "
+          << pdgcode() << " " << energy << " " << m << std::endl;
+      // increase fudge factor
+      sf_ratio_max *= acceptance / sf_ratio_max;
+    } else {
+      break;  // maximum ok, exit loop
+    }
+  }
+  return m;
+}
+
 /* Resonance mass sampling for 2-particle final state */
 double ParticleType::sample_resonance_mass(const double mass_stable,
                                            const double cms_energy,

@@ -408,6 +408,14 @@ class ParticleType {
   double sample_spectral_function_simple(double energy) const;
 
   /**
+   * Sample mass from the full spectral function.
+   *
+   * \param[in] energy Maximum energy from which the mass should be sampled.
+   * \return sampled mass
+   */
+  double sample_spectral_function(double energy) const;
+
+  /**
    * Caclulate the ratio between the full spectral function and simple one.
    *
    * \param[in] m Mass of the resonance where the ratio is to be evaluated.
