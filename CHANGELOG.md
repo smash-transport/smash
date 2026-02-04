@@ -19,6 +19,10 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Added
+* New key `Ignore_Unformed` in `Output: Thermodynamics` to exclude unformed (and preformed) particles from the density
+evaluation. This is useful e.g. in afterburner calculations.
+
 ### Changed
 * The `make install` target has been standardized to create an enclosing version-specific folder inside which the standard `bin`, `lib`, `include` and `share` directories are created (previously, the version specific folder was created inside the standard ones).
 

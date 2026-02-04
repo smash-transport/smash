@@ -203,6 +203,11 @@ void ThermodynamicOutput::at_intermediate_time(
             continue;
           }
         }
+        if (dens_param.ignore_unformed()) {
+          if (p.xsec_scaling_factor() < 1) {
+            continue;
+          }
+        }
         const double dens_factor =
             density_factor(p.type(), out_par_.td_dens_type);
         if (std::abs(dens_factor) < really_small) {

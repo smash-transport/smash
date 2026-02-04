@@ -146,6 +146,9 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   const bool only_participants =
       config.take(InputKeys::output_thermodynamics_onlyParticipants);
 
+  const bool ignore_unformed =
+      config.take(InputKeys::output_thermodynamics_ignoreUnformed);
+
   if (only_participants && config.has_section(InputSections::potentials)) {
     throw std::invalid_argument(
         "Only_Participants option cannot be "
@@ -324,6 +327,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
           config.take(InputKeys::collTerm_fixedMinCellLength),
           scale_xs,
           only_participants,
+          ignore_unformed,
           config.take(InputKeys::collTerm_ignoreDecayWidthAtTheEnd),
           config.take(InputKeys::collTerm_decayInitial),
           config.take(InputKeys::collTerm_spinInteractions),

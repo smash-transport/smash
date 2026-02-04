@@ -5545,6 +5545,27 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_thermo_ignore_unformed_,Ignore_Unformed,
+   * bool, false}
+   *
+   * Whether the thermodynamic calculation should consider unformed (or
+   * preformed) particles or not.
+   *
+   * Unformed particles are traditionally those created by string fragmentation,
+   * such that their density should contribute to thermodynamics. However, we
+   * use the formation time also to ignore particles that are not really present
+   * yet in the simulation, for example in afterburner/ListModus calculations.
+   * In these cases, one might want to ignore unformed particles when evaluating
+   * thermodynamic properties.
+   */
+  /**
+   * \see_key{key_output_thermo_ignore_unformed_}
+   */
+  inline static const Key<bool> output_thermodynamics_ignoreUnformed{
+      InputSections::o_thermodynamics + "Ignore_Unformed", false, {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_position_,Position,
    * list of 3 doubles,[0.0\, 0.0\, 0.0]}
    *
@@ -6344,6 +6365,7 @@ struct InputKeys {
       std::cref(output_rivet_weights_nominal),
       std::cref(output_rivet_weights_select),
       std::cref(output_thermodynamics_onlyParticipants),
+      std::cref(output_thermodynamics_ignoreUnformed),
       std::cref(output_thermodynamics_position),
       std::cref(output_thermodynamics_quantites),
       std::cref(output_thermodynamics_smearing),

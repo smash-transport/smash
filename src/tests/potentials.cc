@@ -459,6 +459,7 @@ static ExperimentParameters default_parameters_vdf(
       2.5,    // fixed min. cell length
       1.0,    // cross section scaling
       false,  // in thermodynamics outputs spectators are included
+      false,  // ignore unformed particles in thermodynamics
       false,  // do non-strong decays
       true,   // can decay initial particles
       SpinInteractionType::Off,  // no spin interactions

@@ -71,6 +71,7 @@ struct OutputParameters {
         td_jQBS(false),
         td_smearing(true),
         td_only_participants(false),
+        td_ignore_unformed(false),
         part_extended(false),
         part_only_final(OutputOnlyFinal::Yes),
         coll_extended(false),
@@ -110,6 +111,8 @@ struct OutputParameters {
       td_smearing = thermo_conf.take(InputKeys::output_thermodynamics_smearing);
       td_only_participants =
           thermo_conf.take(InputKeys::output_thermodynamics_onlyParticipants);
+      td_ignore_unformed =
+          thermo_conf.take(InputKeys::output_thermodynamics_ignoreUnformed);
     }
 
     /* Unconditionally take quantities from the configuration file. This is
@@ -262,6 +265,12 @@ struct OutputParameters {
    * spectators (false)
    */
   bool td_only_participants;
+
+  /**
+   * Flag reporting whether unformed particles are ignored (true) or not
+   * (false)
+   */
+  bool td_ignore_unformed;
 
   /// Extended format for particles output
   bool part_extended;

@@ -145,6 +145,11 @@ struct ExperimentParameters {
    */
   bool only_participants;
 
+  /**
+   * Ignore unformed particles in thermodynamic outputs.
+   */
+  bool ignore_unformed;
+
   /// Do non-strong decays at the end
   bool do_non_strong_decays;
 
