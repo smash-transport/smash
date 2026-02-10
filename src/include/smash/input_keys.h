@@ -3116,6 +3116,32 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_unformed_xsec_suppression,Unformed_Xsec_Suppression,
+   *               double,0.7}
+   *
+   * Applies an additional suppression factor to the interaction cross sections
+   * of unformed hadrons.
+   *
+   * This parameter rescales the effective cross sections of hadrons during
+   * their formation time and can be used to tune the interaction strength of
+   * unformed hadrons in dense environments.
+   *
+   * Notes:
+   * - A value of 1.0 corresponds to no additional suppression.
+   * - Values smaller than 1.0 reduce the interaction probability of unformed
+   *   hadrons.
+   * - This parameter serves as a phenomenological tuning knob.
+   */
+  /**
+   * \see_key{key_CT_SP_unformed_xsec_suppression}
+   */
+  inline static const Key<double> collTerm_stringParam_unformedXsecSuppression{
+      InputSections::c_stringParameters + "Unformed_Xsec_Suppression",
+      0.7,
+      {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_leading_hadron_treatment_,Leading_Hadron_Treatment,
    *               string,All_Strings}
    *
@@ -6222,6 +6248,7 @@ struct InputKeys {
       std::cref(collTerm_stringParam_stringZB),
       std::cref(collTerm_stringParam_stringZBLeading),
       std::cref(collTerm_stringParam_useMonashTune),
+      std::cref(collTerm_stringParam_unformedXsecSuppression),
       std::cref(collTerm_stringParam_leadingHadronTreatment),
       std::cref(collTerm_dileptons_decays),
       std::cref(collTerm_photons_twoToTwoScatterings),

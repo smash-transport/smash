@@ -131,11 +131,6 @@ class StringProcess {
   double string_sigma_T_;
   /// string tension [GeV/fm]
   double kappa_tension_string_;
-  /**
-   * additional cross-section suppression factor
-   * to take coherence effect into account.
-   */
-  double additional_xsec_supp_;
   /// constant proper time in the case of constant formation time [fm]
   double time_formation_const_;
   /// factor to be multiplied to formation times in soft strings
@@ -168,6 +163,12 @@ class StringProcess {
    * processes.
    */
   bool use_monash_tune_;
+
+  /**
+   * additional cross-section suppression factor
+   * to take coherence effect into account.
+   */
+  double additional_xsec_supp_;
 
   /**
    * Choice if which algorithm to use for leading hadrons. Either all strings
@@ -362,6 +363,8 @@ class StringProcess {
    * \param[in] use_monash_tune whether to use the monash tune for all string
    *            processes. This is recommended if one runs smash at LHC
    *            energies
+   * \param[in] additional_xsec_supp factor to supress the unformed hadrons 
+   *            cross-sections.
    * \param[in] leading_hadron_treatment optional key that defaults to "All_Strings".
    *            New method "Only_ValanceEndpoints" only selects leading hadrons with
    *            valence content. "All_Strings" is legacy method.
@@ -385,6 +388,7 @@ class StringProcess {
                 double prob_proton_to_d_uu,
                 bool separate_fragment_baryon, double popcorn_rate,
                 bool use_monash_tune,
+                double additional_xsec_supp = 0.7,
                 std::string leading_hadron_treatment = "All_Strings");
 
   /**

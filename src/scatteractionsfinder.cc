@@ -15,6 +15,7 @@
 
 #include "smash/constants.h"
 #include "smash/decaymodes.h"
+#include "smash/input_keys.h"
 #include "smash/logging.h"
 #include "smash/parametrizations.h"
 #include "smash/scatteraction.h"
@@ -124,6 +125,7 @@ ScatterActionsFinder::ScatterActionsFinder(
         config.take(InputKeys::collTerm_stringParam_popcornRate),
         config.take(InputKeys::collTerm_stringParam_useMonashTune,
                     parameters.use_monash_tune_default.value()),
+        config.take(InputKeys::collTerm_stringParam_unformedXsecSuppression),
         config.take(InputKeys::collTerm_stringParam_leadingHadronTreatment));
   }
 }

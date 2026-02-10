@@ -28,7 +28,7 @@ StringProcess::StringProcess(
     double stringz_b, double string_sigma_T, double factor_t_form,
     bool mass_dependent_formation_times, double prob_proton_to_d_uu,
     bool separate_fragment_baryon, double popcorn_rate, bool use_monash_tune,
-    std::string leading_hadron_treatment)
+    double additional_xsec_supp, std::string leading_hadron_treatment)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -43,7 +43,6 @@ StringProcess::StringProcess(
       popcorn_rate_(popcorn_rate),
       string_sigma_T_(string_sigma_T),
       kappa_tension_string_(string_tension),
-      additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
       soft_t_form_(factor_t_form),
       time_collision_(0.),
@@ -51,6 +50,7 @@ StringProcess::StringProcess(
       prob_proton_to_d_uu_(prob_proton_to_d_uu),
       separate_fragment_baryon_(separate_fragment_baryon),
       use_monash_tune_(use_monash_tune),
+      additional_xsec_supp_(additional_xsec_supp),
       leading_hadron_treatment_(leading_hadron_treatment) {
   // setup and initialize pythia for fragmentation
   pythia_hadron_ = std::make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
