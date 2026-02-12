@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2021,2023-2025
+ *    Copyright (c) 2016-2021,2023-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -97,6 +97,15 @@ constexpr int rho_z = 0x113;
 /// ρ⁻.
 constexpr int rho_m = -0x213;
 
+/// D⁺.
+constexpr int D_p = 0x411;
+/// D⁰.
+constexpr int D_z = 0x421;
+/// D⁻.
+constexpr int D_m = -0x411;
+/// D̄⁰.
+constexpr int Dbar_z = -0x421;
+
 /// h₁(1170).
 constexpr int h1 = 0x10223;
 
@@ -136,7 +145,7 @@ constexpr int64_t antihypertriton = -0x1010010030;
 constexpr uint64_t pack(int32_t x, int32_t y) {
   return (static_cast<uint64_t>(static_cast<uint32_t>(x)) << 32) |
          static_cast<uint64_t>(static_cast<uint32_t>(y));
-  //^ Casting to an intermediate 32-bit integer is important!
+  // Casting to an intermediate 32-bit integer is important!
 }
 
 }  // namespace smash

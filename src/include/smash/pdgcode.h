@@ -485,6 +485,12 @@ class PdgCode {
     return (c == pdg::rho_z) || (c == pdg::rho_p) || (c == pdg::rho_m);
   }
 
+  /// \return whether this is a D meson (D+, D-, D0, Dbar0)
+  inline bool is_Dmeson() const {
+    const auto abs_code = std::abs(code());
+    return (abs_code == pdg::D_p) || (abs_code == pdg::D_z);
+  }
+
   /// \return whether this is (anti-)deuteron
   inline bool is_deuteron() const {
     return is_nucleus() && nucleus_.A_ == 2 && nucleus_.Z_ == 1 &&
