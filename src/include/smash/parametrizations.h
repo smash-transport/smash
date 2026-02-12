@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2018,2020,2023-2024
+ *    Copyright (c) 2013-2018,2020,2023-2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -622,21 +622,13 @@ double kminusp_pi0lambda(double sqrts);
  * K- n <-> pi- Sigma0 cross section parametrization
  * Follow from the parametrization with the same strange
  * product via isospin symmetry.
+ * K- n <-> pi0 Sigma- cross section parametrization is
+ * also handled with this.
  *
  * \param[in] sqrts the rest frame total energy [GeV]
  * \return the parametrized cross-section [mb]
  */
 double kminusn_piminussigma0(double sqrts);
-
-/**
- * K- n <-> pi0 Sigma- cross section parametrization
- * Follow from the parametrization with the same strange
- * product via isospin symmetry.
- *
- * \param[in] sqrts the rest frame total energy [GeV]
- * \return the parametrized cross-section [mb]
- */
-double kminusn_pi0sigmaminus(double sqrts);
 
 /**
  * K- n <-> pi- Lambda cross section parametrization
