@@ -78,6 +78,16 @@ function(target_add_compiler_flag_if_supported)
     endif()
     if(NOT arg_of_FLAGS)
         message(FATAL_ERROR "FLAGS must contain at least one flag")
+    else()
+        foreach(_flag IN LISTS arg_of_FLAGS)
+            if(_flag MATCHES "\\$<")
+                message(FATAL_ERROR " \n"
+                                    " Generator expressions are not allowed in FLAGS:\n   ${_flag}\n"
+                                    " Pass raw compiler flags only.\n")
+            endif()
+        endforeach()
+        # If the same flag is passed more than once, just ignore duplicates
+        list(REMOVE_DUPLICATES arg_of_FLAGS)
     endif()
 
     if(arg_of_SCOPE)
@@ -96,9 +106,20 @@ function(target_add_compiler_flag_if_supported)
     endif()
 
     foreach(_target IN LISTS arg_of_TARGETS)
-        get_target_property(_existing_opts ${_target} COMPILE_OPTIONS)
-        if(_existing_opts STREQUAL "_existing_opts-NOTFOUND")
-            set(_existing_opts "")
+        # Collect existing target compile options and interface compile options (if needed) to check
+        # if the flag is already present and avoid adding it twice. Note that possibly existing
+        # generator expressions in target options remain unevaluated strings here, but this is fine
+        # as this function is intended to be used at configure time.
+        set(_existing_opts "")
+        get_target_property(_options ${_target} COMPILE_OPTIONS)
+        if(NOT _options STREQUAL "_options-NOTFOUND")
+            list(APPEND _existing_opts ${_options})
+        endif()
+        if(_scope MATCHES "^(PUBLIC|INTERFACE)$")
+            get_target_property(_options ${_target} INTERFACE_COMPILE_OPTIONS)
+            if(NOT _options STREQUAL "_options-NOTFOUND")
+                list(APPEND _existing_opts ${_options})
+            endif()
         endif()
 
         foreach(_flag IN LISTS arg_of_FLAGS)
