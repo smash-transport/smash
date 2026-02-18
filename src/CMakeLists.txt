@@ -86,11 +86,8 @@ if(TRY_USE_ROOT)
     endif()
     if(ROOT_FOUND)
         message(STATUS "Found ROOT: ${ROOT_INCLUDE_DIRS} (version ${ROOT_VERSION})")
-        list(APPEND
-             SMASH_LIBRARIES
-             ROOT::Core
-             ROOT::RIO
-             ROOT::Tree)
+        create_system_wrapper_target(ROOT_bundle ROOT::Core ROOT::RIO ROOT::Tree)
+        list(APPEND SMASH_LIBRARIES ROOT_bundle)
         list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_ROOT")
     else()
         message(STATUS "Suitable ROOT not found. Support disabled. "
