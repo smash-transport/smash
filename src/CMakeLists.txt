@@ -75,8 +75,8 @@ find_package(Eigen3 3.0 REQUIRED)
 
 option(TRY_USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(TRY_USE_ROOT)
-    find_package(ROOT QUIET) # Min version not handled here but after to better inform user
-    set(ROOT_MINIMUM_VERSION "5.34")
+    find_package(ROOT CONFIG QUIET COMPONENTS Core RIO Tree)
+    set(ROOT_MINIMUM_VERSION "6.20")
     if(ROOT_FOUND)
         message(STATUS "Candidate ROOT version ${ROOT_VERSION} found, "
                        "requested ${ROOT_MINIMUM_VERSION}")
@@ -85,9 +85,12 @@ if(TRY_USE_ROOT)
         endif()
     endif()
     if(ROOT_FOUND)
-        message(STATUS "Found valid ROOT ${ROOT_VERSION} (include at ${ROOT_INCLUDE_DIR}).")
-        include_directories(SYSTEM "${ROOT_INCLUDE_DIR}")
-        set(SMASH_LIBRARIES ${ROOT_LIBRARIES})
+        message(STATUS "Found ROOT: ${ROOT_INCLUDE_DIRS} (version ${ROOT_VERSION})")
+        list(APPEND
+             SMASH_LIBRARIES
+             ROOT::Core
+             ROOT::RIO
+             ROOT::Tree)
         list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_ROOT")
     else()
         message(STATUS "Suitable ROOT not found. Support disabled. "
@@ -308,7 +311,10 @@ target_link_libraries(objlib
                              suave
                              divonne
                              vegas
-                             yaml-cpp)
+                             yaml-cpp
+                             ROOT::Core
+                             ROOT::RIO
+                             ROOT::Tree)
 
 add_executable(smash smash.cc $<TARGET_OBJECTS:objlib>)
 

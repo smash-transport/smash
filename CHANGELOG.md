@@ -25,6 +25,7 @@ evaluation. This is useful e.g. in afterburner calculations.
 
 ### Changed
 * Minimum supported CMake version is now version 3.28
+* Minimum supported ROOT version is now version 6.20
 * The `make install` target has been standardized to create an enclosing version-specific folder inside which the standard `bin`, `lib`, `include` and `share` directories are created (previously, the version specific folder was created inside the standard ones).
 
 ### Deprecated
