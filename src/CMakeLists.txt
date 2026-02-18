@@ -11,6 +11,13 @@ include(CheckLibraryExists)
 include(AddCompilerFlag)
 include(FindPkgConfig)
 
+# Prepare empty list variables to collect libraries, compiler definitions for internal usage in
+# SMASH, compiler definitions for users of SMASH, internal compile options and so on
+set(SMASH_LIBRARIES "")
+set(SMASH_PRIVATE_DEFINITIONS "")
+set(SMASH_PUBLIC_DEFINITIONS "")
+set(SMASH_PRIVATE_COMPILE_OPTIONS "")
+
 # Enable warnings for supported compilers only --> Here we know the compilers support the flag, do
 # not test!
 if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
@@ -41,7 +48,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
     option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C funtions in SMASH."
            OFF)
     if(DEPRECATE_C_FNS)
-        add_definitions(-include smash/deprecate_c_functions.h -DDONT_ASSERT_TEST)
+        list(APPEND SMASH_PRIVATE_DEFINITIONS "DONT_ASSERT_TEST")
+        list(APPEND SMASH_PRIVATE_COMPILE_OPTIONS "-include" "smash/deprecate_c_functions.h")
     endif()
 endif()
 
@@ -80,7 +88,7 @@ if(TRY_USE_ROOT)
         message(STATUS "Found valid ROOT ${ROOT_VERSION} (include at ${ROOT_INCLUDE_DIR}).")
         include_directories(SYSTEM "${ROOT_INCLUDE_DIR}")
         set(SMASH_LIBRARIES ${ROOT_LIBRARIES})
-        add_definitions(-DSMASH_USE_ROOT)
+        list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_ROOT")
     else()
         message(STATUS "Suitable ROOT not found. Support disabled. "
                        "See README for more information.")
@@ -102,13 +110,13 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
         message(STATUS "Found valid HepMC ${HepMC3_VERSION} (include at ${HEPMC3_INCLUDE_DIR}).")
         include_directories(SYSTEM "${HEPMC3_INCLUDE_DIR}")
         set(SMASH_LIBRARIES ${SMASH_LIBRARIES} ${HEPMC3_LIBRARIES})
-        add_definitions(-DSMASH_USE_HEPMC)
+        list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_HEPMC")
         if((NOT HEPMC3_ROOTIO_LIB) OR (NOT ROOT_FOUND))
             message(STATUS "HepMC3_treeroot output disabled, missing ROOT and/or "
                            "HepMC3 ROOT I/O support")
         else()
             message(STATUS "HepMC3_treeroot output support enabled")
-            add_definitions(-DSMASH_USE_HEPMC_ROOTIO)
+            list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_HEPMC_ROOTIO")
         endif()
     else()
         message(STATUS "Suitable HepMC not found. Support disabled. "
@@ -134,7 +142,7 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
         message(STATUS "Found valid Rivet ${RIVET_VERSION} (include at ${RIVET_INCLUDE_DIR}).")
         include_directories(SYSTEM "${RIVET_INCLUDE_DIR}")
         set(SMASH_LIBRARIES ${SMASH_LIBRARIES} ${RIVET_LIBRARIES})
-        add_definitions(-DSMASH_USE_RIVET)
+        list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_RIVET")
         set(Rivet_FOUND TRUE)
     else()
         message(STATUS "Suitable Rivet not found. Support disabled. "
@@ -149,7 +157,7 @@ if(Pythia_FOUND)
     # https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
     include_directories(BEFORE SYSTEM "${Pythia_INCLUDE_DIRS}")
     set(SMASH_LIBRARIES ${SMASH_LIBRARIES} ${Pythia_LIBRARIES} ${CMAKE_DL_LIBS})
-    add_definitions("-DPYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\"" -DPYTHIA_FOUND)
+    list(APPEND SMASH_PRIVATE_DEFINITIONS "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\"" "PYTHIA_FOUND")
 endif()
 
 # set up include paths
@@ -283,7 +291,7 @@ if(ENABLE_NANOBENCHMARKING)
         message(WARNING "Nanobenchmarking is not supported on ARM processors and it was disabled.")
     else()
         set(smash_src ${smash_src} tsc.cc)
-        add_definitions(-DUSE_NANOBENCHMARKING_CODE)
+        list(APPEND SMASH_PRIVATE_DEFINITIONS "USE_NANOBENCHMARKING_CODE")
     endif()
 endif()
 
@@ -291,6 +299,9 @@ endif()
 # https://stackoverflow.com/a/29824424 NOTE: shared libraries need PIC and this is already set for
 # all targets through CMAKE_POSITION_INDEPENDENT_CODE
 add_library(objlib OBJECT ${smash_src})
+target_compile_definitions(objlib PUBLIC ${SMASH_PUBLIC_DEFINITIONS}
+                           PRIVATE ${SMASH_PRIVATE_DEFINITIONS})
+target_compile_options(objlib PRIVATE ${SMASH_PRIVATE_COMPILE_OPTIONS})
 target_link_libraries(objlib
                       PUBLIC einhard
                              cuhre
@@ -336,6 +347,7 @@ target_link_libraries(smash ${SMASH_LIBRARIES})
 # INSTALL_RPATH in the library to ensure that projects linking to SMASH finds at run time libraries
 # like Pythia, which are likely to be in not standard places.
 add_library(smash_shared SHARED $<TARGET_OBJECTS:objlib>)
+target_compile_definitions(smash_shared PUBLIC ${SMASH_PUBLIC_DEFINITIONS})
 target_link_libraries(smash_shared ${SMASH_LIBRARIES})
 set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
                                               INSTALL_RPATH_USE_LINK_PATH TRUE)
