@@ -37,7 +37,7 @@ SMASH requires the following tools and libraries:
 
 | Software | Required version |
 |  :---:   |       :---:      |
-| [CMake](https://cmake.org) | 3.16 or higher |
+| [CMake](https://cmake.org) | 3.28 or higher |
 | [GNU Scientific Library (GSL)](https://www.gnu.org/software/gsl/) | 2.0  or higher |
 | [Eigen3 library](http://eigen.tuxfamily.org) | 3.0  or higher |
 | [Pythia](https://pythia.org) | 8.316 |

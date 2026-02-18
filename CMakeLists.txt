@@ -8,7 +8,7 @@
 ########################################################
 
 # Minimum cmake version this is tested on
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.28)
 
 # The name, version and language of our project
 project(SMASH VERSION 3.3 LANGUAGES CXX)
@@ -57,7 +57,7 @@ if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
 endif()
 
 # Before starting, tell cmake where to find our modules and include utilities
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Utilities)
 
 # The variable SMASH_VERSION is already set via the project() command, since we specify there a
@@ -167,9 +167,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 # add 3rd-party libraries (before setting compiler flags etc)
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/Cuba-4.2.2")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/einhard")
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/yaml-cpp-0.8.0/include")
 add_subdirectory(3rdparty)
 
 # Set up compile options passed to all targets. From CMake documentation: "The flags in

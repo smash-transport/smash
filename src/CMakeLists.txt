@@ -291,6 +291,13 @@ endif()
 # https://stackoverflow.com/a/29824424 NOTE: shared libraries need PIC and this is already set for
 # all targets through CMAKE_POSITION_INDEPENDENT_CODE
 add_library(objlib OBJECT ${smash_src})
+target_link_libraries(objlib
+                      PUBLIC einhard
+                             cuhre
+                             suave
+                             divonne
+                             vegas
+                             yaml-cpp)
 
 add_executable(smash smash.cc $<TARGET_OBJECTS:objlib>)
 
