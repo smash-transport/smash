@@ -55,7 +55,6 @@ endif()
 
 find_package(Git)
 if(GIT_FOUND)
-    # message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
     get_filename_component(GIT_PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
     set(GIT_DIR "${GIT_PARENT_DIR}/.git")
     if(EXISTS "${GIT_DIR}")
@@ -65,7 +64,6 @@ if(GIT_FOUND)
     else()
         set(GIT_BRANCH "NOTFOUND")
     endif()
-    # message("git branch: ${GIT_BRANCH}")
 endif(GIT_FOUND)
 
 string(TIMESTAMP BUILD_DATE)
@@ -170,13 +168,17 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
     endif()
 endif()
 
-# find Pythia
 find_package(Pythia 8.316 EXACT REQUIRED)
 if(Pythia_FOUND)
-    # the BEFORE at the line below is due to
-    # https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
-    include_directories(BEFORE SYSTEM "${Pythia_INCLUDE_DIRS}")
-    set(SMASH_LIBRARIES ${SMASH_LIBRARIES} ${Pythia_LIBRARIES} ${CMAKE_DL_LIBS})
+    if(NOT TARGET Pythia::Pythia)
+        message(FATAL_ERROR "Pythia library found, but its target is somehow missing.\n"
+                            "Ensure to be using the provided CMake module to find it.\n")
+    endif()
+    # Here we PREPEND the Pythia target to the list of libraries to ensure that it is linked before
+    # all the other and it is meant to avoid possible issues with e.g. ROOT whose include
+    # directories might contain a Pythia.h header that might not be the one of the Pythia linked to
+    # SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
+    list(PREPEND SMASH_LIBRARIES Pythia::Pythia)
     list(APPEND SMASH_PRIVATE_DEFINITIONS "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\"" "PYTHIA_FOUND")
 endif()
 
