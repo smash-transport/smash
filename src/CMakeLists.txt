@@ -69,6 +69,16 @@ endif(GIT_FOUND)
 string(TIMESTAMP BUILD_DATE)
 
 find_package(GSL 2.0 REQUIRED)
+if(GSL_FOUND)
+    if(TARGET GSL::gsl AND TARGET GSL::gslcblas)
+        create_system_wrapper_target(GSL_bundle GSL::gsl GSL::gslcblas)
+        list(APPEND SMASH_LIBRARIES GSL_bundle)
+    else()
+        message(FATAL_ERROR " \n" " GSL library found, but its targets are somehow missing.\n"
+                            " Ensure to be using the official CMake module to find it.\n")
+    endif()
+endif()
+
 find_package(Eigen3 3.0 REQUIRED)
 
 option(TRY_USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
@@ -185,13 +195,11 @@ endif()
 # set up include paths
 include_directories(include)
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
-include_directories(SYSTEM ${GSL_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR})
+include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
 # set default libraries for linking
 set(SMASH_LIBRARIES
     ${SMASH_LIBRARIES}
-    ${GSL_LIBRARY}
-    ${GSL_CBLAS_LIBRARY}
     einhard
     yaml-cpp
     cuhre
