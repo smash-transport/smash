@@ -11,10 +11,12 @@
 
 #include <algorithm>
 #include <map>
+#include <stdexcept>
 #include <vector>
 
 #include "smash/constants.h"
 #include "smash/decaymodes.h"
+#include "smash/forwarddeclarations.h"
 #include "smash/input_keys.h"
 #include "smash/logging.h"
 #include "smash/parametrizations.h"
@@ -188,10 +190,27 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
       transition_high_energy{create_string_transition_parameters(config)},
       total_xs_strategy(config.take(InputKeys::collTerm_totXsStrategy)),
       pseudoresonance_method(config.take(InputKeys::collTerm_pseudoresonance)),
+      hard_string_transition_mode(
+          config.take(InputKeys::collTerm_hard_string_transition_mode)),
+      hard_string_transition_start_energy(
+          config.take(InputKeys::collTerm_hard_string_transition_start_energy)),
+      hard_string_transition_end_energy(
+          config.take(InputKeys::collTerm_hard_string_transition_end_energy)),
+
       AQM_charm_suppression(
           config.take(InputKeys::collTerm_HF_AQMcSuppression)),
       AQM_bottom_suppression(
           config.take(InputKeys::collTerm_HF_AQMbSuppression)) {
+  if (hard_string_transition_mode == HardStringTransitionMode::Custom_Range) {
+    if (hard_string_transition_start_energy >
+        hard_string_transition_end_energy) {
+      throw std::invalid_argument(
+          "When using a custom string transition region, the start "
+          "center-of-mass "
+          "energy must be smaller than or equal to the end energy.");
+    }
+  }
+
   if (total_xs_strategy == TotalCrossSectionStrategy::BottomUp) {
     logg[LFindScatter].info(
         "Evaluating total cross sections from partial processes.");

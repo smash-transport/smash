@@ -352,6 +352,23 @@ class CrossSections {
       const ScatterActionsFinderParameters& finder_parameters) const;
 
   /**
+   * Computes a smooth transition weight w ∈ [0,1] based on sqrt(s).
+   *
+   * The weight is:
+   *   - w = 0 for sqrt(s) < region_lower
+   *   - w = 1 for sqrt(s) > region_upper
+   *   - smoothly interpolated in between using a sinusoidal profile
+   *
+   * This weight can be used to interpolate between two models,
+   * parameters, or process choices (e.g. soft ↔ hard interactions).
+   *
+   * \param[in] region_lower Lower bound of the transition region in sqrt(s)
+   * [GeV] \param[in] region_upper Upper bound of the transition region in
+   * sqrt(s) [GeV] \return Transition weight w ∈ [0,1]
+   */
+  double smooth_transition_weight(double region_lower,
+                                  double region_upper) const;
+  /**
    * \param[in] region_lower the lowest sqrts in the transition region [GeV]
    * \param[in] region_upper the highest sqrts in the transition region [GeV]
    * \return probability to have the high energy interaction (via string)
