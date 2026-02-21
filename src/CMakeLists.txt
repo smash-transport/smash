@@ -11,9 +11,15 @@ include(CheckLibraryExists)
 include(AddCompilerFlag)
 include(FindPkgConfig)
 
-# Prepare empty list variables to collect libraries, compiler definitions for internal usage in
-# SMASH, compiler definitions for users of SMASH, internal compile options and so on
-set(SMASH_LIBRARIES "")
+# Prepare list variables to collect libraries, compiler definitions for internal usage in SMASH,
+# compiler definitions for users of SMASH, internal compile options and so on
+set(SMASH_LIBRARIES
+    einhard
+    yaml-cpp
+    cuhre
+    suave
+    divonne
+    vegas)
 set(SMASH_PRIVATE_DEFINITIONS "")
 set(SMASH_PUBLIC_DEFINITIONS "")
 set(SMASH_PRIVATE_COMPILE_OPTIONS "")
@@ -192,17 +198,6 @@ endif()
 # set up include paths
 include_directories(include)
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
-
-# set default libraries for linking
-set(SMASH_LIBRARIES
-    ${SMASH_LIBRARIES}
-    einhard
-    yaml-cpp
-    cuhre
-    suave
-    divonne
-    vegas # Cuba multidimensional integration
-)
 
 # ~~~
 # For GNU and Clang compilers, link to C++ filesystem library if compiler version requires it
