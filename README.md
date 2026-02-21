@@ -47,7 +47,7 @@ Support for ROOT, HepMC3 and Rivet output is automatically enabled if a suitable
 | Software | Required version |
 |  :---:   |       :---:      |
 | ROOT     |  6.20 or higher  |
-| HepMC3   | 3.2.3 or higher  |
+| HepMC3   | 3.2.6 or higher  |
 | Rivet    | 3.1.4 or higher  |
 
 ### Compilation and installation

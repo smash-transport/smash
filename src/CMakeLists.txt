@@ -106,7 +106,7 @@ endif()
 option(TRY_USE_HEPMC "Turn this off to disable HepMC3 output support in SMASH." ON)
 if(TRY_USE_HEPMC OR TRY_USE_RIVET)
     find_package(HepMC3 QUIET CONFIG) # Min version not handled here but after to better inform user
-    set(HepMC3_MINIMUM_VERSION "3.2.3")
+    set(HepMC3_MINIMUM_VERSION "3.2.6")
     if(HepMC3_FOUND)
         message(STATUS "Candidate HepMC3 version ${HepMC3_VERSION} found, "
                        "requested ${HepMC3_MINIMUM_VERSION}")
@@ -117,33 +117,22 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
     if(HepMC3_FOUND)
         message(STATUS "Found HepMC3: ${HEPMC3_INCLUDE_DIR} (version ${HepMC3_VERSION})")
         if(NOT TARGET HepMC3::HepMC3)
-            if(NOT HEPMC3_LIB OR HEPMC3_LIB MATCHES "NOTFOUND$")
-                message(FATAL_ERROR "HepMC3 found, but its main library is missing.")
-            endif()
-            set(HEPMC3_OPTIONAL_LIBS ${HEPMC3_SEARCH_LIB} ${HEPMC3_ROOTIO_LIB}
-                                     ${HEPMC3_PROTOBUFIO_LIB})
-            # Filter out the optional libraries that were not found (i.e. whose value terminates
-            # with NOTFOUND) before creating the target, otherwise linking will likely fail
-            list(FILTER
-                 HEPMC3_OPTIONAL_LIBS
-                 EXCLUDE
-                 REGEX
-                 "NOTFOUND$")
-            add_library(HepMC3::HepMC3 UNKNOWN IMPORTED)
-            set_target_properties(HepMC3::HepMC3
-                                  PROPERTIES IMPORTED_LOCATION "${HEPMC3_LIB}"
-                                             INTERFACE_LINK_LIBRARIES "${HEPMC3_OPTIONAL_LIBS}")
-            target_include_directories(HepMC3::HepMC3 SYSTEM INTERFACE ${HEPMC3_INCLUDE_DIR})
+            message(FATAL_ERROR "HepMC3 found, but its main target is missing.")
+        else()
+            set(HEPMC3_TARGETS HepMC3::HepMC3)
         endif()
-        list(APPEND SMASH_LIBRARIES HepMC3::HepMC3)
-        list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_HEPMC")
-        if((NOT HEPMC3_ROOTIO_LIB) OR (NOT ROOT_FOUND))
-            message(STATUS "HepMC3_treeroot output disabled, missing ROOT and/or "
-                           "HepMC3 ROOT I/O support")
+        if(NOT ROOT_FOUND)
+            message(STATUS "HepMC3_treeroot output disabled, missing ROOT support")
+        elseif(NOT TARGET HepMC3::rootIO)
+            message(STATUS "HepMC3_treeroot output disabled, missing HepMC3 ROOT I/O support")
         else()
             message(STATUS "HepMC3_treeroot output support enabled")
+            list(APPEND HEPMC3_TARGETS HepMC3::rootIO)
             list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_HEPMC_ROOTIO")
         endif()
+        create_system_wrapper_target(HepMC3_bundle ${HEPMC3_TARGETS})
+        list(APPEND SMASH_LIBRARIES HepMC3_bundle)
+        list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_HEPMC")
     else()
         message(STATUS "Suitable HepMC3 not found. Support disabled. "
                        "See README for more information.")
