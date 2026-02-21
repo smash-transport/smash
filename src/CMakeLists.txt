@@ -80,6 +80,14 @@ if(GSL_FOUND)
 endif()
 
 find_package(Eigen3 3.0 REQUIRED)
+if(EIGEN3_FOUND)
+    if(TARGET Eigen3::Eigen)
+        list(APPEND SMASH_LIBRARIES Eigen3::Eigen)
+    else()
+        message(FATAL_ERROR " \n" " Eigen3 library found, but its target is somehow missing.\n"
+                            " Ensure to be using the provided CMake module to find it.\n")
+    endif()
+endif()
 
 option(TRY_USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(TRY_USE_ROOT)
@@ -184,7 +192,6 @@ endif()
 # set up include paths
 include_directories(include)
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
-include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
 
 # set default libraries for linking
 set(SMASH_LIBRARIES
