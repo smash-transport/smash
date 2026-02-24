@@ -20,8 +20,8 @@ set(SMASH_LIBRARIES
     suave
     divonne
     vegas)
-set(SMASH_PRIVATE_DEFINITIONS "")
-set(SMASH_PUBLIC_DEFINITIONS "")
+set(SMASH_INTERNAL_DEFINITIONS "")
+set(SMASH_CLIENT_DEFINITIONS "")
 set(SMASH_PRIVATE_COMPILE_OPTIONS "")
 
 # Enable warnings for supported compilers only --> Here we know the compilers support the flag, do
@@ -54,7 +54,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
     option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C funtions in SMASH."
            OFF)
     if(DEPRECATE_C_FNS)
-        list(APPEND SMASH_PRIVATE_DEFINITIONS "DONT_ASSERT_TEST")
+        list(APPEND SMASH_INTERNAL_DEFINITIONS "DONT_ASSERT_TEST")
         list(APPEND SMASH_PRIVATE_COMPILE_OPTIONS "-include" "smash/deprecate_c_functions.h")
     endif()
 endif()
@@ -110,7 +110,7 @@ if(TRY_USE_ROOT)
         message(STATUS "Found ROOT: ${ROOT_INCLUDE_DIRS} (version ${ROOT_VERSION})")
         create_system_wrapper_target(ROOT_bundle ROOT::Core ROOT::RIO ROOT::Tree)
         list(APPEND SMASH_LIBRARIES ROOT_bundle)
-        list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_ROOT")
+        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_ROOT")
     else()
         message(STATUS "Suitable ROOT not found. Support disabled. "
                        "See README for more information.")
@@ -142,11 +142,11 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
         else()
             message(STATUS "HepMC3_treeroot output support enabled")
             list(APPEND HEPMC3_TARGETS HepMC3::rootIO)
-            list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_HEPMC_ROOTIO")
+            list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_HEPMC_ROOTIO")
         endif()
         create_system_wrapper_target(HepMC3_bundle ${HEPMC3_TARGETS})
         list(APPEND SMASH_LIBRARIES HepMC3_bundle)
-        list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_HEPMC")
+        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_HEPMC")
     else()
         message(STATUS "Suitable HepMC3 not found. Support disabled. "
                        "See README for more information.")
@@ -174,7 +174,7 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
                                 " Ensure to be using the provided CMake module to find it.\n")
         endif()
         list(APPEND SMASH_LIBRARIES Rivet::Rivet)
-        list(APPEND SMASH_PUBLIC_DEFINITIONS "SMASH_USE_RIVET")
+        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_RIVET")
     else()
         message(STATUS "Suitable Rivet not found. Support disabled. "
                        "See README for more information.")
@@ -192,7 +192,8 @@ if(Pythia_FOUND)
     # directories might contain a Pythia.h header that might not be the one of the Pythia linked to
     # SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
     list(PREPEND SMASH_LIBRARIES Pythia::Pythia)
-    list(APPEND SMASH_PRIVATE_DEFINITIONS "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\"" "PYTHIA_FOUND")
+    list(APPEND SMASH_INTERNAL_DEFINITIONS "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+         "PYTHIA_FOUND")
 endif()
 
 # set up include paths
@@ -312,20 +313,21 @@ if(ENABLE_NANOBENCHMARKING)
         message(WARNING "Nanobenchmarking is not supported on ARM processors and it was disabled.")
     else()
         set(smash_src ${smash_src} tsc.cc)
-        list(APPEND SMASH_PRIVATE_DEFINITIONS "USE_NANOBENCHMARKING_CODE")
+        list(APPEND SMASH_INTERNAL_DEFINITIONS "USE_NANOBENCHMARKING_CODE")
     endif()
 endif()
 
 # this is the "object library" target: compiles the sources only once see
 # https://stackoverflow.com/a/29824424 NOTE: shared libraries need PIC and this is already set for
 # all targets through CMAKE_POSITION_INDEPENDENT_CODE
-add_library(objlib OBJECT ${smash_src})
-target_compile_definitions(objlib PUBLIC ${SMASH_PUBLIC_DEFINITIONS}
-                           PRIVATE ${SMASH_PRIVATE_DEFINITIONS})
-target_compile_options(objlib PRIVATE ${SMASH_PRIVATE_COMPILE_OPTIONS})
-target_link_libraries(objlib PUBLIC ${SMASH_LIBRARIES})
+add_library(smash_objlib OBJECT ${smash_src})
+target_compile_definitions(smash_objlib PUBLIC ${SMASH_CLIENT_DEFINITIONS}
+                                               ${SMASH_INTERNAL_DEFINITIONS})
+target_compile_options(smash_objlib PUBLIC ${SMASH_PRIVATE_COMPILE_OPTIONS})
+target_link_libraries(smash_objlib PUBLIC ${SMASH_LIBRARIES})
 
-add_executable(smash smash.cc $<TARGET_OBJECTS:objlib>)
+add_executable(smash smash.cc $<TARGET_OBJECTS:smash_objlib>)
+target_link_libraries(smash PRIVATE smash_objlib)
 
 # configure a header file to pass some of the CMake settings to the source code
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/smash/config.h.in"
@@ -352,26 +354,27 @@ macro(generate_headers)
     endforeach()
 endmacro()
 generate_headers(particles.txt decaymodes.txt)
-
 set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated_headers}")
-
-target_link_libraries(smash ${SMASH_LIBRARIES})
 
 # Create a shared library out of the whole SMASH. Note that, since "the build-tree runtime path will
 # not be used for binaries in the install tree" (CMake documentation), we request here to set the
 # INSTALL_RPATH in the library to ensure that projects linking to SMASH finds at run time libraries
-# like Pythia, which are likely to be in not standard places.
-add_library(smash_shared SHARED $<TARGET_OBJECTS:objlib>)
-target_compile_definitions(smash_shared PUBLIC ${SMASH_PUBLIC_DEFINITIONS})
-target_link_libraries(smash_shared ${SMASH_LIBRARIES})
+# like Pythia, which are likely to be in not standard places. Furthermore, smash_shared is linked
+# privately to the object library to avoid that the dependency on the external libraries is
+# propagated to users of the shared library, which should not be aware of them. The client
+# definitions are re-exposed to users of the shared library since they are needed to use it.
+add_library(smash_shared SHARED $<TARGET_OBJECTS:smash_objlib>)
+target_link_libraries(smash_shared PRIVATE smash_objlib)
+target_compile_definitions(smash_shared PUBLIC ${SMASH_CLIENT_DEFINITIONS})
 set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
                                               INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # tests:
 if(BUILD_TESTING)
     # library for unit tests
-    add_library(smash_static STATIC $<TARGET_OBJECTS:objlib>)
-    set_target_properties(smash_static PROPERTIES OUTPUT_NAME smash)
+    add_library(smash_testlib STATIC $<TARGET_OBJECTS:smash_objlib>)
+    target_link_libraries(smash_testlib PUBLIC smash_objlib)
+    set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash)
     # Look for sanitizers supported by the compiler. Sanitizers add instrumentation code to the
     # executable that test correctness of the code:
     #
@@ -403,12 +406,12 @@ if(BUILD_TESTING)
         set(USE_SANITIZER FALSE)
     endif()
 
-    # define BUILD_TESTS for smash_static in order to enable small code changes for the unit tests.
+    # define BUILD_TESTS for smash_testlib in order to enable small code changes for the unit tests.
     # It is an unfortunate side effect that the sanitzer build now also compiles to slightly
     # different code. To fix this we'd have to compile all source files a third time... not sure we
     # prefer that.
     if(USE_SANITIZER)
-        set_target_properties(smash_static
+        set_target_properties(smash_testlib
                               PROPERTIES COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
                                          LINK_FLAGS ${SANITIZER_FLAG})
 
@@ -416,9 +419,9 @@ if(BUILD_TESTING)
         set_target_properties(smash_sanitizer
                               PROPERTIES COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
                                          LINK_FLAGS ${SANITIZER_FLAG})
-        target_link_libraries(smash_sanitizer smash_static ${SMASH_LIBRARIES})
+        target_link_libraries(smash_sanitizer smash_testlib)
     else()
-        set_target_properties(smash_static PROPERTIES COMPILE_FLAGS "-DBUILD_TESTS")
+        set_target_properties(smash_testlib PROPERTIES COMPILE_FLAGS "-DBUILD_TESTS")
     endif()
 
     add_subdirectory(tests)
