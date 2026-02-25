@@ -196,6 +196,10 @@ class BremsstrahlungAction : public ScatterAction {
   std::pair<double, double> brems_diff_cross_sections();
 };
 
+//TODO: Potentially create a new class DileptonBremsstrahlungAction
+// for dilepton bremsstrahlung processes, which are not implemented yet.
+// Alternatively it is put into a new file instead.
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_BREMSSTRAHLUNGACTION_H_

@@ -3893,6 +3893,20 @@ struct InputKeys {
       detail::get_default_validator<bool>()};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_dileptons
+   * \optional_key{key_CT_dileptons_bremsstrahlung_,Bremsstrahlung,bool,false}
+   *
+   * Whether or not to enable dilepton production from NN bremsstrahlung.
+   * The approach follows the meson-exchange approximation depicted in Shyam,Mosel (2010).
+   */
+  /**
+   * \see_key{key_CT_dileptons_bremsstrahlung_}
+   */
+  inline static const Key<bool> collTerm_dileptons_bremsstrahlung{
+      InputSections::c_dileptons + "Bremsstrahlung", false, {"3.20"}};
+  // TODO: Change version after successful testing to 3.3 or 3.4
+  
+  /*!\Userguide
    * \page doxypage_input_conf_ct_photons
    * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false,\none}
    *
@@ -7853,7 +7867,7 @@ General:
  * <h3> Example of dileptons configuration </h3>
  *
  * The following example configures the dilepton production for dileptons
- * originating from resonance decays. In addition, the extended OSCAR2013
+ * originating from resonance decays and bremsstrahlung. In addition, the extended OSCAR2013
  * dilepton output is enabled.
  *
  *\verbatim
@@ -7864,6 +7878,7 @@ General:
  Collision_Term:
      Dileptons:
          Decays: True
+         Bremsstrahlung: True
  \endverbatim
  *
  * <hr>

@@ -603,6 +603,12 @@ class Experiment : public ExperimentBase {
 
   /// This indicates whether dileptons are switched on.
   const bool dileptons_switch_;
+  
+  /**
+   * This indicates whether dilepton production via bremsstrahlung is 
+   * switched on.
+   */ 
+  const bool dileptons_bremsstrahlung_switch_;
 
   /// This indicates whether photons are switched on.
   const bool photons_switch_;
@@ -719,6 +725,8 @@ class Experiment : public ExperimentBase {
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   out << "End time: " << e.end_time_ << " fm\n";
+  out << "Dilepton bremsstrahlung: "
+      << (e.dileptons_bremsstrahlung_switch_ ? "on" : "off") << "\n";
   out << e.modus_;
   return out;
 }
@@ -927,6 +935,8 @@ Experiment<Modus>::Experiment(Configuration &config,
       metric_(config.take(InputKeys::gen_metricType),
               config.take(InputKeys::gen_expansionRate)),
       dileptons_switch_(config.take(InputKeys::collTerm_dileptons_decays)),
+      dileptons_bremsstrahlung_switch_(
+          config.take(InputKeys::collTerm_dileptons_bremsstrahlung)),
       photons_switch_(
           config.take(InputKeys::collTerm_photons_twoToTwoScatterings)),
       bremsstrahlung_switch_(
@@ -1023,6 +1033,8 @@ Experiment<Modus>::Experiment(Configuration &config,
                   modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
 
   // create finders
+  //TODO: Add dilepton finder for bremsstrahlung as well or make it possible 
+  // to use the same one for both decays and bremsstrahlung here
   if (dileptons_switch_) {
     dilepton_finder_ = std::make_unique<DecayActionsFinderDilepton>();
   }
@@ -2460,6 +2472,35 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     brems_act.perform_bremsstrahlung(outputs_);
   }
 
+  //TODO: New action for Dilepton bremsstrahlung to be implemented maybe here.
+  //      Below code is only a placeholder copy from photon part above.
+  /*
+  if (dilepton_bremsstrahlung_switch_ &&
+      DileptonBremsstrahlungAction::is_dilepton_bremsstrahlung_reaction(
+          action.incoming_particles())) {
+    // Time in the action constructor is relative to current time of incoming
+    constexpr double action_time = 0.;
+
+    DileptonBremsstrahlungAction dilepton_brems_act(
+        action.incoming_particles(), action_time, n_fractional_photons_,
+        action.get_total_weight(), parameters_.spin_interaction_type);
+
+    // Add a completely dummy process to the dilepton bremsstrahlung action. The
+    // only important thing is that its cross-section is equal to the cross-section
+    // of the hadronic action. This can be done, because the dilepton bremsstrahlung
+    // action is never actually performed, only the final state is generated and
+    // printed to the dilepton output. Note: The cross_section_scaling_factor can
+    // be neglected here, since it cancels out for the weighting, where a ratio
+    // of (unscaled) dilepton bremsstrahlung cross section and (unscaled) hadronic
+    // cross section is taken.
+    dilepton_brems_act.add_dummy_hadronic_process(action.get_total_weight());
+
+    // Now add the actual dilepton bremsstrahlung reaction channel.
+    dilepton_brems_act.add_single_process();
+
+    dilepton_brems_act.perform_dilepton_bremsstrahlung(outputs_);
+  }
+  */
   logg[LExperiment].debug(~einhard::Green(), "✔ ", action);
   return true;
 }
@@ -2712,6 +2753,7 @@ void Experiment<Modus>::propagate_and_shine(double to_time,
     }
   }
 }
+//TODO: Add functionality for bremsstrahlung shine in the future for dileptons.
 
 /**
  * Make sure `interactions_total` can be represented as a 32-bit integer.
@@ -3060,6 +3102,7 @@ void Experiment<Modus>::do_final_interactions() {
           dilepton_finder_->shine_final(ensembles_[i_ens], output.get(), true);
         }
       }
+      //TODO: Final bremsstrahlung shining from resonances as well?
       // Find actions.
       for (const auto &finder : action_finders_) {
         auto found_actions = finder->find_final_actions(ensembles_[i_ens]);
@@ -3089,6 +3132,7 @@ void Experiment<Modus>::do_final_interactions() {
       }
     }
   }
+  //TODO: Similar question for final bremsstrahlung shine here as well?
 }
 
 template <typename Modus>

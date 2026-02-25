@@ -79,7 +79,7 @@ void BremsstrahlungAction::generate_final_state() {
   if (collision_processes_bremsstrahlung_.size() != 1) {
     logg[LScatterAction].fatal()
         << "Problem in BremsstrahlungAction::generate_final_state().\nThe "
-           "brocess branch has "
+           "process branch has "
         << collision_processes_bremsstrahlung_.size()
         << " entries. It should however have 1.";
     throw std::runtime_error("");
@@ -417,4 +417,7 @@ void BremsstrahlungAction::create_interpolations() {
                                                 dsigma_dtheta_pi0pi0_pipi,
                                                 ExtrapolationType::Constant);
 }
+//TODO: Potentially create a new class DileptonBremsstrahlungAction
+// for dilepton bremsstrahlung processes, which are not implemented yet.
+
 }  // namespace smash
