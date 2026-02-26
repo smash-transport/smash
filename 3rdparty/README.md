@@ -49,14 +49,18 @@ We use [this library](https://github.com/jbeder/yaml-cpp) mainly for SMASH confi
 If you want to include a new version inside SMASH codebase, you need to do something along the following lines (from within the `3rdparty` folder).
 ```bash
 rm -r yaml-cpp-*
-YAML_VERSION='X.Y.Z' # Put in the right numbers
+YAML_VERSION='yaml-cpp-X.Y.Z' # Put in the right numbers
 wget https://github.com/jbeder/yaml-cpp/archive/refs/tags/"${YAML_VERSION}".zip
-unzip "${YAML_VERSION}".zip && rm yaml-cpp-"${YAML_VERSION}".zip
-rm -r yaml-cpp-"${YAML_VERSION}"/{test,util}
+unzip "${YAML_VERSION}".zip && rm "${YAML_VERSION}".zip
+mv yaml-cpp-"${YAML_VERSION}" "${YAML_VERSION}"
+rm -r "${YAML_VERSION}"/{test,util}
 unset -v 'YAML_VERSION'
 ```
 Removing the `test` and `util` folders is crucial to avoid shipping hundreds of unnecessary files which sum up to some unnecessary MB.
 This is connected to the fact we do not build YAML tests or tools (cf. `YAML_CPP_BUILD_TESTS` and `YAML_CPP_BUILD_TOOLS` CMake variables in the _3rdparty/CMakeLists.txt_ file) and it is likely not changing in the future.
+Note that the filenames in the snippet above depends on how YAML developers package and ship their releases.
+In particular the double `yaml-cpp-` prefix in the unzipped folder has appeared in version `0.9.0`.
+The snippet above should be checked at every update and adjusted as needed.
 
 **Be sure to drop any CMake version requirement as described in the general remarks above.**
 

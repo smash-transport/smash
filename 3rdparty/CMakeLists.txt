@@ -28,7 +28,7 @@ list(APPEND CMAKE_MESSAGE_INDENT "   ")
 set(YAML_CPP_BUILD_TESTS OFF CACHE INTERNAL "")
 set(YAML_CPP_BUILD_TOOLS OFF CACHE INTERNAL "")
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE INTERNAL "")
-add_subdirectory(yaml-cpp-0.8.0)
+add_subdirectory(yaml-cpp-0.9.0)
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 message(CHECK_PASS "done")
 
@@ -46,7 +46,7 @@ set_property(TARGET yaml-cpp PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
 # dependency" and it needs to be installed here as well and it would be wrong to use their shipped
 # installation because we want that users using SMASH as a library link to the frozen YAML library
 # shipped with SMASH.
-install(DIRECTORY yaml-cpp-0.8.0/include/yaml-cpp
+install(DIRECTORY yaml-cpp-0.9.0/include/yaml-cpp
         DESTINATION "include"
         FILES_MATCHING
         PATTERN "*.h")
