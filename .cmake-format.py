@@ -43,9 +43,30 @@ with section("parse"):
         "MIC_CXX_RESULT": 1,
       }
     },
+    "check_compiler_flag_is_supported": {
+      "pargs": 0,
+      "flags": [],
+      "kwargs": {
+        "LANGUAGE": 1,
+        "FLAG": 1,
+        "RESULT": 1,
+        "COMPILER": 1,
+      }
+    },
+    "target_add_compiler_flag_if_supported": {
+      "pargs": 0,
+      "flags": [],
+      "kwargs": {
+        "TARGETS": '+',
+        "FLAGS": '+',
+        "LANGUAGE": 1,
+        "COMPILER": 1,
+        "SCOPE": 1,
+      }
+    },
     "add_compiler_flags_if_supported": {
       "pargs": '+',
-      "flags": ["VERBOSE"],
+      "flags": ["VERBOSE", "ADD_IF_PRESENT"],
       "kwargs": {
         "C_FLAGS": 1,
         "CXX_FLAGS": 1,
@@ -70,6 +91,19 @@ with section("parse"):
         "CHECK_START": '+',
         "CHECK_PASS": '+',
         "CHECK_FAIL": '+',
+      }
+    },
+    "target_sources": {
+      "pargs": 1,
+      "flags": [],
+      "kwargs": {
+        "PUBLIC": '+',
+        "INTERFACE": '+',
+        "PRIVATE": '+',
+        "FILE_SET": 1,
+        "TYPE": 1,
+        "BASE_DIRS": '+',
+        "FILES": '+',
       }
     },
   }
