@@ -263,6 +263,7 @@ inline ExperimentParameters default_parameters(
       1.0,    // cross section scaling
       false,  // in thermodynamics outputs spectators are included
       false,  // ignore unformed particles for thermodynamics
+      true,   // force decays at the end
       false,  // do weak decays
       true,   // decay initial particles
       SpinInteractionType::Off,  // no spin interactions

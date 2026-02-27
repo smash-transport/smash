@@ -592,12 +592,6 @@ class Experiment : public ExperimentBase {
    */
   const double delta_time_startup_;
 
-  /**
-   * This indicates whether we force all resonances to decay in the last
-   * timestep.
-   */
-  const bool force_decays_;
-
   /// This indicates whether to use the grid.
   const bool use_grid_;
 
@@ -925,7 +919,6 @@ Experiment<Modus>::Experiment(Configuration &config,
       ensembles_(parameters_.n_ensembles),
       end_time_(config.take(InputKeys::gen_endTime)),
       delta_time_startup_(parameters_.labclock->timestep_duration()),
-      force_decays_(config.take(InputKeys::collTerm_forceDecaysAtEnd)),
       use_grid_(config.take(InputKeys::gen_useGrid)),
       metric_(config.take(InputKeys::gen_metricType),
               config.take(InputKeys::gen_expansionRate)),
@@ -1054,9 +1047,8 @@ Experiment<Modus>::Experiment(Configuration &config,
           "inelastically (e.g. resonance chains), else SMASH is known to "
           "hang.");
     }
-    action_finders_.emplace_back(std::make_unique<DecayActionsFinder>(
-        parameters_.res_lifetime_factor, parameters_.do_non_strong_decays,
-        force_decays_, parameters_.spin_interaction_type));
+    action_finders_.emplace_back(
+        std::make_unique<DecayActionsFinder>(parameters_));
   }
   bool no_coll = config.take(InputKeys::collTerm_noCollisions);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||

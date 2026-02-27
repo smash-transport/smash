@@ -328,6 +328,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
           scale_xs,
           only_participants,
           ignore_unformed,
+          config.take(InputKeys::collTerm_forceDecaysAtEnd),
           config.take(InputKeys::collTerm_ignoreDecayWidthAtTheEnd),
           config.take(InputKeys::collTerm_decayInitial),
           config.take(InputKeys::collTerm_spinInteractions),

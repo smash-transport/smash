@@ -2240,7 +2240,7 @@ struct InputKeys {
    *
    * Allow or prohibit initial state particles from decaying before their first
    * collision. This is relevant when, for instance, studying the interactions
-   * a resonance can go through.
+   * a resonance can go through. This prevails over \key `Force_Decays_At_End`
    */
   /**
    * \see_key{key_CT_decay_initial_}

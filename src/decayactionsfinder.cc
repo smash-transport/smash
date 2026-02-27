@@ -29,7 +29,6 @@ ActionList DecayActionsFinder::find_actions_in_cell(
     if (p.type().is_stable()) {
       continue;  // particle doesn't decay
     }
-
     if (!decay_initial_particles_ &&
         p.get_history().collisions_per_particle == 0) {
       continue;
@@ -77,12 +76,15 @@ ActionList DecayActionsFinder::find_actions_in_cell(
 ActionList DecayActionsFinder::find_final_actions(
     const Particles &search_list) const {
   ActionList actions;
-  if (find_final_decays_) {
+  if (force_decays_at_end_) {
     for (const auto &p : search_list) {
-      if (!do_final_non_strong_decays_ && p.type().is_stable()) {
+      if (!ignore_minimum_width_at_end_ && p.type().is_stable()) {
         continue;  // particle is stable with respect to strong interaction
       }
-
+      if (!decay_initial_particles_ &&
+          p.get_history().collisions_per_particle == 0) {
+        continue;
+      }
       if (p.type().decay_modes().is_empty()) {
         continue;  // particle cannot decay (not even e.m. or weakly)
       }

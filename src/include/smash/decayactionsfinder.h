@@ -28,20 +28,14 @@ class DecayActionsFinder : public ActionFinderInterface {
   /**
    * Initialize the finder
    *
-   * \param[in] res_lifetime_factor The multiplicative factor to be applied to
-   *                                resonance lifetimes; default is 1
-   * \param[in] do_non_strong_decays whether to do non-strong decays at the end
-   * \param[in] force_decays_at_end whether to enforce decays at the end
-   * \param[in] spin_interaction_type Which type of spin interaction to use
+   * \param[in] par parameters from Experiment
    */
-  explicit DecayActionsFinder(
-      double res_lifetime_factor, bool do_non_strong_decays,
-      bool force_decays_at_end,
-      SpinInteractionType spin_interaction_type = SpinInteractionType::Off)
-      : res_lifetime_factor_(res_lifetime_factor),
-        do_final_non_strong_decays_(do_non_strong_decays),
-        find_final_decays_(force_decays_at_end),
-        spin_interaction_type_(spin_interaction_type) {}
+  explicit DecayActionsFinder(const ExperimentParameters &par)
+      : res_lifetime_factor_(par.res_lifetime_factor),
+        ignore_minimum_width_at_end_(par.ignore_minimum_width_at_end),
+        force_decays_at_end_(par.force_decays_at_end),
+        decay_initial_particles_(par.decay_initial_particles),
+        spin_interaction_type_(par.spin_interaction_type) {}
 
   /**
    * Check the whole particle list for decays.
@@ -77,16 +71,16 @@ class DecayActionsFinder : public ActionFinderInterface {
   ActionList find_final_actions(const Particles &search_list) const override;
 
   /// Multiplicative factor to be applied to resonance lifetimes
-  const double res_lifetime_factor_ = 1.;
+  const double res_lifetime_factor_ =
+      InputKeys::collTerm_resonanceLifetimeModifier.default_value();
 
   /// Do all non-strong decays (including weak and electro-magnetic ones)
-  const bool do_final_non_strong_decays_;
+  const bool ignore_minimum_width_at_end_ =
+      InputKeys::collTerm_ignoreDecayWidthAtTheEnd.default_value();
 
   /// Whether to find final decay actions
-  const bool find_final_decays_;
-
-  /// Spin interaction type
-  SpinInteractionType spin_interaction_type_;
+  const bool force_decays_at_end_ =
+      InputKeys::collTerm_forceDecaysAtEnd.default_value();
 
   /**
    * Whether to initial state particles can decay. Useful for analyzing
@@ -94,6 +88,10 @@ class DecayActionsFinder : public ActionFinderInterface {
    */
   const bool decay_initial_particles_ =
       InputKeys::collTerm_decayInitial.default_value();
+
+  /// Spin interaction type
+  const SpinInteractionType spin_interaction_type_ =
+      InputKeys::collTerm_spinInteractions.default_value();
 };
 
 }  // namespace smash
