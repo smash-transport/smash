@@ -160,6 +160,7 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
 int StringProcess::append_final_state(ParticleList& intermediate_particles,
                                       const FourVector& uString,
                                       const ThreeVector& evecLong,
+                                      double additional_xsec_supp,
                                       bool find_and_scale_leading) {
   int nfrag = 0;
   int bstring = 0;
@@ -174,7 +175,7 @@ int StringProcess::append_final_state(ParticleList& intermediate_particles,
    * based on the number of valence quarks. */
   if (find_and_scale_leading)
     assign_all_scaling_factors(bstring, intermediate_particles, evecLong,
-                               additional_xsec_supp_);
+                               additional_xsec_supp);
 
   // Velocity three-vector to perform Lorentz boost.
   const ThreeVector vstring = uString.velocity();
@@ -944,7 +945,7 @@ bool StringProcess::next_NDiffHard() {
     FourVector uString = FourVector(1., 0., 0., 0.);
     ThreeVector evec = find_forward_string ? evecBasisAB_[0] : -evecBasisAB_[0];
     int nfrag = append_final_state(new_intermediate_particles, uString, evec,
-                                   should_assign);
+                                   additional_xsec_supp_, should_assign);
     NpartFinal_ += nfrag;
 
     find_forward_string = !find_forward_string;

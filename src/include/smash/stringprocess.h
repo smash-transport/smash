@@ -388,7 +388,7 @@ class StringProcess {
                 double prob_proton_to_d_uu,
                 bool separate_fragment_baryon, double popcorn_rate,
                 bool use_monash_tune,
-                double additional_xsec_supp = 0.7,
+                double additional_xsec_supp,
                 std::string leading_hadron_treatment = "All_Strings");
 
   /**
@@ -919,7 +919,9 @@ class StringProcess {
    * \param[out] intermediate_particles list of fragmented particles
                  to be appended
    * \param[in] uString is velocity four vector of the string.
-   * \param[in] evecLong is unit 3-vector in which string is stretched.
+   * \param[in] evecLong is unit 3-vector in which string is stretched. 
+   * \param[in] suppression_factor additional coherence factor to be
+               multiplied with scaling factor
    * \param[in] find_and_scale_leading if true, leading hadrons originating from 
    * valence quark or diquark endpoints are identified and their formation times 
    * are rescaled according to the leading-hadron prescription.
@@ -931,6 +933,7 @@ class StringProcess {
   int append_final_state(ParticleList &intermediate_particles,
                          const FourVector &uString,
                          const ThreeVector &evecLong,
+                         double additional_xsec_supp = 1.0,
                          bool find_and_scale_leading = true);
   /**
    * append new particle from PYTHIA to a specific particle list
