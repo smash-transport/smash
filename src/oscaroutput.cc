@@ -857,7 +857,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # Units: fm none none none none
  * # SMASH_version
  * \endcode
- **/
+ */
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(
