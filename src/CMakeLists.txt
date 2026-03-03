@@ -29,13 +29,13 @@ target_link_libraries(smash_shared PRIVATE smash_objlib)
 
 # Prepare list variables to collect libraries, compiler definitions for internal usage in SMASH,
 # compiler definitions for users of SMASH, internal compile options and so on
-set(SMASH_LIBRARIES
-    einhard
-    yaml-cpp
-    cuhre
-    suave
-    divonne
-    vegas)
+target_link_libraries(smash_objlib
+                      PUBLIC einhard
+                             yaml-cpp
+                             cuhre
+                             suave
+                             divonne
+                             vegas)
 set(SMASH_INTERNAL_DEFINITIONS "")
 set(SMASH_CLIENT_DEFINITIONS "")
 set(SMASH_PRIVATE_COMPILE_OPTIONS "")
@@ -94,7 +94,7 @@ find_package(GSL 2.0 REQUIRED)
 if(GSL_FOUND)
     if(TARGET GSL::gsl AND TARGET GSL::gslcblas)
         create_system_wrapper_target(GSL_bundle GSL::gsl GSL::gslcblas)
-        list(APPEND SMASH_LIBRARIES GSL_bundle)
+        target_link_libraries(smash_objlib PUBLIC GSL_bundle)
     else()
         message(FATAL_ERROR " \n" " GSL library found, but its targets are somehow missing.\n"
                             " Ensure to be using the official CMake module to find it.\n")
@@ -104,7 +104,7 @@ endif()
 find_package(Eigen3 3.0 REQUIRED)
 if(EIGEN3_FOUND)
     if(TARGET Eigen3::Eigen)
-        list(APPEND SMASH_LIBRARIES Eigen3::Eigen)
+        target_link_libraries(smash_objlib PUBLIC Eigen3::Eigen)
     else()
         message(FATAL_ERROR " \n" " Eigen3 library found, but its target is somehow missing.\n"
                             " Ensure to be using the provided CMake module to find it.\n")
@@ -125,7 +125,7 @@ if(TRY_USE_ROOT)
     if(ROOT_FOUND)
         message(STATUS "Found ROOT: ${ROOT_INCLUDE_DIRS} (version ${ROOT_VERSION})")
         create_system_wrapper_target(ROOT_bundle ROOT::Core ROOT::RIO ROOT::Tree)
-        list(APPEND SMASH_LIBRARIES ROOT_bundle)
+        target_link_libraries(smash_objlib PUBLIC ROOT_bundle)
         list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_ROOT")
     else()
         message(STATUS "Suitable ROOT not found. Support disabled. "
@@ -161,7 +161,7 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
             list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_HEPMC_ROOTIO")
         endif()
         create_system_wrapper_target(HepMC3_bundle ${HEPMC3_TARGETS})
-        list(APPEND SMASH_LIBRARIES HepMC3_bundle)
+        target_link_libraries(smash_objlib PUBLIC HepMC3_bundle)
         list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_HEPMC")
     else()
         message(STATUS "Suitable HepMC3 not found. Support disabled. "
@@ -189,7 +189,7 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
             message(FATAL_ERROR " \n" " Rivet library found, but its target is somehow missing.\n"
                                 " Ensure to be using the provided CMake module to find it.\n")
         endif()
-        list(APPEND SMASH_LIBRARIES Rivet::Rivet)
+        target_link_libraries(smash_objlib PUBLIC Rivet::Rivet)
         list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_RIVET")
     else()
         message(STATUS "Suitable Rivet not found. Support disabled. "
@@ -207,7 +207,7 @@ if(Pythia_FOUND)
     # all the other and it is meant to avoid possible issues with e.g. ROOT whose include
     # directories might contain a Pythia.h header that might not be the one of the Pythia linked to
     # SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
-    list(PREPEND SMASH_LIBRARIES Pythia::Pythia)
+    target_link_libraries(smash_objlib PUBLIC Pythia::Pythia)
     list(APPEND SMASH_INTERNAL_DEFINITIONS "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
          "PYTHIA_FOUND")
 endif()
@@ -225,11 +225,11 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 # ~~~
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
-        set(SMASH_LIBRARIES ${SMASH_LIBRARIES} stdc++fs)
+        target_link_libraries(smash_objlib PUBLIC stdc++fs)
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
-        set(SMASH_LIBRARIES ${SMASH_LIBRARIES} c++fs)
+        target_link_libraries(smash_objlib PUBLIC c++fs)
     endif()
 endif()
 
@@ -337,7 +337,6 @@ endif()
 target_compile_definitions(smash_objlib PUBLIC ${SMASH_CLIENT_DEFINITIONS}
                                                ${SMASH_INTERNAL_DEFINITIONS})
 target_compile_options(smash_objlib PUBLIC ${SMASH_PRIVATE_COMPILE_OPTIONS})
-target_link_libraries(smash_objlib PUBLIC ${SMASH_LIBRARIES})
 
 # configure a header file to pass some of the CMake settings to the source code
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/smash/config.h.in"
