@@ -389,10 +389,12 @@ set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated
 
 # tests:
 if(BUILD_TESTING)
-    # library for unit tests
+    # Add library for unit tests. Note that we link to smash_objlib publicly to propagate all SMASH
+    # internal features to tests targets that will link against this library.
     add_library(smash_testlib STATIC $<TARGET_OBJECTS:smash_objlib>)
-    target_link_libraries(smash_testlib PUBLIC smash_objlib)
+    target_link_libraries(smash_testlib PUBLIC smash_objlib smash_api)
     set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash)
+
     # Look for sanitizers supported by the compiler. Sanitizers add instrumentation code to the
     # executable that test correctness of the code:
     #
@@ -403,20 +405,23 @@ if(BUILD_TESTING)
     # If the undefined sanitizer is not available with the compiler it will fall back to address
     # sanitizer only. If this ones also not available the sanitizer build will be skipped
     # altogether.
-    set(SANITIZER_FLAG -fsanitize=address,undefined)
-    set(_tmp "${CMAKE_REQUIRED_FLAGS}")
-    set(CMAKE_REQUIRED_FLAGS ${SANITIZER_FLAG}) # add_compiler_flag only adds the flag for
-                                                # compilation - it's also required with the link
-                                                # command, though
-    add_compiler_flag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
-    set(CMAKE_REQUIRED_FLAGS "${_tmp}")
+    function(check_sanitizer_flag_support flag result_var)
+        set(_saved_flags "${CMAKE_REQUIRED_FLAGS}")
+        set(CMAKE_REQUIRED_FLAGS "${flag}") # add_compiler_flag only adds the flag for
+        # compilation - it's also required with the link command, though
+        add_compiler_flag("${flag}" CXX_RESULT _have_flag)
+        set(CMAKE_REQUIRED_FLAGS "${_saved_flags}")
+        set(${result_var} ${_have_flag} PARENT_SCOPE)
+    endfunction()
+
+    set(SANITIZER_FLAG "-fsanitize=address,undefined")
+    check_sanitizer_flag_support("${SANITIZER_FLAG}" HAVE_SANITIZER)
     if(NOT HAVE_SANITIZER)
-        set(SANITIZER_FLAG -fsanitize=address)
-        set(CMAKE_REQUIRED_FLAGS ${SANITIZER_FLAG})
-        add_compiler_flag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
-        set(CMAKE_REQUIRED_FLAGS "${_tmp}")
+        set(SANITIZER_FLAG "-fsanitize=address")
+        check_sanitizer_flag_support("${SANITIZER_FLAG}" HAVE_SANITIZER)
     endif()
 
+    # Offer option to disable sanitizer usage, if available.
     if(HAVE_SANITIZER)
         option(USE_SANITIZER
                "Use available address and undefined behavior sanitizers for test code." ON)
@@ -424,22 +429,20 @@ if(BUILD_TESTING)
         set(USE_SANITIZER FALSE)
     endif()
 
-    # define BUILD_TESTS for smash_testlib in order to enable small code changes for the unit tests.
-    # It is an unfortunate side effect that the sanitzer build now also compiles to slightly
-    # different code. To fix this we'd have to compile all source files a third time... not sure we
-    # prefer that.
+    # The static library for unit tests uses the same object files as smash_objlib but adds
+    # test-specific definitions (BUILD_TESTS) and optional sanitizer instrumentation. Note that
+    # smash_objlib itself is NOT modified, so main builds remain unaffected.
+    target_compile_definitions(smash_testlib PUBLIC BUILD_TESTS)
+
     if(USE_SANITIZER)
-        set_target_properties(smash_testlib
-                              PROPERTIES COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
-                                         LINK_FLAGS ${SANITIZER_FLAG})
+        target_compile_options(smash_testlib PUBLIC ${SANITIZER_FLAG})
+        target_link_options(smash_testlib PUBLIC ${SANITIZER_FLAG})
 
         add_executable(smash_sanitizer smash.cc)
-        set_target_properties(smash_sanitizer
-                              PROPERTIES COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
-                                         LINK_FLAGS ${SANITIZER_FLAG})
-        target_link_libraries(smash_sanitizer smash_testlib)
-    else()
-        set_target_properties(smash_testlib PROPERTIES COMPILE_FLAGS "-DBUILD_TESTS")
+        target_compile_definitions(smash_sanitizer PUBLIC BUILD_TESTS)
+        target_compile_options(smash_sanitizer PUBLIC ${SANITIZER_FLAG})
+        target_link_options(smash_sanitizer PUBLIC ${SANITIZER_FLAG})
+        target_link_libraries(smash_sanitizer PRIVATE smash_testlib)
     endif()
 
     add_subdirectory(tests)
