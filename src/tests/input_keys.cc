@@ -138,3 +138,46 @@ struct check_to_string_for_enums<std::variant<Ts...>> {
 TEST(are_all_enum_keys_convertible_to_string) {
   check_to_string_for_enums<InputKeys::key_references_variant>::validate();
 }
+
+#if 0
+
+// The following code is useful to print all keys in the database for debug
+// purposes and it is intentionally left as part of the codebase commented out
+// for future needs.
+
+#include "smash/input_keys.h"
+#include "smash/traits.h"
+
+template <typename T>
+std::enable_if_t<is_writable_to_stream_v<decltype(std::cout), T>> print(
+    T const& in) {
+  std::cout << std::boolalpha << in << '\n';
+}
+
+template <typename T>
+std::enable_if_t<!is_writable_to_stream_v<decltype(std::cout), T>> print(
+    T const& in) {
+  std::cout << "NOT PRINTABLE (" << typeid(in).name() << ")\n";
+}
+
+TEST(check_list) {
+  for (const auto& key : InputKeys::list) {
+    try {
+      std::visit(
+          [](auto&& arg) {
+            std::cout << std::setw(70) << std::string(arg.get()) << "  ";
+            if (arg.get().has_dependent_default())
+              std::cout << "--> dependent default!\n";
+            else {
+              const auto def = arg.get().default_value();
+              print(def);
+            }
+          },
+          key);
+    } catch (const std::bad_optional_access&) {
+      std::visit([](auto&&) { std::cout << "--> Mandatory\n"; }, key);
+    }
+  }
+}
+
+#endif
