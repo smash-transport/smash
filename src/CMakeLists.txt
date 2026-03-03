@@ -39,6 +39,12 @@ target_link_libraries(smash_shared PRIVATE smash_objlib PUBLIC smash_api)
 set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
                                               INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+# Set up include paths for SMASH and its clients using the smash_api interface target.
+target_include_directories(smash_api
+                           INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                                     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+                                     $<INSTALL_INTERFACE:include>)
+
 # Prepare list variables to collect libraries, compiler definitions for internal usage in SMASH,
 # compiler definitions for users of SMASH, internal compile options and so on
 target_link_libraries(smash_objlib
@@ -236,10 +242,6 @@ if(Pythia_FOUND)
     target_compile_definitions(smash_objlib PUBLIC "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
                                                    "PYTHIA_FOUND")
 endif()
-
-# set up include paths
-include_directories(include)
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
 # ~~~
 # For GNU and Clang compilers, link to C++ filesystem library if compiler version requires it
