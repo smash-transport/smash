@@ -22,10 +22,19 @@ add_executable(smash smash.cc $<TARGET_OBJECTS:smash_objlib>)
 add_library(smash_shared SHARED $<TARGET_OBJECTS:smash_objlib>)
 
 # Both smash executable and shared library are linked privately to the object library because the
-# object is only an implementation detail and we do not want to expose it to clients. The client
-# definitions are re-exposed to users of the shared library when needed.
+# object is only an implementation detail and we do not want to expose it to clients, but also to
+# avoid that the dependency on the external libraries is propagated to users of the shared library,
+# which should not be aware of them (dependency on external library is introduced in the Config
+# file). The client definitions are re-exposed to users of the shared library when needed.
 target_link_libraries(smash PRIVATE smash_objlib)
 target_link_libraries(smash_shared PRIVATE smash_objlib)
+
+# Call shared library smash (e.g. libsmash.so). Note that, since "the build-tree runtime path will
+# not be used for binaries in the install tree" (CMake documentation), we request here to set the
+# INSTALL_RPATH in the library to ensure that projects linking to SMASH finds at run time libraries
+# like Pythia, which are likely to be in not standard places.
+set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
+                                              INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Prepare list variables to collect libraries, compiler definitions for internal usage in SMASH,
 # compiler definitions for users of SMASH, internal compile options and so on
@@ -36,9 +45,6 @@ target_link_libraries(smash_objlib
                              suave
                              divonne
                              vegas)
-set(SMASH_INTERNAL_DEFINITIONS "")
-set(SMASH_CLIENT_DEFINITIONS "")
-set(SMASH_PRIVATE_COMPILE_OPTIONS "")
 
 # Enable warnings for supported compilers only --> Here we know the compilers support the flag, do
 # not test!
@@ -70,8 +76,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
     option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C functions in SMASH."
            OFF)
     if(DEPRECATE_C_FNS)
-        list(APPEND SMASH_INTERNAL_DEFINITIONS "DONT_ASSERT_TEST")
-        list(APPEND SMASH_PRIVATE_COMPILE_OPTIONS "-include" "smash/deprecate_c_functions.h")
+        target_compile_definitions(smash_objlib PUBLIC "DONT_ASSERT_TEST")
+        target_compile_options(smash_objlib PUBLIC "-include" "smash/deprecate_c_functions.h")
     endif()
 endif()
 
@@ -126,7 +132,8 @@ if(TRY_USE_ROOT)
         message(STATUS "Found ROOT: ${ROOT_INCLUDE_DIRS} (version ${ROOT_VERSION})")
         create_system_wrapper_target(ROOT_bundle ROOT::Core ROOT::RIO ROOT::Tree)
         target_link_libraries(smash_objlib PUBLIC ROOT_bundle)
-        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_ROOT")
+        target_compile_definitions(smash_objlib PUBLIC "SMASH_USE_ROOT")
+        target_compile_definitions(smash_shared PUBLIC "SMASH_USE_ROOT")
     else()
         message(STATUS "Suitable ROOT not found. Support disabled. "
                        "See README for more information.")
@@ -158,11 +165,13 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
         else()
             message(STATUS "HepMC3_treeroot output support enabled")
             list(APPEND HEPMC3_TARGETS HepMC3::rootIO)
-            list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_HEPMC_ROOTIO")
+            target_compile_definitions(smash_objlib PUBLIC "SMASH_USE_HEPMC_ROOTIO")
+            target_compile_definitions(smash_shared PUBLIC "SMASH_USE_HEPMC_ROOTIO")
         endif()
         create_system_wrapper_target(HepMC3_bundle ${HEPMC3_TARGETS})
         target_link_libraries(smash_objlib PUBLIC HepMC3_bundle)
-        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_HEPMC")
+        target_compile_definitions(smash_objlib PUBLIC "SMASH_USE_HEPMC")
+        target_compile_definitions(smash_shared PUBLIC "SMASH_USE_HEPMC")
     else()
         message(STATUS "Suitable HepMC3 not found. Support disabled. "
                        "See README for more information.")
@@ -190,7 +199,8 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
                                 " Ensure to be using the provided CMake module to find it.\n")
         endif()
         target_link_libraries(smash_objlib PUBLIC Rivet::Rivet)
-        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_RIVET")
+        target_compile_definitions(smash_objlib PUBLIC "SMASH_USE_RIVET")
+        target_compile_definitions(smash_shared PUBLIC "SMASH_USE_RIVET")
     else()
         message(STATUS "Suitable Rivet not found. Support disabled. "
                        "See README for more information.")
@@ -208,8 +218,8 @@ if(Pythia_FOUND)
     # directories might contain a Pythia.h header that might not be the one of the Pythia linked to
     # SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
     target_link_libraries(smash_objlib PUBLIC Pythia::Pythia)
-    list(APPEND SMASH_INTERNAL_DEFINITIONS "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
-         "PYTHIA_FOUND")
+    target_compile_definitions(smash_objlib PUBLIC "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+                                                   "PYTHIA_FOUND")
 endif()
 
 # set up include paths
@@ -329,14 +339,9 @@ if(ENABLE_NANOBENCHMARKING)
         message(WARNING "Nanobenchmarking is not supported on ARM processors and it was disabled.")
     else()
         target_sources(smash_objlib PRIVATE tsc.cc)
-        list(APPEND SMASH_INTERNAL_DEFINITIONS "USE_NANOBENCHMARKING_CODE")
+        target_compile_definitions(smash_objlib PUBLIC "USE_NANOBENCHMARKING_CODE")
     endif()
 endif()
-
-# Complete smash_objlib
-target_compile_definitions(smash_objlib PUBLIC ${SMASH_CLIENT_DEFINITIONS}
-                                               ${SMASH_INTERNAL_DEFINITIONS})
-target_compile_options(smash_objlib PUBLIC ${SMASH_PRIVATE_COMPILE_OPTIONS})
 
 # configure a header file to pass some of the CMake settings to the source code
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/smash/config.h.in"
@@ -364,17 +369,6 @@ macro(generate_headers)
 endmacro()
 generate_headers(particles.txt decaymodes.txt)
 set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated_headers}")
-
-# Create a shared library out of the whole SMASH. Note that, since "the build-tree runtime path will
-# not be used for binaries in the install tree" (CMake documentation), we request here to set the
-# INSTALL_RPATH in the library to ensure that projects linking to SMASH finds at run time libraries
-# like Pythia, which are likely to be in not standard places. Furthermore, smash_shared is linked
-# privately to the object library to avoid that the dependency on the external libraries is
-# propagated to users of the shared library, which should not be aware of them. The client
-# definitions are re-exposed to users of the shared library since they are needed to use it.
-target_compile_definitions(smash_shared PUBLIC ${SMASH_CLIENT_DEFINITIONS})
-set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
-                                              INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # tests:
 if(BUILD_TESTING)
