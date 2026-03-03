@@ -197,7 +197,7 @@ static auto get_binary_filename(const std::string &content,
  * \ref input_output_content_specific_ "content-specific output options".
  *
  * See also \ref doxypage_output_collisions_box_modus.
- **/
+ */
 
 BinaryOutputBase::BinaryOutputBase(const std::filesystem::path &path,
                                    const std::string &mode,

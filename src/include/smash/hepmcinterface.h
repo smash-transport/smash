@@ -82,7 +82,7 @@ namespace smash {
  */
 class HepMcInterface : public OutputInterface {
  public:
-  /** Pair of Atomic weight and number **/
+  /// Pair of Atomic weight and number
   using AZ = std::pair<int, int>;
   /**
    * Create HepMC particle event in memory.

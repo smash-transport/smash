@@ -60,7 +60,7 @@ VtkOutput::~VtkOutput() {}
  *
  * There is also a possibility to print a lattice with thermodynamical
  * quantities to VTK files, see \ref doxypage_output_vtk_lattice.
- **/
+ */
 
 void VtkOutput::at_eventstart(const Particles &particles,
                               const EventLabel &event_label,
