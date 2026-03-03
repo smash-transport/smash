@@ -49,38 +49,54 @@ target_link_libraries(smash_objlib
                              divonne
                              vegas)
 
-# Enable warnings for supported compilers only --> Here we know the compilers support the flag, do
-# not test!
+# Enable warnings for supported compilers only (we know the compilers support the flag, do not test)
 if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
-    set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Wfloat-conversion -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch"
-    )
+    target_compile_options(smash_objlib
+                           PUBLIC -W
+                                  -Wall
+                                  -Wextra
+                                  -Wmissing-declarations
+                                  -Wpointer-arith
+                                  -Wshadow
+                                  -Wuninitialized
+                                  -Wfloat-conversion
+                                  -Winit-self
+                                  -Wundef
+                                  -Wcast-align
+                                  -Wformat=2
+                                  -Wold-style-cast
+                                  -Werror=switch)
+    # GNU specific options
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set(CMAKE_CXX_FLAGS
-            "${CMAKE_CXX_FLAGS} -Wlogical-op -Wnull-dereference -Wduplicated-cond -Wrestrict -Wduplicated-branches -Wsuggest-override"
-        )
+        target_compile_options(smash_objlib
+                               PUBLIC -Wlogical-op
+                                      -Wnull-dereference
+                                      -Wduplicated-cond
+                                      -Wrestrict
+                                      -Wduplicated-branches
+                                      -Wsuggest-override)
         # Needed for workaround about C++17 compatibility (bug in some GNU versions)
-        add_compile_definitions(GCC_COMPILER)
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(CMAKE_CXX_FLAGS
-            "${CMAKE_CXX_FLAGS} -Wno-missing-braces -Winconsistent-missing-override")
-        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "14")
-            # Use of contracted mathematical expression like FMA (if the hardware supports them) are
-            # controlled by a flag whose default unfortunately varies among compilers and versions
-            # thereof. Since clang-14 changed the default from "off" to "on", we set here the value
-            # to "on" also for older versions. GNU default is "fast", but this seems to be similar
-            # to clang's "on" (which fuses in the same statement) than to clang's "fast" (which
-            # fuses across statements). Here we simply try to have the same behaviour across the
-            # supported compilers.
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffp-contract=on")
+        target_compile_definitions(smash_objlib PUBLIC GCC_COMPILER)
+    else()
+        # LLVM specific options
+        target_compile_options(smash_objlib PUBLIC -Wno-missing-braces
+                                                   -Winconsistent-missing-override)
+        # Use of contracted mathematical expression like FMA (if the hardware supports them) are
+        # controlled by a flag whose default unfortunately varies among compilers and versions
+        # thereof. Since clang-14 changed the default from "off" to "on", we set here the value to
+        # "on" also for older versions. GNU default is "fast", but this seems to be similar to
+        # clang's "on" (which fuses in the same statement) than to clang's "fast" (which fuses
+        # across statements). Here we simply try to have the same behaviour across the supported
+        # compilers.
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
+            target_compile_options(smash_objlib PUBLIC -ffp-contract=on)
         endif()
     endif()
-    # Enable warnings about deprecated C functions
-    option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C functions in SMASH."
-           OFF)
+    # Enable warnings about deprecated C functions by default.
+    option(DEPRECATE_C_FNS "Enable warnings about deprecated C functions in SMASH." OFF)
     if(DEPRECATE_C_FNS)
-        target_compile_definitions(smash_objlib PUBLIC "DONT_ASSERT_TEST")
-        target_compile_options(smash_objlib PUBLIC "-include" "smash/deprecate_c_functions.h")
+        target_compile_definitions(smash_objlib PUBLIC DONT_ASSERT_TEST)
+        target_compile_options(smash_objlib PUBLIC -include smash/deprecate_c_functions.h)
     endif()
 endif()
 
