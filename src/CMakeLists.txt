@@ -11,23 +11,26 @@ include(CheckLibraryExists)
 include(AddCompilerFlag)
 include(FindPkgConfig)
 
-# According to modern CMake mental model: Declare the target early, and then feed it sources, link
-# dependencies, and compile definitions incrementally. The "object library" target is used to
+# According to modern CMake mental model: Declare the targets early, and then feed it sources, link
+# dependencies, compile definitions, etc. incrementally. The "object library" target is used to
 # compile the sources only once see https://stackoverflow.com/a/29824424 and all its features will
 # be PUBLIC since this is a library to serve internally both the executable and the shared library
-# and all its properties must propagate. NOTE: shared libraries need PIC and this is already set for
-# all targets through CMAKE_POSITION_INDEPENDENT_CODE
+# and all its properties must propagate. Here we use the smash_api interface library to collect
+# everything that should be exposed to users of the shared library. NOTE: shared libraries need PIC
+# and this is already set for all targets through CMAKE_POSITION_INDEPENDENT_CODE
 add_library(smash_objlib OBJECT)
 add_executable(smash smash.cc $<TARGET_OBJECTS:smash_objlib>)
 add_library(smash_shared SHARED $<TARGET_OBJECTS:smash_objlib>)
+add_library(smash_api INTERFACE)
 
 # Both smash executable and shared library are linked privately to the object library because the
 # object is only an implementation detail and we do not want to expose it to clients, but also to
 # avoid that the dependency on the external libraries is propagated to users of the shared library,
 # which should not be aware of them (dependency on external library is introduced in the Config
-# file). The client definitions are re-exposed to users of the shared library when needed.
-target_link_libraries(smash PRIVATE smash_objlib)
-target_link_libraries(smash_shared PRIVATE smash_objlib)
+# file). What has to be propagated to clients belongs to smash_api interface target.
+target_link_libraries(smash_objlib PRIVATE smash_api)
+target_link_libraries(smash PRIVATE smash_objlib smash_api)
+target_link_libraries(smash_shared PRIVATE smash_objlib PUBLIC smash_api)
 
 # Call shared library smash (e.g. libsmash.so). Note that, since "the build-tree runtime path will
 # not be used for binaries in the install tree" (CMake documentation), we request here to set the
@@ -132,8 +135,7 @@ if(TRY_USE_ROOT)
         message(STATUS "Found ROOT: ${ROOT_INCLUDE_DIRS} (version ${ROOT_VERSION})")
         create_system_wrapper_target(ROOT_bundle ROOT::Core ROOT::RIO ROOT::Tree)
         target_link_libraries(smash_objlib PUBLIC ROOT_bundle)
-        target_compile_definitions(smash_objlib PUBLIC "SMASH_USE_ROOT")
-        target_compile_definitions(smash_shared PUBLIC "SMASH_USE_ROOT")
+        target_compile_definitions(smash_api INTERFACE "SMASH_USE_ROOT")
     else()
         message(STATUS "Suitable ROOT not found. Support disabled. "
                        "See README for more information.")
@@ -165,13 +167,11 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
         else()
             message(STATUS "HepMC3_treeroot output support enabled")
             list(APPEND HEPMC3_TARGETS HepMC3::rootIO)
-            target_compile_definitions(smash_objlib PUBLIC "SMASH_USE_HEPMC_ROOTIO")
-            target_compile_definitions(smash_shared PUBLIC "SMASH_USE_HEPMC_ROOTIO")
+            target_compile_definitions(smash_api INTERFACE "SMASH_USE_HEPMC_ROOTIO")
         endif()
         create_system_wrapper_target(HepMC3_bundle ${HEPMC3_TARGETS})
         target_link_libraries(smash_objlib PUBLIC HepMC3_bundle)
-        target_compile_definitions(smash_objlib PUBLIC "SMASH_USE_HEPMC")
-        target_compile_definitions(smash_shared PUBLIC "SMASH_USE_HEPMC")
+        target_compile_definitions(smash_api INTERFACE "SMASH_USE_HEPMC")
     else()
         message(STATUS "Suitable HepMC3 not found. Support disabled. "
                        "See README for more information.")
@@ -199,8 +199,7 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
                                 " Ensure to be using the provided CMake module to find it.\n")
         endif()
         target_link_libraries(smash_objlib PUBLIC Rivet::Rivet)
-        target_compile_definitions(smash_objlib PUBLIC "SMASH_USE_RIVET")
-        target_compile_definitions(smash_shared PUBLIC "SMASH_USE_RIVET")
+        target_compile_definitions(smash_api INTERFACE "SMASH_USE_RIVET")
     else()
         message(STATUS "Suitable Rivet not found. Support disabled. "
                        "See README for more information.")
