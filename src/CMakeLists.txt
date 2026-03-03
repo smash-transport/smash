@@ -11,6 +11,22 @@ include(CheckLibraryExists)
 include(AddCompilerFlag)
 include(FindPkgConfig)
 
+# According to modern CMake mental model: Declare the target early, and then feed it sources, link
+# dependencies, and compile definitions incrementally. The "object library" target is used to
+# compile the sources only once see https://stackoverflow.com/a/29824424 and all its features will
+# be PUBLIC since this is a library to serve internally both the executable and the shared library
+# and all its properties must propagate. NOTE: shared libraries need PIC and this is already set for
+# all targets through CMAKE_POSITION_INDEPENDENT_CODE
+add_library(smash_objlib OBJECT)
+add_executable(smash smash.cc $<TARGET_OBJECTS:smash_objlib>)
+add_library(smash_shared SHARED $<TARGET_OBJECTS:smash_objlib>)
+
+# Both smash executable and shared library are linked privately to the object library because the
+# object is only an implementation detail and we do not want to expose it to clients. The client
+# definitions are re-exposed to users of the shared library when needed.
+target_link_libraries(smash PRIVATE smash_objlib)
+target_link_libraries(smash_shared PRIVATE smash_objlib)
+
 # Prepare list variables to collect libraries, compiler definitions for internal usage in SMASH,
 # compiler definitions for users of SMASH, internal compile options and so on
 set(SMASH_LIBRARIES
@@ -51,7 +67,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
         endif()
     endif()
     # Enable warnings about deprecated C functions
-    option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C funtions in SMASH."
+    option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C functions in SMASH."
            OFF)
     if(DEPRECATE_C_FNS)
         list(APPEND SMASH_INTERNAL_DEFINITIONS "DONT_ASSERT_TEST")
@@ -218,91 +234,91 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 # list the source files
-set(smash_src
-    action.cc
-    boxmodus.cc
-    binaryoutput.cc
-    bremsstrahlungaction.cc
-    chemicalpotential.cc
-    clebschgordan.cc
-    clebschgordan_lookup.cc
-    collidermodus.cc
-    configuration.cc
-    crosssections.cc
-    crosssectionsphoton.cc
-    customnucleus.cc
-    decayaction.cc
-    decayactionsfinder.cc
-    decaymodes.cc
-    decaytype.cc
-    deformednucleus.cc
-    alphaclusterednucleus.cc
-    density.cc
-    decayactiondilepton.cc
-    decayactionsfinderdilepton.cc
-    dynamicfluidfinder.cc
-    distributions.cc
-    energymomentumtensor.cc
-    experiment.cc
-    fields.cc
-    file.cc
-    filelock.cc
-    fluidizationaction.cc
-    fourvector.cc
-    fpenvironment.cc
-    grandcan_thermalizer.cc
-    grid.cc
-    hadgas_eos.cc
-    hypersurfacecrossingfinder.cc
-    icoutput.cc
-    inputfunctions.cc
-    interpolation.cc
-    interpolation2D.cc
-    isoparticletype.cc
-    library.cc
-    listmodus.cc
-    logging.cc
-    nucleus.cc
-    oscaroutput.cc
-    pauliblocking.cc
-    parametrizations.cc
-    particledata.cc
-    particles.cc
-    particletype.cc
-    pdgcode.cc
-    potentials.cc
-    potential_globals.cc
-    processbranch.cc
-    stringprocess.cc
-    propagation.cc
-    quantumnumbers.cc
-    quantumsampling.cc
-    random.cc
-    scatteraction.cc
-    scatteractionmulti.cc
-    scatteractionphoton.cc
-    scatteractionsfinder.cc
-    setup_particles_decaymodes.cc
-    sha256.cc
-    spheremodus.cc
-    stringfunctions.cc
-    stringify.cc
-    tabulation.cc
-    thermalizationaction.cc
-    thermodynamiclatticeoutput.cc
-    thermodynamicoutput.cc
-    threevector.cc
-    vtkoutput.cc
-    wallcrossingaction.cc)
+target_sources(smash_objlib
+               PRIVATE action.cc
+                       boxmodus.cc
+                       binaryoutput.cc
+                       bremsstrahlungaction.cc
+                       chemicalpotential.cc
+                       clebschgordan.cc
+                       clebschgordan_lookup.cc
+                       collidermodus.cc
+                       configuration.cc
+                       crosssections.cc
+                       crosssectionsphoton.cc
+                       customnucleus.cc
+                       decayaction.cc
+                       decayactionsfinder.cc
+                       decaymodes.cc
+                       decaytype.cc
+                       deformednucleus.cc
+                       alphaclusterednucleus.cc
+                       density.cc
+                       decayactiondilepton.cc
+                       decayactionsfinderdilepton.cc
+                       dynamicfluidfinder.cc
+                       distributions.cc
+                       energymomentumtensor.cc
+                       experiment.cc
+                       fields.cc
+                       file.cc
+                       filelock.cc
+                       fluidizationaction.cc
+                       fourvector.cc
+                       fpenvironment.cc
+                       grandcan_thermalizer.cc
+                       grid.cc
+                       hadgas_eos.cc
+                       hypersurfacecrossingfinder.cc
+                       icoutput.cc
+                       inputfunctions.cc
+                       interpolation.cc
+                       interpolation2D.cc
+                       isoparticletype.cc
+                       library.cc
+                       listmodus.cc
+                       logging.cc
+                       nucleus.cc
+                       oscaroutput.cc
+                       pauliblocking.cc
+                       parametrizations.cc
+                       particledata.cc
+                       particles.cc
+                       particletype.cc
+                       pdgcode.cc
+                       potentials.cc
+                       potential_globals.cc
+                       processbranch.cc
+                       stringprocess.cc
+                       propagation.cc
+                       quantumnumbers.cc
+                       quantumsampling.cc
+                       random.cc
+                       scatteraction.cc
+                       scatteractionmulti.cc
+                       scatteractionphoton.cc
+                       scatteractionsfinder.cc
+                       setup_particles_decaymodes.cc
+                       sha256.cc
+                       spheremodus.cc
+                       stringfunctions.cc
+                       stringify.cc
+                       tabulation.cc
+                       thermalizationaction.cc
+                       thermodynamiclatticeoutput.cc
+                       thermodynamicoutput.cc
+                       threevector.cc
+                       vtkoutput.cc
+                       wallcrossingaction.cc)
 
 if(TRY_USE_ROOT AND ROOT_FOUND)
-    set(smash_src ${smash_src} rootoutput.cc)
+    target_sources(smash_objlib PRIVATE rootoutput.cc)
 endif()
 
 if(TRY_USE_HEPMC AND HepMC3_FOUND)
-    set(smash_src ${smash_src} hepmcoutput.cc hepmcinterface.cc)
+    target_sources(smash_objlib PRIVATE hepmcoutput.cc hepmcinterface.cc)
     if(TRY_USE_RIVET AND Rivet_FOUND)
-        set(smash_src ${smash_src} rivetoutput.cc)
+        target_sources(smash_objlib PRIVATE rivetoutput.cc)
     endif()
 endif()
 
@@ -312,22 +328,16 @@ if(ENABLE_NANOBENCHMARKING)
     if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^arm")
         message(WARNING "Nanobenchmarking is not supported on ARM processors and it was disabled.")
     else()
-        set(smash_src ${smash_src} tsc.cc)
+        target_sources(smash_objlib PRIVATE tsc.cc)
         list(APPEND SMASH_INTERNAL_DEFINITIONS "USE_NANOBENCHMARKING_CODE")
     endif()
 endif()
 
-# this is the "object library" target: compiles the sources only once see
-# https://stackoverflow.com/a/29824424 NOTE: shared libraries need PIC and this is already set for
-# all targets through CMAKE_POSITION_INDEPENDENT_CODE
-add_library(smash_objlib OBJECT ${smash_src})
+# Complete smash_objlib
 target_compile_definitions(smash_objlib PUBLIC ${SMASH_CLIENT_DEFINITIONS}
                                                ${SMASH_INTERNAL_DEFINITIONS})
 target_compile_options(smash_objlib PUBLIC ${SMASH_PRIVATE_COMPILE_OPTIONS})
 target_link_libraries(smash_objlib PUBLIC ${SMASH_LIBRARIES})
-
-add_executable(smash smash.cc $<TARGET_OBJECTS:smash_objlib>)
-target_link_libraries(smash PRIVATE smash_objlib)
 
 # configure a header file to pass some of the CMake settings to the source code
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/smash/config.h.in"
@@ -363,8 +373,6 @@ set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated
 # privately to the object library to avoid that the dependency on the external libraries is
 # propagated to users of the shared library, which should not be aware of them. The client
 # definitions are re-exposed to users of the shared library since they are needed to use it.
-add_library(smash_shared SHARED $<TARGET_OBJECTS:smash_objlib>)
-target_link_libraries(smash_shared PRIVATE smash_objlib)
 target_compile_definitions(smash_shared PUBLIC ${SMASH_CLIENT_DEFINITIONS})
 set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
                                               INSTALL_RPATH_USE_LINK_PATH TRUE)
