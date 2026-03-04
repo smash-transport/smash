@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2018-2025
+ *    Copyright (c) 2018-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -95,6 +95,29 @@ static void append_list(CollisionBranchList& main_list,
     proc->set_weight(proc->weight() * weight);
     main_list.emplace_back(std::move(proc));
   }
+}
+
+/**
+ * Helper function:
+ * Throw if elastic cross section is negative.
+ *
+ * \param[in] sqrts center of mass energy of incoming particles
+ * \param[in] sig_el elastic cross section
+ * \param[in] data_a incoming particle a
+ * \param[in] data_b incoming particle b
+ */
+[[noreturn]] static void throw_negative_elastic_xsec(
+    const double sqrts, const double sig_el, const ParticleData& data_a,
+    const ParticleData& data_b) {
+  std::stringstream ss{};
+  const ParticleType& a = data_a.type();
+  const ParticleType& b = data_b.type();
+  const PdgCode& pdg_a = a.pdgcode();
+  const PdgCode& pdg_b = b.pdgcode();
+  ss << "problem in CrossSections::elastic: a=" << a.name() << " b=" << b.name()
+     << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
+     << " sigma=" << sig_el << " s=" << sqrts * sqrts;
+  throw std::runtime_error(ss.str());
 }
 
 /**
@@ -450,13 +473,8 @@ double CrossSections::nn_el() const {
   if (sig_el > 0.) {
     return sig_el;
   } else {
-    std::stringstream ss;
-    const auto name_a = incoming_particles_[0].type().name();
-    const auto name_b = incoming_particles_[1].type().name();
-    ss << "problem in CrossSections::elastic: a=" << name_a << " b=" << name_b
-       << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
-       << " sigma=" << sig_el << " s=" << s;
-    throw std::runtime_error(ss.str());
+    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
+                                incoming_particles_[1]);
   }
 }
 
@@ -533,13 +551,8 @@ double CrossSections::npi_el() const {
   if (sig_el > 0) {
     return sig_el;
   } else {
-    std::stringstream ss;
-    const auto name_a = incoming_particles_[0].type().name();
-    const auto name_b = incoming_particles_[1].type().name();
-    ss << "problem in CrossSections::elastic: a=" << name_a << " b=" << name_b
-       << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
-       << " sigma=" << sig_el << " s=" << s;
-    throw std::runtime_error(ss.str());
+    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
+                                incoming_particles_[1]);
   }
 }
 
@@ -858,13 +871,8 @@ double CrossSections::nk_el() const {
   if (sig_el > 0) {
     return sig_el;
   } else {
-    std::stringstream ss;
-    const auto name_a = incoming_particles_[0].type().name();
-    const auto name_b = incoming_particles_[1].type().name();
-    ss << "problem in CrossSections::elastic: a=" << name_a << " b=" << name_b
-       << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
-       << " sigma=" << sig_el << " s=" << s;
-    throw std::runtime_error(ss.str());
+    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
+                                incoming_particles_[1]);
   }
 }
 
