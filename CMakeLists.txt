@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2012-2025
+#    Copyright (c) 2012-2026
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -56,6 +56,23 @@ if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
     endif()
 endif()
 
+# Fail early if a too old officially supported compiler is used
+if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
+    unset(MINIMUM_CXX_COMPILER_VERSION)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(MINIMUM_CXX_COMPILER_VERSION "8")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(MINIMUM_CXX_COMPILER_VERSION "7")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+        set(MINIMUM_CXX_COMPILER_VERSION "11")
+    endif()
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS MINIMUM_CXX_COMPILER_VERSION)
+        message(FATAL_ERROR " At least version ${MINIMUM_CXX_COMPILER_VERSION}"
+                            " of ${CMAKE_CXX_COMPILER_ID} compiler is required.\n"
+                            " Version in use is ${CMAKE_CXX_COMPILER_VERSION}")
+    endif()
+endif()
+
 # Before starting, tell cmake where to find our modules and include utilities
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Utilities)
@@ -83,23 +100,6 @@ if(NOT CMAKE_CXX_LINK_PIE_SUPPORTED)
                       "PIE link options will not be passed to linker.")
 endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# Fail early if a too old officially supported compiler is used
-if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
-    unset(MINIMUM_CXX_COMPILER_VERSION)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set(MINIMUM_CXX_COMPILER_VERSION "8")
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        set(MINIMUM_CXX_COMPILER_VERSION "7")
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-        set(MINIMUM_CXX_COMPILER_VERSION "11")
-    endif()
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${MINIMUM_CXX_COMPILER_VERSION})
-        message(FATAL_ERROR " At least version ${MINIMUM_CXX_COMPILER_VERSION}"
-                            " of ${CMAKE_CXX_COMPILER_ID} compiler is required.\n"
-                            " Version in use is ${CMAKE_CXX_COMPILER_VERSION}")
-    endif()
-endif()
 
 # Request a given C++ standard
 set(CXX_SMASH_STANDARD "17")
