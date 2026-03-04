@@ -154,19 +154,33 @@ else()
                                INTERFACE LITTLE_ENDIAN_ARCHITECTURE)
 endif()
 
-# Let Clang users on Linux be able to use libc++
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    option(CLANG_USE_LIBC++
-           "If turned on clang will explicitly be asked to use libc++ (otherwise it uses the system default)"
-           OFF)
-    if(CLANG_USE_LIBC++)
-        message(STATUS "Prepare compilation in order to use LLVM libc++ implementation")
-        set(MESSAGE_QUIET ON)
-        add_compiler_flag(-stdlib=libc++ CXX_FLAGS CMAKE_CXX_FLAGS CXX_RESULT _use_libcxx)
-        unset(MESSAGE_QUIET)
+# Let Clang users on Linux be able to use libc++. Note that on Apple machines libc++ is the default
+# and hence this is not needed. Warn the user, if they try to enable this option.
+option(CLANG_USE_LIBC++
+       "If turned on clang will explicitly be asked to use libc++ (otherwise it uses the system default)"
+       OFF)
+if(CLANG_USE_LIBC++)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        message(STATUS "Using LLVM libc++ implementation for ${CMAKE_CXX_COMPILER_ID} compiler")
+        target_add_compiler_flag_if_supported(TARGETS smash_project_build_requirements
+                                              LANGUAGE CXX
+                                              FLAGS -stdlib=libc++
+                                              SCOPE INTERFACE RESULT _libcxx_supported)
+        list(GET _libcxx_supported 0 _use_libcxx)
         if(_use_libcxx AND "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-            link_libraries(c++abi supc++)
+            message(STATUS "Linking libc++ support libraries for Linux Clang")
+            target_link_libraries(smash_project_build_requirements INTERFACE c++abi supc++)
         endif()
+    else()
+        set(_message_text
+            " CLANG_USE_LIBC++ option set to ON, but the compiler is not Clang; ignoring it.\n")
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+            string(APPEND
+                   _message_text
+                   " Note that AppleClang on macOS uses libc++ as the default C++ standard library,\n"
+                   " so this option is not needed there.\n")
+        endif()
+        message(WARNING " \n" "${_message_text}")
     endif()
 endif()
 
