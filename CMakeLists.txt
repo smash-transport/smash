@@ -105,19 +105,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # cache makes it visible to IDEs or tools consuming the build.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json" FORCE)
 
-# Define two interface libraries to hold usage and build requirements of the project. Build
-# requirements are those internal to SMASH e.g. compiler flags that we want to add to all targets,
-# while usage requirements are all properties which are also needed by SMASH clients.
-add_library(smash_project_build_requirements INTERFACE)
-add_library(smash_project_usage_requirements INTERFACE)
-
-# Request a given C++ standard. Note that CMake will error if the compiler does not support the
-# requested standard, without any need to set the global CMAKE_CXX_STANDARD_REQUIRED variable.
-target_compile_features(smash_project_usage_requirements INTERFACE cxx_std_17)
-set_property(TARGET smash_project_usage_requirements PROPERTY CXX_EXTENSIONS OFF)
-
 # Set a default value for CMAKE_BUILD_TYPE, otherwise we get something which is none of the options.
-if(NOT DEFINED CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
+if(NOT DEFINED CMAKE_BUILD_TYPE OR NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE
         Release
         CACHE STRING
@@ -131,6 +120,17 @@ elseif(NOT CMAKE_BUILD_TYPE MATCHES "^(Debug|Release|RelWithDebInfo|MinSizeRel|P
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(ATTENTION "Consider adding '-O0' compiler flag for best debug information.")
 endif()
+
+# Define two interface libraries to hold usage and build requirements of the project. Build
+# requirements are those internal to SMASH e.g. compiler flags that we want to add to all targets,
+# while usage requirements are all properties which are also needed by SMASH clients.
+add_library(smash_project_build_requirements INTERFACE)
+add_library(smash_project_usage_requirements INTERFACE)
+
+# Request a given C++ standard. Note that CMake will error if the compiler does not support the
+# requested standard, without any need to set the global CMAKE_CXX_STANDARD_REQUIRED variable.
+target_compile_features(smash_project_usage_requirements INTERFACE cxx_std_17)
+set_property(TARGET smash_project_usage_requirements PROPERTY CXX_EXTENSIONS OFF)
 
 # Retrieve architecture information about endianness
 include(TestBigEndian)
