@@ -54,6 +54,7 @@ endfunction()
 # target_add_compiler_flag_if_supported(TARGETS   <target> [<target> ...]   # One or more targets
 #                                       LANGUAGE <C|CXX>                    # Language of the flags
 #                                       FLAGS    <flag> [<flag> ...]        # Flags to test and add
+#                                       [RESULT <variable>]                 # Variable filled if specified
 #                                       [COMPILER <AUTO|MIC>]               # Default AUTO
 #                                       [SCOPE <PRIVATE|INTERFACE|PUBLIC>]) # Default PRIVATE
 # For each target and each flag:
@@ -61,12 +62,16 @@ endfunction()
 # 2. Else, check if the compiler supports the flag using check_compiler_flag_is_supported()
 # 3. If supported, add the flag to the target with target_compile_options()
 # 4. SCOPE is applied to all targets uniformly
+# 5. If RESULT is specified, this variable is set to a list of TRUE/FALSE values indicating whether
+#    the flag was added or not to each target. The length of this list is the number of targets passed
+#    multiplied by the number of flags passed. The order is the same as the order of targets and flags
+#    passed. A flag skipped because already present is considered as added, hence TRUE in the result list.
 # ~~~
 include("${CMAKE_CURRENT_LIST_DIR}/CheckCompilerFlag.cmake")
 function(target_add_compiler_flag_if_supported)
     cmake_parse_arguments(arg_of
                           ""
-                          "LANGUAGE;COMPILER;SCOPE"
+                          "LANGUAGE;COMPILER;SCOPE;RESULT"
                           "TARGETS;FLAGS"
                           ${ARGN})
 
@@ -105,6 +110,10 @@ function(target_add_compiler_flag_if_supported)
         set(_compiler AUTO)
     endif()
 
+    if(arg_of_RESULT)
+        set(_result_list "")
+    endif()
+
     foreach(_target IN LISTS arg_of_TARGETS)
         # Collect existing target compile options and interface compile options (if needed) to check
         # if the flag is already present and avoid adding it twice. Note that possibly existing
@@ -127,6 +136,9 @@ function(target_add_compiler_flag_if_supported)
             if(_found_index GREATER -1)
                 message(ATTENTION "The target '${_target}' already has the flag '${_flag}',"
                                   " skipping it.")
+                if(arg_of_RESULT)
+                    list(APPEND _result_list TRUE) # Skipped flags considered “added”
+                endif()
                 continue()
             endif()
             set(MESSAGE_QUIET ON)
@@ -136,6 +148,9 @@ function(target_add_compiler_flag_if_supported)
                                              COMPILER ${_compiler})
             unset(MESSAGE_QUIET)
             if(NOT _flag_supported)
+                if(arg_of_RESULT)
+                    list(APPEND _result_list FALSE)
+                endif()
                 continue()
             else()
                 # Note that the generator expression is expanded as late as possible and the
@@ -144,9 +159,17 @@ function(target_add_compiler_flag_if_supported)
                 # but for mixed one it would be wrong not do do so.
                 target_compile_options(${_target} ${_scope}
                                        $<$<COMPILE_LANGUAGE:${arg_of_LANGUAGE}>:${_flag}>)
+                if(arg_of_RESULT)
+                    list(APPEND _result_list TRUE)
+                endif()
             endif()
         endforeach()
     endforeach()
+
+    # If RESULT variable is specified, set it in the calling scope
+    if(arg_of_RESULT)
+        set(${arg_of_RESULT} "${_result_list}" PARENT_SCOPE)
+    endif()
 endfunction()
 
 # Creates an INTERFACE target that links to the given existing targets and re-exposes all of their
