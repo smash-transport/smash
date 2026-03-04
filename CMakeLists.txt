@@ -92,12 +92,6 @@ string(TOLOWER "${SMASH_VERSION}" SMASH_INSTALLATION_SUBFOLDER)
 set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${SMASH_INSTALLATION_SUBFOLDER}"
     CACHE PATH "Install prefix for the present SMASH version" FORCE)
 
-# Define two interface libraries to hold usage and build requirements of the project. Build
-# requirements are those internal to SMASH e.g. compiler flags that we want to add to all targets,
-# while usage requirements are all properties which are also needed by SMASH clients.
-add_library(smash_project_build_requirements INTERFACE)
-add_library(smash_project_usage_requirements INTERFACE)
-
 # SMASH will be shipped as shared library and hence we want to build position independent code
 include(CheckPIESupported)
 check_pie_supported(LANGUAGES CXX)
@@ -107,13 +101,16 @@ if(NOT CMAKE_CXX_LINK_PIE_SUPPORTED)
 endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Request a given C++ standard
-set(CXX_SMASH_STANDARD "17")
-if(NOT "${CMAKE_CXX_STANDARD}")
-    set(CMAKE_CXX_STANDARD ${CXX_SMASH_STANDARD})
-endif()
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+# Define two interface libraries to hold usage and build requirements of the project. Build
+# requirements are those internal to SMASH e.g. compiler flags that we want to add to all targets,
+# while usage requirements are all properties which are also needed by SMASH clients.
+add_library(smash_project_build_requirements INTERFACE)
+add_library(smash_project_usage_requirements INTERFACE)
+
+# Request a given C++ standard. Note that CMake will error if the compiler does not support the
+# requested standard, without any need to set the global CMAKE_CXX_STANDARD_REQUIRED variable.
+target_compile_features(smash_project_usage_requirements INTERFACE cxx_std_17)
+set_property(TARGET smash_project_usage_requirements PROPERTY CXX_EXTENSIONS OFF)
 
 # needed for clang-tidy
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
