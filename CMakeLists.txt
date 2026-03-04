@@ -132,10 +132,9 @@ add_library(smash_project_usage_requirements INTERFACE)
 target_compile_features(smash_project_usage_requirements INTERFACE cxx_std_17)
 set_property(TARGET smash_project_usage_requirements PROPERTY CXX_EXTENSIONS OFF)
 
-# Retrieve architecture information about endianness
-include(TestBigEndian)
-test_big_endian(IS_BIG_ENDIAN)
-if(IS_BIG_ENDIAN)
+# Retrieve architecture information about endianness. Note that this compile definition is ATM a
+# usage requirement as the PDG code header file relies on it.
+if(CMAKE_CXX_BYTE_ORDER STREQUAL "BIG_ENDIAN")
     message(STATUS "Big endian architecture detected.")
     option(FORCE_USE_ON_BIG_ENDIAN "Force cmake to setup and compile on big endian machine." OFF)
     if(NOT FORCE_USE_ON_BIG_ENDIAN)
@@ -148,10 +147,11 @@ if(IS_BIG_ENDIAN)
                             " Alternatively you can use the provided Docker containers (see README).\n"
         )
     endif()
-    add_definitions("-DBIG_ENDIAN_ARCHITECTURE")
+    target_compile_definitions(smash_project_usage_requirements INTERFACE BIG_ENDIAN_ARCHITECTURE)
 else()
     message(STATUS "Little endian architecture detected.")
-    add_definitions("-DLITTLE_ENDIAN_ARCHITECTURE")
+    target_compile_definitions(smash_project_usage_requirements
+                               INTERFACE LITTLE_ENDIAN_ARCHITECTURE)
 endif()
 
 # Let Clang users on Linux be able to use libc++
