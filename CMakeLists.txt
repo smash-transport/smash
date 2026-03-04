@@ -92,6 +92,12 @@ string(TOLOWER "${SMASH_VERSION}" SMASH_INSTALLATION_SUBFOLDER)
 set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/${SMASH_INSTALLATION_SUBFOLDER}"
     CACHE PATH "Install prefix for the present SMASH version" FORCE)
 
+# Define two interface libraries to hold usage and build requirements of the project. Build
+# requirements are those internal to SMASH e.g. compiler flags that we want to add to all targets,
+# while usage requirements are all properties which are also needed by SMASH clients.
+add_library(smash_project_build_requirements INTERFACE)
+add_library(smash_project_usage_requirements INTERFACE)
+
 # SMASH will be shipped as shared library and hence we want to build position independent code
 include(CheckPIESupported)
 check_pie_supported(LANGUAGES CXX)

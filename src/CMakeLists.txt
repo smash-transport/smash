@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2012-2025
+#    Copyright (c) 2012-2026
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -28,7 +28,8 @@ add_library(smash_api INTERFACE)
 # avoid that the dependency on the external libraries is propagated to users of the shared library,
 # which should not be aware of them (dependency on external library is introduced in the Config
 # file). What has to be propagated to clients belongs to smash_api interface target.
-target_link_libraries(smash_objlib PRIVATE smash_api)
+target_link_libraries(smash_objlib PUBLIC smash_project_build_requirements smash_api)
+target_link_libraries(smash_api INTERFACE smash_project_usage_requirements)
 target_link_libraries(smash PRIVATE smash_objlib smash_api)
 target_link_libraries(smash_shared PRIVATE smash_objlib PUBLIC smash_api)
 
