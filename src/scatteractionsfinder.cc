@@ -1038,8 +1038,8 @@ void ScatterActionsFinder::dump_cross_sections(
     }
   }
   // Get rid of cross sections that are zero.
-  // (This only happens if their is a resonance in the final state that cannot
-  // decay with our simplified assumptions.)
+  // This only happens if there is a resonance in the final state that cannot
+  // decay with our simplified assumptions.
   for (auto it = begin(xs_dump); it != end(xs_dump);) {
     // Sum cross section over all energies.
     const xs_saver& xs = (*it).second;
