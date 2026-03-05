@@ -276,10 +276,11 @@ else()
 endif()
 mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LINKER_FLAGS_PROFILING)
 
-# have binary in the build directory
+# By default, produce binary in the build directory. Note that the target property
+# RUNTIME_OUTPUT_DIRECTORY supersedes this variable for a target if it is set.
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
-# enable standard CTest
+# Enable standard CTest
 include(CTest)
 
 # Add subdirectories where the code is. Note that SMASH requirements are propagated through targets
