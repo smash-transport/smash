@@ -185,20 +185,53 @@ if(CLANG_USE_LIBC++)
     endif()
 endif()
 
-# add 3rd-party libraries (before setting compiler flags etc)
-add_subdirectory(3rdparty)
-
-# Set up compile options passed to all targets. From CMake documentation: "The flags in
-# CMAKE_<LANG>_FLAGS will be passed to the compiler before those in the per-configuration
-# CMAKE_<LANG>_FLAGS_<CONFIG> variant, and before flags added by the add_compile_options() or
-# target_compile_options() commands."
-add_compiler_flags_if_supported("-fno-math-errno" # Tell the compiler to ignore errno setting of
-                                                  # math functions. This can help the compiler
-                                                  # considerably in optimizing mathematical
-                                                  # expressions.
-                                "-march=native" # The '-march=native' flag is not supported e.g. on
-                                                # Apple M1 machines
-                                CXX_FLAGS CMAKE_CXX_FLAGS)
+# Set up compile options that are considered build requirements for SMASH. These flags are attached
+# to smash_project_build_requirements INTERFACE, so they propagate to all targets that link to them.
+# Since CMake applies flags in this order (as documented):
+# ~~~
+# (1) CMAKE_<LANG>_FLAGS
+# (2) CMAKE_<LANG>_FLAGS_<CONFIG>
+# (3) add_compile_options()
+# (4) target_compile_options()
+# ~~~
+# we want to provide a way for users to change the architecture tuning, which is by default set to
+# native. Given the order above, any attempt to set architecture tuning via CMAKE_CXX_FLAGS will be
+# overridden by the value set here and hence we want to warn users if they try to do so. Furthermore
+# we want to provide a cache variable for users to properly set the architecture tuning, which is
+# then passed to the compiler via target_compile_options().
+set(SMASH_ARCH_FLAG
+    "native"
+    CACHE STRING
+          "Value passed to -march compiler flag (e.g. native, x86-64). Empty string disables architecture tuning."
+)
+# Warn the user if they try to set architecture tuning via CMAKE_CXX_FLAGS, which is not the correct
+# way and will be overridden by SMASH_ARCH_FLAG.
+if(CMAKE_CXX_FLAGS MATCHES "-march")
+    message(WARNING " \n"
+                    " Detected '-march=' inside CMAKE_CXX_FLAGS. SMASH controls\n"
+                    " architecture tuning via SMASH_ARCH_FLAG. This flag provided\n"
+                    " via CMAKE_CXX_FLAGS will be overridden. Please use:\n"
+                    "   -DSMASH_ARCH_FLAG=<value>\n"
+                    " instead of modifying CMAKE_CXX_FLAGS.")
+endif()
+# Finally, add the architecture tuning flag if supported by the compiler and inform the user about
+# the current value of architecture tuning and how to change it.
+set(_architecture_tuning_message "Architecture tuning controlled by SMASH_ARCH_FLAG (current:")
+if(SMASH_ARCH_FLAG)
+    message(ATTENTION "${_architecture_tuning_message} -march=${SMASH_ARCH_FLAG})")
+    target_add_compiler_flag_if_supported(TARGETS smash_project_build_requirements
+                                          LANGUAGE CXX
+                                          FLAGS -march=${SMASH_ARCH_FLAG}
+                                          SCOPE INTERFACE)
+else()
+    message(STATUS "${_architecture_tuning_message} disabled)")
+endif()
+# Tell the compiler to ignore errno setting of math functions. This can help the compiler
+# considerably in optimizing mathematical expressions.
+target_add_compiler_flag_if_supported(TARGETS smash_project_build_requirements
+                                      LANGUAGE CXX
+                                      FLAGS -fno-math-errno
+                                      SCOPE INTERFACE)
 
 # CMake provides 4 build configurations (Debug, Release, RelWithDebInfo, MinSizeRel) together with
 # sensible values for the corresponding CMAKE_(C|CXX)_FLAGS_<CONFIG> variables (cached and marked as
@@ -249,7 +282,12 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 # enable standard CTest
 include(CTest)
 
-# subdirectories where the code is
+# Add subdirectories where the code is. Note that SMASH requirements are propagated through targets
+# and no global change should have occurred above. Therefore, adding the vendored third-party
+# libraries here should not cause any issue, since they will not be affected by SMASH specific build
+# or usage requirements. On the contrary, we can use there the SMASH_ARCH_FLAG variable to set the
+# architecture tuning for the compilation of the vendored libraries as well, which is necessary.
+add_subdirectory(3rdparty)
 add_subdirectory(src)
 add_subdirectory(doc)
 

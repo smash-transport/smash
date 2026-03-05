@@ -67,8 +67,8 @@ CXX=clang++ ./configure --cxx-common='-std=c++17 -stdlib=libc++ -march=native -O
 1. The `wget` command is not directly available on OSX.
    Although this can be easily installed e.g. via `brew install wget`, to download Pythia it is enough to use the `curl` command (see example below).
 
-2. On recent Apple machines provided with M1 (ARM) processors, no `gcc` compiler is available and `clang` is to be used.
-   The compiler flag `-march=native` is not defined and has to be dropped.
+2. On Apple machines it can be that the compiler flag `-march=native` is not supported by the compiler (e.g. Appleclang 13.0 compiler on M1 machines).
+   In those cases that flag has to be dropped.
 
 The commands to build Pythia on a M1 Apple machine become:
 ```console
@@ -255,10 +255,9 @@ There are various possible ways to fix this issue:
 2. Only run SMASH on platforms similar to the one where it was compiled.
    When running SMASH on a computing cluster, this may require restricting the jobs to the correct platform.
 3. Find out for which platform you need to compile SMASH and specify it setting up the compilation.
-   For this purpose, use CMake command line options, as e.g. `-DCMAKE_CXX_FLAGS="-march=x86-64" -DCMAKE_C_FLAGS="-march=x86-64"`.
-4. As last resort, compile SMASH without machine-specific optimizations by removing `-march=native` from `CMakeLists.txt`.
-   This is the easiest solution, however it results in a less efficient executable.
-   Note that the same applies to any other libraries you compile with `-march=native`, for instance Pythia.
+   For this purpose, set CMake `SMASH_ARCH_FLAG` variable via the command line, as e.g. passing `-DSMASH_ARCH_FLAG="x86-64"`.
+   Note that the same tuning flag must be applied to any other libraries you compiled, for instance Pythia.
+   For instance, if you set up SMASH passing `-DSMASH_ARCH_FLAG="x86-64"` to CMake, you should also build Pythia with `-march=x86-64`.
 
 <a id="fuse-math-expr"></a>
 
