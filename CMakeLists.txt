@@ -202,28 +202,44 @@ add_compiler_flags_if_supported("-fno-math-errno" # Tell the compiler to ignore 
 
 # CMake provides 4 build configurations (Debug, Release, RelWithDebInfo, MinSizeRel) together with
 # sensible values for the corresponding CMAKE_(C|CXX)_FLAGS_<CONFIG> variables (cached and marked as
-# advanced). Here we need to set those for Profiling build, only. Since the relevant variables are
-# created and cached by CMake, we need to force their value in the cache if their value is false,
-# e.g. empty.
+# advanced). Here we need to set those for Profiling build, only. We only set a default if the cache
+# variable is not defined, allowing users to override it (even with an empty value). However, we
+# warn users if they set an empty value, since that might lead to non-instrumented builds which are
+# not useful for profiling.
 #
 # See https://cristianadam.eu/20190223/modifying-the-default-cmake-build-types/ for more infos.
-if(NOT CMAKE_CXX_FLAGS_PROFILING)
-    add_compiler_flags_if_supported("-O3" "-DNDEBUG" "-pg" CXX_FLAGS SUPPORTED_CXX_FLAGS_PROFILING)
-endif()
-if(NOT CMAKE_C_FLAGS_PROFILING)
-    add_compiler_flags_if_supported("-O3" "-DNDEBUG" "-pg" C_FLAGS SUPPORTED_C_FLAGS_PROFILING)
-endif()
-if(NOT CMAKE_CXX_FLAGS_PROFILING)
-    set(CMAKE_CXX_FLAGS_PROFILING "${SUPPORTED_CXX_FLAGS_PROFILING}"
-        CACHE STRING "Flags used by the C++ compiler during profile builds." FORCE)
-endif()
-if(NOT CMAKE_C_FLAGS_PROFILING)
-    set(CMAKE_C_FLAGS_PROFILING "${SUPPORTED_C_FLAGS_PROFILING}"
-        CACHE STRING "Flags used by the C compiler during profile builds." FORCE)
-endif()
-if(NOT CMAKE_EXE_LINKER_FLAGS_PROFILING)
-    set(CMAKE_EXE_LINKER_FLAGS_PROFILING "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -pg"
-        CACHE STRING "Flags used by the linker during profile builds." FORCE)
+#
+# Note that here we do not test whether the compiler supports the provided flags, because these are
+# universal for compilers that we support. Do not set up Profiling build flags for other compilers
+# and warn user about them having to set up those flags manually.
+if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
+    if(NOT DEFINED CMAKE_CXX_FLAGS_PROFILING)
+        set(CMAKE_CXX_FLAGS_PROFILING "-O3 -DNDEBUG -pg"
+            CACHE STRING "Flags used by the C++ compiler during Profiling builds.")
+    elseif(CMAKE_CXX_FLAGS_PROFILING STREQUAL "")
+        message(WARNING "CMAKE_CXX_FLAGS_PROFILING is empty. "
+                        "Profiling builds may not generate useful profiling data.")
+    endif()
+    if(NOT DEFINED CMAKE_C_FLAGS_PROFILING)
+        set(CMAKE_C_FLAGS_PROFILING "-O3 -DNDEBUG -pg"
+            CACHE STRING "Flags used by the C compiler during Profiling builds.")
+    elseif(CMAKE_C_FLAGS_PROFILING STREQUAL "")
+        message(WARNING "CMAKE_C_FLAGS_PROFILING is empty. "
+                        "Profiling builds may not generate useful profiling data.")
+    endif()
+    if(NOT DEFINED CMAKE_EXE_LINKER_FLAGS_PROFILING)
+        set(CMAKE_EXE_LINKER_FLAGS_PROFILING "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -pg"
+            CACHE STRING "Flags used by the linker during Profiling builds.")
+    elseif(CMAKE_EXE_LINKER_FLAGS_PROFILING STREQUAL "")
+        message(WARNING "CMAKE_EXE_LINKER_FLAGS_PROFILING is empty. "
+                        "Profiling builds may not generate useful profiling data.")
+    endif()
+    mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING
+                     CMAKE_EXE_LINKER_FLAGS_PROFILING)
+else()
+    message(WARNING " \n"
+                    " Profiling build flags are not set for compiler ${CMAKE_CXX_COMPILER_ID}.\n"
+                    " You have to set them manually, if you need a Profiling build.")
 endif()
 mark_as_advanced(CMAKE_CXX_FLAGS_PROFILING CMAKE_C_FLAGS_PROFILING CMAKE_EXE_LINKER_FLAGS_PROFILING)
 
