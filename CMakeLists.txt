@@ -128,9 +128,10 @@ add_library(smash_project_build_requirements INTERFACE)
 add_library(smash_project_usage_requirements INTERFACE)
 
 # Request a given C++ standard. Note that CMake will error if the compiler does not support the
-# requested standard, without any need to set the global CMAKE_CXX_STANDARD_REQUIRED variable.
+# requested standard, without any need to set the global CMAKE_CXX_STANDARD_REQUIRED variable. We
+# would like to also disable here compiler-specific extensions, but properties like CXX_EXTENSIONS
+# do not propagate through INTERFACE libraries and hence we need to set it on the targets directly.
 target_compile_features(smash_project_usage_requirements INTERFACE cxx_std_17)
-set_property(TARGET smash_project_usage_requirements PROPERTY CXX_EXTENSIONS OFF)
 
 # Retrieve architecture information about endianness. Note that this compile definition is ATM a
 # usage requirement as the PDG code header file relies on it.

@@ -33,6 +33,10 @@ target_link_libraries(smash_api INTERFACE smash_project_usage_requirements)
 target_link_libraries(smash PRIVATE smash_objlib smash_api)
 target_link_libraries(smash_shared PRIVATE smash_objlib PUBLIC smash_api)
 
+# Disable compiler-specific extensions for all targets. This cannot be done through INTERFACE
+# libraries because properties like CXX_EXTENSIONS do not propagate through them.
+set_target_properties(smash_objlib smash smash_shared PROPERTIES CXX_EXTENSIONS OFF)
+
 # Call shared library smash (e.g. libsmash.so). Note that, since "the build-tree runtime path will
 # not be used for binaries in the install tree" (CMake documentation), we request here to set the
 # INSTALL_RPATH in the library to ensure that projects linking to SMASH finds at run time libraries
@@ -394,7 +398,7 @@ if(BUILD_TESTING)
     # internal features to tests targets that will link against this library.
     add_library(smash_testlib STATIC $<TARGET_OBJECTS:smash_objlib>)
     target_link_libraries(smash_testlib PUBLIC smash_objlib smash_api)
-    set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash)
+    set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash CXX_EXTENSIONS OFF)
 
     # Look for sanitizers supported by the compiler. Sanitizers add instrumentation code to the
     # executable that test correctness of the code:
