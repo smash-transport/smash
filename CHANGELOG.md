@@ -24,9 +24,10 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 evaluation. This is useful e.g. in afterburner calculations.
 
 ### Changed
-* Minimum supported CMake version is now version 3.28
-* Minimum supported ROOT version is now version 6.20
-* Minimum supported HepMC3 version is now version 3.2.6
+* ⚠️ To build SMASH tuning compilation for a different architecture than the `native` one, the `SMASH_ARCH_FLAG` CMake variable must now be used (e.g. passing `-DSMASH_ARCH_FLAG=x86-64` to CMake). Using `CMAKE_CXX_FLAGS` and `CMAKE_C_FLAGS` or setting the environment `CFLAGS` and `CXXFLAGS` variables will not have the desired effect!
+* Minimum supported CMake version is now version `3.28`.
+* Minimum supported ROOT version is now version `6.20`.
+* Minimum supported HepMC3 version is now version `3.2.6`.
 * The `make install` target has been standardized to create an enclosing version-specific folder inside which the standard `bin`, `lib`, `include` and `share` directories are created (previously, the version specific folder was created inside the standard ones).
 
 ### Removed
