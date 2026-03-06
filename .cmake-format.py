@@ -64,15 +64,6 @@ with section("parse"):
         "SCOPE": 1,
       }
     },
-    "add_compiler_flags_if_supported": {
-      "pargs": '+',
-      "flags": ["VERBOSE", "ADD_IF_PRESENT"],
-      "kwargs": {
-        "C_FLAGS": 1,
-        "CXX_FLAGS": 1,
-        "ON_FAILURE": 1,
-      }
-    },
     "message": {
       "pargs": '*',
       "flags": [],
