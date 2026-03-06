@@ -12,7 +12,9 @@
 #include <iomanip>
 #include <iostream>
 
+GCC_IGNORE_BEGIN("-Wnull-dereference")
 #include "Eigen/Dense"
+GCC_IGNORE_END()
 
 #include "smash/logging.h"
 #include "smash/numerics.h"
