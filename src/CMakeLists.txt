@@ -126,6 +126,21 @@ endif(GIT_FOUND)
 
 string(TIMESTAMP BUILD_DATE)
 
+# Note that we look for Pythia first (and especially before ROOT, HepMC3 and Rivet) to ensure it is
+# linked before all the other and it is meant to avoid possible issues with e.g. ROOT whose include
+# directories might contain a Pythia.h header that might not be the one of the Pythia linked to
+# SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
+find_package(Pythia 8.316 EXACT REQUIRED)
+if(Pythia_FOUND)
+    if(NOT TARGET Pythia::Pythia)
+        message(FATAL_ERROR "Pythia library found, but its target is somehow missing.\n"
+                            "Ensure to be using the provided CMake module to find it.\n")
+    endif()
+    target_link_libraries(smash_objlib PUBLIC Pythia::Pythia)
+    target_compile_definitions(smash_objlib PUBLIC "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+                                                   "PYTHIA_FOUND")
+endif()
+
 find_package(GSL 2.0 REQUIRED)
 if(GSL_FOUND)
     if(TARGET GSL::gsl AND TARGET GSL::gslcblas)
@@ -231,21 +246,6 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
         message(STATUS "Suitable Rivet not found. Support disabled. "
                        "See README for more information.")
     endif()
-endif()
-
-find_package(Pythia 8.316 EXACT REQUIRED)
-if(Pythia_FOUND)
-    if(NOT TARGET Pythia::Pythia)
-        message(FATAL_ERROR "Pythia library found, but its target is somehow missing.\n"
-                            "Ensure to be using the provided CMake module to find it.\n")
-    endif()
-    # Here we PREPEND the Pythia target to the list of libraries to ensure that it is linked before
-    # all the other and it is meant to avoid possible issues with e.g. ROOT whose include
-    # directories might contain a Pythia.h header that might not be the one of the Pythia linked to
-    # SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
-    target_link_libraries(smash_objlib PUBLIC Pythia::Pythia)
-    target_compile_definitions(smash_objlib PUBLIC "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
-                                                   "PYTHIA_FOUND")
 endif()
 
 # ~~~
