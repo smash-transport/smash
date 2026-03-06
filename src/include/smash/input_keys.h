@@ -2657,18 +2657,16 @@ struct InputKeys {
    * \f[
    * \frac{\sigma^{\mathrm{AQM}}_{\mathrm{process}}}
    * {\sigma^{\mathrm{AQM}}_\mathrm{ref\_process}}
-   * \sigma^{\mathrm{param}}_\mathrm{ref\_process}.
+   * \sigma^{\mathrm{param}}_\mathrm{ref\_process}
    * \f]
    * where "process" refers to a generic process and "ref_process" to a
    * reference process such as PP for which solid parametrizations exist.
    * The AQM cross-section for a process involving the incoming particles
    * \f$a\f$ and \f$b\f$ is determined by the following calculation:
    * \f[
-   * \sigma^{\mathrm{AQM}}_{ab} = 40 \left( \frac{2}{3} \right)^{n_\mathrm{meson}}
-   * (1 - 0.4 x^s_a) (1 - 0.4 x^s_b)
-   * (1 - \kappa^c x^c_a) (1 - \kappa^c x^c_b)
-   * (1 - \kappa^b x^b_a) (1 - \kappa^b x^b_b)
-   * \f]
+   * \sigma^{\mathrm{AQM}}_{ab} = 40 \left( \frac{2}{3}
+   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_a) (1 - 0.4 x^s_b) (1 - \kappa^c
+   * x^c_a) (1 - \kappa^c x^c_b) (1 - \kappa^b x^b_a) (1 - \kappa^b x^b_b) \f]
    * with \f$n_\mathrm{meson}\f$ being the number of mesons in the process,
    * \f$x^s_{a,b}\f$ the fraction of strange quarks, \f$x^c_{a,b}\f$ the
    * fraction of charm quarks, and \f$x^b_{a,b}\f$ the fraction of bottom quarks
