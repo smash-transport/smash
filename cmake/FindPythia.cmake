@@ -125,7 +125,7 @@ mark_as_advanced(Pythia_FOUND
 if(Pythia_FOUND AND NOT TARGET Pythia::Pythia)
     add_library(Pythia::Pythia UNKNOWN IMPORTED)
     set_target_properties(Pythia::Pythia PROPERTIES IMPORTED_LOCATION ${Pythia_LIBRARY})
-    target_include_directories(Pythia::Pythia SYSTEM INTERFACE ${Pythia_INCLUDE_DIRS})
+    target_include_directories(Pythia::Pythia INTERFACE ${Pythia_INCLUDE_DIRS})
     if(CMAKE_DL_LIBS)
         set_property(TARGET Pythia::Pythia APPEND PROPERTY INTERFACE_LINK_LIBRARIES
                                                            ${CMAKE_DL_LIBS})
