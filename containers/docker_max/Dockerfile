@@ -446,7 +446,7 @@ RUN <<EOF
     mkdir -p smash_bin
     cd smash_bin
     cmake -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config\
-          -DCMAKE_INSTALL_PREFIX=${HEPMC_INSTALL} /SMASH/smash
+          -DSMASH_ARCH_FLAG="${TARGET_ARCHITECTURE}" /SMASH/smash
     make -j$(nproc)
     cd /SMASH
     if [ ! -f /SMASH/smash_bin/smash ]

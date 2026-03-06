@@ -103,8 +103,7 @@ RUN <<EOF
   cd smash/build
   set +e
   cmake -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config \
-        -DCMAKE_C_FLAGS="${C_CXX_ARCH_FLAG}" \
-        -DCMAKE_CXX_FLAGS="${C_CXX_ARCH_FLAG}" ..
+        -DSMASH_ARCH_FLAG="${C_CXX_ARCH_FLAG}" ..
   if [[ $? -ne 0 ]]; then
     echo "Error: cmake SMASH build configuration failed!"
     exit 1
