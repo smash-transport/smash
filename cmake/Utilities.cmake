@@ -183,14 +183,21 @@ function(create_system_wrapper_target new_target)
         return()
     endif()
     if(ARGC LESS 2)
-        message(FATAL_ERROR "create_system_wrapper_target(${new_target}): "
+        message(FATAL_ERROR "${CMAKE_CURRENT_FUNCTION}(${new_target}): "
                             "At least one existing target must be provided.")
     endif()
     add_library(${new_target} INTERFACE)
     foreach(dependence IN LISTS ARGN)
         if(NOT TARGET ${dependence})
-            message(FATAL_ERROR "create_system_wrapper_target(${new_target}): "
+            message(FATAL_ERROR "${CMAKE_CURRENT_FUNCTION}(${new_target}): "
                                 "Target ${dependence} does not exist.")
+        endif()
+        get_target_property(_imported ${dependence} IMPORTED)
+        if(_imported)
+            message(WARNING " \n"
+                            " The target '${dependence}' is IMPORTED. Calling this function\n"
+                            " is usually unnecessary as CMake treats include directories from\n"
+                            " the interfaces of consumed imported targets as system directories.\n")
         endif()
         target_link_libraries(${new_target} INTERFACE ${dependence})
         target_include_directories(${new_target} SYSTEM
