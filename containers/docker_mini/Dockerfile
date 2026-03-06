@@ -19,7 +19,18 @@ LABEL org.opencontainers.image.authors="SMASH team"
 LABEL org.opencontainers.image.url="https://smash-transport.github.io"
 LABEL org.opencontainers.image.source="https://github.com/smash-transport/smash"
 LABEL org.opencontainers.image.description="\
-Basic SMASH image (sources, compiler and bare executable, without ROOT, HepMC3 and Rivet)."
+Basic SMASH image tuned for ${TARGET_ARCHITECTURE} architecture\
+ (sources, compiler and bare executable, without ROOT, HepMC3 and Rivet)."
+
+# Fail if TARGET_ARCHITECTURE is set to "native" (this is not allowed in this Dockerfile
+# since it would make the image non portable)
+
+RUN <<EOF
+  if [[ "$TARGET_ARCHITECTURE" = "native" ]]; then
+    echo "ERROR: TARGET_ARCHITECTURE cannot be 'native'" >&2
+    exit 1
+  fi
+EOF
 
 # Install minimal set of requirements
 
