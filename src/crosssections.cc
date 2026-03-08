@@ -114,9 +114,9 @@ static void append_list(CollisionBranchList& main_list,
   const ParticleType& b = data_b.type();
   const PdgCode& pdg_a = a.pdgcode();
   const PdgCode& pdg_b = b.pdgcode();
-  ss << "problem in CrossSections::elastic: a=" << a.name() << " b=" << b.name()
-     << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
-     << " sigma=" << sig_el << " s=" << sqrts * sqrts;
+  ss << "Problem in CrossSections::elastic_parametrization: a=" << a.name()
+     << " b=" << b.name() << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
+     << " sigma=" << sig_el << " s=" << sqrts * sqrts << " sqrt(s)=" << sqrts;
   throw std::runtime_error(ss.str());
 }
 
