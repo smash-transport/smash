@@ -1320,7 +1320,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * As dileptons are treated perturbatively, the produced dileptons are
    * only written to the dilepton output, but neither to the usual collision
    * output, nor to the particle lists.
-   **/
+   */
 
   /*!\Userguide
    * \page doxypage_output_photons
@@ -1353,7 +1353,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * The photon output is available in binary, OSCAR1999, OSCAR2013 and
    * OSCAR2013 extended format. \n
    *
-   **/
+   */
 
   /*!\Userguide
    * \page doxypage_output_initial_conditions

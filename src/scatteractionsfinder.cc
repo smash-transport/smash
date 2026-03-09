@@ -24,12 +24,6 @@
 
 namespace smash {
 static constexpr int LFindScatter = LogArea::FindScatter::id;
-/*!\Userguide
- * \page doxypage_input_conf_ct_string_parameters
- *
- *
- *
- */
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration& config, const ExperimentParameters& parameters)

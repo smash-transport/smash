@@ -164,7 +164,7 @@ class Angles {
    * \return \f$z\f$ projection of the direction.
    *
    * \f$z = \cos\vartheta\f$
-   **/
+   */
   double z() const;
   /// \return The unit three-vector corresponding to the angles.
   ThreeVector inline threevec() const;

@@ -38,7 +38,7 @@ namespace smash {
  * output functions. In future it should be substituted by some
  * more general output.
  *
- **/
+ */
 class ThermodynamicLatticeOutput : public OutputInterface {
  public:
   /// Version of the thermodynamic lattice output

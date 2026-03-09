@@ -35,7 +35,7 @@ namespace smash {
  * output functions. In future it should be substituted by some
  * more general output.
  *
- **/
+ */
 class ThermodynamicOutput : public OutputInterface {
  public:
   /**

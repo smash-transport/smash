@@ -66,7 +66,7 @@ class ColliderModus : public ModusDefault {
    *                     input energy options is specified, or if custom
    *                     impact parameter Values and Yields are improperly
    *                     supplied
-   **/
+   */
   explicit ColliderModus(Configuration modus_config,
                          const ExperimentParameters &parameters);
   /**
@@ -101,7 +101,7 @@ class ColliderModus : public ModusDefault {
    *
    * Note that imp_max_ less than imp_min_ also works fine.
    *
-   **/
+   */
   void sample_impact();
 
   /// Time until nuclei have passed through each other
@@ -189,7 +189,7 @@ class ColliderModus : public ModusDefault {
    *
    * The object that goes from negative z-values to positive z-values
    * with positive velocity.
-   **/
+   */
   std::unique_ptr<Nucleus> projectile_;
   /**
    * Target.
@@ -197,19 +197,19 @@ class ColliderModus : public ModusDefault {
    * The object that goes from positive z-values to negative z-values
    * with negative velocity. In fixed target experiments, the target is
    * at rest.
-   **/
+   */
   std::unique_ptr<Nucleus> target_;
   /**
    * Center-of-mass energy squared of the nucleus-nucleus collision.
    *
    * Needs to be double to allow for calculations at LHC energies
-   * **/
+   */
   double total_s_;
   /**
    * Center-of-mass energy of a nucleon-nucleon collision.
    *
    * Needs to be double to allow for calculations at LHC energies
-   * **/
+   */
   double sqrt_s_NN_;
   /** Configure Deformed Nucleus
    *
@@ -291,7 +291,7 @@ class ColliderModus : public ModusDefault {
    * Projectile is shifted on -(this value) in z-direction
    * and target on +(this value)*v_target/v_projectile. In this way
    * projectile and target touch at t=0 in z=0.
-   **/
+   */
   double initial_z_displacement_;
   /**
    * Reference frame for the system, as specified from config

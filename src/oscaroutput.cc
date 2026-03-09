@@ -680,7 +680,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * input_output_content_specific_ "content-specific output options" for
  * details), (nin, nout) = (0, Nparticles) in the
  * initial timestep and (nin, nout) = (Nparticles, 0) in the final timestep.
- **/
+ */
 
 /*!\Userguide
  * \page doxypage_output_ascii
@@ -857,7 +857,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * # Units: fm none none none none
  * # SMASH_version
  * \endcode
- **/
+ */
 
 template <OscarOutputFormat Format, int Contents>
 void OscarOutput<Format, Contents>::write_particledata(

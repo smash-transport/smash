@@ -248,7 +248,7 @@ namespace smash {
  * HepMC3 output of a subtype (asciiv3 or treeroot) into the other without
  * loss of information.
  *
- **/
+ */
 
 // clang-format on
 HepMcOutput::HepMcOutput(const std::filesystem::path &path, std::string name,
