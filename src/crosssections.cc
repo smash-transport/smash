@@ -1095,21 +1095,6 @@ CollisionBranchList CrossSections::two_to_four() const {
   return process_list;
 }
 
-double CrossSections::d_pi_inelastic_xs(double pion_kinetic_energy) {
-  const double x = pion_kinetic_energy;
-  return x * (4.3 + 10.0 * x) / ((x - 0.16) * (x - 0.16) + 0.007);
-}
-
-double CrossSections::d_N_inelastic_xs(double N_kinetic_energy) {
-  const double x = N_kinetic_energy;
-  return x * (1.0 + 50 * x) / (x * x + 0.01) +
-         4 * x / ((x - 0.008) * (x - 0.008) + 0.0004);
-}
-
-double CrossSections::d_aN_inelastic_xs(double aN_kinetic_energy) {
-  return 55.0 / (aN_kinetic_energy + 0.17);
-}
-
 double CrossSections::two_to_three_xs(const ParticleType& type_a,
                                       const ParticleType& type_b,
                                       double sqrts) {
