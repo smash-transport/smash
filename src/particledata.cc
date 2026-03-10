@@ -74,6 +74,8 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
       history_.p1 = plist[0].pdgcode();
       history_.p2 = plist[1].pdgcode();
       break;
+    //TODO: Do we need to include the new process type BremsstrahlungDilepton 
+    //      here as well? Maybe not first priority, but later?
     case ProcessType::Thermalization:
     case ProcessType::MultiParticleThreeMesonsToOne:
     case ProcessType::MultiParticleThreeToTwo:

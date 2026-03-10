@@ -18,6 +18,7 @@
 #include "actionfinderfactory.h"
 #include "actions.h"
 #include "bremsstrahlungaction.h"
+#include "bremsstrahlungactiondilepton.h"
 #include "chrono.h"
 #include "decayactionsfinder.h"
 #include "decayactionsfinderdilepton.h"
@@ -604,6 +605,7 @@ class Experiment : public ExperimentBase {
   /// This indicates whether dileptons are switched on.
   const bool dileptons_switch_;
   
+  // DOCUMENT: Newly introduced switch for dilepton bremsstrahlung
   /**
    * This indicates whether dilepton production via bremsstrahlung is 
    * switched on.
@@ -725,6 +727,7 @@ class Experiment : public ExperimentBase {
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   out << "End time: " << e.end_time_ << " fm\n";
+  // DOCUMENT: Hint on dilepton bremsstrahlung switch can be removed later
   out << "Dilepton bremsstrahlung: "
       << (e.dileptons_bremsstrahlung_switch_ ? "on" : "off") << "\n";
   out << e.modus_;
@@ -935,6 +938,7 @@ Experiment<Modus>::Experiment(Configuration &config,
       metric_(config.take(InputKeys::gen_metricType),
               config.take(InputKeys::gen_expansionRate)),
       dileptons_switch_(config.take(InputKeys::collTerm_dileptons_decays)),
+      // DOCUMENT: Newly introduced switch for dilepton bremsstrahlung is read
       dileptons_bremsstrahlung_switch_(
           config.take(InputKeys::collTerm_dileptons_bremsstrahlung)),
       photons_switch_(
@@ -2472,21 +2476,27 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     brems_act.perform_bremsstrahlung(outputs_);
   }
 
-  //TODO: New action for Dilepton bremsstrahlung to be implemented maybe here.
-  //      Below code is only a placeholder copy from photon part above.
-  /*
-  if (dilepton_bremsstrahlung_switch_ &&
-      DileptonBremsstrahlungAction::is_dilepton_bremsstrahlung_reaction(
+  //TODO: Below code is work-in-progress!
+  if (dileptons_bremsstrahlung_switch_ &&
+      BremsstrahlungActionDilepton::is_dilepton_brems_reaction(
           action.incoming_particles())) {
     // Time in the action constructor is relative to current time of incoming
     constexpr double action_time = 0.;
 
-    DileptonBremsstrahlungAction dilepton_brems_act(
-        action.incoming_particles(), action_time, n_fractional_photons_,
-        action.get_total_weight(), parameters_.spin_interaction_type);
+    //Setting the form factor to a fixed value for the time being
+    //TODO: Make this another configurable parameter (input key) later.
+    //      This also triggers adjustments to be made in configuration.h 
+    //      (similar to e.g. SpinInteractionType() therein) and stringify.h
+    //      (to be able to read the form factor type from the config afaiu). 
+    const BremsstrahlungActionDilepton::FormFactorType form_factor_type = 
+        BremsstrahlungActionDilepton::FormFactorType::FF1;
+    
+        // Create the dilepton bremsstrahlung action with the respective form factor.
+    BremsstrahlungActionDilepton dilepton_brems_act(
+        action.incoming_particles(), action_time, action.get_total_weight(), form_factor_type);
 
     // Add a completely dummy process to the dilepton bremsstrahlung action. The
-    // only important thing is that its cross-section is equal to the cross-section
+    // only important thing is that its cross section is equal to the cross section
     // of the hadronic action. This can be done, because the dilepton bremsstrahlung
     // action is never actually performed, only the final state is generated and
     // printed to the dilepton output. Note: The cross_section_scaling_factor can
@@ -2495,12 +2505,14 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     // cross section is taken.
     dilepton_brems_act.add_dummy_hadronic_process(action.get_total_weight());
 
-    // Now add the actual dilepton bremsstrahlung reaction channel.
+    // Compute dilepton bremsstrahlung cross sections and register 
+    // the single pn -> pne⁺e⁻ process branch.
+    // Analogous to the photon bremsstrahlung add_single_process().
     dilepton_brems_act.add_single_process();
 
     dilepton_brems_act.perform_dilepton_bremsstrahlung(outputs_);
   }
-  */
+  
   logg[LExperiment].debug(~einhard::Green(), "✔ ", action);
   return true;
 }

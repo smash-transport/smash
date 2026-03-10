@@ -24,6 +24,15 @@ constexpr int invalid = 0x0;
 /// Photon.
 constexpr int photon = 0x22;
 
+// DOCUMENT: Explicitly introduced electron and positron.
+//           The is_dilepton() function in pdgcode.h has not been
+//           adapted to not mess around with working code. 
+/// Elektron
+constexpr int e_m = 0x11;
+
+/// Positron
+constexpr int e_p = -0x11;
+
 /// Proton.
 constexpr int p = 0x2212;
 /// Neutron.

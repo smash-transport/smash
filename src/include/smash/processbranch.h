@@ -63,6 +63,9 @@ enum class ProcessType {
   FluidizationNoRemoval = 21,
   /// \see_process_type{9}
   Bremsstrahlung = 9,
+  //TODO: Add Doxygen documentation for the new process types below.
+  /// \see_process_type{16}
+  BremsstrahlungDilepton = 16,
   /// \see_process_type{10}
   MultiParticleThreeMesonsToOne = 10,
   /// \see_process_type{11}
@@ -112,6 +115,7 @@ inline bool is_valid_process_type(int v) {
     case ProcessType::Fluidization:
     case ProcessType::FluidizationNoRemoval:
     case ProcessType::Bremsstrahlung:
+    case ProcessType::BremsstrahlungDilepton:
     case ProcessType::MultiParticleThreeMesonsToOne:
     case ProcessType::MultiParticleThreeToTwo:
     case ProcessType::MultiParticleFourToTwo:

@@ -3903,8 +3903,8 @@ struct InputKeys {
    * \see_key{key_CT_dileptons_bremsstrahlung_}
    */
   inline static const Key<bool> collTerm_dileptons_bremsstrahlung{
-      InputSections::c_dileptons + "Bremsstrahlung", false, {"3.20"}};
-  // TODO: Change version after successful testing to 3.3 or 3.4
+      InputSections::c_dileptons + "Bremsstrahlung", false, {"3.4"}};
+  // TODO: Maybe change version to 3.4 or lower if this doesnt work at the moment.
   
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
@@ -7879,6 +7879,7 @@ General:
      Dileptons:
          Decays: True
          Bremsstrahlung: True
+        // TODO: To be adjusted further for the specific form factor once done.
  \endverbatim
  *
  * <hr>

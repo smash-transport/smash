@@ -57,7 +57,6 @@ class DecayActionsFinderDilepton {
   void shine_final(const Particles& search_list, OutputInterface* output,
                    bool only_res = false) const;
 
-  //TODO: Potentially add function to produce dileptons from bremsstrahlung here.
 };
 
 }  // namespace smash

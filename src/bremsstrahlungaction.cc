@@ -417,7 +417,5 @@ void BremsstrahlungAction::create_interpolations() {
                                                 dsigma_dtheta_pi0pi0_pipi,
                                                 ExtrapolationType::Constant);
 }
-//TODO: Potentially create a new class DileptonBremsstrahlungAction
-// for dilepton bremsstrahlung processes, which are not implemented yet.
 
 }  // namespace smash
