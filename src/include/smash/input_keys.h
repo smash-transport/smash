@@ -2655,6 +2655,7 @@ struct InputKeys {
    * - `"PiDeuteron_to_pidprime"` &rarr; deuteron + pion &harr; d' + pion
    * - `"NDeuteron_to_Ndprime"` &rarr; deuteron + (anti-)nucleon &harr;
    *   d' + (anti-)nucleon, and their CPT-conjugates
+   * - `"Dpi_to_Dpi"` &rarr; D meson + pion &harr; D meson + pion
    * - `"All"` &rarr; include all binary processes, no necessity to list each
    *   single category
    *

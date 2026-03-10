@@ -981,14 +981,16 @@ class Configuration {
           s.set(IncludedReactions::PiDeuteron_to_pidprime);
         } else if (x == "NDeuteron_to_Ndprime") {
           s.set(IncludedReactions::NDeuteron_to_Ndprime);
+        } else if (x == "Dpi_to_Dpi") {
+          s.set(IncludedReactions::Dpi_to_Dpi);
         } else {
           throw IncorrectTypeInAssignment(
               "The value for key \"" + std::string(key_) +
               "\" should be \"All\", \"Elastic\", \"NN_to_NR\", \"NN_to_DR\","
               "\"KN_to_KN\", \"KN_to_KDelta\", \"PiDeuteron_to_NN\", "
               "\"PiDeuteron_to_pidprime\", \"NDeuteron_to_Ndprime\", "
-              "\"Strangeness_exchange\" or "
-              "\"NNbar\", or any combination of these.");
+              "\"Strangeness_exchange\", \"NNbar\", or \"Dpi_to_Dpi\" "
+              "or any combination of these.");
         }
       }
       return s;

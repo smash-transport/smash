@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2025
+ *    Copyright (c) 2025-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -327,6 +327,8 @@ std::vector<std::string> to_string(const ReactionsBitSet &s) {
     result.push_back("PiDeuteron_to_pidprime");
   if (s.test(IncludedReactions::NDeuteron_to_Ndprime))
     result.push_back("NDeuteron_to_Ndprime");
+  if (s.test(IncludedReactions::Dpi_to_Dpi))
+    result.push_back("Dpi_to_Dpi");
   return result;
 }
 
