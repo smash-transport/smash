@@ -484,18 +484,18 @@ double deuteron_nucleon_elastic(double mandelstam_s) {
          600.0 * std::exp(-excess_sqr / 0.1) + 10.0;
 }
 
-double d_pi_inelastic_xs(double pion_kinetic_energy) {
+double deuteron_pion_inelastic(double pion_kinetic_energy) {
   const double x = pion_kinetic_energy;
   return x * (4.3 + 10.0 * x) / ((x - 0.16) * (x - 0.16) + 0.007);
 }
 
-double d_N_inelastic_xs(double N_kinetic_energy) {
+double deuteron_nucleon_inelastic(double N_kinetic_energy) {
   const double x = N_kinetic_energy;
   return x * (1.0 + 50 * x) / (x * x + 0.01) +
          4 * x / ((x - 0.008) * (x - 0.008) + 0.0004);
 }
 
-double d_aN_inelastic_xs(double aN_kinetic_energy) {
+double deuteron_antinucleon_inelastic(double aN_kinetic_energy) {
   return 55.0 / (aN_kinetic_energy + 0.17);
 }
 

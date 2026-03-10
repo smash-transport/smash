@@ -378,7 +378,7 @@ double deuteron_nucleon_elastic(double mandelstam_s);
  *             in the deuteron rest frame
  * \return cross section [mb]
  */
-double d_pi_inelastic_xs(double pion_kinetic_energy);
+double deuteron_pion_inelastic(double pion_kinetic_energy);
 
 /**
  * Parametrization of deuteron-nucleon inelastic cross section
@@ -387,7 +387,7 @@ double d_pi_inelastic_xs(double pion_kinetic_energy);
  *            in the deuteron rest frame
  * \return cross section [mb]
  */
-double d_N_inelastic_xs(double N_kinetic_energy);
+double deuteron_nucleon_inelastic(double N_kinetic_energy);
 
 /**
  * Parametrization of deuteron-antinucleon inelastic cross section
@@ -396,7 +396,7 @@ double d_N_inelastic_xs(double N_kinetic_energy);
  *             in the deuteron rest frame
  * \return cross section [mb]
  */
-double d_aN_inelastic_xs(double aN_kinetic_energy);
+double deuteron_antinucleon_inelastic(double aN_kinetic_energy);
 
 /**
  * K+ p total cross section parametrization.

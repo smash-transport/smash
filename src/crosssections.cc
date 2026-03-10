@@ -1120,15 +1120,15 @@ double CrossSections::two_to_three_xs(const ParticleType& type_a,
   }
 
   if (type_catalyzer->is_pion()) {
-    xs = d_pi_inelastic_xs(Tkin);
+    xs = deuteron_pion_inelastic(Tkin);
   } else if (type_catalyzer->is_nucleon()) {
     if (type_nucleus->pdgcode().antiparticle_sign() ==
         type_catalyzer->pdgcode().antiparticle_sign()) {
       // Nd and N̅d̅
-      xs = d_N_inelastic_xs(Tkin);
+      xs = deuteron_nucleon_inelastic(Tkin);
     } else {
       // N̅d and Nd̅
-      xs = d_aN_inelastic_xs(Tkin);
+      xs = deuteron_antinucleon_inelastic(Tkin);
     }
   }
   return xs;
@@ -1157,15 +1157,15 @@ double CrossSections::two_to_four_xs(const ParticleType& type_a,
   }
 
   if (type_catalyzer->is_pion()) {
-    xs = A / 2. * d_pi_inelastic_xs(Tkin);
+    xs = A / 2. * deuteron_pion_inelastic(Tkin);
   } else if (type_catalyzer->is_nucleon()) {
     if (type_nucleus->pdgcode().antiparticle_sign() ==
         type_catalyzer->pdgcode().antiparticle_sign()) {
       // N + A, anti-N + anti-A
-      xs = A / 2. * d_N_inelastic_xs(Tkin);
+      xs = A / 2. * deuteron_nucleon_inelastic(Tkin);
     } else {
       // N̅ + A and N + anti-A
-      xs = A / 2. * d_aN_inelastic_xs(Tkin);
+      xs = A / 2. * deuteron_antinucleon_inelastic(Tkin);
     }
   }
   return xs;
