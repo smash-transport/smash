@@ -372,6 +372,33 @@ double deuteron_pion_elastic(double mandelstam_s);
 double deuteron_nucleon_elastic(double mandelstam_s);
 
 /**
+ * Parametrization of deuteron-pion inelastic cross section
+ *
+ * \param[in] pion_kinetic_energy pion kinetic energy [GeV]
+ *             in the deuteron rest frame
+ * \return cross section [mb]
+ */
+double deuteron_pion_inelastic(double pion_kinetic_energy);
+
+/**
+ * Parametrization of deuteron-nucleon inelastic cross section
+ *
+ * \param[in] N_kinetic_energy Nucleon kinetic energy [GeV]
+ *            in the deuteron rest frame
+ * \return cross section [mb]
+ */
+double deuteron_nucleon_inelastic(double N_kinetic_energy);
+
+/**
+ * Parametrization of deuteron-antinucleon inelastic cross section
+ *
+ * \param[in] aN_kinetic_energy [GeV] Anti-nucleon kinetic energy
+ *             in the deuteron rest frame
+ * \return cross section [mb]
+ */
+double deuteron_antinucleon_inelastic(double aN_kinetic_energy);
+
+/**
  * K+ p total cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.8
  *

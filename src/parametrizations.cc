@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2025
+ *    Copyright (c) 2013-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -482,6 +482,21 @@ double deuteron_nucleon_elastic(double mandelstam_s) {
   const double excess_sqr = excess * excess;
   return 2500.0 * std::exp(-excess_sqr / 0.003) +
          600.0 * std::exp(-excess_sqr / 0.1) + 10.0;
+}
+
+double deuteron_pion_inelastic(double pion_kinetic_energy) {
+  const double x = pion_kinetic_energy;
+  return x * (4.3 + 10.0 * x) / ((x - 0.16) * (x - 0.16) + 0.007);
+}
+
+double deuteron_nucleon_inelastic(double N_kinetic_energy) {
+  const double x = N_kinetic_energy;
+  return x * (1.0 + 50 * x) / (x * x + 0.01) +
+         4 * x / ((x - 0.008) * (x - 0.008) + 0.0004);
+}
+
+double deuteron_antinucleon_inelastic(double aN_kinetic_energy) {
+  return 55.0 / (aN_kinetic_energy + 0.17);
 }
 
 double kplusp_total(double mandelstam_s) {

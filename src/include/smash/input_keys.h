@@ -2071,7 +2071,7 @@ struct InputKeys {
    * \optional_key{key_CT_HF_AQM_b_suppression_,AQM_Bottom_Suppression,double,0.93}
    *
    * Suppression parameter for AQM cross sections involving a bottom hadron.
-   * Default value taken from Angantyr.
+   * Default value taken from Angantyr (\iref{Bierlich:2022pfr}).
    */
   /**
    * \see_key{key_CT_additional_el_cs_}
@@ -2084,7 +2084,7 @@ struct InputKeys {
    * \optional_key{key_CT_HF_AQM_c_suppression_,AQM_Charm_Suppression,double,0.8}
    *
    * Suppression parameter for AQM cross sections involving a charm hadron.
-   * Default value taken from Angantyr.
+   * Default value taken from Angantyr (\iref{Bierlich:2022pfr}).
    */
   /**
    * \see_key{key_CT_additional_el_cs_}
@@ -2659,13 +2659,25 @@ struct InputKeys {
    * {\sigma^{\mathrm{AQM}}_\mathrm{ref\_process}}
    * \sigma^{\mathrm{param}}_\mathrm{ref\_process}
    * \f]
-   * where \f$ \sigma^{\mathrm{AQM}}_x = 40 \left( \frac{2}{3}
-   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) \f$, with
-   * \f$n_\mathrm{meson}\f$ being the number of mesons in the process,
-   * \f$x^s_{1,2}\f$ the fraction of strange quarks in the participant.
-   * "process" is then a generic process and "ref_process" a reference process
-   * such as PP for which solid parametrizations exist.
-   * (\iref{Bass:1998ca})
+   * where "process" refers to a generic process and "ref_process" to a
+   * reference process such as PP for which solid parametrizations exist.
+   * The AQM cross-section for a process involving the incoming particles
+   * \f$a\f$ and \f$b\f$ is determined by the following calculation:
+   * \f[
+   * \sigma^{\mathrm{AQM}}_{ab} = 40 \left( \frac{2}{3}
+   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_a) (1 - 0.4 x^s_b) (1 - \kappa^c
+   * x^c_a) (1 - \kappa^c x^c_b) (1 - \kappa^b x^b_a) (1 - \kappa^b x^b_b) \f]
+   * with \f$n_\mathrm{meson}\f$ being the number of mesons in the process,
+   * \f$x^s_{a,b}\f$ the fraction of strange quarks, \f$x^c_{a,b}\f$ the
+   * fraction of charm quarks, and \f$x^b_{a,b}\f$ the fraction of bottom quarks
+   * of the hadrons \f$a\f$ and \f$b\f$. \f$ \kappa^c \f$ and \f$ \kappa^b \f$
+   * are the respective suppression factors for interactions involving charm and
+   * bottom hadrons (see
+   * <tt>\ref key_CT_HF_AQM_c_suppression_ "AQM_Charm_Suppression"</tt> and
+   * <tt>\ref key_CT_HF_AQM_b_suppression_ "AQM_Bottom_Suppression"</tt> for the
+   * default values and how to specify alternate values in the configuration
+   * file). See \iref{Bass:1998ca} for AQM only considering strangeness and
+   * \iref{Bierlich:2022pfr} for the charm and bottom suppression factors.
    */
   /**
    * \see_key{key_CT_use_aqm_}

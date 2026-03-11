@@ -114,9 +114,9 @@ static void append_list(CollisionBranchList& main_list,
   const ParticleType& b = data_b.type();
   const PdgCode& pdg_a = a.pdgcode();
   const PdgCode& pdg_b = b.pdgcode();
-  ss << "problem in CrossSections::elastic: a=" << a.name() << " b=" << b.name()
-     << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
-     << " sigma=" << sig_el << " s=" << sqrts * sqrts;
+  ss << "Problem in CrossSections::elastic_parametrization: a=" << a.name()
+     << " b=" << b.name() << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
+     << " sigma=" << sig_el << " s=" << sqrts * sqrts << " sqrt(s)=" << sqrts;
   throw std::runtime_error(ss.str());
 }
 
@@ -1095,21 +1095,6 @@ CollisionBranchList CrossSections::two_to_four() const {
   return process_list;
 }
 
-double CrossSections::d_pi_inelastic_xs(double pion_kinetic_energy) {
-  const double x = pion_kinetic_energy;
-  return x * (4.3 + 10.0 * x) / ((x - 0.16) * (x - 0.16) + 0.007);
-}
-
-double CrossSections::d_N_inelastic_xs(double N_kinetic_energy) {
-  const double x = N_kinetic_energy;
-  return x * (1.0 + 50 * x) / (x * x + 0.01) +
-         4 * x / ((x - 0.008) * (x - 0.008) + 0.0004);
-}
-
-double CrossSections::d_aN_inelastic_xs(double aN_kinetic_energy) {
-  return 55.0 / (aN_kinetic_energy + 0.17);
-}
-
 double CrossSections::two_to_three_xs(const ParticleType& type_a,
                                       const ParticleType& type_b,
                                       double sqrts) {
@@ -1135,15 +1120,15 @@ double CrossSections::two_to_three_xs(const ParticleType& type_a,
   }
 
   if (type_catalyzer->is_pion()) {
-    xs = d_pi_inelastic_xs(Tkin);
+    xs = deuteron_pion_inelastic(Tkin);
   } else if (type_catalyzer->is_nucleon()) {
     if (type_nucleus->pdgcode().antiparticle_sign() ==
         type_catalyzer->pdgcode().antiparticle_sign()) {
       // Nd and N̅d̅
-      xs = d_N_inelastic_xs(Tkin);
+      xs = deuteron_nucleon_inelastic(Tkin);
     } else {
       // N̅d and Nd̅
-      xs = d_aN_inelastic_xs(Tkin);
+      xs = deuteron_antinucleon_inelastic(Tkin);
     }
   }
   return xs;
@@ -1172,15 +1157,15 @@ double CrossSections::two_to_four_xs(const ParticleType& type_a,
   }
 
   if (type_catalyzer->is_pion()) {
-    xs = A / 2. * d_pi_inelastic_xs(Tkin);
+    xs = A / 2. * deuteron_pion_inelastic(Tkin);
   } else if (type_catalyzer->is_nucleon()) {
     if (type_nucleus->pdgcode().antiparticle_sign() ==
         type_catalyzer->pdgcode().antiparticle_sign()) {
       // N + A, anti-N + anti-A
-      xs = A / 2. * d_N_inelastic_xs(Tkin);
+      xs = A / 2. * deuteron_nucleon_inelastic(Tkin);
     } else {
       // N̅ + A and N + anti-A
-      xs = A / 2. * d_aN_inelastic_xs(Tkin);
+      xs = A / 2. * deuteron_antinucleon_inelastic(Tkin);
     }
   }
   return xs;

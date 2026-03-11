@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2014,2018-2024
+ *    Copyright (c) 2013-2014,2018-2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -23,10 +23,9 @@
 namespace smash {
 
 /**
- * The cross section class assembles everything that is needed to
- * calculate the cross section and returns a list of all possible reactions
- * for the incoming particles at the given energy with the calculated cross
- * sections.
+ * The CrossSections class assembles everything that is needed to calculate
+ * cross sections and gathers a list of all possible reactions for the incoming
+ * particles at the given energy with the calculated cross sections.
  */
 class CrossSections {
  public:
@@ -236,33 +235,6 @@ class CrossSections {
    *
    */
   CollisionBranchPtr NNbar_to_5pi(double scale_xs) const;
-
-  /**
-   * Parametrization of deuteron-pion inelastic cross section
-   *
-   * \param[in] pion_kinetic_energy pion kinetic energy [GeV]
-   *             in the deuteron rest frame
-   * \return cross section [mb]
-   */
-  static double d_pi_inelastic_xs(double pion_kinetic_energy);
-
-  /**
-   * Parametrization of deuteron-nucleon inelastic cross section
-   *
-   * \param[in] N_kinetic_energy Nucleon kinetic energy [GeV]
-   *            in the deuteron rest frame
-   * \return cross section [mb]
-   */
-  static double d_N_inelastic_xs(double N_kinetic_energy);
-
-  /**
-   * Parametrization of deuteron-antinucleon inelastic cross section
-   *
-   * \param[in] aN_kinetic_energy [GeV] Anti-nucleon kinetic energy
-   *             in the deuteron rest frame
-   * \return cross section [mb]
-   */
-  static double d_aN_inelastic_xs(double aN_kinetic_energy);
 
   /**
    * Determine 2->3 cross section for the scattering of the given particle

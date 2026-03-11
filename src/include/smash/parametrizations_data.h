@@ -582,11 +582,14 @@ const std::initializer_list<double> PIMINUSP_RES_SQRTS = {
     3.4435140, 3.4706390, 3.4868130, 3.4975540, 3.5507730, 3.6032070, 3.6548900,
     3.6574550, 3.7058520, 3.7310720, 3.7461230, 3.7955240, 3.9886240, 4.0003630,
     4.2614590, 4.4340360, 4.6809920, 4.7288360, 4.8386340};
-/// Elastic π⁻N⁺ cross section contributions from decays.
-///
-/// These need to be subtracted from the interpolation of the PDG data on
-/// elastic cross sections. This data was generated using the SMASH analysis
-/// suite and should be updated when strange resonances are changed or added.
+
+/**
+ * Elastic π⁻N⁺ cross section contributions from decays.
+ *
+ * These need to be subtracted from the interpolation of the PDG data on
+ * elastic cross sections. This data was generated using the SMASH analysis
+ * suite and should be updated when strange resonances are changed or added.
+ */
 const std::initializer_list<double> PIMINUSP_RES_SIG = {
     2.727771,  3.571329,  4.034613,  4.882370,  4.975210,  5.117328,  6.891753,
     7.205112,  7.746671,  8.247897,  9.456023,  9.485245,  9.711213,  10.112155,
@@ -779,11 +782,14 @@ const std::initializer_list<double> PIPLUSP_RES_SQRTS = {
     3.4161730, 3.4189170, 3.4435140, 3.4706390, 3.4868130, 3.4975540, 3.5242640,
     3.5507730, 3.6032070, 3.6548900, 3.7058520, 3.7461230, 3.9246250, 3.9886240,
     4.4000620, 4.4340360, 4.8192100, 4.8386340};
-/// Elastic π⁺N⁺ cross section contributions from decays.
-///
-/// These need to be subtracted from the interpolation of the PDG data on
-/// elastic cross sections. This data was generated using the SMASH analysis
-/// suite and should be updated when strange resonances are changed or added.
+
+/**
+ * Elastic π⁺N⁺ cross section contributions from decays.
+ *
+ * These need to be subtracted from the interpolation of the PDG data on
+ * elastic cross sections. This data was generated using the SMASH analysis
+ * suite and should be updated when strange resonances are changed or added.
+ */
 const std::initializer_list<double> PIPLUSP_RES_SIG = {
     6.022200,   10.038871,  17.441789,  18.453186,  19.268833,  23.150742,
     26.498913,  27.386442,  29.291426,  40.496896,  42.513388,  43.030735,
@@ -909,8 +915,10 @@ const std::initializer_list<double> PIPLUSP_TOT_SQRTS = {
     5.9800000, 5.9925000, 6.0050000, 6.0175000, 6.0300000, 6.0425000, 6.0550000,
     6.0675000, 6.0800000};
 
-/// Total p π⁺ cross section parametrized from bottom-up SMASH-3.0,
-/// using the hadronic list from PDG2018.
+/**
+ * Total p π⁺ cross section parametrized from bottom-up SMASH-3.0,
+ * using the hadronic list from PDG2018.
+ */
 const std::initializer_list<double> PIPLUSP_TOT_SIG = {
     0.091281,   0.962113,   3.137700,   7.044444,   13.412202,  23.289333,
     38.047868,  59.689265,  89.229993,  124.462341, 156.483158, 172.253319,
@@ -1073,9 +1081,10 @@ const std::initializer_list<double> PIMINUSP_TOT_SQRTS = {
     5.9800000, 5.9883300, 5.9966700, 6.0050000, 6.0133300, 6.0216700, 6.0300000,
     6.0383300, 6.0466700, 6.0550000, 6.0633300, 6.0716700, 6.0800000};
 
-/// Total p π⁻ cross section parametrized from bottom-up SMASH-3.0,
-/// using the hadronic list from PDG2018.
-///
+/**
+ * Total p π⁻ cross section parametrized from bottom-up SMASH-3.0,
+ * using the hadronic list from PDG2018.
+ */
 const std::initializer_list<double> PIMINUSP_TOT_SIG = {
     0.152858,  0.327257,  0.691281,  1.295780,  2.171295,  3.386768,  5.008652,
     7.163028,  10.009071, 13.673280, 18.337398, 24.205797, 31.337485, 39.349561,
