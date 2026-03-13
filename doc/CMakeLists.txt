@@ -34,6 +34,8 @@ if(DOXYGEN_FOUND)
         get_target_property(DOT_EXECUTABLE Doxygen::dot IMPORTED_LOCATION)
     else()
         set(HAVE_DOT "NO")
+        message(ATTENTION "Doxygen dot tool not found. "
+                          "Graphs won't be generated in the developer documentation!")
     endif()
     set(DOXYGEN_EXTRACT_ALL "YES")
     # Prepare list of files to be used as input for user guide and development documentation
