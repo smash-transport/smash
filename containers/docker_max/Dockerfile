@@ -12,8 +12,10 @@ SHELL ["/bin/bash", "-c"]
 
 # Set the proper general cpu family architecture flag.
 # Please, for more information refer to the documentation of your compiler.
+# The default value is set to "x86-64-v2" which is a conservative choice for modern
+# x86-64 CPUs (cf. https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels)
 
-ARG TARGET_ARCHITECTURE="x86-64"
+ARG TARGET_ARCHITECTURE="x86-64-v2"
 
 # Declare all together the versions of the going to be installed codebases
 
@@ -59,8 +61,7 @@ SMASH with ROOT ${ROOT_VERSION}, HepMC3 ${HEPMC_VERSION}, Rivet ${RIVET_VERSION}
 
 RUN <<EOF
   if [[ "$TARGET_ARCHITECTURE" = "native" ]]; then
-    echo "ERROR: TARGET_ARCHITECTURE cannot be 'native'" >&2
-    exit 1
+    echo "Warning: TARGET_ARCHITECTURE is set to 'native' - be sure this is desired." >&2
   fi
 EOF
 
