@@ -55,26 +55,34 @@ target_add_compiler_flag_if_supported(TARGETS ${CUBA_TARGETS}
                                       FLAGS "-Wall" "-march=native"
                                       SCOPE PRIVATE)
 
-foreach(_target IN LISTS CUBA_TARGETS)
+foreach(target IN LISTS CUBA_TARGETS)
 
-    target_include_directories(${_target} SYSTEM
-                               PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/${_target}>
+    target_include_directories(${target} SYSTEM
+                               PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/${target}>
                                        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/common>
                                PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
                                       $<INSTALL_INTERFACE:include/cuba>)
 
-    target_sources(${_target}
+    target_sources(${target}
                    PUBLIC
                    FILE_SET HEADERS
                    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
                    FILES cuba.h)
 
-    target_compile_definitions(${_target} PRIVATE ${CUBA_COMPILE_DEFINITIONS})
+    target_compile_definitions(${target} PRIVATE ${CUBA_COMPILE_DEFINITIONS})
+
+    # Set C standard to C17, which is the latest standard supported by all the compilers we want to
+    # support. This is at the moment needed because recent compilers (e.g. GCC 15) set the default C
+    # standard to C23, which causes compilation to fail since until Cuba-4.2.2 the library is not
+    # compatible with it. Setting the C standard explicitly to C17 and setting it as requested
+    # ensures that we do not hit such issues. Compiler GNU extension are enabled just in case that
+    # Cuba uses some (if it doesn't now, it doesn't harm to still have them on).
+    set_target_properties(${target} PROPERTIES C_STANDARD 17 C_STANDARD_REQUIRED ON C_EXTENSIONS ON)
 
     # Flags -pg and -fomit-frame-pointer are incompatible, hence omit the latter in profiling mode,
     # where performance is irrelevant
     if(NOT CMAKE_BUILD_TYPE STREQUAL "Profiling")
-        target_add_compiler_flag_if_supported(TARGETS ${_target}
+        target_add_compiler_flag_if_supported(TARGETS ${target}
                                               LANGUAGE C
                                               FLAGS -fomit-frame-pointer
                                               SCOPE PRIVATE)

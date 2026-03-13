@@ -149,6 +149,33 @@ function(target_add_compiler_flag_if_supported)
     endforeach()
 endfunction()
 
+# Creates an INTERFACE target that links to the given existing targets and re-exposes all of their
+# INTERFACE include directories as SYSTEM.
+#
+# SYNOPSIS: create_system_wrapper_target(<new_target> <target1> [<target2> ...])
+#
+# The original targets are not modified. If <new_target> already exists, the function is a no-op.
+function(create_system_wrapper_target new_target)
+    if(TARGET ${new_target})
+        return()
+    endif()
+    if(ARGC LESS 2)
+        message(FATAL_ERROR "create_system_wrapper_target(${new_target}): "
+                            "At least one existing target must be provided.")
+    endif()
+    add_library(${new_target} INTERFACE)
+    foreach(dependence IN LISTS ARGN)
+        if(NOT TARGET ${dependence})
+            message(FATAL_ERROR "create_system_wrapper_target(${new_target}): "
+                                "Target ${dependence} does not exist.")
+        endif()
+        target_link_libraries(${new_target} INTERFACE ${dependence})
+        target_include_directories(${new_target} SYSTEM
+                                   INTERFACE $<TARGET_PROPERTY:${dependence},INTERFACE_INCLUDE_DIRECTORIES>
+        )
+    endforeach()
+endfunction()
+
 # Add utility function to add a compiler flag in a sound way (i.e. testing if it is supported) and
 # possibly warn or fail if it is not. Syntax:
 # ~~~

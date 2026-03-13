@@ -11,6 +11,19 @@ include(CheckLibraryExists)
 include(AddCompilerFlag)
 include(FindPkgConfig)
 
+# Prepare list variables to collect libraries, compiler definitions for internal usage in SMASH,
+# compiler definitions for users of SMASH, internal compile options and so on
+set(SMASH_LIBRARIES
+    einhard
+    yaml-cpp
+    cuhre
+    suave
+    divonne
+    vegas)
+set(SMASH_INTERNAL_DEFINITIONS "")
+set(SMASH_CLIENT_DEFINITIONS "")
+set(SMASH_PRIVATE_COMPILE_OPTIONS "")
+
 # Enable warnings for supported compilers only --> Here we know the compilers support the flag, do
 # not test!
 if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
@@ -41,13 +54,13 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
     option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C funtions in SMASH."
            OFF)
     if(DEPRECATE_C_FNS)
-        add_definitions(-include smash/deprecate_c_functions.h -DDONT_ASSERT_TEST)
+        list(APPEND SMASH_INTERNAL_DEFINITIONS "DONT_ASSERT_TEST")
+        list(APPEND SMASH_PRIVATE_COMPILE_OPTIONS "-include" "smash/deprecate_c_functions.h")
     endif()
 endif()
 
 find_package(Git)
 if(GIT_FOUND)
-    # message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
     get_filename_component(GIT_PARENT_DIR ${CMAKE_CURRENT_SOURCE_DIR} PATH)
     set(GIT_DIR "${GIT_PARENT_DIR}/.git")
     if(EXISTS "${GIT_DIR}")
@@ -57,61 +70,85 @@ if(GIT_FOUND)
     else()
         set(GIT_BRANCH "NOTFOUND")
     endif()
-    # message("git branch: ${GIT_BRANCH}")
 endif(GIT_FOUND)
 
 string(TIMESTAMP BUILD_DATE)
 
 find_package(GSL 2.0 REQUIRED)
+if(GSL_FOUND)
+    if(TARGET GSL::gsl AND TARGET GSL::gslcblas)
+        create_system_wrapper_target(GSL_bundle GSL::gsl GSL::gslcblas)
+        list(APPEND SMASH_LIBRARIES GSL_bundle)
+    else()
+        message(FATAL_ERROR " \n" " GSL library found, but its targets are somehow missing.\n"
+                            " Ensure to be using the official CMake module to find it.\n")
+    endif()
+endif()
+
 find_package(Eigen3 3.0 REQUIRED)
+if(EIGEN3_FOUND)
+    if(TARGET Eigen3::Eigen)
+        list(APPEND SMASH_LIBRARIES Eigen3::Eigen)
+    else()
+        message(FATAL_ERROR " \n" " Eigen3 library found, but its target is somehow missing.\n"
+                            " Ensure to be using the provided CMake module to find it.\n")
+    endif()
+endif()
 
 option(TRY_USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
 if(TRY_USE_ROOT)
-    find_package(ROOT QUIET) # Min version not handled here but after to better inform user
-    set(ROOT_MINIMUM_VERSION "5.34")
+    find_package(ROOT CONFIG QUIET COMPONENTS Core RIO Tree)
+    set(ROOT_MINIMUM_VERSION "6.20")
     if(ROOT_FOUND)
         message(STATUS "Candidate ROOT version ${ROOT_VERSION} found, "
                        "requested ${ROOT_MINIMUM_VERSION}")
-        if(${ROOT_VERSION} VERSION_LESS ${ROOT_MINIMUM_VERSION})
+        if(ROOT_VERSION VERSION_LESS ROOT_MINIMUM_VERSION)
             set(ROOT_FOUND FALSE)
         endif()
     endif()
     if(ROOT_FOUND)
-        message(STATUS "Found valid ROOT ${ROOT_VERSION} (include at ${ROOT_INCLUDE_DIR}).")
-        include_directories(SYSTEM "${ROOT_INCLUDE_DIR}")
-        set(SMASH_LIBRARIES ${ROOT_LIBRARIES})
-        add_definitions(-DSMASH_USE_ROOT)
+        message(STATUS "Found ROOT: ${ROOT_INCLUDE_DIRS} (version ${ROOT_VERSION})")
+        create_system_wrapper_target(ROOT_bundle ROOT::Core ROOT::RIO ROOT::Tree)
+        list(APPEND SMASH_LIBRARIES ROOT_bundle)
+        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_ROOT")
     else()
         message(STATUS "Suitable ROOT not found. Support disabled. "
                        "See README for more information.")
     endif()
 endif()
 
-option(TRY_USE_HEPMC "Turn this off to disable HepMC output support in SMASH." ON)
+option(TRY_USE_HEPMC "Turn this off to disable HepMC3 output support in SMASH." ON)
 if(TRY_USE_HEPMC OR TRY_USE_RIVET)
-    find_package(HepMC3 QUIET) # Min version not handled here but after to better inform user
-    set(HepMC3_MINIMUM_VERSION "3.2.3")
+    find_package(HepMC3 QUIET CONFIG) # Min version not handled here but after to better inform user
+    set(HepMC3_MINIMUM_VERSION "3.2.6")
     if(HepMC3_FOUND)
-        message(STATUS "Candidate HepMC version ${HepMC3_VERSION} found, "
+        message(STATUS "Candidate HepMC3 version ${HepMC3_VERSION} found, "
                        "requested ${HepMC3_MINIMUM_VERSION}")
-        if(${HepMC3_VERSION} VERSION_LESS ${HepMC3_MINIMUM_VERSION})
+        if(HepMC3_VERSION VERSION_LESS HepMC3_MINIMUM_VERSION)
             set(HepMC3_FOUND FALSE)
         endif()
     endif()
     if(HepMC3_FOUND)
-        message(STATUS "Found valid HepMC ${HepMC3_VERSION} (include at ${HEPMC3_INCLUDE_DIR}).")
-        include_directories(SYSTEM "${HEPMC3_INCLUDE_DIR}")
-        set(SMASH_LIBRARIES ${SMASH_LIBRARIES} ${HEPMC3_LIBRARIES})
-        add_definitions(-DSMASH_USE_HEPMC)
-        if((NOT HEPMC3_ROOTIO_LIB) OR (NOT ROOT_FOUND))
-            message(STATUS "HepMC3_treeroot output disabled, missing ROOT and/or "
-                           "HepMC3 ROOT I/O support")
+        message(STATUS "Found HepMC3: ${HEPMC3_INCLUDE_DIR} (version ${HepMC3_VERSION})")
+        if(NOT TARGET HepMC3::HepMC3)
+            message(FATAL_ERROR "HepMC3 found, but its main target is missing.")
+        else()
+            set(HEPMC3_TARGETS HepMC3::HepMC3)
+        endif()
+        if(NOT ROOT_FOUND)
+            message(STATUS "HepMC3_treeroot output disabled, missing ROOT support")
+        elseif(NOT TARGET HepMC3::rootIO)
+            message(STATUS "HepMC3_treeroot output disabled, missing HepMC3 ROOT I/O support")
         else()
             message(STATUS "HepMC3_treeroot output support enabled")
-            add_definitions(-DSMASH_USE_HEPMC_ROOTIO)
+            list(APPEND HEPMC3_TARGETS HepMC3::rootIO)
+            list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_HEPMC_ROOTIO")
         endif()
+        create_system_wrapper_target(HepMC3_bundle ${HEPMC3_TARGETS})
+        list(APPEND SMASH_LIBRARIES HepMC3_bundle)
+        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_HEPMC")
     else()
-        message(STATUS "Suitable HepMC not found. Support disabled. "
+        message(STATUS "Suitable HepMC3 not found. Support disabled. "
                        "See README for more information.")
     endif()
 endif()
@@ -123,52 +160,45 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
     if(Rivet_FOUND)
         message(STATUS "Candidate Rivet version ${RIVET_VERSION} found, "
                        "requested ${Rivet_MINIMUM_VERSION}")
-        if(${RIVET_VERSION} VERSION_LESS "${Rivet_MINIMUM_VERSION}")
+        if(RIVET_VERSION VERSION_LESS Rivet_MINIMUM_VERSION)
             set(Rivet_FOUND FALSE)
-        elseif(${RIVET_VERSION} VERSION_GREATER_EQUAL "3.2")
+        elseif(RIVET_VERSION VERSION_GREATER_EQUAL "3.2")
             message(ATTENTION "Rivet version larger than 3.1.x found. "
                               "The SMASH interface might miss some functionality.")
         endif()
     endif()
     if(Rivet_FOUND)
-        message(STATUS "Found valid Rivet ${RIVET_VERSION} (include at ${RIVET_INCLUDE_DIR}).")
-        include_directories(SYSTEM "${RIVET_INCLUDE_DIR}")
-        set(SMASH_LIBRARIES ${SMASH_LIBRARIES} ${RIVET_LIBRARIES})
-        add_definitions(-DSMASH_USE_RIVET)
-        set(Rivet_FOUND TRUE)
+        message(STATUS "Found Rivet ${RIVET_INCLUDE_DIR} (version ${RIVET_VERSION})")
+        if(NOT TARGET Rivet::Rivet)
+            message(FATAL_ERROR " \n" " Rivet library found, but its target is somehow missing.\n"
+                                " Ensure to be using the provided CMake module to find it.\n")
+        endif()
+        list(APPEND SMASH_LIBRARIES Rivet::Rivet)
+        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_RIVET")
     else()
         message(STATUS "Suitable Rivet not found. Support disabled. "
                        "See README for more information.")
     endif()
 endif()
 
-# find Pythia
 find_package(Pythia 8.316 EXACT REQUIRED)
 if(Pythia_FOUND)
-    # the BEFORE at the line below is due to
-    # https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
-    include_directories(BEFORE SYSTEM "${Pythia_INCLUDE_DIRS}")
-    set(SMASH_LIBRARIES ${SMASH_LIBRARIES} ${Pythia_LIBRARIES} ${CMAKE_DL_LIBS})
-    add_definitions("-DPYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\"" -DPYTHIA_FOUND)
+    if(NOT TARGET Pythia::Pythia)
+        message(FATAL_ERROR "Pythia library found, but its target is somehow missing.\n"
+                            "Ensure to be using the provided CMake module to find it.\n")
+    endif()
+    # Here we PREPEND the Pythia target to the list of libraries to ensure that it is linked before
+    # all the other and it is meant to avoid possible issues with e.g. ROOT whose include
+    # directories might contain a Pythia.h header that might not be the one of the Pythia linked to
+    # SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
+    list(PREPEND SMASH_LIBRARIES Pythia::Pythia)
+    list(APPEND SMASH_INTERNAL_DEFINITIONS "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+         "PYTHIA_FOUND")
 endif()
 
 # set up include paths
 include_directories(include)
 include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
-include_directories(SYSTEM ${GSL_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR})
-
-# set default libraries for linking
-set(SMASH_LIBRARIES
-    ${SMASH_LIBRARIES}
-    ${GSL_LIBRARY}
-    ${GSL_CBLAS_LIBRARY}
-    einhard
-    yaml-cpp
-    cuhre
-    suave
-    divonne
-    vegas # Cuba multidimensional integration
-)
 
 # ~~~
 # For GNU and Clang compilers, link to C++ filesystem library if compiler version requires it
@@ -283,23 +313,21 @@ if(ENABLE_NANOBENCHMARKING)
         message(WARNING "Nanobenchmarking is not supported on ARM processors and it was disabled.")
     else()
         set(smash_src ${smash_src} tsc.cc)
-        add_definitions(-DUSE_NANOBENCHMARKING_CODE)
+        list(APPEND SMASH_INTERNAL_DEFINITIONS "USE_NANOBENCHMARKING_CODE")
     endif()
 endif()
 
 # this is the "object library" target: compiles the sources only once see
 # https://stackoverflow.com/a/29824424 NOTE: shared libraries need PIC and this is already set for
 # all targets through CMAKE_POSITION_INDEPENDENT_CODE
-add_library(objlib OBJECT ${smash_src})
-target_link_libraries(objlib
-                      PUBLIC einhard
-                             cuhre
-                             suave
-                             divonne
-                             vegas
-                             yaml-cpp)
+add_library(smash_objlib OBJECT ${smash_src})
+target_compile_definitions(smash_objlib PUBLIC ${SMASH_CLIENT_DEFINITIONS}
+                                               ${SMASH_INTERNAL_DEFINITIONS})
+target_compile_options(smash_objlib PUBLIC ${SMASH_PRIVATE_COMPILE_OPTIONS})
+target_link_libraries(smash_objlib PUBLIC ${SMASH_LIBRARIES})
 
-add_executable(smash smash.cc $<TARGET_OBJECTS:objlib>)
+add_executable(smash smash.cc $<TARGET_OBJECTS:smash_objlib>)
+target_link_libraries(smash PRIVATE smash_objlib)
 
 # configure a header file to pass some of the CMake settings to the source code
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/smash/config.h.in"
@@ -326,25 +354,27 @@ macro(generate_headers)
     endforeach()
 endmacro()
 generate_headers(particles.txt decaymodes.txt)
-
 set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated_headers}")
-
-target_link_libraries(smash ${SMASH_LIBRARIES})
 
 # Create a shared library out of the whole SMASH. Note that, since "the build-tree runtime path will
 # not be used for binaries in the install tree" (CMake documentation), we request here to set the
 # INSTALL_RPATH in the library to ensure that projects linking to SMASH finds at run time libraries
-# like Pythia, which are likely to be in not standard places.
-add_library(smash_shared SHARED $<TARGET_OBJECTS:objlib>)
-target_link_libraries(smash_shared ${SMASH_LIBRARIES})
+# like Pythia, which are likely to be in not standard places. Furthermore, smash_shared is linked
+# privately to the object library to avoid that the dependency on the external libraries is
+# propagated to users of the shared library, which should not be aware of them. The client
+# definitions are re-exposed to users of the shared library since they are needed to use it.
+add_library(smash_shared SHARED $<TARGET_OBJECTS:smash_objlib>)
+target_link_libraries(smash_shared PRIVATE smash_objlib)
+target_compile_definitions(smash_shared PUBLIC ${SMASH_CLIENT_DEFINITIONS})
 set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
                                               INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # tests:
 if(BUILD_TESTING)
     # library for unit tests
-    add_library(smash_static STATIC $<TARGET_OBJECTS:objlib>)
-    set_target_properties(smash_static PROPERTIES OUTPUT_NAME smash)
+    add_library(smash_testlib STATIC $<TARGET_OBJECTS:smash_objlib>)
+    target_link_libraries(smash_testlib PUBLIC smash_objlib)
+    set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash)
     # Look for sanitizers supported by the compiler. Sanitizers add instrumentation code to the
     # executable that test correctness of the code:
     #
@@ -376,12 +406,12 @@ if(BUILD_TESTING)
         set(USE_SANITIZER FALSE)
     endif()
 
-    # define BUILD_TESTS for smash_static in order to enable small code changes for the unit tests.
+    # define BUILD_TESTS for smash_testlib in order to enable small code changes for the unit tests.
     # It is an unfortunate side effect that the sanitzer build now also compiles to slightly
     # different code. To fix this we'd have to compile all source files a third time... not sure we
     # prefer that.
     if(USE_SANITIZER)
-        set_target_properties(smash_static
+        set_target_properties(smash_testlib
                               PROPERTIES COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
                                          LINK_FLAGS ${SANITIZER_FLAG})
 
@@ -389,9 +419,9 @@ if(BUILD_TESTING)
         set_target_properties(smash_sanitizer
                               PROPERTIES COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
                                          LINK_FLAGS ${SANITIZER_FLAG})
-        target_link_libraries(smash_sanitizer smash_static ${SMASH_LIBRARIES})
+        target_link_libraries(smash_sanitizer smash_testlib)
     else()
-        set_target_properties(smash_static PROPERTIES COMPILE_FLAGS "-DBUILD_TESTS")
+        set_target_properties(smash_testlib PROPERTIES COMPILE_FLAGS "-DBUILD_TESTS")
     endif()
 
     add_subdirectory(tests)
