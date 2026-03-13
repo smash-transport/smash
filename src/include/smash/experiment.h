@@ -2491,25 +2491,22 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     const BremsstrahlungActionDilepton::FormFactorType form_factor_type = 
         BremsstrahlungActionDilepton::FormFactorType::FF1;
     
-        // Create the dilepton bremsstrahlung action with the respective form factor.
+    // Create the dilepton bremsstrahlung action with the respective form factor.
     BremsstrahlungActionDilepton dilepton_brems_act(
         action.incoming_particles(), action_time, action.get_total_weight(), form_factor_type);
 
-    // Add a completely dummy process to the dilepton bremsstrahlung action. The
+    // Add a dummy process to the dilepton bremsstrahlung action. The
     // only important thing is that its cross section is equal to the cross section
     // of the hadronic action. This can be done, because the dilepton bremsstrahlung
     // action is never actually performed, only the final state is generated and
-    // printed to the dilepton output. Note: The cross_section_scaling_factor can
-    // be neglected here, since it cancels out for the weighting, where a ratio
-    // of (unscaled) dilepton bremsstrahlung cross section and (unscaled) hadronic
-    // cross section is taken.
+    // printed to the dilepton output.
+    // Furthermore, the add_single_process() logic used in the photon bremsstrahlung
+    // becomes obsolet since there are no sub-branches leading to the output at the
+    // moment. Therefore, the very reduced logic from this function is incorporated
+    // into add_dummy_hadronic_process.
     dilepton_brems_act.add_dummy_hadronic_process(action.get_total_weight());
-
-    // Compute dilepton bremsstrahlung cross sections and register 
-    // the single pn -> pne⁺e⁻ process branch.
-    // Analogous to the photon bremsstrahlung add_single_process().
-    dilepton_brems_act.add_single_process();
-
+    
+    // TODO: Go on from here next week.
     dilepton_brems_act.perform_dilepton_bremsstrahlung(outputs_);
   }
   

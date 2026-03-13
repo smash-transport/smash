@@ -114,18 +114,7 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    */
   void add_dummy_hadronic_process(double reaction_cross_section);
 
-  /**
-   * Compute dilepton bremsstrahlung cross sections and register
-   * the single pn -> pne⁺e⁻ process branch. Must be called after 
-   * add_dummy_hadronic_process() and before perform_dilepton_bremsstrahlung().
-   * Analogous to the photon bremsstrahlung add_single_process().
-   */
-  void add_single_process() {
-    add_processes<CollisionBranch>(dilepton_brems_cross_sections(),
-                                   collision_processes_dilepton_bremsstrahlung_,
-                                   cross_section_dilepton_bremsstrahlung_);
-  }
-
+  // TODO: Go on from here next week.
   /**
    * Create the final state and write to output.
    *
@@ -173,10 +162,6 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   /// Form factor type: FF1, FF2 or no_form_factor.
   const FormFactorType form_factor_type_;
 
-  //TODO: Probably not needed anymore but to be checked after implementation.
-  /// Weight of the produced photon.
-  /// double weight_ = 0.0;
-
   /// Total cross section of dilepton bremsstrahlung process [mb].
   double cross_section_dilepton_bremsstrahlung_ = 0.0;
 
@@ -191,13 +176,6 @@ class BremsstrahlungActionDilepton : public ScatterAction {
 
   /// Sampled invariant mass of the dilepton pair
   double M_;
-
-  /**
-   * Computes the total cross section of the dilepton bremsstrahlung process.
-   *
-   * \returns List of photon reaction branches.
-   */
-  CollisionBranchList dilepton_brems_cross_sections();
 
 /**
    * Computes the differential cross sections dSigma/dk and dSigma/dtheta of the

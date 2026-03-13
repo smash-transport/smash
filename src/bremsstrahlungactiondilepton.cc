@@ -54,7 +54,7 @@ BremsstrahlungActionDilepton::dilepton_brems_reaction_type(const ParticleList &i
 }
 
 // ── Dummy hadronic process ────────────────────────────────────────────────────
-// Same pattern as BremsstrahlungAction::add_dummy_hadronic_process():
+// First, same pattern as BremsstrahlungAction::add_dummy_hadronic_process():
 // The hadronic scatteraction (p+n elastic) is registered as a dummy
 // to satisfy the ScatterAction machinery, while the actual dilepton
 // emission is handled otherwise and does not rely on this machinery.
@@ -63,83 +63,43 @@ void BremsstrahlungActionDilepton::add_dummy_hadronic_process(
   CollisionBranchPtr dummy_process = std::make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
       reaction_cross_section, ProcessType::BremsstrahlungDilepton);
-  add_collision(std::move(dummy_process));
-}
 
-// ── Total cross section for CollisionBranch ──────────────────────────────────
-CollisionBranchList BremsstrahlungActionDilepton::dilepton_brems_cross_sections() {
-  CollisionBranchList process_list;
-  // First, define all outgoing particles at the end of the reaction,
-  // i.e. the righthand side of the reaction np (-> np\gamma) -> npe⁺e⁻
+  add_collision(std::move(dummy_process));
+
+  // Second, define all outgoing particles at the end of the reaction,
+  // i.e. the righthand side of the reaction np (-> np\gamma) -> npe⁺e⁻.
+  // As this is the only process and there is no branching logic as
+  // with the photon case, the add_single_process() function is not needed and 
+  // the outgoing particles can be defined directly here.
   static const ParticleTypePtr e_p_particle = &ParticleType::find(pdg::e_p);
   static const ParticleTypePtr e_m_particle = &ParticleType::find(pdg::e_m);
   static const ParticleTypePtr p_particle = &ParticleType::find(pdg::p);
   static const ParticleTypePtr n_particle = &ParticleType::find(pdg::n);
 
-  // If the reaction is not the defined np reaction, return the empty list and exit.
-  // TODO: The photon process actually has more than one branch and therefore goes
-  //       through the different reactions with multiple if-statements, ending with
-  //       an else-statement throwing a runtime error. I do not think this is needed,
-  //       hence, only in case it is not an np reaction the process list is returned.
-  if (reac_ != ReactionType::np) {
-    return process_list;
-  }
+  // Third, add the dilepton bremsstrahlung process branch to the final state list.
+  CollisionBranchList final_state_list;
 
-  // Find cross section corresponding to given sqrt(s)
-  double sqrts = sqrt_s();
-  double xsection;
+  // TODO: This part is commented out for now as reac_ is for sure np, 
+  //       but it can be reworked in case we want to add more reactions in the future.
+  //       In this case, the function needs to be changed as current return is void.
+  /**
+   * if (reac_ != ReactionType::np) {
+   *     return final_state_list;
+   * }
+   */
 
-  if (reac_ == ReactionType::pi_p_pi_m) {
-    // Here the final state is determined by the the final state provided by the
-    // sampled process using Monte Carlo techniqus
-
-    // Prevent negative cross sections due to numerics in interpolation
-    xsection_pipi = (xsection_pipi <= 0.0) ? really_small : xsection_pipi;
-    xsection_pi0pi0 = (xsection_pi0pi0 <= 0.0) ? really_small : xsection_pi0pi0;
-
-    // Necessary only to decide for a final state with pi+ and pi- as incoming
-    // particles.
-    CollisionBranchList process_list_pipi;
-
-    // Add both processes to the process_list
-    process_list_pipi.push_back(std::make_unique<CollisionBranch>(
-        incoming_particles_[0].type(), incoming_particles_[1].type(),
-        *photon_particle, xsection_pipi, ProcessType::Bremsstrahlung));
-    process_list_pipi.push_back(std::make_unique<CollisionBranch>(
-        *pi_z_particle, *pi_z_particle, *photon_particle, xsection_pi0pi0,
-        ProcessType::Bremsstrahlung));
-
-    // Decide for one of the possible final states
-    double total_cross_section = xsection_pipi + xsection_pi0pi0;
-    const CollisionBranch *proc =
-        choose_channel<CollisionBranch>(process_list_pipi, total_cross_section);
-
-    xsection = proc->weight();
-
-    process_list.push_back(std::make_unique<CollisionBranch>(
-        proc->particle_list()[0].type(), proc->particle_list()[1].type(),
-        *photon_particle, xsection, ProcessType::Bremsstrahlung));
-
-  } else if (reac_ == ReactionType::pi_m_pi_m ||
-             reac_ == ReactionType::pi_p_pi_p ||
-             reac_ == ReactionType::pi_z_pi_m ||
-             reac_ == ReactionType::pi_z_pi_p) {
-    // Here the final state hadrons are identical to the initial state hadrons
-    if (reac_ == ReactionType::pi_m_pi_m || reac_ == ReactionType::pi_p_pi_p) {
-      xsection = (*pipi_pipi_same_interpolation)(sqrts);
-    }
-
-    // Prevent negative cross sections due to numerics in interpolation
-    xsection = (xsection <= 0.0) ? really_small : xsection;
-
-    process_list.push_back(std::make_unique<CollisionBranch>(
-        incoming_particles_[0].type(), incoming_particles_[1].type(),
-        *photon_particle, xsection, ProcessType::Bremsstrahlung));
-
-  return process_list;
+  final_state_list.push_back(std::make_unique<CollisionBranch>(
+      *p_particle, *n_particle,
+      *e_p_particle, *e_m_particle,
+      reaction_cross_section,
+      ProcessType::BremsstrahlungDilepton));
+  
+  add_processes<CollisionBranch>(final_state_list, 
+    collision_processes_dilepton_bremsstrahlung_,
+    cross_section_dilepton_bremsstrahlung_);
 }
 
-
+// TODO: Go on from here next week. The following functions are still to be implemented:
 // ── Perform dilepton bremsstrahlung ────────────────────────────────────────────────
 /* The function perform_dilepton_bremsstrahlung is called to create the final state and write it
  * to the output. It first generates the final state by calling generate_final_state(), and then 
