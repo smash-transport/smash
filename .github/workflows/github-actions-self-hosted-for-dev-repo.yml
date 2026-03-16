@@ -52,8 +52,10 @@ jobs:
           # we build the documentation
           singularity exec ${container_file} make undocumented_test
           singularity exec ${container_file} make user
+          echo "SMASH documentation has been successfully built."
           # we build SMASH
           singularity exec ${container_file} make -j $(nproc)
+          echo "SMASH has been successfully built."
           # now we run the tests, excluding cpplint (which has been already executed) and potentials*
           singularity exec ${container_file} ctest -j$(nproc) -E "^(potentials(_run)?|cpplint)$"
           # now we run the potentials* tests that require some additional care
@@ -99,8 +101,10 @@ jobs:
           # we build the documentation
           make undocumented_test
           make user
+          echo "SMASH documentation has been successfully built."
           # we build SMASH
           make -j $(nproc)
+          echo "All SMASH targets have been built, now tests will be run."
           # now we run the tests, excluding cpplint (which has been already executed) and potentials*
           ctest -j$(nproc) -E "^(potentials(_run)?|cpplint)$"
           # now we run the potentials* tests that require some additional care
