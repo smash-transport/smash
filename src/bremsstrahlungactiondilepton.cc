@@ -30,9 +30,10 @@ BremsstrahlungActionDilepton::BremsstrahlungActionDilepton(
 
 // ── Reaction type ─────────────────────────────────────────────────────────────      
 BremsstrahlungActionDilepton::ReactionType
-BremsstrahlungActionDilepton::dilepton_brems_reaction_type(const ParticleList &in) {
-  /* Currently, only n+p dilepton bremsstrahlung is implemented. This function checks
-   * if the incoming particles correspond to this process and returns the
+BremsstrahlungActionDilepton::dilepton_brems_reaction_type(const ParticleList &in)
+ {
+  /* Currently, only n+p dilepton bremsstrahlung is implemented. This function 
+   * checks if the incoming particles correspond to this process and returns the
    * corresponding enum. If the incoming particles do not correspond to any
    * implemented process, no_reaction is returned.
    */
@@ -79,7 +80,7 @@ void BremsstrahlungActionDilepton::add_dummy_hadronic_process(
   // Third, add the dilepton bremsstrahlung process branch to the final state list.
   CollisionBranchList final_state_list;
 
-  // TODO: This part is commented out for now as reac_ is for sure np, 
+  // TODO: This part is commented out for now as reac_ is for sure 'np', 
   //       but it can be reworked in case we want to add more reactions in the future.
   //       In this case, the function needs to be changed as current return is void.
   /**
@@ -88,6 +89,9 @@ void BremsstrahlungActionDilepton::add_dummy_hadronic_process(
    * }
    */
 
+  // For the 'np' reaction, the final state is 'pn e⁺e⁻' in this order. 
+  // The order of particles written in CollisionBranch is relevant for the usage
+  // in generate_final_state() to identify the outgoing_particles_ correctly.
   final_state_list.push_back(std::make_unique<CollisionBranch>(
       *p_particle, *n_particle,
       *e_p_particle, *e_m_particle,
@@ -99,14 +103,16 @@ void BremsstrahlungActionDilepton::add_dummy_hadronic_process(
     cross_section_dilepton_bremsstrahlung_);
 }
 
-// TODO: Go on from here next week. The following functions are still to be implemented:
-// ── Perform dilepton bremsstrahlung ────────────────────────────────────────────────
-/* The function perform_dilepton_bremsstrahlung is called to create the final state and write it
- * to the output. It first generates the final state by calling generate_final_state(), and then 
- * iterates over the list of outputs to find the dilepton output and writes the interaction to it.
+// ── Perform dilepton bremsstrahlung ───────────────────────────────────────────
+/* The function perform_dilepton_bremsstrahlung is called to create the final 
+ * state and write it to the output. It first generates the final state by calling
+ * generate_final_state(), and then iterates over the list of outputs to find the 
+ * dilepton output and writes the interaction to it.
 */
-void BremsstrahlungActionDilepton::perform_dilepton_bremsstrahlung(const OutputsList &outputs) {
-  // Compared to photon bremsstrahlung, only one photon is created. Hence, no loop anymore.
+void BremsstrahlungActionDilepton::perform_dilepton_bremsstrahlung(const OutputsList &outputs) 
+{
+  // Compared to photon bremsstrahlung, only one photon is created.
+  // Hence, no loop anymore.
   generate_final_state();
   for (const auto &output : outputs) {
     // we only care about the dilepton output, the function will take care of this
@@ -119,8 +125,7 @@ void BremsstrahlungActionDilepton::perform_dilepton_bremsstrahlung(const Outputs
 
 // ── Main: generate_final_state ────────────────────────────────────────────────
 void BremsstrahlungActionDilepton::generate_final_state() {
-  //TODO: Rework completely for dileptons.
-  // we have only one reaction per incoming particle pair
+  // Sanity check: exactly one process branch expected
   if (collision_processes_dilepton_bremsstrahlung_.size() != 1) {
     logg[LScatterAction].fatal()
         << "Problem in BremsstrahlungActionDilepton::generate_final_state().\nThe "
@@ -129,35 +134,148 @@ void BremsstrahlungActionDilepton::generate_final_state() {
         << " entries. It should however have 1.";
     throw std::runtime_error("");
   }
-
+  // Get the process branch and define the outgoing particles from it.
   auto *proc = collision_processes_dilepton_bremsstrahlung_[0].get();
 
   outgoing_particles_ = proc->particle_list();
   process_type_ = proc->get_type();
+  // Get the interaction point that is needed much later
   FourVector interaction_point = get_interaction_point();
 
-  // Sample k and theta:
-  // minimum cutoff for k to be in accordance with cross section calculations
-  double delta_k;  // k-range
-  double k_min = 0.001;
-  double k_max =
-      (sqrt_s() * sqrt_s() - 2 * outgoing_particles_[0].type().mass() * 2 *
-                                 outgoing_particles_[1].type().mass()) /
-      (2 * sqrt_s());
+  // Get the nucleon masses once to not get confused later.
+  const double m_p = outgoing_particles_[0].type().mass();  // proton
+  const double m_n = outgoing_particles_[1].type().mass();  // neutron
 
-  if ((k_max - k_min) < 0.0) {
-    // Make sure it is kinematically even possible to create a photon that is
-    // in accordance with the cross section cutoff
-    k_ = 0.0;
-    delta_k = 0.0;
-  } else {
-    k_ = random::uniform(k_min, k_max);
-    delta_k = (k_max - k_min);
+  // DOCUMENT: Fixed electron mass [GeV] included in constants.h now.
+  //           Not sure if this would immediately work the same way as above via
+  //           ParticleType, but to be seen. 
+  const double m_e = outgoing_particles_[2].type().mass();  // electron mass
+
+  // ── Step 1: Sample invariant mass M of dilepton pair ────────────────────────
+  //
+  // M runs from the kinematic threshold 2m_e up to the maximum value
+  // allowed by 3-body kinematics: M_max = sqrt(s) - m_p - m_n.
+  // Uniform sampling; physical distribution enters via the weight below.
+  // (Analogous to k_ = random::uniform(k_min, k_max) in BremsstrahlungAction)
+
+  double delta_M;
+  // Minimum mass is 2m_e, as the dilepton pair has to be created on-shell.
+  const double M_min = 2.0 * m_e;
+  // Maximum mass is given by the kinematics of the 3-body final state.
+  const double M_max = sqrt_s() - m_p - m_n;
+  // Check if it is kinematically possible to create a dilepton pair.
+  // If not, set the weight to 0 and return.
+  if (M_max <= M_min) {
+    weight_ = 0.0;
+    return;
   }
-  theta_ = random::uniform(0.0, M_PI);
+  // If it is kinematically possible, sample M uniformly in the allowed range
+  // and set delta_M accordingly. 
+  else {
+    M_ = random::uniform(M_min, M_max);
+    delta_M = M_max - M_min;
+  }
 
-  // Sample the phase space anisotropically in the local rest frame
-  sample_3body_phasespace();
+  // ── Step 2: Sample dilepton 3-momentum q ────────────────────────
+  //
+  // After fixing M, the momentum q depends on the CM energy sqrt_s.
+  // There is a lower limit stemming from the kinematics of the 3-body final state. 
+  // Given the sampled mass (which impacts the available phase space), 
+  // the total energy in the CM frame must fit as well to create a dilepton pair. 
+  // This translates into a minimum q_min that can be calculated from the 
+  // kinematics of the 3-body final state. 
+  
+  // The upper limit q_max follows from the allowed kinematic range q²= E²-M² >= 0, 
+  // which can be expressed in terms of the the implemented Källén function named
+  // Action::lambda_tilde used in the 3-body kinematics. 
+  // It holds q² = lambda_tilde(s, M², (m_p+m_n)²)/4s.
+
+  // Calculate the lower limit of q from the kinematics of the 3-body final state 
+  // given the sampled M_.
+  double q_min;
+  // Corresponding minimum energy E_min of the dilepton pair in the pn-CM frame 
+  // given the beam energy.
+  const double E_min = (sqrt_s()*sqrt_s() + M_*M_ - (m_p + m_n)*(m_p + m_n)) / 
+    (2.0 * sqrt_s());
+  // The minimum q_min is then given by sqrt(E_min² - M_²). If this is negative, 
+  // set q_min to 0.
+  if (E_min > M_) {
+    q_min = std::sqrt(E_min * E_min - M_ * M_);
+  } else {
+    q_min = 0.0;
+  }
+  
+  // Calculate q_max from the built-in pCM function.
+  const double q_max = pCM(sqrt_s(), M_, m_p + m_n);
+  
+  // Sample q_ uniformly in [q_min, q_max] if kinematically allowed, otherwise set
+  // the weight to 0 and return.
+  double delta_q;
+  if (q_max > q_min) {
+    q_ = random::uniform(q_min, q_max);
+    delta_q = q_max - q_min;
+  } else {
+    weight_ = 0.0;
+    return;
+  }
+
+  // ── Step 3: Sample polar and azimuthal angles of dilepton in pn-CM frame ────
+  //
+  // Analogous to theta_ in BremsstrahlungAction but phi here explicitly as well.
+  // Uniform in [0, pi]; azimuthal angle phi uniform in [0, 2pi].
+  theta_ = random::uniform(0.0, M_PI);
+  const double phi = random::uniform(0.0, twopi);
+
+  // ── Step 4 (Stage 1): Construct dilepton 4-momentum in pn-CM frame ──────────
+  //
+  // The virtual photon carries 4-momentum p_ll with:
+  //   |p_ll| = q,  E_ll = sqrt(q²+M²),  direction (theta, phi)
+  const double E_ll = std::sqrt(q_ * q_ + M_ * M_);
+
+  // Photon angle: phi, theta_ from above as in BremsstrahlungAction.
+  const Angles phitheta(phi, std::cos(theta_));
+
+  // Construct the dilepton 4-momentum in the pn-CM frame. 
+  // The dilepton pair is treated as a single particle with mass M_ and momentum q_ 
+  // in the direction given by phitheta.
+  const FourVector p_ll(E_ll, q_ * phitheta.threevec());
+
+  // To better distinguish the notation, let (pn)' denote the recoil nucleon pair 
+  // after the collision.
+  // Calculate the recoil for the (pn)' subsystem to check whether there is enough 
+  // energy to create the outgoing pn pair. This is introduced compared 
+  // to the photon case to ensure that the reaction is physically possible. 
+  const FourVector p_recoil = total_momentum_of_outgoing_particles() - p_ll;
+
+  // ── Step 5 (Stage 2): "Decay" of subsystems into e⁺e⁻ ───────────────────────
+  //
+  // The invariant mass of the (pn)' subsystem is sqrt(p_recoil²), so basically 
+  // sqrt_s for (pn)' only.
+  // If the invariant mass of (pn)' is smaller than the rest masses of p and n,
+  // set the weight to 0 and return, as the action is energetically not possible.
+  // Momentum of the (pn)' subsystem in its CM frame, calculated from the built-in
+  // pCM function.
+  // Within (pn)' subsystem, sample the angles of p and n isotropically...
+  // ... and set the 4-momenta of the outgoing p and n in the (pn)' CM frame 
+  // accordingly.
+  // Obtain the velocity of the (pn)' subsystem relative to the pn-CM frame.
+  // By construction of p_recoil above, the velocity of the (pn)' subsystem is 
+  // opposite to the velocity of the dilepton pair. 
+  // Boost the outgoing p and n from the moving (pn)' subsystem back to the 
+  // pn-CM frame.
+  // Note that the dilepton pair is, by construction, already in the pn-CM frame 
+  // and no boost is needed for it here.
+  sample_2body_isotropic(p_recoil, outgoing_particles_[0], outgoing_particles_[1]);
+
+  // Isotropic 2-body decay in the virtual photon rest frame, then boost to 
+  // pn-CM frame. This step is independent of the SPA formula and the PEFF —
+  // it is pure kinematic bookkeeping.
+  sample_2body_isotropic(p_ll, outgoing_particles_[2], outgoing_particles_[3]);
+
+  // TODO: Continue here tomorrow with step 6.
+
+
+
 
   // Get differential cross sections
   std::pair<double, double> diff_xs_pair = dilepton_brems_diff_cross_sections();
@@ -188,33 +306,52 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   Action::check_conservation(id_process);
 }
 
-// ── Stage 1: Sample k and theta, assign weight, set positions and boost ──────────
-void BremsstrahlungActionDilepton::sample_3body_phasespace() {
-  //TODO: Rework completely for dileptons.
-  assert(outgoing_particles_.size() == 3);
-  const double m_a = outgoing_particles_[0].type().mass(),
-               m_b = outgoing_particles_[1].type().mass(),
-               m_c = outgoing_particles_[2].type().mass();
-  const double sqrts = sqrt_s();
-  const double E_ab = sqrts - m_c - k_;  // Ekin of the pion pair in cm frame
-  const double pcm = pCM(sqrts, E_ab, m_c);  // cm momentum of (π pair - photon)
-  const double pcm_pions = pCM(E_ab, m_a, m_b);  // cm momentum within pion pair
+// ── Stage 2: "Decay" of subsystem ─────────────────────────────────────────────
+// This function assumes a 2-body decay of a parent particle into two daughters, 
+// where the parent particle can be a subsystem of the reaction,
+// e.g. the virtual photon in the dilepton case.
+// The reaction is AB -> (AB)' + C and C can be a dilepton pair.
+void BremsstrahlungActionDilepton::sample_2body_isotropic(
+    const FourVector &p_parent, ParticleData &daughter1, ParticleData &daughter2)
+{
+  // The invariant mass of the (AB)' subsystem is sqrt(p_parent²), so basically 
+  // sqrt_s for (AB)' only.
+  const double M_parent = p_parent.abs();
 
-  // Photon angle: Phi random, theta from theta_ sampled above
-  const Angles phitheta_photon(random::uniform(0.0, twopi), std::cos(theta_));
-  outgoing_particles_[2].set_4momentum(m_c, pcm * phitheta_photon.threevec());
-  // Boost velocity to cm frame of the two pions
-  const ThreeVector beta_cm_pion_pair_photon =
-      pcm * phitheta_photon.threevec() / std::sqrt(pcm * pcm + E_ab * E_ab);
+  // If the invariant mass of the (AB)' subsystem is smaller than the sum of the 
+  // rest masses of the daughters, set the weight to 0 and return, as the action 
+  // is energetically not possible.
+  if (M_parent < daughter1.type().mass() + daughter2.type().mass()) {
+    weight_ = 0.0;
+    return;
+  }
 
-  // Sample pion pair isotropically
-  Angles phitheta;
-  phitheta.distribute_isotropically();
-  outgoing_particles_[0].set_4momentum(m_a, pcm_pions * phitheta.threevec());
-  outgoing_particles_[1].set_4momentum(m_b, -pcm_pions * phitheta.threevec());
-  outgoing_particles_[0].boost_momentum(beta_cm_pion_pair_photon);
-  outgoing_particles_[1].boost_momentum(beta_cm_pion_pair_photon);
+  // Momentum of the 2-particle subsystem in its CM frame,
+  // calculated from the built-in pCM function.
+  const double pcm = pCM(M_parent, daughter1.type().mass(), 
+    daughter2.type().mass());
+
+  // Within 2-particle subsystem, sample the angles of daughters isotropically...
+  Angles phitheta_daughters;
+  phitheta_daughters.distribute_isotropically();
+  // ... and set the 4-momenta of the outgoing daughters in the (AB)' CM frame 
+  // accordingly.
+  daughter1.set_4momentum(daughter1.type().mass(),
+    pcm * phitheta_daughters.threevec());
+  daughter2.set_4momentum(daughter2.type().mass(),
+   -pcm * phitheta_daughters.threevec());
+  // Obtain the velocity of the (AB)' subsystem relative to the AB-CM frame.
+  // By construction of p_recoil above, the velocity of the (AB)' subsystem is 
+  // opposite to the velocity of the dilepton pair.
+  const ThreeVector beta = p_parent.velocity();
+  // Boost the outgoing A and B from the moving (AB)' subsystem back to the 
+  // AB-CM frame.
+  // Note that the dilepton pair is, by construction, already in the AB-CM frame 
+  // and no boost is needed for it here.
+  daughter1.boost_momentum(-beta);
+  daughter2.boost_momentum(-beta);
 }
+
 
 
 // ── Stage 2: Sample the phase space anisotropically, get differential cross sections and assign weight ──────────

@@ -2493,20 +2493,20 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     
     // Create the dilepton bremsstrahlung action with the respective form factor.
     BremsstrahlungActionDilepton dilepton_brems_act(
-        action.incoming_particles(), action_time, action.get_total_weight(), form_factor_type);
+        action.incoming_particles(), action_time, action.get_total_weight(), 
+        form_factor_type);
 
     // Add a dummy process to the dilepton bremsstrahlung action. The
-    // only important thing is that its cross section is equal to the cross section
-    // of the hadronic action. This can be done, because the dilepton bremsstrahlung
-    // action is never actually performed, only the final state is generated and
-    // printed to the dilepton output.
+    // only important thing is that its cross section is equal to the cross 
+    // section of the hadronic action. This can be done, because the dilepton 
+    // bremsstrahlung action is never actually performed, only the final state is 
+    // generated and printed to the dilepton output.
     // Furthermore, the add_single_process() logic used in the photon bremsstrahlung
-    // becomes obsolet since there are no sub-branches leading to the output at the
-    // moment. Therefore, the very reduced logic from this function is incorporated
-    // into add_dummy_hadronic_process.
+    // becomes obsolet since there are no sub-branches leading to the output at
+    // the moment. Therefore, the very reduced logic from this function is 
+    // incorporated into add_dummy_hadronic_process.
     dilepton_brems_act.add_dummy_hadronic_process(action.get_total_weight());
     
-    // TODO: Go on from here next week.
     dilepton_brems_act.perform_dilepton_bremsstrahlung(outputs_);
   }
   
@@ -2762,7 +2762,6 @@ void Experiment<Modus>::propagate_and_shine(double to_time,
     }
   }
 }
-//TODO: Add functionality for bremsstrahlung shine in the future for dileptons.
 
 /**
  * Make sure `interactions_total` can be represented as a 32-bit integer.
@@ -3111,7 +3110,6 @@ void Experiment<Modus>::do_final_interactions() {
           dilepton_finder_->shine_final(ensembles_[i_ens], output.get(), true);
         }
       }
-      //TODO: Final bremsstrahlung shining from resonances as well?
       // Find actions.
       for (const auto &finder : action_finders_) {
         auto found_actions = finder->find_final_actions(ensembles_[i_ens]);
@@ -3141,7 +3139,6 @@ void Experiment<Modus>::do_final_interactions() {
       }
     }
   }
-  //TODO: Similar question for final bremsstrahlung shine here as well?
 }
 
 template <typename Modus>

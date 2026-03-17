@@ -72,7 +72,7 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    *
    * \return The constructed object.
    */
-  // ──────── Constructor ─────────────────────────── 
+  // ──────── Constructor ─────────────────────────────────────────────────────── 
   BremsstrahlungActionDilepton(const ParticleList &in, const double time,
                        const double hadronic_cross_section_input, 
                        FormFactorType ff_type);
@@ -102,7 +102,7 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   static bool is_dilepton_brems_reaction(const ParticleList &in) {
     return dilepton_brems_reaction_type(in) != ReactionType::no_reaction;
   }
-  // ──────── Further nonstatic methods ───────────────────────────────
+  // ──────── Further nonstatic methods ─────────────────────────────────────────
   /**
    * Adds the hadronic process with a given cross section.
    *
@@ -114,7 +114,6 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    */
   void add_dummy_hadronic_process(double reaction_cross_section);
 
-  // TODO: Go on from here next week.
   /**
    * Create the final state and write to output.
    *
@@ -124,16 +123,26 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   void perform_dilepton_bremsstrahlung(const OutputsList &outputs);
 
   /**
-   * Generate the final-state for the Bremsstrahlung process. Generates only
-   * 3-body final state.
+   * Main function: sample kinematics and compute weight for one
+   * dilepton event.
+   *
+   * Sampling strategy (four variables, analogous to k and theta in photons):
+   *   1. M     -> invariant mass, sampled uniformly in [2*m_e, M_max]
+   *   2. q     -> 3-momentum, sampled uniformly in [q_min, q_max], limits depend 
+   *               on M and sqrt_s
+   *   3. theta -> polar angle, sampled uniformly in [0, π]
+   *   4. phi   -> azimuthal angle, sampled uniformly in [0, 2π]
+   *
+   * Phasespace construction (two-stage):
+   *   Stage 1: Dilepton 4-momentum p_ll built from (M, q, theta, phi) directly.
+   *            Nucleon recoil checked.
+   *   Stage 2: virtual photon(M) -> e⁺e⁻ isotropically in photon rest frame,
+   *            then boosted back to CM frame.
+   *
+   * Weight set to:
+   *   w = dσ/(dM dq dΩ) × ΔM × Δq × 4π² / (σ_had)
    */
   void generate_final_state() override;
-
-  /**
-   * Sample the final state anisotropically, considering the differential
-   * cross sections with respect to theta and k.
-   */
-  void sample_3body_phasespace();
 
   /**
    * Return the weight of the last created photon.
@@ -151,6 +160,18 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   double hadronic_cross_section() const { return hadronic_cross_section_; }
 
  private:
+  // ── Core sampling and kinematics ──────────────────────────────────────────
+
+  /**
+   * Generates momenta of outgoing particles (for 2-body isotropic decays only).
+   * 
+   * \param[in] p_parent FourVector of incoming particle momentum.
+   * \param[in] daughter1 First daughter particle.
+   * \param[in] daughter2 Second daughter particle.
+   */
+  void sample_2body_isotropic(const FourVector &p_parent, ParticleData &daughter1, 
+    ParticleData &daughter2);
+
   /**
    * Holds the bremsstrahlung branch. As of now, this will hold only one branch.
    */
@@ -161,6 +182,9 @@ class BremsstrahlungActionDilepton : public ScatterAction {
 
   /// Form factor type: FF1, FF2 or no_form_factor.
   const FormFactorType form_factor_type_;
+
+  /// Weight of the produced photon.
+  double weight_ = 0.0;
 
   /// Total cross section of dilepton bremsstrahlung process [mb].
   double cross_section_dilepton_bremsstrahlung_ = 0.0;
