@@ -92,10 +92,10 @@ struct KeyTraits {
  * would be enough. However, this would be in general wrong because this functor
  * is used in the \c Key constructors which are used by the \c InputKeys class,
  * that is a collection of static <tt>Key</tt>s. Hence, since initialization
- * order of static/global objects in C++ is undefined, we need to to do
- * something else. We use therefore the "construct on first use idiom", making
- * the functor a static object in a function scope. For more information, refer
- * for example to <a
+ * order of static/global objects in C++ is undefined, we need to do something
+ * else. We use therefore the "construct on first use idiom", making the functor
+ * a static object in a function scope. For more information, refer for example
+ * to <a
  * href="https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use-members">ISO
  * C++ FAQ</a>.
  */
