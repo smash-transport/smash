@@ -1237,7 +1237,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \required_key_no_line{key_gen_end_time_,End_Time,double}
+   * \required_key_no_line{key_gen_end_time_,End_Time,double,\f$x>0\f$}
    *
    * The time \unit{in fm} after which the evolution is stopped. Note
    * that the starting time depends on the chosen `Modus`.
@@ -1246,7 +1246,9 @@ struct InputKeys {
    * \see_key{key_gen_end_time_}
    */
   inline static const Key<double> gen_endTime{
-      InputSections::general + "End_Time", {"0.50"}};
+      InputSections::general + "End_Time",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general

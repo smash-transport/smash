@@ -139,6 +139,12 @@ TEST(are_all_enum_keys_convertible_to_string) {
   check_to_string_for_enums<InputKeys::key_references_variant>::validate();
 }
 
+TEST(validators_general) {
+  VERIFY(InputKeys::gen_endTime.validate(0.5));
+  VERIFY(!InputKeys::gen_endTime.validate(0));
+  VERIFY(!InputKeys::gen_endTime.validate(-6.6));
+}
+
 #if 0
 
 // The following code is useful to print all keys in the database for debug

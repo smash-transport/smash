@@ -174,9 +174,6 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   }
 
   const double t_end = config.read(InputKeys::gen_endTime);
-  if (t_end <= 0.) {
-    throw std::invalid_argument("End_Time cannot be zero or negative.");
-  }
 
   // Enforce a small time step, if the box modus is used
   if (box_length > 0.0 && dt > box_length / 10.0) {
