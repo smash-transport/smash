@@ -7,10 +7,19 @@
  *
  */
 
-#include "smash/bremsstrahlungactiondilepton.h"
-
-#include "smash/outputinterface.h"
-#include "smash/random.h"
+// scatteraction.h as well as forwarddeclarations.h are included via main header 
+// bremsstrahlungactiondilepton.h 
+#include "smash/bremsstrahlungactiondilepton.h" // corresponding main header
+#include "smash/formfactors.h" // for the form factors
+#include "smash/constants.h" // for the lambda² value in the form factors
+#include "smash/parametrizations.h"   // np_elastic(s)
+#include "smash/particledata.h"
+#include "smash/particletype.h"
+#include "smash/pdgcode.h" // for pdg codes of particles
+#include "smash/pdgcode_constants.h" 
+#include "smash/pow.h" // for efficient power calculations
+#include "smash/outputinterface.h" // for writing the dilepton output
+#include "smash/random.h" // for random sampling of kinematic variables
 
 namespace smash {
 static constexpr int LScatterAction = LogArea::ScatterAction::id;
@@ -109,7 +118,8 @@ void BremsstrahlungActionDilepton::add_dummy_hadronic_process(
  * generate_final_state(), and then iterates over the list of outputs to find the 
  * dilepton output and writes the interaction to it.
 */
-void BremsstrahlungActionDilepton::perform_dilepton_bremsstrahlung(const OutputsList &outputs) 
+void BremsstrahlungActionDilepton::perform_dilepton_bremsstrahlung(
+  const OutputsList &outputs) 
 {
   // Compared to photon bremsstrahlung, only one photon is created.
   // Hence, no loop anymore.
@@ -252,7 +262,8 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   // The invariant mass of the (pn)' subsystem is sqrt(p_recoil²), so basically 
   // sqrt_s for (pn)' only.
   // If the invariant mass of (pn)' is smaller than the rest masses of p and n,
-  // set the weight to 0 and return, as the action is energetically not possible.
+  // the sampling check fails and the function returns false, as the action is 
+  // energetically not possible. Hence, set the weight to 0 and return, completely.
   // Momentum of the (pn)' subsystem in its CM frame, calculated from the built-in
   // pCM function.
   // Within (pn)' subsystem, sample the angles of p and n isotropically...
@@ -265,35 +276,40 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   // pn-CM frame.
   // Note that the dilepton pair is, by construction, already in the pn-CM frame 
   // and no boost is needed for it here.
-  sample_2body_isotropic(p_recoil, outgoing_particles_[0], outgoing_particles_[1]);
+  if (!sample_2body_isotropic(p_recoil, outgoing_particles_[0], 
+    outgoing_particles_[1])) {weight_ = 0.0; return;}
 
   // Isotropic 2-body decay in the virtual photon rest frame, then boost to 
   // pn-CM frame. This step is independent of the SPA formula and the PEFF —
-  // it is pure kinematic bookkeeping.
-  sample_2body_isotropic(p_ll, outgoing_particles_[2], outgoing_particles_[3]);
+  // it is pure kinematic bookkeeping but along the same lines as above.
+  if (!sample_2body_isotropic(p_ll, outgoing_particles_[2], 
+    outgoing_particles_[3])) {weight_ = 0.0; return;}
 
-  // TODO: Continue here tomorrow with step 6.
+  // ── Step 6: Compute weight ──────────────────────────────────────────────────
+  //
+  // Integrand is dsigma/(dM dq dtheta dphi) evaluated at the sampled point.
+  // Note on solid angle treatment:
+  // We sample phi uniformly -> degree of freedom averages to 2pi.
+  // We sample theta uniformly in [0,pi] -> As we sample 2pi * pi we get 2*pi².
+  const double dsigma_dM_dq_dOmega = diff_xs_pn_dilepton(M_, q_, sqrt_s());
+  const double W_M     = dsigma_dM_dq_dOmega * delta_M;
+  const double W_q     = delta_q;
+  const double W_Omega = twopi * M_PI;
 
+  weight_ = W_M * W_q * W_Omega / hadronic_cross_section_;
 
-
-
-  // Get differential cross sections
-  std::pair<double, double> diff_xs_pair = dilepton_brems_diff_cross_sections();
-  double diff_xs_k = diff_xs_pair.first;
-  double diff_xs_theta = diff_xs_pair.second;
-
-  // Assign weighting factor
-  const double W_theta = diff_xs_theta * (M_PI - 0.0);
-  const double W_k = diff_xs_k * delta_k;
-  weight_ = std::sqrt(W_theta * W_k) / hadronic_cross_section();
-
-  // Set position and formation time and boost back to computational frame
+  // xsec_scaling_factor() not applied here by intention:
+  // BremsstrahlungActionDilepton solely covers elementary pn collisions, 
+  // for which the scaling factor would always be equal to 1.
+  // This is different to the treatment in BremsstrahlungAction (photons) 
+  // as in that case there is a heavy ion context with formation time scaling.
+  
+  // Set positions and boost to computational frame
   for (auto &new_particle : outgoing_particles_) {
-    // assuming decaying particles are always fully formed
     new_particle.set_formation_time(time_of_execution_);
     new_particle.set_4position(interaction_point);
     new_particle.boost_momentum(
-        -total_momentum_of_outgoing_particles().velocity());
+      -total_momentum_of_outgoing_particles().velocity());
   }
 
   // Not sure if the process here is similar to the photon process and also
@@ -308,10 +324,12 @@ void BremsstrahlungActionDilepton::generate_final_state() {
 
 // ── Stage 2: "Decay" of subsystem ─────────────────────────────────────────────
 // This function assumes a 2-body decay of a parent particle into two daughters, 
-// where the parent particle can be a subsystem of the reaction,
-// e.g. the virtual photon in the dilepton case.
-// The reaction is AB -> (AB)' + C and C can be a dilepton pair.
-void BremsstrahlungActionDilepton::sample_2body_isotropic(
+// where the parent particle can be a subsystem of the reaction, e.g. the virtual 
+// photon in the dilepton case. The reaction is AB -> (AB)' + C and C can be a 
+// dilepton pair.
+// Function type is bool as it returns false if the decay is not kinematically 
+// possible, true otherwise.
+bool BremsstrahlungActionDilepton::sample_2body_isotropic(
     const FourVector &p_parent, ParticleData &daughter1, ParticleData &daughter2)
 {
   // The invariant mass of the (AB)' subsystem is sqrt(p_parent²), so basically 
@@ -319,11 +337,10 @@ void BremsstrahlungActionDilepton::sample_2body_isotropic(
   const double M_parent = p_parent.abs();
 
   // If the invariant mass of the (AB)' subsystem is smaller than the sum of the 
-  // rest masses of the daughters, set the weight to 0 and return, as the action 
+  // rest masses of the daughters, return false, as the action 
   // is energetically not possible.
   if (M_parent < daughter1.type().mass() + daughter2.type().mass()) {
-    weight_ = 0.0;
-    return;
+    return false;
   }
 
   // Momentum of the 2-particle subsystem in its CM frame,
@@ -350,59 +367,144 @@ void BremsstrahlungActionDilepton::sample_2body_isotropic(
   // and no boost is needed for it here.
   daughter1.boost_momentum(-beta);
   daughter2.boost_momentum(-beta);
+  
+  // If the function has not returned false until here, the decay is kinematically
+  // possible and the function can return true.
+  return true;
 }
 
+// ── Differential cross section: SPA + PEFF ────────────────────────────────────
+//
+double BremsstrahlungActionDilepton::diff_xs_pn_dilepton(
+    const double M, const double q, const double sqrts) const {
+  //
+  // M: invariant mass of dilepton pair
+  // q: 3-momentum of dilepton in pn-CM frame
+  // E = sqrt(q²+M²): dilepton energy in pn-CM frame
+  // s: Mandelstam-s of pn collision
+  // m_p: proton mass
+  // m_n: neutron mass
+  const double s  = sqrts * sqrts;
+  const double m_p = outgoing_particles_[0].type().mass();  // proton
+  const double m_n = outgoing_particles_[1].type().mass();  // neutron
+  const double m_pn = m_p + m_n;
+  const double E  = std::sqrt(q * q + M * M);
 
+  // Check if the sampled point is kinematically allowed. If not, return 0.
+  if (E <= 0.0 || M <= 0.0) return 0.0;
 
-// ── Stage 2: Sample the phase space anisotropically, get differential cross sections and assign weight ──────────
-std::pair<double, double> BremsstrahlungActionDilepton::dilepton_brems_diff_cross_sections() {
-  //TODO: Rework completely for dileptons.
-  static const ParticleTypePtr pi_z_particle = &ParticleType::find(pdg::pi_z);
-  const double collision_energy = sqrt_s();
-  double dsigma_dk;
-  double dsigma_dtheta;
+  // sigma_bar(s): Eq. (41) in Weil (2013), p. 23
+  const double sigma_bar   = (s - (m_pn)*(m_pn)) / (2.0 * (m_p * m_p)) 
+                              * np_elastic(s);
 
-  if (reac_ == ReactionType::pi_p_pi_m) {
-    if (outgoing_particles_[0].type() != *pi_z_particle) {
-      // pi+- + pi+-- -> pi+- + pi+- + gamma
-      dsigma_dk =
-          (*pipi_pipi_opp_dsigma_dk_interpolation)(k_, collision_energy);
-      dsigma_dtheta = (*pipi_pipi_opp_dsigma_dtheta_interpolation)(
-          theta_, collision_energy);
-    } else {
-      // pi+- + pi+-- -> pi0 + pi0 + gamma
-      dsigma_dk = (*pipi_pi0pi0_dsigma_dk_interpolation)(k_, collision_energy);
-      dsigma_dtheta =
-          (*pipi_pi0pi0_dsigma_dtheta_interpolation)(theta_, collision_energy);
-    }
-  } else if (reac_ == ReactionType::pi_p_pi_p ||
-             reac_ == ReactionType::pi_m_pi_m) {
-    dsigma_dk = (*pipi_pipi_same_dsigma_dk_interpolation)(k_, collision_energy);
-    dsigma_dtheta =
-        (*pipi_pipi_same_dsigma_dtheta_interpolation)(theta_, collision_energy);
-  } else if (reac_ == ReactionType::pi_z_pi_p ||
-             reac_ == ReactionType::pi_z_pi_m) {
-    dsigma_dk = (*pipi0_pipi0_dsigma_dk_interpolation)(k_, collision_energy);
-    dsigma_dtheta =
-        (*pipi0_pipi0_dsigma_dtheta_interpolation)(theta_, collision_energy);
-  } else if (reac_ == ReactionType::pi_z_pi_z) {
-    dsigma_dk = (*pi0pi0_pipi_dsigma_dk_interpolation)(k_, collision_energy);
-    dsigma_dtheta =
-        (*pi0pi0_pipi_dsigma_dtheta_interpolation)(theta_, collision_energy);
+  // R2(s): Eq. (42) in Weil (2013), p. 23 with truncation at 0 to prevent 
+  // numerical issues just in case
+  const double R2_s = R_2_helper(s);
+  // Check for potential division by zero in the SPA formula.
+  if (R2_s <= 0.0) return 0.0;
+
+  // s2: Eq. (43) in Weil (2013), p. 23
+  const double s2   = s + M * M - 2.0 * E * sqrts;
+
+  // R2(s2): same factor evaluated at reduced energy
+  const double R2_s2 = R_2_helper(s2);
+
+  // Prefactor alpha²/(6pi³)
+  const double prefactor = fine_structure * fine_structure / 
+                            (6.0 * M_PI * M_PI * M_PI);
+
+  // Factor q²/(ME³)  [after dE -> dq substitution]
+  const double factor_2 = (q * q) / (M * E * E * E);
+
+  // Total differential cross section: Eq. (40) in Weil (2013), p. 23, without
+  // the PEFF correction, which is applied later as a multiplicative factor.
+  double diff_xs = prefactor * factor_2 * sigma_bar * (R2_s2 / R2_s);
+
+  // ── Pion electromagnetic form factor (Shyam & Mosel 2010) ───────────────────
+  //
+  // The PEFF modifies the QM bremsstrahlung contribution via the
+  // internal charged pion propagator in diagram 1(c) of the pn-channel.
+  // The differential cross-section goes dsigma/dM -> dsigma/dM * |F_pi(M²)|²
+  diff_xs *= pion_em_form_factor_sq(M * M);
+  
+  return diff_xs;
+}
+
+// ── Helper function R_2(s) ────────────────────────────────────────────────────
+//
+double BremsstrahlungActionDilepton::R_2_helper(const double s) const {
+  const double m_p = outgoing_particles_[0].type().mass();  // proton
+  const double m_n = outgoing_particles_[1].type().mass();  // neutron
+  const double m_pn = m_p + m_n;
+  if (s <= (m_pn * m_pn)) {
+    return 0.0;
   } else {
-    throw std::runtime_error(
-        "Unkown channel when computing differential cross sections for "
-        "bremsstrahlung processes.");
+    return std::sqrt(1.0 - (m_pn * m_pn) / s);
   }
+}
 
-  // Prevent negative cross sections due to numerics in interpolation
-  dsigma_dk = (dsigma_dk < 0.0) ? really_small : dsigma_dk;
-  dsigma_dtheta = (dsigma_dtheta < 0.0) ? really_small : dsigma_dtheta;
+// ── Form factor |F_pi(M²)|² (Shyam & Mosel 2010) ──────────────────────────────
+//
+double BremsstrahlungActionDilepton::pion_em_form_factor_sq(
+    const double M_sq) const {
+  // Obtain rho pole mass from particles.txt
+  const double m_rho = ParticleType::find(pdg::rho_z).mass();
+  // Energy-dependent rho width
+  const double Gamma = gamma_rho(M_sq);
 
-  // Combine differential cross sections to a pair
-  std::pair<double, double> diff_x_sections = {dsigma_dk, dsigma_dtheta};
+  switch (form_factor_type_)
+  {
+  case FormFactorType::FF1:
+    return pion_em_form_factor_sqr_FF1(M_sq, m_rho, Gamma);
+  case FormFactorType::FF2:
+    return pion_em_form_factor_sqr_FF2(M_sq, m_rho, Gamma);
+  case FormFactorType::no_form_factor:
+  default:
+  // TODO: Maybe additionally log something for the default case and split it
+  //       into a separate case to inform the user. But check later again with
+  //       class definition and handling there. Maybe I already included
+  //       a logging message there. For now, fall through behaviour.
+    return 1.0;
+  }
+}
 
-  return diff_x_sections;
+// ── Energy-dependent Gamma_rho ────────────────────────────────────────────────
+//
+double BremsstrahlungActionDilepton::gamma_rho(double M_sq) const {
+// TODO: Physikalische Frage für späteren Klärungsbedarf:
+// Warum ist Gamma_rho(M²) im PEFF-Propagator die rho->pipi-Breite,
+// obwohl der eigentliche Prozess virt.photon -> e⁺e⁻ ist?
+// Stichwort: Vektormeson-Dominanz (VMD), zeitartiger Pionformfaktor,
+// Kopplung des virtuellen Photons an hadronische Zustände über rho-Propagator.
+// Referenz: Shyam & Mosel 2010, Sec. II; Gale & Kapusta 1991.
+
+  // The energy-dependent width Gamma_rho(M²) as provided in Brown et.al (1986)
+  // is given by the formula:
+  // Gamma_rho(M²) = gamma0_rho * m_rho³ / [M * (2 * m_rho² - M²)]
+  //                * (M² - 4 * m_pi²)^(3/2) / (m_rho² - 4 * m_pi²)^(3/2)
+  // with 
+  // m_rho:       rho pole mass, 
+  // gamma0_rho:  width at rho pole mass,
+  // m_pi:        pion mass.
+
+  // Get masses and width from particles.txt
+  const double m_rho = ParticleType::find(pdg::rho_z).mass();
+  const double m_rho_sq = ParticleType::find(pdg::rho_z).mass_sqr();
+  const double m_pi_sq = ParticleType::find(pdg::pi_0).mass_sqr();
+  const double gamma0_rho = ParticleType::find(pdg::rho_z).width_at_pole();
+  
+  // Check if M² is above the 2-pion threshold. If not, return the width at the 
+  // rho pole mass. 
+  const double num = M_sq - 4.0 * m_pi_sq;
+  if (num <= 0) return gamma0_rho;
+
+  // If M² is above the 2-pion threshold, calculate the energy-dependent width  
+  const double M          = std::sqrt(M_sq);
+  const double num_sqrt   = std::sqrt(num);
+  const double denom_sqrt = std::sqrt(m_rho_sq - 4.0 * m_pi_sq);
+
+  return gamma0_rho * (m_rho_sq * m_rho) / (M * (2.0 * m_rho_sq - M_sq))
+         * pow_int(num_sqrt / denom_sqrt, 3.0);
 }
 
 }  // namespace smash

@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "scatteraction.h"
+#include "forwarddeclarations.h"
 
 namespace smash {
 /**
@@ -34,14 +35,21 @@ namespace smash {
  * only, charged meson exchange).
  *
  * Kinematic variables sampled (analogous to BremsstrahlungAction):
- *   - M  : invariant mass of the dilepton pair  [2me, M_max]
- *   - q  : 3-momentum of dilepton in pn-CM frame
- *   - θ  : polar angle of dilepton in pn-CM frame  [0, π]
+ *   - M:     invariant mass of the dilepton pair  [2me, M_max]
+ *   - q:     3-momentum of dilepton in pn-CM frame
+ *   - theta: polar angle of dilepton in pn-CM frame  [0, pi]
+ *   - phi:   azimuthal angle of dilepton in pn-CM frame  [0, 2pi]
  *
  * The dilepton 4-momentum is constructed directly from (M, q, θ) to enable
  * event-by-event acceptance cuts (e.g. HADES filter).
  * The e⁺e⁻ pair is subsequently produced isotropically in the virtual photon's
  * rest frame.
+ * 
+ * Inherited member from Action (3rd level: Action -> ScatterAction -> here):
+ * weight_              : Weight of the produced dilepton pair
+ * outgoing_particles_  : Final state particles {p, n, e⁺, e⁻}
+ * time_of_execution_   : Time of execution
+ * incoming_particles_  : Incoming particles {p, n}
  */
 class BremsstrahlungActionDilepton : public ScatterAction {
  public:
@@ -130,8 +138,8 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    *   1. M     -> invariant mass, sampled uniformly in [2*m_e, M_max]
    *   2. q     -> 3-momentum, sampled uniformly in [q_min, q_max], limits depend 
    *               on M and sqrt_s
-   *   3. theta -> polar angle, sampled uniformly in [0, π]
-   *   4. phi   -> azimuthal angle, sampled uniformly in [0, 2π]
+   *   3. theta -> polar angle, sampled uniformly in [0, pi]
+   *   4. phi   -> azimuthal angle, sampled uniformly in [0, 2*pi]
    *
    * Phasespace construction (two-stage):
    *   Stage 1: Dilepton 4-momentum p_ll built from (M, q, theta, phi) directly.
@@ -140,28 +148,12 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    *            then boosted back to CM frame.
    *
    * Weight set to:
-   *   w = dσ/(dM dq dΩ) × ΔM × Δq × 4π² / (σ_had)
+   *   w = dsigma/(dM dq dOmega) * Delta_M * Delta_q * 2*pi² / (sigma_hadronic)
    */
   void generate_final_state() override;
 
-  /**
-   * Return the weight of the last created photon.
-   *
-   * \return The total weight.
-   */
-  double get_total_weight() const override { return weight_; }
-
-  /**
-   * Return the total cross section of the underlying hadronic scattering
-   * It is necessary for the weighting procedure.
-   *
-   * \return total cross-section [mb]
-   */
-  double hadronic_cross_section() const { return hadronic_cross_section_; }
-
  private:
-  // ── Core sampling and kinematics ──────────────────────────────────────────
-
+  // ── Core sampling and kinematics ────────────────────────────────────────────
   /**
    * Generates momenta of outgoing particles (for 2-body isotropic decays only).
    * 
@@ -172,6 +164,50 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   void sample_2body_isotropic(const FourVector &p_parent, ParticleData &daughter1, 
     ParticleData &daughter2);
 
+  // ── Differential cross section: SPA + PEFF ──────────────────────────────────
+  /**
+   * Fully differential cross section dsigma/(dM dq dtheta) for pn -> pne⁺e⁻.
+   *
+   * Based on the phase-space corrected SPA:
+   * dsigma/(dM dE dOmega) = (alpha²/6pi³) * (q/ME²) * sigma(s) * R2(s2)/R2(s)
+   * with:
+   *   sigma(s)  = [s - (m_p + m_n)²] / (2*m_p²) * sigma_el(s)
+   *   R2(s) = sqrt(1 - (m_p + m_n)²/s)
+   *   s2    = s + M² - 2*E*sqrt(s)
+   * 
+   * Variable substitution: E = sqrt(q² + M²), so dE = q/E dq,
+   * resulting in dsigma/(dM dq dOmega) = dsigma/(dM dE dOmega) * (q/E).
+   *
+   * \param[in] M      Invariant mass of dilepton pair
+   * \param[in] q      3-momentum of dilepton in pn-CM frame
+   * \param[in] sqrts  CM energy sqrt(s)
+   * \return           dsigma/(dM dq dOmega)
+   */
+  double diff_xs_pn_dilepton(double M, double q, double sqrts) const;
+
+  // ── Pion electromagnetic form factor (Shyam & Mosel 2010) ───────────────────
+  /**
+   * Returns |F_pi(M²)|², the squared pion electromagnetic form factor.
+   *
+   * The energy-dependent ρ width Γ_ρ(M²) follows the standard
+   * parametrization already available in SMASH (decaytype.cc).
+   *
+   * \param[in] M2  M² = invariant mass squared of dilepton pair [GeV²]
+   * \return |F_pi(M²)|² (dimensionless)
+   */
+  double pion_em_form_factor_sq(double M2) const;
+
+  // ── Gamma_rho (Shyam & Mosel 2010) ──────────────────────────────────────────
+  /**
+   * Energy-dependent Gamma_rho(M²) used in the form factor.
+   *
+   * \param[in] M_sq  Invariant mass squared [GeV²]
+   * \return Gamma_rho(M²) [GeV]
+   */
+  double gamma_rho(double M_sq) const;
+
+  // ── Little helper function ──────────────────────────────────────────────────
+  double BremsstrahlungActionDilepton::R_2_helper(const double s) const;
   /**
    * Holds the bremsstrahlung branch. As of now, this will hold only one branch.
    */
@@ -182,9 +218,6 @@ class BremsstrahlungActionDilepton : public ScatterAction {
 
   /// Form factor type: FF1, FF2 or no_form_factor.
   const FormFactorType form_factor_type_;
-
-  /// Weight of the produced photon.
-  double weight_ = 0.0;
 
   /// Total cross section of dilepton bremsstrahlung process [mb].
   double cross_section_dilepton_bremsstrahlung_ = 0.0;
@@ -200,15 +233,6 @@ class BremsstrahlungActionDilepton : public ScatterAction {
 
   /// Sampled invariant mass of the dilepton pair
   double M_;
-
-/**
-   * Computes the differential cross sections dSigma/dk and dSigma/dtheta of the
-   * bremsstrahlung process.
-   *
-   * \returns Pair containing dSigma/dk as a first argument and dSigma/dtheta
-   *          as a second argument
-   */
-  std::pair<double, double> dilepton_brems_diff_cross_sections();
 };
 
 }  // namespace smash
