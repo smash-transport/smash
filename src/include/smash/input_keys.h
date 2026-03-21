@@ -2116,6 +2116,14 @@ struct InputKeys {
    *
    * The following collision criterions can be used.
    *
+   * - `"Covariant"` &rarr; <b>Covariant collision criterion</b>\n
+   *   The covariant collision criterion uses a covariant expression of the
+   *   two-particle impact parameter in the two-particle center-of-momentum
+   *   frame, which allows for its calculation in the computational frame
+   *   without boosting. Furthermore, it calculates the collision times used for
+   *   the collision ordering in the two-particle center-of-momentum frame.
+   *   Further details are described in \iref{Hirano:2012yy}.
+   *
    * - `"Geometric"` &rarr; <b>Geometric collision criterion</b>\n
    *   The geometric collision criterion calculates the two-particle impact
    *   parameter as the closest approach distance in the two-particle
@@ -2141,14 +2149,6 @@ struct InputKeys {
    *   the results change with smaller timesteps. Since the probability value is
    *   not by defintion limited to 1 in case of large timesteps, an error is
    *   thrown if it gets larger than 1.
-   *
-   * - `"Covariant"` &rarr; <b>Covariant collision criterion</b>\n
-   *   The covariant collision criterion uses a covariant expression of the
-   *   two-particle impact parameter in the two-particle center-of-momentum
-   *   frame, which allows for its calculation in the computational frame
-   *   without boosting. Furthermore, it calculates the collision times used for
-   *   the collision ordering in the two-particle center-of-momentum frame.
-   *   Further details are described in \iref{Hirano:2012yy}.
    */
   /**
    * \see_key{key_CT_collision_criterion_}
