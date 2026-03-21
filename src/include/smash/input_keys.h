@@ -861,7 +861,7 @@ struct InputSections {
  * doxypage_input_conf_lattice "Lattice"</tt> while for the other potentials it
  * can be used as an optimisation.
  *
- * <h3> Configuring VDF Potentials </h3>
+ * <h3> Configuring VDF potentials </h3>
  *
  * The following snippets from the configuration file configure SMASH such
  * that the VDF potential is activated for the simulation.
@@ -2276,7 +2276,8 @@ struct InputKeys {
    *
    * \warning If `"Elastic"` is the only process allowed, the
    * `"Total_Cross_Section_Strategy"` must be set as `"BottomUp"`, otherwise
-   * SMASH fails. \see_key{key_CT_totXsStrategy_}
+   * SMASH fails. See <tt>\ref key_CT_totXsStrategy_
+   * "Total_Cross_Section_Strategy"</tt> for more information.
    */
   /**
    * \see_key{key_CT_included_2to2_}
@@ -5042,8 +5043,8 @@ struct InputKeys {
    * \anchor input_output_content_specific_
    *
    * Every possible content-specific section is documented in the following.
-   * Refer to \ref config_output_examples "this page" for concrete output
-   * configuration examples.
+   * Refer to \ref config_output_examples for a small selection of possible
+   * output configurations.
    *
    * <hr>
    * <h3> &diams; %Particles </h3>
@@ -5511,7 +5512,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * <hr>
+   * <hr> \anchor input_output_coulomb_
    * <h3> &diams; Coulomb </h3>
    * &rArr; Only `VTK` format.
    *
@@ -5527,14 +5528,14 @@ struct InputKeys {
    *
    * The user can print thermodynamical quantities
    * -# on the spatial lattice to VTK output;
-   * -# on the spatial lattice to ASCII output;
+   * -# on the spatial lattice to ASCII or Binary output;
    * -# at a given point to ASCII output;
    * -# averaged over all particles to ASCII output.
    *
    * <b>About 1 and 2:</b> Note that this output requires a lattice, which needs
    * to be enabled in the conguration file and is regulated by the options of
    * \ref doxypage_input_conf_lattice. See \ref doxypage_output_vtk_lattice for
-   * further information.
+   * further information on 1 and \ref doxypage_output_thermodyn_lattice for 2.
    *
    * <b>About 3 and 4:</b> See \ref doxypage_output_thermodyn for
    * further information.

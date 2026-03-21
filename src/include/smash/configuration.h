@@ -179,7 +179,7 @@ namespace smash {
  * `decaymodes.txt` file, which is
  * located in '$SMASH_SRC_DIRECTORY/input'. If you want to modify and use this
  * file to set up SMASH, execute
- * ```
+ * ```console
  * ./smash -d $SMASH_SRC_DIRECTORY/input/decaymodes.txt
  * ```
  * in the '$SMASH_SRC_DIRECTORY/build' directory. \n

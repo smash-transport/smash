@@ -1192,23 +1192,29 @@ Experiment<Modus>::Experiment(Configuration &config,
    *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_ascii,
    *         \ref doxypage_output_binary, \ref doxypage_output_root.
    * - \b Thermodynamics:
-   *          This output allows to print out thermodynamic quantities, see \ref
-   *          input_output_thermodynamics_.
+   *         This output allows to print out thermodynamic quantities, see
+   *         \ref input_output_thermodynamics_ "Thermodynamics".
    *    - Available formats:
-   *          \ref doxypage_output_thermodyn,
-   *          \ref doxypage_output_thermodyn_lattice,
-   *          \ref doxypage_output_vtk_lattice.
+   *         \ref doxypage_output_thermodyn,
+   *         \ref doxypage_output_thermodyn_lattice,
+   *         \ref doxypage_output_vtk_lattice.
    * - \b Initial_Conditions:
-   *          Special initial conditions output, see
-   *          \ref doxypage_output_initial_conditions for details.
+   *         Special initial conditions output, see
+   *         \ref doxypage_output_initial_conditions for details.
    *   - Available formats:
    *         \ref doxypage_output_oscar_particles,
    *         \ref doxypage_output_initial_conditions.
    * - \b Rivet:
-   *          Run Rivet analysis on generated events and output results, see
-   *          \ref doxypage_output_rivet for details.
+   *         Run Rivet analysis on generated events and output results, see
+   *         \ref doxypage_output_rivet for details.
    *    - Available formats:
-   *          \ref doxypage_output_rivet.
+   *         \ref doxypage_output_rivet.
+   * - \b Coulomb:
+   *         Electric and magnetic fields, see \ref input_output_coulomb_
+   *         "Coulomb" and \ref doxypage_input_conf_pot_coulomb
+   *         "Coulomb potential" for further information.
+   *    - Available formats:
+   *         \ref doxypage_output_vtk
    *
    * \attention At the moment, the \b Initial_Conditions and \b Rivet outputs
    * content as well as the \b HepMC format cannot be used <u>with multiple

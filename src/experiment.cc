@@ -116,8 +116,8 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
          Extended: False
  \endverbatim
  * The HepMC_asciiv3 and/or HepMC_treeroot ouputs are enabled by specifying
- * these output options under Particles or Collisions depdening on the content
- * wanted.
+ * these output options under %Particles or Collisions depending on the desired
+ * content.
  *\verbatim
  Output:
      Particles:
@@ -129,6 +129,7 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  * for the electric and magnetic fields is available. It can be obtained by
  * adding the following to the output section of the configuration:
  *\verbatim
+ Output:
      Coulomb:
          Format: ["VTK"]
  \endverbatim
