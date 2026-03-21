@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2025
+ *    Copyright (c) 2013-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -527,6 +527,9 @@ class Experiment : public ExperimentBase {
   /// point by point, in any format
   bool printout_full_lattice_any_td_ = false;
 
+  /// Whether to write the electric and magnetic fields to VTK files
+  bool printout_coulomb_vtk_ = false;
+
   /// Instance of class used for forced thermalization
   std::unique_ptr<GrandCanThermalizer> thermalizer_;
 
@@ -844,6 +847,7 @@ void Experiment<Modus>::create_output(const std::string &format,
         "HepMC output requested, but HepMC support not compiled in");
 #endif
   } else if (content == "Coulomb" && format == "VTK") {
+    printout_coulomb_vtk_ = true;
     outputs_.emplace_back(
         std::make_unique<VtkOutput>(output_path, "Fields", out_par));
   } else if (content == "Rivet") {
@@ -1744,7 +1748,8 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
 
   // Create lattices
-  if (config.has_section(InputSections::lattice)) {
+  bool has_lattice = config.has_section(InputSections::lattice);
+  if (has_lattice) {
     bool automatic = config.take(InputKeys::lattice_automatic);
     bool all_geometrical_properties_specified =
         config.has_value(InputKeys::lattice_cellNumber) &&
@@ -1940,14 +1945,36 @@ Experiment<Modus>::Experiment(Configuration &config,
       jmu_custom_lat_ = std::make_unique<DensityLattice>(
           l, n, origin, periodic, LatticeUpdate::AtOutput);
     }
-  } else if (printout_lattice_td_ || printout_full_lattice_any_td_) {
+  }
+
+  // Error messages for missing lattice or coulomb potential config requirements
+  bool has_coulomb_potential = potentials_ && potentials_->use_coulomb();
+  bool has_lattice_td_output =
+      printout_lattice_td_ || printout_full_lattice_any_td_;
+  if (has_lattice_td_output && !has_lattice) {
     logg[LExperiment].error(
-        "If you want Therm. VTK or Lattice output, configure a lattice for "
-        "it.");
-  } else if (potentials_ && potentials_->use_coulomb()) {
+        "If you want Thermodynamic VTK or Lattice output, configure a "
+        "lattice for it.");
+  }
+  if (has_coulomb_potential && !has_lattice) {
     logg[LExperiment].error(
-        "Coulomb potential requires a lattice. Please add one to the "
-        "configuration");
+        "Coulomb potential requires a lattice. Please set it up in the "
+        "configuration file.");
+  }
+  if (printout_coulomb_vtk_) {
+    if (!has_lattice && !has_coulomb_potential) {
+      logg[LExperiment].error(
+          "Coulomb VTK output requires coulomb potential and a lattice. "
+          "Please add both to the configuration file.");
+    } else if (!has_lattice) {
+      logg[LExperiment].error(
+          "Coulomb VTK output requires a lattice. "
+          "Please set it up in the configuration file.");
+    } else if (!has_coulomb_potential) {
+      logg[LExperiment].error(
+          "Coulomb VTK output requires coulomb potential. "
+          "Please add it to the configuration file.");
+    }
   }
 
   // Warning for the mean field calculation if lattice is not on.

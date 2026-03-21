@@ -753,11 +753,12 @@ struct InputSections {
  *
  * The configuration of a lattice is usually not necessary, it is however
  * required if the \ref doxypage_output_vtk_lattice "Thermodynamic VTK Output",
- * the \ref doxypage_output_thermodyn_lattice "Thermodynamic Lattice Output" or
+ * the \ref doxypage_output_thermodyn_lattice "Thermodynamic Lattice Output",
  * the <tt>\ref key_lattice_pot_affect_threshold_
- * "Potentials_Affect_Thresholds"</tt> option is enabled. To configure the
- * thermodynamic output, use \ref doxypage_input_conf_output "the \c Output
- * section".
+ * "Potentials_Affect_Thresholds"</tt>, the \ref doxypage_input_conf_pot_coulomb
+ * "Coulomb potentials", or the \ref input_output_coulomb_ "Coulomb VTK output"
+ * option is enabled. To configure the thermodynamic output, use
+ * \ref doxypage_input_conf_output "the \c Output section".
  *
  * To enable a lattice it is necessary to add a `Lattice` section with the
  * following parameters. If no `Lattice` section is used in the configuration,
@@ -5517,8 +5518,11 @@ struct InputKeys {
    * &rArr; Only `VTK` format.
    *
    * No content-specific output options, apart from the <tt>\ref
-   * key_output_content_format_ "Format"</tt> key which accept `["VTK"]` value
-   * only.
+   * key_output_content_format_ "Format"</tt> key which only accepts `["VTK"]`.
+   * \note This output requires \ref doxypage_input_conf_pot_coulomb
+   *    "coulomb potential" to be enabled which in turn requires a
+   *    \ref doxypage_input_conf_lattice, both of which have to be specified in
+   *    the conguration file.
    */
 
   /*!\Userguide
