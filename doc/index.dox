@@ -103,6 +103,10 @@
             \page doxypage_input_conf_modi_list List
             \page doxypage_input_conf_modi_listbox ListBox
         \page doxypage_input_conf_output Output
+            <div class="invisible-content">
+            \subpage doxypage_input_conf_output_examples
+            </div>
+            \page doxypage_input_conf_output_examples %Configuration examples
         \page doxypage_input_conf_lattice Lattice
             <div class="invisible-content">
             \subpage doxypage_input_lattice_default_parameters

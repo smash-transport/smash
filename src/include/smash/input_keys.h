@@ -5044,8 +5044,8 @@ struct InputKeys {
    * \anchor input_output_content_specific_
    *
    * Every possible content-specific section is documented in the following.
-   * Refer to \ref config_output_examples for a small selection of possible
-   * output configurations.
+   * Refer to \ref doxypage_input_conf_output_examples for a small selection of
+   * possible output configurations.
    *
    * <hr>
    * <h3> &diams; %Particles </h3>

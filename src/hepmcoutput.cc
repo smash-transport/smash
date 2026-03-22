@@ -31,7 +31,7 @@ namespace smash {
  * - _HepMC_treeroot_ ROOT Tree binary format, readable by ROOT
  *
  * You can find a snippet of the configuration for this output in \ref
- * config_output_examples.
+ * doxypage_input_conf_output_examples.
  *
  * Producing HepMC output in asciiv3 format requires HepMC3 to be installed.
  * Download the tarball from http://hepmc.web.cern.ch/hepmc/

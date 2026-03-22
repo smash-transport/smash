@@ -48,11 +48,8 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
 }
 
 /*!\Userguide
- * \page doxypage_input_conf_output
+ * \page doxypage_input_conf_output_examples
  *
- * ---
- *
- * \section config_output_examples Examples for configuring the SMASH output
  * The following example configures the output to be printed in an interval of
  * 1 fm and with the net baryon density being printed to the header.
  * The particles output is generated in "Oscar1999", VTK and "Root" format,

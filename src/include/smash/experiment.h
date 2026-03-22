@@ -1166,7 +1166,8 @@ Experiment<Modus>::Experiment(Configuration &config,
    * means the physical information contained in the output (e.g. list of
    * particles, list of interactions, thermodynamics, etc) and format (e.g.
    * ASCII, binary or ROOT). The same content can be printed out in several
-   * formats _simultaneously_. See \ref config_output_examples for examples.
+   * formats _simultaneously_. See \ref doxypage_input_conf_output_examples for
+   * examples.
    *
    * These are the possible contents offered by SMASH:
    *
