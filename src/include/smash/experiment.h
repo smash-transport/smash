@@ -1285,7 +1285,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    *     <a href=https://docs.enthought.com/mayavi/mayavi/data.html>Mayavi</a>
    *     or <a
    *     href=https://reference.wolfram.com/language/ref/format/VTK.html>Mathematica</a>.
-   *   - For "Particles" content \ref doxypage_output_vtk
+   *   - For "Particles" and "Coulomb" content \ref doxypage_output_vtk
    *   - For "Thermodynamics" content \ref doxypage_output_vtk_lattice
    * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
    *   Tree ROOT format see \ref doxypage_output_hepmc for details
