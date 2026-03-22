@@ -1202,7 +1202,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    *    - Available formats:
    *         \ref doxypage_output_thermodyn,
    *         \ref doxypage_output_thermodyn_lattice,
-   *         \ref doxypage_output_vtk_lattice.
+   *         \ref doxypage_output_vtk.
    * - \b Initial_Conditions:
    *         Special initial conditions output, see
    *         \ref doxypage_output_initial_conditions for details.
@@ -1285,8 +1285,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    *     <a href=https://docs.enthought.com/mayavi/mayavi/data.html>Mayavi</a>
    *     or <a
    *     href=https://reference.wolfram.com/language/ref/format/VTK.html>Mathematica</a>.
-   *   - For "Particles" and "Coulomb" content \ref doxypage_output_vtk
-   *   - For "Thermodynamics" content \ref doxypage_output_vtk_lattice
+   *   - Visit \ref doxypage_output_vtk for further information
    * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
    *   Tree ROOT format see \ref doxypage_output_hepmc for details
    * - \b "YODA", \b "YODA-full" - compact ASCII text format used by the

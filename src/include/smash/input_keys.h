@@ -752,7 +752,7 @@ struct InputSections {
  * values are interpolated.
  *
  * The configuration of a lattice is usually not necessary, it is however
- * required if the \ref doxypage_output_vtk_lattice "Thermodynamic VTK Output",
+ * required if the \ref doxypage_output_vtk "Thermodynamic VTK Output",
  * the \ref doxypage_output_thermodyn_lattice "Thermodynamic Lattice Output",
  * the <tt>\ref key_lattice_pot_affect_threshold_
  * "Potentials_Affect_Thresholds"</tt>, the \ref doxypage_input_conf_pot_coulomb
@@ -5538,7 +5538,7 @@ struct InputKeys {
    *
    * <b>About 1 and 2:</b> Note that this output requires a lattice, which needs
    * to be enabled in the conguration file and is regulated by the options of
-   * \ref doxypage_input_conf_lattice. See \ref doxypage_output_vtk_lattice for
+   * \ref doxypage_input_conf_lattice. See \ref doxypage_output_vtk for
    * further information on 1 and \ref doxypage_output_thermodyn_lattice for 2.
    *
    * <b>About 3 and 4:</b> See \ref doxypage_output_thermodyn for

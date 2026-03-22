@@ -75,8 +75,19 @@ VtkOutput::~VtkOutput() {}
  *           configuration file.
  *
  * - \b Thermodynamics:
- *         - There is a dedicated \ref doxypage_output_vtk_lattice page with
- *           information on VTK output regarding thermodynamical quantities.
+ *         - Density on the lattice can be printed out in the VTK format of
+ *           structured grid.
+ *           - Filename structure:
+ *    `<density_type>_<density_name>_<event_number>_tstep<timestep_counter>.vtk`
+ *         - Additionally to density, energy-momentum tensor \f$T^{\mu\nu}\f$,
+ *           energy-momentum tensor in Landau rest frame \f$T^{\mu\nu}_L \f$
+ *           and velocity of Landau rest frame \f$v_L\f$ on the lattice can be
+ *           printed out in the VTK format of structured grid.
+ *           - Filename structure:
+ *        `<density_type>_<quantity>_<event_number>_tstep<timestep_counter>.vtk`
+ *
+ * For the possible output configurations see
+ * \ref input_output_content_specific_ "content-specific output options".
  */
 
 void VtkOutput::at_eventstart(const Particles &particles,
@@ -193,14 +204,6 @@ void VtkOutput::write(const Particles &particles) {
   }
 }
 
-/*!\Userguide
- * \page doxypage_output_vtk_lattice
- * Density on the lattice can be printed out in the VTK format of structured
- * grid. At every output time step a new VTK file is created. The name format is
- * `<density_type>_<density_name>_<event_number>_tstep<timestep_counter>.vtk`.
- * Files can be opened directly with <a href="http://paraview.org">ParaView</a>.
- */
-
 template <typename T>
 void VtkOutput::write_vtk_header(std::ofstream &file,
                                  RectangularLattice<T> &lattice,
@@ -277,20 +280,6 @@ void VtkOutput::thermodynamics_output(
                    [&](DensityOnLattice &node) { return node.rho(); });
   vtk_density_output_counter_++;
 }
-
-/*!\Userguide
- * \page doxypage_output_vtk_lattice
- * Additionally to density, energy-momentum tensor \f$T^{\mu\nu} \f$,
- * energy-momentum tensor in Landau rest frame \f$T^{\mu\nu}_L \f$ and
- * velocity of Landau rest frame \f$v_L\f$ on the lattice can be printed out
- * in the VTK format of structured grid. At every output time step a new VTK
- * file is created. The name format is
- * `<density_type>_<quantity>_<event_number>_tstep<timestep_counter>.vtk`. Files
- * can be opened directly with <a href="http://paraview.org">ParaView</a>.
- *
- * For configuring the output see \ref input_output_content_specific_
- * "content-specific output options".
- */
 
 void VtkOutput::thermodynamics_output(
     const ThermodynamicQuantity tq, const DensityType dens_type,
