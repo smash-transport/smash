@@ -1097,16 +1097,18 @@ struct InputSections {
  *            that were existing in the past and are not accepted anymore.
  *            After having added the version in which the key has been
  *            deprecated or removed to the member definition, <b>adjust the user
- *            documentation by either saying that the key is deprecated or by
- *            moving it to the list of removed keys in the dedicated page (in
- *            the user guide, only)</b>. This shall be done using the
- *            `\list_removed_key` Doxygen alias. If doing so a full page is
- *            removed, make sure that all reference to it are removed, too. If a
- *            key is removed and no user guide to refer to exists anymore (which
- *            is almost always the case), change the `\see_key` Doxygen alias to
- *            `\removed_key` in the member documentation (pass the SMASH version
- *            number to it in which the key has been removed as second
- *            additional argument). Look at already removed keys for an example.
+ *            documentation by either stating that the key is deprecated or by
+ *            moving it to the list of removed keys in the for this purpose
+ *            \ref doxypage_input_conf_removed_keys "dedicated page"</b>. This
+ *            shall be done using the `\list_removed_key` Doxygen alias. If in
+ *            doing so a full page is removed, make sure that all references to
+ *            it are removed, too. If a key is removed and no user guide key to
+ *            refer to exists anymore (which is almost always the case), change
+ *            the `\see_key` Doxygen alias to `\removed_key` in the member
+ *            documentation (pass the SMASH version number to it in which the
+ *            key has been removed as second additional argument). Look at
+ *            already \ref doxypage_input_conf_removed_keys "removed keys" for
+ *            examples.
  *
  * @note Ordering of members in this class is imposed by how keys shall appear
  *       in the documentation. For example, in the `General` section, all
@@ -1417,18 +1419,6 @@ struct InputKeys {
       InputSections::general + "Metric_Type",
       ExpansionMode::NoExpansion,
       {"1.1"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_general
-   * \optional_key{key_gen_rfdd_mode_,Rest_Frame_Density_Derivatives_Mode,string,"Off"}
-   *
-   * The mode of calculating the gradients of currents, decides whether the rest
-   * frame density derivatives are computed (these derivatives are needed for
-   * the VDF potentials, but not for the Skyrme potentials).
-   */
-  /**
-   * \see_key{key_gen_rfdd_mode_}
-   */
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys

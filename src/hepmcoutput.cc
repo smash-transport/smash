@@ -108,7 +108,7 @@ namespace smash {
  * documentation for more details.
  *
  * Here there is an example of the first lines of the HepMC_asciiv3 output, in
- * \key Collider modus and \key Particles output type:
+ * \key Collider modus and \key %Particles output type:
 
  \verbatim
 

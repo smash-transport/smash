@@ -1419,7 +1419,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * 1. Spin interactions have to be enabled in the collision term section of
    * the configuration file.
    * 2. The spin components `spin0`, `spinx`, `spiny` and `spinz` have to be
-   * specified in the `Quantities` list of the Particles output subsection.
+   * specified in the `Quantities` list of the %Particles output subsection.
    * \see_key{key_output_particles_quantities_}
    *
    * Spin output is available in OSCAR2013 format. If spins are enabled, the
