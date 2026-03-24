@@ -152,6 +152,22 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    */
   void generate_final_state() override;
 
+  // ── Add override function to handle weight retrieval ────────────────────────
+  /**
+   * Return the weight of the last created photon.
+   *
+   * \return The total weight.
+   */
+  double get_total_weight() const override { return weight_; }
+
+  // ── Add override function to handle partial weight ──────────────────────────
+  /**
+   * Return the partial weight of zero as otherwise garbage was written to output.
+   *
+   * \return 0.0 as partial weight.
+   */
+  double get_partial_weight() const override { return 0.0; }
+
  private:
   // ── Core sampling and kinematics ────────────────────────────────────────────
   /**
@@ -160,8 +176,14 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    * \param[in] p_parent FourVector of incoming particle momentum.
    * \param[in] daughter1 First daughter particle.
    * \param[in] daughter2 Second daughter particle.
+   * \return    bool if sampling successful, i.e. if there is enough energy 
+   *            to create the outgoing particles. If sampling fails, the function 
+   *            returns false and the weight of the dilepton pair is set to 0 
+   *            in generate_final_state().
+   *            Note: This function is used for the "decay" of the virtual photon 
+   *                  into e⁺e⁻, but can be used for any isotropic 2-body decay.
    */
-  void sample_2body_isotropic(const FourVector &p_parent, ParticleData &daughter1, 
+  bool sample_2body_isotropic(const FourVector &p_parent, ParticleData &daughter1, 
     ParticleData &daughter2);
 
   // ── Differential cross section: SPA + PEFF ──────────────────────────────────
@@ -207,7 +229,7 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   double gamma_rho(double M_sq) const;
 
   // ── Little helper function ──────────────────────────────────────────────────
-  double BremsstrahlungActionDilepton::R_2_helper(const double s) const;
+  double R_2_helper(const double s) const;
   /**
    * Holds the bremsstrahlung branch. As of now, this will hold only one branch.
    */
@@ -216,14 +238,20 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   /// Reaction process as determined from incoming particles.
   const ReactionType reac_;
 
-  /// Form factor type: FF1, FF2 or no_form_factor.
-  const FormFactorType form_factor_type_;
+  /// Weight of the dilepton event.
+  /// Set in generate_final_state(), used by perform_dilepton_bremsstrahlung()
+  /// for the output. Analogous to weight_ in BremsstrahlungAction. Requires
+  /// the override of get_total_weight() to work with the output machinery.
+  double weight_ = 0.0;
 
   /// Total cross section of dilepton bremsstrahlung process [mb].
   double cross_section_dilepton_bremsstrahlung_ = 0.0;
 
   /// Total hadronic cross section
   const double hadronic_cross_section_;
+
+  /// Form factor type: FF1, FF2 or no_form_factor.
+  const FormFactorType form_factor_type_;
 
   /// Sampled 3-momentum of dilepton pair in pn-CM frame (virtual photon momentum)
   double q_;

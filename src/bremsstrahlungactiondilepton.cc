@@ -107,7 +107,7 @@ void BremsstrahlungActionDilepton::add_dummy_hadronic_process(
       reaction_cross_section,
       ProcessType::BremsstrahlungDilepton));
   
-  add_processes<CollisionBranch>(final_state_list, 
+  add_processes<CollisionBranch>(std::move(final_state_list), 
     collision_processes_dilepton_bremsstrahlung_,
     cross_section_dilepton_bremsstrahlung_);
 }
@@ -189,31 +189,16 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   // ── Step 2: Sample dilepton 3-momentum q ────────────────────────
   //
   // After fixing M, the momentum q depends on the CM energy sqrt_s.
-  // There is a lower limit stemming from the kinematics of the 3-body final state. 
-  // Given the sampled mass (which impacts the available phase space), 
-  // the total energy in the CM frame must fit as well to create a dilepton pair. 
-  // This translates into a minimum q_min that can be calculated from the 
-  // kinematics of the 3-body final state. 
+  // There is no lower limit beside being positive, but the upper limit is given 
+  // by the kinematics of the 3-body final state. 
   
   // The upper limit q_max follows from the allowed kinematic range q²= E²-M² >= 0, 
   // which can be expressed in terms of the the implemented Källén function named
   // Action::lambda_tilde used in the 3-body kinematics. 
   // It holds q² = lambda_tilde(s, M², (m_p+m_n)²)/4s.
 
-  // Calculate the lower limit of q from the kinematics of the 3-body final state 
-  // given the sampled M_.
-  double q_min;
-  // Corresponding minimum energy E_min of the dilepton pair in the pn-CM frame 
-  // given the beam energy.
-  const double E_min = (sqrt_s()*sqrt_s() + M_*M_ - (m_p + m_n)*(m_p + m_n)) / 
-    (2.0 * sqrt_s());
-  // The minimum q_min is then given by sqrt(E_min² - M_²). If this is negative, 
-  // set q_min to 0.
-  if (E_min > M_) {
-    q_min = std::sqrt(E_min * E_min - M_ * M_);
-  } else {
-    q_min = 0.0;
-  }
+  // Set minimal momentum to zero.
+  double q_min = 0.0;
   
   // Calculate q_max from the built-in pCM function.
   const double q_max = pCM(sqrt_s(), M_, m_p + m_n);
@@ -252,10 +237,14 @@ void BremsstrahlungActionDilepton::generate_final_state() {
 
   // To better distinguish the notation, let (pn)' denote the recoil nucleon pair 
   // after the collision.
+  // Calculate total momentum via momentum conservation as sum of incoming momenta.
+  // This is needed to calculate the recoil momentum of the (pn)' subsystem below.
+  const FourVector total_momentum = incoming_particles_[0].momentum() + 
+    incoming_particles_[1].momentum();
   // Calculate the recoil for the (pn)' subsystem to check whether there is enough 
   // energy to create the outgoing pn pair. This is introduced compared 
   // to the photon case to ensure that the reaction is physically possible. 
-  const FourVector p_recoil = total_momentum_of_outgoing_particles() - p_ll;
+  const FourVector p_recoil = total_momentum - p_ll;
 
   // ── Step 5 (Stage 2): "Decay" of subsystems into e⁺e⁻ ───────────────────────
   //
@@ -426,7 +415,16 @@ double BremsstrahlungActionDilepton::diff_xs_pn_dilepton(
   // internal charged pion propagator in diagram 1(c) of the pn-channel.
   // The differential cross-section goes dsigma/dM -> dsigma/dM * |F_pi(M²)|²
   diff_xs *= pion_em_form_factor_sq(M * M);
-  
+
+  // Debug output to check values.
+  logg[LScatterAction].info()
+    << "M=" << M << " q=" << q << " sqrts=" << sqrts
+    << " E=" << E
+    << " sigma_bar=" << sigma_bar
+    << " R2_s=" << R2_s
+    << " s2=" << s2
+    << " R2_s2=" << R2_s2
+    << " diff_xs=" << diff_xs;
   return diff_xs;
 }
 
@@ -490,7 +488,7 @@ double BremsstrahlungActionDilepton::gamma_rho(double M_sq) const {
   // Get masses and width from particles.txt
   const double m_rho = ParticleType::find(pdg::rho_z).mass();
   const double m_rho_sq = ParticleType::find(pdg::rho_z).mass_sqr();
-  const double m_pi_sq = ParticleType::find(pdg::pi_0).mass_sqr();
+  const double m_pi_sq = ParticleType::find(pdg::pi_z).mass_sqr();
   const double gamma0_rho = ParticleType::find(pdg::rho_z).width_at_pole();
   
   // Check if M² is above the 2-pion threshold. If not, return the width at the 
@@ -504,7 +502,7 @@ double BremsstrahlungActionDilepton::gamma_rho(double M_sq) const {
   const double denom_sqrt = std::sqrt(m_rho_sq - 4.0 * m_pi_sq);
 
   return gamma0_rho * (m_rho_sq * m_rho) / (M * (2.0 * m_rho_sq - M_sq))
-         * pow_int(num_sqrt / denom_sqrt, 3.0);
+         * pow_int(num_sqrt / denom_sqrt, 3);
 }
 
 }  // namespace smash

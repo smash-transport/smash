@@ -328,11 +328,13 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 # list the source files
+<<<<<<< HEAD
 target_sources(smash_objlib
                PRIVATE action.cc
                        boxmodus.cc
                        binaryoutput.cc
                        bremsstrahlungaction.cc
+                       bremsstrahlungactiondilepton.cc
                        chemicalpotential.cc
                        clebschgordan.cc
                        clebschgordan_lookup.cc
@@ -405,6 +407,86 @@ target_sources(smash_objlib
                        threevector.cc
                        vtkoutput.cc
                        wallcrossingaction.cc)
+=======
+set(smash_src
+    action.cc
+    boxmodus.cc
+    binaryoutput.cc
+    bremsstrahlungaction.cc
+    # DOCUMENT: Added missing .cc file for dilepton bremsstrahlung action
+    bremsstrahlungactiondilepton.cc
+    chemicalpotential.cc
+    clebschgordan.cc
+    clebschgordan_lookup.cc
+    collidermodus.cc
+    configuration.cc
+    crosssections.cc
+    crosssectionsphoton.cc
+    customnucleus.cc
+    decayaction.cc
+    decayactionsfinder.cc
+    decaymodes.cc
+    decaytype.cc
+    deformednucleus.cc
+    alphaclusterednucleus.cc
+    density.cc
+    decayactiondilepton.cc
+    decayactionsfinderdilepton.cc
+    dynamicfluidfinder.cc
+    distributions.cc
+    energymomentumtensor.cc
+    experiment.cc
+    fields.cc
+    file.cc
+    filelock.cc
+    fluidizationaction.cc
+    fourvector.cc
+    fpenvironment.cc
+    grandcan_thermalizer.cc
+    grid.cc
+    hadgas_eos.cc
+    hypersurfacecrossingfinder.cc
+    icoutput.cc
+    inputfunctions.cc
+    interpolation.cc
+    interpolation2D.cc
+    isoparticletype.cc
+    library.cc
+    listmodus.cc
+    logging.cc
+    nucleus.cc
+    oscaroutput.cc
+    pauliblocking.cc
+    parametrizations.cc
+    particledata.cc
+    particles.cc
+    particletype.cc
+    pdgcode.cc
+    potentials.cc
+    potential_globals.cc
+    processbranch.cc
+    stringprocess.cc
+    propagation.cc
+    quantumnumbers.cc
+    quantumsampling.cc
+    random.cc
+    scatteraction.cc
+    scatteractionmulti.cc
+    scatteractionphoton.cc
+    scatteractionsfinder.cc
+    setup_particles_decaymodes.cc
+    sha256.cc
+    spheremodus.cc
+    stringfunctions.cc
+    stringify.cc
+    tabulation.cc
+    thermalizationaction.cc
+    thermodynamiclatticeoutput.cc
+    thermodynamicoutput.cc
+    threevector.cc
+    vtkoutput.cc
+    wallcrossingaction.cc)
+>>>>>>> 0a8acebd5 (Adding missing .cc file entry for CMake)
 
 if(TRY_USE_ROOT AND ROOT_FOUND)
     target_sources(smash_objlib PRIVATE rootoutput.cc)

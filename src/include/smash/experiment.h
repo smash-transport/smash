@@ -2476,7 +2476,7 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     brems_act.perform_bremsstrahlung(outputs_);
   }
 
-  //TODO: Below code is work-in-progress!
+  //DOCUMENT: Below code is working but still in testing!
   if (dileptons_bremsstrahlung_switch_ &&
       BremsstrahlungActionDilepton::is_dilepton_brems_reaction(
           action.incoming_particles())) {
@@ -2489,7 +2489,7 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     //      (similar to e.g. SpinInteractionType() therein) and stringify.h
     //      (to be able to read the form factor type from the config afaiu). 
     const BremsstrahlungActionDilepton::FormFactorType form_factor_type = 
-        BremsstrahlungActionDilepton::FormFactorType::FF1;
+        BremsstrahlungActionDilepton::FormFactorType::FF2;
     
     // Create the dilepton bremsstrahlung action with the respective form factor.
     BremsstrahlungActionDilepton dilepton_brems_act(
