@@ -28,7 +28,7 @@ StringProcess::StringProcess(
     double stringz_b, double string_sigma_T, double factor_t_form,
     bool mass_dependent_formation_times, double prob_proton_to_d_uu,
     bool separate_fragment_baryon, double popcorn_rate, bool use_monash_tune,
-    double additional_xsec_supp, std::string leading_hadron_treatment)
+    double additional_xsec_supp)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -50,8 +50,7 @@ StringProcess::StringProcess(
       prob_proton_to_d_uu_(prob_proton_to_d_uu),
       separate_fragment_baryon_(separate_fragment_baryon),
       use_monash_tune_(use_monash_tune),
-      additional_xsec_supp_(additional_xsec_supp),
-      leading_hadron_treatment_(leading_hadron_treatment) {
+      additional_xsec_supp_(additional_xsec_supp) {
   // setup and initialize pythia for fragmentation
   pythia_hadron_ = std::make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
@@ -530,7 +529,7 @@ bool StringProcess::next_NDiffSoft() {
   return success;
 }
 
-std::vector<bool> StringProcess::compute_valence_final_flags(
+std::vector<bool> StringProcess::compute_beam_valence_flags(
     Pythia8::Pythia& pythia) {
   const Pythia8::Event& event = pythia.event;
 
@@ -759,14 +758,13 @@ bool StringProcess::next_NDiffHard() {
   if (!final_state_success) {
     return false;
   }
-  if (leading_hadron_treatment_ == "Only_Valence_Endpoints") {
-    auto valance_tags = compute_valence_final_flags(*hard_map_[idAB]);
-    for (auto& p : hard_map_[idAB]->event) {
-      if (valance_tags[p.index()] && p.isFinal()) {
-        p.statusCode(static_cast<int>(LeadingStatus::LEADING_PARTON));
-      }
+  auto valance_tags = compute_beam_valence_flags(*hard_map_[idAB]);
+  for (auto& p : hard_map_[idAB]->event) {
+    if (valance_tags[p.index()] && p.isFinal()) {
+      p.statusCode(static_cast<int>(LeadingStatus::LEADING_PARTON));
     }
   }
+
   ParticleList new_intermediate_particles;
   ParticleList new_non_hadron_particles;
 
@@ -876,8 +874,7 @@ bool StringProcess::next_NDiffHard() {
 
     // fragment the (identified) string into hadrons.
     hadronize_success = pythia_hadron_->forceHadronLevel(false);
-    if (leading_hadron_treatment_ == "Only_Valence_Endpoints" &&
-        is_open_string && has_leading_partons) {
+    if (is_open_string && has_leading_partons) {
       tag_leading_hadron(pythia_hadron_->event, pythia_hadron_->particleData);
     }
 
@@ -913,8 +910,7 @@ bool StringProcess::next_NDiffHard() {
             auto& p = new_intermediate_particles.back();
             p.set_cross_section_scaling_factor(0.0);
 
-            if (leading_hadron_treatment_ == "Only_Valence_Endpoints" &&
-                is_open_string && has_leading_partons && found_ptype) {
+            if (is_open_string && has_leading_partons && found_ptype) {
               if (is_leading_from_quark(event_hadron[i])) {
                 p.set_cross_section_scaling_factor(0.5 * additional_xsec_supp_);
               } else if (is_leading_from_diquark(event_hadron[i])) {
@@ -940,8 +936,7 @@ bool StringProcess::next_NDiffHard() {
     if (!hadronize_success) {
       break;
     }
-    bool should_assign = leading_hadron_treatment_ == "All_Strings" ||
-                         (!is_open_string && has_leading_partons);
+    bool should_assign = !is_open_string && has_leading_partons;
     FourVector uString = FourVector(1., 0., 0., 0.);
     ThreeVector evec = find_forward_string ? evecBasisAB_[0] : -evecBasisAB_[0];
     int nfrag = append_final_state(new_intermediate_particles, uString, evec,

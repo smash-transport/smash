@@ -339,7 +339,8 @@ inline std::unique_ptr<StringProcess> default_string_process_interface() {
       1. / 3.,  // Prob_proton_to_d_uu
       true,     // Separate_Fragment_Baryon
       0.15,     // Popcorn_Rate
-      false);   // Use_Monash_Tune
+      false,    // Use_Monash_Tune
+      0.7);     // Additional_xsec_supp
 }
 
 /// Creates default parameters for dynamic IC

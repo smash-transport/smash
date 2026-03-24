@@ -16,36 +16,87 @@
 
 using namespace smash;
 
-// mesons:
+// mesons
+PdgCode pi0(0x111);
 PdgCode pinull(0x111);
+
+PdgCode pip(0x211);
 PdgCode pion(0x211);
+
+PdgCode pim(-0x211);
 PdgCode piminus(-0x211);
+
 PdgCode eta(0x221);
+PdgCode etap(0x331);
+PdgCode eta_pr(0x331);
+
+PdgCode rho0(0x113);
 PdgCode rhominus(-0x213);
 PdgCode omega(0x223);
 PdgCode phi(0x333);
+
 PdgCode K0(0x311);
-PdgCode Kplus(0x321);
-PdgCode Kminus(-0x321);
-PdgCode K0L(0x130);
+PdgCode k0(0x311);
+PdgCode k0bar(-0x311);
 PdgCode K0S(0x310);
+PdgCode K0L(0x130);
+
+PdgCode Kplus(0x321);
+PdgCode kp(0x321);
+
+PdgCode Kminus(-0x321);
+PdgCode km(-0x321);
+
+PdgCode dplus(0x411);
 PdgCode dminus(-0x411);
+
+PdgCode d0(0x421);
+PdgCode d0bar(-0x421);
+
+PdgCode b0(0x511);
+PdgCode b0bar(-0x511);
+
 PdgCode bnulls(0x531);
+PdgCode bs0(0x531);
+PdgCode bs0bar(-0x531);
+
 PdgCode bPcbar(-0x541);
-PdgCode eta_pr(0x331);
+
+PdgCode jpsi(0x443);
 PdgCode j_psi(0x443);
-// baryons:
+PdgCode ups(0x553);
+
+// baryons
 PdgCode neutron(0x2112);
+PdgCode n(0x2112);
+PdgCode an(-0x2112);
+PdgCode nbar(-0x2112);
+
 PdgCode proton(0x2212);
+PdgCode p(0x2212);
 PdgCode antiproton(-0x2212);
+PdgCode ap(-0x2212);
+PdgCode pbar(-0x2212);
+
 PdgCode delta(0x2224);
-PdgCode nstar(0x202112);       // N*(1440)^+
+PdgCode delpp(0x2224);
+PdgCode delm(0x1114);
 PdgCode antidelta(-0x122224);  // Δ(1700)
+
+PdgCode nstar(0x202112);  // N*(1440)^+
+
 PdgCode sigmanull(0x3212);
 PdgCode sigma(0x3222);
+PdgCode sigp(0x3222);
+PdgCode sigm(0x3112);
+
 PdgCode lambda(0x3122);
+PdgCode lam(0x3122);
+PdgCode alam(-0x3122);
+
 PdgCode antixi(-0x103312);  // Anti-Ξ(1820)
 PdgCode omega_bar(-0x3334);
+
 PdgCode lambda_c(0x4122);
 PdgCode sigma_c_bar(-0x4114);
 PdgCode xi_c(0x4322);
@@ -53,6 +104,8 @@ PdgCode omega_c_bar(-0x4332);
 PdgCode xi_cc_bar(-0x4422);
 PdgCode omega_bc(0x5432);
 PdgCode omega_bb(0x5532);
+
+// nuclei
 PdgCode deuteron("1000010020");
 PdgCode antideutron("-1000010020");
 PdgCode triton("1000010030");
@@ -62,14 +115,15 @@ PdgCode antihe3("-1000020030");
 PdgCode He4("1000020040");
 PdgCode H3L("1010010030");
 PdgCode antiH3L("-1010010030");
-// non-hadrons:
+
+// non-hadrons
 // leptons
 PdgCode electron(0x11);
 PdgCode antimu(-0x13);
+
 // bosons
 PdgCode photon(0x22);
 PdgCode higgs(0x25);
-
 TEST(create_nuclei_using_hexadecimal_codes) {
   VERIFY(deuteron == PdgCode{0x1000010020});
   VERIFY(antideutron == PdgCode{-0x1000010020});
@@ -820,8 +874,6 @@ TEST(pack_int) {
 }
 
 TEST(quark_content) {
-  PdgCode pip(0x211), pim(-0x211), pi0(0x111), p(0x2212), n(0x2112),
-      ap(-0x2212), an(-0x2112), el(0x11);
   std::array<int, 3> q;
   q = pip.quark_content();
   COMPARE(q[0], 0);
@@ -858,7 +910,7 @@ TEST(quark_content) {
   COMPARE(q[1], -1);
   COMPARE(q[2], -1);
 
-  q = el.quark_content();
+  q = electron.quark_content();
   COMPARE(q[0], 0);
   COMPARE(q[1], 0);
   COMPARE(q[2], 0);
@@ -866,37 +918,30 @@ TEST(quark_content) {
 
 TEST(net_quark_number) {
   // pion+ has one u and one dbar
-  PdgCode pip(0x211);
   VERIFY(pip.net_quark_number(1) == -1);
   VERIFY(pip.net_quark_number(2) == 1);
 
   // pion- has one d and one ubar
-  PdgCode pim(-0x211);
   VERIFY(pim.net_quark_number(1) == 1);
   VERIFY(pim.net_quark_number(2) == -1);
 
   // pion0 has one vanishing net u and d quark numbers
-  PdgCode pi0(0x111);
   VERIFY(pi0.net_quark_number(1) == 0);
   VERIFY(pi0.net_quark_number(2) == 0);
 
   // proton has two u and one d
-  PdgCode p(0x2212);
   VERIFY(p.net_quark_number(1) == 1);
   VERIFY(p.net_quark_number(2) == 2);
 
   // neutron has one u and two d
-  PdgCode n(0x2112);
   VERIFY(n.net_quark_number(1) == 2);
   VERIFY(n.net_quark_number(2) == 1);
 
   // antiproton has two ubar and one dbar
-  PdgCode ap(-0x2212);
   VERIFY(ap.net_quark_number(1) == -1);
   VERIFY(ap.net_quark_number(2) == -2);
 
   // antineutron has one ubar and two dbar
-  PdgCode an(-0x2112);
   VERIFY(an.net_quark_number(1) == -2);
   VERIFY(an.net_quark_number(2) == -1);
 }
@@ -913,22 +958,17 @@ TEST(deexcite) {
 
 TEST(valence_quarks) {
   // pion0, meson, baryon number of 0
-  PdgCode pi0(0x111);
   VERIFY(pi0.contains_enough_valence_quarks(1));
   VERIFY(pi0.contains_enough_valence_quarks(-1));
 
-  // antineutron, baryon, baryon number of -1
-  PdgCode an(-0x2112);
   VERIFY(an.contains_enough_valence_quarks(-2));
   VERIFY(an.contains_enough_valence_quarks(-1));
 
   // proton, baryon, baryon number of 1
-  PdgCode p(0x2212);
   VERIFY(p.contains_enough_valence_quarks(1));
   VERIFY(p.contains_enough_valence_quarks(2));
 
   // pion-, meson, baryon number of 0
-  PdgCode pim(-0x211);
   VERIFY(!(pim.contains_enough_valence_quarks(2)));
   VERIFY(!(pim.contains_enough_valence_quarks(-2)));
 }
@@ -941,115 +981,65 @@ TEST(nucleus_components) {
   VERIFY(H3L.nucleus_an() == 0);
   VERIFY(H3L.nucleus_aLa() == 0);
 }
+namespace {
 
+static void verify_quark_content(const PdgCode& hadron,
+                                 std::initializer_list<int> present,
+                                 std::initializer_list<int> absent) {
+  for (const int q : present) {
+    VERIFY(hadron.contains_quark(q));
+  }
+  for (const int q : absent) {
+    VERIFY(!hadron.contains_quark(q));
+  }
+}
+
+}  // namespace
 TEST(contains_quark) {
-  PdgCode pim(-0x211);
-  PdgCode pip(0x211);
-  VERIFY(pim.contains_quark(1) && pim.contains_quark(-2));
-  VERIFY(pip.contains_quark(-1) && pip.contains_quark(2));
+  verify_quark_content(pim, {1, -2}, {-1, 2, 3, -3});
+  verify_quark_content(pip, {-1, 2}, {1, -2, 3, -3});
 
-  PdgCode kp(0x321);
-  PdgCode km(-0x321);
-  VERIFY(kp.contains_quark(2) && kp.contains_quark(-3));
-  VERIFY(km.contains_quark(-2) && km.contains_quark(3));
+  verify_quark_content(kp, {2, -3}, {-2, 3, 1, -1});
+  verify_quark_content(km, {-2, 3}, {2, -3, 1, -1});
 
-  PdgCode p(0x2212);
-  PdgCode pbar(-0x2212);
-  VERIFY(p.contains_quark(2) && p.contains_quark(1));
-  VERIFY(!p.contains_quark(3) && !p.contains_quark(-3));
-  VERIFY(pbar.contains_quark(-2) && pbar.contains_quark(-1));
+  verify_quark_content(p, {1, 2}, {-1, -2, 3, -3});
+  verify_quark_content(pbar, {-1, -2}, {1, 2, 3, -3});
 
-  PdgCode n(0x2112);
-  PdgCode nbar(-0x2112);
-  VERIFY(n.contains_quark(2) && n.contains_quark(1));
-  VERIFY(nbar.contains_quark(-2) && nbar.contains_quark(-1));
+  verify_quark_content(n, {1, 2}, {-1, -2, 3, -3});
+  verify_quark_content(nbar, {-1, -2}, {1, 2, 3, -3});
 
-  PdgCode lam(0x3122);
-  PdgCode alam(-0x3122);
-  VERIFY(lam.contains_quark(2) && lam.contains_quark(1) &&
-         lam.contains_quark(3));
-  VERIFY(alam.contains_quark(-2) && alam.contains_quark(-1) &&
-         alam.contains_quark(-3));
+  verify_quark_content(lam, {1, 2, 3}, {-1, -2, -3});
+  verify_quark_content(alam, {-1, -2, -3}, {1, 2, 3});
 
-  PdgCode sigp(0x3222);
-  PdgCode sigm(0x3112);
-  VERIFY(sigp.contains_quark(2) && sigp.contains_quark(3) &&
-         !sigp.contains_quark(1));
-  VERIFY(sigm.contains_quark(1) && sigm.contains_quark(3) &&
-         !sigm.contains_quark(2));
+  verify_quark_content(sigp, {2, 3}, {1, -2, -3});
+  verify_quark_content(sigm, {1, 3}, {2, -1, -3});
 
-  PdgCode delpp(0x2224);
-  PdgCode delm(0x1114);
-  VERIFY(delpp.contains_quark(2) && !delpp.contains_quark(1) &&
-         !delpp.contains_quark(3));
-  VERIFY(delm.contains_quark(1) && !delm.contains_quark(2) &&
-         !delm.contains_quark(3));
+  verify_quark_content(delpp, {2}, {1, 3, -2});
+  verify_quark_content(delm, {1}, {2, 3, -1});
 
-  PdgCode dplus(0x411);
-  PdgCode dminus(-0x411);
-  VERIFY(dplus.contains_quark(4) && dplus.contains_quark(-1));
-  VERIFY(dminus.contains_quark(-4) && dminus.contains_quark(1));
+  verify_quark_content(dplus, {4, -1}, {-4, 1});
+  verify_quark_content(dminus, {-4, 1}, {4, -1});
 
-  PdgCode pi0(0x111);
-  PdgCode rho0(0x113);
-  PdgCode omega(0x223);
-  VERIFY(pi0.contains_quark(1) && pi0.contains_quark(-1));
-  VERIFY(pi0.contains_quark(2) && pi0.contains_quark(-2));
-  VERIFY(!pi0.contains_quark(3) && !pi0.contains_quark(-3));
+  verify_quark_content(pi0, {1, -1, 2, -2}, {3, -3});
+  verify_quark_content(rho0, {1, -1, 2, -2}, {3, -3});
+  verify_quark_content(omega, {1, -1, 2, -2}, {3, -3});
 
-  VERIFY(rho0.contains_quark(1) && rho0.contains_quark(-1));
-  VERIFY(rho0.contains_quark(2) && rho0.contains_quark(-2));
-  VERIFY(!rho0.contains_quark(3) && !rho0.contains_quark(-3));
+  verify_quark_content(eta, {1, -1, 2, -2, 3, -3}, {});
+  verify_quark_content(etap, {1, -1, 2, -2, 3, -3}, {});
 
-  VERIFY(omega.contains_quark(1) && omega.contains_quark(-1));
-  VERIFY(omega.contains_quark(2) && omega.contains_quark(-2));
-  VERIFY(!omega.contains_quark(3) && !omega.contains_quark(-3));
+  verify_quark_content(phi, {3, -3}, {1, -1, 2, -2});
+  verify_quark_content(jpsi, {4, -4}, {1, -1, 2, -2, 3, -3, 5, -5, 6, -6});
+  verify_quark_content(ups, {5, -5}, {3, -3, 4, -4});
 
-  PdgCode eta(0x221);
-  PdgCode etap(0x331);
-  VERIFY(eta.contains_quark(1) && eta.contains_quark(-1));
-  VERIFY(eta.contains_quark(2) && eta.contains_quark(-2));
-  VERIFY(!eta.contains_quark(3) && !eta.contains_quark(-3));
+  verify_quark_content(k0, {1, -3}, {-1, 3});
+  verify_quark_content(k0bar, {-1, 3}, {1, -3});
 
-  VERIFY(etap.contains_quark(1) && etap.contains_quark(-1));
-  VERIFY(etap.contains_quark(2) && etap.contains_quark(-2));
-  VERIFY(!etap.contains_quark(3) && !etap.contains_quark(-3));
+  verify_quark_content(d0, {4, -2}, {-4, 2});
+  verify_quark_content(d0bar, {-4, 2}, {4, -2});
 
-  PdgCode phi(0x333);
-  VERIFY(phi.contains_quark(3) && phi.contains_quark(-3));
-  VERIFY(!phi.contains_quark(2) && !phi.contains_quark(-2));
-  VERIFY(!phi.contains_quark(1) && !phi.contains_quark(-1));
+  verify_quark_content(b0, {1, -5}, {-1, 5});
+  verify_quark_content(b0bar, {-1, 5}, {1, -5});
 
-  PdgCode jpsi(0x443);
-  VERIFY(jpsi.contains_quark(4) && jpsi.contains_quark(-4));
-  VERIFY(!jpsi.contains_quark(1) && !jpsi.contains_quark(-1));
-  VERIFY(!jpsi.contains_quark(2) && !jpsi.contains_quark(-2));
-  VERIFY(!jpsi.contains_quark(3) && !jpsi.contains_quark(-3));
-  VERIFY(!jpsi.contains_quark(5) && !jpsi.contains_quark(-5));
-  VERIFY(!jpsi.contains_quark(6) && !jpsi.contains_quark(-6));
-
-  PdgCode ups(0x553);
-  VERIFY(ups.contains_quark(5) && ups.contains_quark(-5));
-  VERIFY(!ups.contains_quark(4) && !ups.contains_quark(-4));
-  VERIFY(!ups.contains_quark(3) && !ups.contains_quark(-3));
-
-  PdgCode k0(0x311);
-  PdgCode k0bar(-0x311);
-  VERIFY(k0.contains_quark(1) && k0.contains_quark(-3));
-  VERIFY(k0bar.contains_quark(-1) && k0bar.contains_quark(3));
-
-  PdgCode d0(0x421);
-  PdgCode d0bar(-0x421);
-  VERIFY(d0.contains_quark(4) && d0.contains_quark(-2));
-  VERIFY(d0bar.contains_quark(-4) && d0bar.contains_quark(2));
-
-  PdgCode b0(0x511);
-  PdgCode b0bar(-0x511);
-  VERIFY(b0.contains_quark(1) && b0.contains_quark(-5));
-  VERIFY(b0bar.contains_quark(-1) && b0bar.contains_quark(5));
-
-  PdgCode bs0(0x531);
-  PdgCode bs0bar(-0x531);
-  VERIFY(bs0.contains_quark(3) && bs0.contains_quark(-5));
-  VERIFY(bs0bar.contains_quark(-3) && bs0bar.contains_quark(5));
+  verify_quark_content(bs0, {3, -5}, {-3, 5});
+  verify_quark_content(bs0bar, {-3, 5}, {3, -5});
 }

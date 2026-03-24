@@ -29,8 +29,6 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
 }
 
 bool PdgCode::contains_quark(int signedQuark) const {
-  if (signedQuark == 0)
-    return false;
   if (!is_hadron())
     return false;
 
@@ -45,7 +43,7 @@ bool PdgCode::contains_quark(int signedQuark) const {
     return (absQuark == 1 || absQuark == 2);
   }
   if (absPdgId == 221 || absPdgId == 331) {
-    return (absQuark == 1 || absQuark == 2);
+    return (absQuark == 1 || absQuark == 2 || absQuark == 3);
   }
 
   const int netFlavor = net_quark_number(absQuark);

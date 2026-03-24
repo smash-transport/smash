@@ -171,12 +171,6 @@ class StringProcess {
   double additional_xsec_supp_;
 
   /**
-   * Choice if which algorithm to use for leading hadrons. Either all strings
-   * or strings with valance endpoits.
-   */
-  std::string leading_hadron_treatment_;
-
-  /**
    * Tag hadrons in a hadronized Pythia event that originate from leading
    * partons.
    *
@@ -192,31 +186,38 @@ class StringProcess {
                           const Pythia8::ParticleData &pd);
 
   /**
-   * Compute flags indicating whether final-state particles carry valence
-   * content.
+   * Compute flags identifying beam valence partons (quarks or diquarks)
+   * that act as leading partons after the initial interaction.
    *
    * The returned vector is aligned with the current Pythia event record
-   * (pythia.event): each entry indicates whether the corresponding particle is
-   * considered a "valence final" according to the currently configured tagging
-   * logic (typically based on ancestry from leading partons/endpoints).
+   * (pythia.event): each entry is true if the corresponding particle is
+   * a valence parton originating from one of the incoming beam particles,
+   * i.e. a quark or diquark that carries the beam quantum numbers and
+   * should be considered "leading".
+   *
+   * This typically includes valence quarks extracted during the initial
+   * scattering, as well as surviving diquark remnants of the beam.
    *
    * \note The size of the returned vector equals pythia.event.size().
    *
    * \param[in,out] pythia Pythia instance containing the event to inspect.
-   * \return Per-particle flags for valence-final classification.
+   * \return Per-particle flags for beam valence (leading) partons.
    */
-  std::vector<bool> compute_valence_final_flags(Pythia8::Pythia &pythia);
+  std::vector<bool> compute_beam_valence_flags(Pythia8::Pythia &pythia);
 
   /**
-   * Custom Pythia status codes used to mark leading/valence ancestry.
+   * Custom Pythia status codes used to mark leading/valence
+   * ancestry.
    *
-   * Pythia uses integer status codes to classify particles in the event record.
-   * SMASH adds a small set of reserved, non-standard codes to tag particles
-   * according to whether they are leading partons or hadrons originating from
+   * Pythia uses integer status codes to classify particles in
+   * the event record. SMASH adds a small set of reserved,
+   * non-standard codes to tag particles according to whether
+   * they are leading partons or hadrons originating from
    * leading quark/diquark endpoints.
    *
-   * The values are chosen to avoid collisions with commonly used Pythia
-   * internal codes and are treated here as implementation detail.
+   * The values are chosen to avoid collisions with commonly
+   * used Pythia internal codes and are treated here as
+   * implementation detail.
    */
   enum class LeadingStatus : int {
     /// Status code assigned to leading (valence) partons in the event record.
@@ -364,11 +365,7 @@ class StringProcess {
    *            processes. This is recommended if one runs smash at LHC
    *            energies
    * \param[in] additional_xsec_supp factor to supress the unformed hadrons 
-   *            cross-sections.
-   * \param[in] leading_hadron_treatment optional key that defaults to "All_Strings".
-   *            New method "Only_ValanceEndpoints" only selects leading hadrons with
-   *            valence content. "All_Strings" is legacy method.
-   *
+   *            cross-sections.   
    * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
    *                     double, double, double, double, double)
    * \see pythia8302/share/Pythia8/xmldoc/FlavourSelection.xml
@@ -388,8 +385,7 @@ class StringProcess {
                 double prob_proton_to_d_uu,
                 bool separate_fragment_baryon, double popcorn_rate,
                 bool use_monash_tune,
-                double additional_xsec_supp,
-                std::string leading_hadron_treatment = "All_Strings");
+                double additional_xsec_supp);
 
   /**
    * Common setup of PYTHIA objects for soft and hard string routines
@@ -912,30 +908,30 @@ class StringProcess {
    * which is used for testing mainly
    */
   void clear_final_state() { final_state_.clear(); }
-
   /**
-   * compute the formation time and fill the arrays with final-state particles
+   * Compute the formation time and fill the arrays with final-state particles
    * as described in \iref{Andersson:1983ia}.
-   * \param[out] intermediate_particles list of fragmented particles
-                 to be appended
-   * \param[in] uString is velocity four vector of the string.
-   * \param[in] evecLong is unit 3-vector in which string is stretched. 
-   * \param[in] suppression_factor additional coherence factor to be
-               multiplied with scaling factor
-   * \param[in] find_and_scale_leading if true, leading hadrons originating from 
-   * valence quark or diquark endpoints are identified and their formation times 
-   * are rescaled according to the leading-hadron prescription.
-   * \return number of hadrons fragmented out of string.
    *
-   * \throw std::invalid_argument if fragmented particle is not hadron
-   * \throw std::invalid_argument if string is neither mesonic nor baryonic
+   * \param[out] intermediate_particles List of fragmented particles to be appended.
+   * \param[in] uString Velocity four-vector of the string.
+   * \param[in] evecLong Unit 3-vector along which the string is stretched.
+   * \param[in] additional_xsec_supp Additional multiplicative factor applied to
+   *            the cross section scaling (e.g. coherence or medium effects).
+   * \param[in] find_and_scale_leading If true, leading hadrons originating from
+   *            valence quark or diquark endpoints are identified and their cross
+   *            sections are rescaled according to the leading-hadron prescription.
+   *
+   * \return Number of hadrons fragmented from the string.
+   *
+   * \throw std::invalid_argument If a fragmented particle is not a hadron.
+   * \throw std::invalid_argument If the string is neither mesonic nor baryonic.
    */
   int append_final_state(ParticleList &intermediate_particles,
                          const FourVector &uString,
                          const ThreeVector &evecLong,
                          double additional_xsec_supp = 1.0,
                          bool find_and_scale_leading = true);
-  /**
+    /**
    * append new particle from PYTHIA to a specific particle list
    * \param[in] pdgid PDG id of particle
    * \param[in] momentum four-momentum of particle

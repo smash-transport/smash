@@ -1410,8 +1410,7 @@ class Configuration {
     operator HardStringTransitionMode() const {
       const std::string s = operator std::string();
 
-      // Backward-compatible typo acceptance (optional, but recommended)
-      if (s == "Exponential" || s == "Exponetial") {
+      if (s == "Exponential") {
         return HardStringTransitionMode::Exponential;
       }
       if (s == "Custom_Range") {

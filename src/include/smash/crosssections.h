@@ -363,18 +363,13 @@ class CrossSections {
    * parameters, or process choices (e.g. soft ↔ hard interactions).
    *
    * \param[in] region_lower Lower bound of the transition region in sqrt(s)
-   * [GeV] \param[in] region_upper Upper bound of the transition region in
-   * sqrt(s) [GeV] \return Transition weight w ∈ [0,1]
+   * [GeV]
+   * \param[in] region_upper Upper bound of the transition region in
+   * sqrt(s) [GeV]
+   *
+   * \return Transition weight w ∈ [0,1]
    */
-  double smooth_transition_weight(double region_lower,
-                                  double region_upper) const;
-  /**
-   * \param[in] region_lower the lowest sqrts in the transition region [GeV]
-   * \param[in] region_upper the highest sqrts in the transition region [GeV]
-   * \return probability to have the high energy interaction (via string)
-   */
-  double probability_transit_high(double region_lower,
-                                  double region_upper) const;
+  double interpolation_at_sqrts(double region_lower, double region_upper) const;
 
  private:
   /**

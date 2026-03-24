@@ -19,6 +19,11 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+* Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams.  
+  This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
+
+* `CrossSections::probability_transit_high` has been replaced by  
+  `CrossSections::interpolation_at_sqrts`.
 
 ## SMASH-3.3
 Date: 2025-12-03

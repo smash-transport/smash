@@ -877,9 +877,7 @@ class PdgCode {
    *
    * For baryons, only the net (valence) quark content is considered.
    *
-   * \param[in] quark Signed PDG quark code:
-   *        +1..+6 = (d, u, s, c, b, t),
-   *        -1..-6 = corresponding antiquarks.
+   * \param[in] quark Signed PDG quark code.
    *
    * \return true if the hadron contains at least one quark (or antiquark)
    *         of the requested flavour with the requested sign; false otherwise.

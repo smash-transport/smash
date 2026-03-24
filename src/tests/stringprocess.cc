@@ -45,7 +45,7 @@ using namespace smash;
 static std::unique_ptr<StringProcess> dummy_string_process() {
   auto sp = std::make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1.,
                                             .0, .0, .5, .0, .21, .0, .0, true,
-                                            1. / 3., true, 0., false);
+                                            1. / 3., true, 0., false, 0.7);
 
   return sp;
 }

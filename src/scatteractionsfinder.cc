@@ -127,8 +127,7 @@ ScatterActionsFinder::ScatterActionsFinder(
         config.take(InputKeys::collTerm_stringParam_popcornRate),
         config.take(InputKeys::collTerm_stringParam_useMonashTune,
                     parameters.use_monash_tune_default.value()),
-        config.take(InputKeys::collTerm_stringParam_unformedXsecSuppression),
-        config.take(InputKeys::collTerm_stringParam_leadingHadronTreatment));
+        config.take(InputKeys::collTerm_stringParam_unformedXsecSuppression));
   }
 }
 
@@ -202,12 +201,20 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
       AQM_bottom_suppression(
           config.take(InputKeys::collTerm_HF_AQMbSuppression)) {
   if (hard_string_transition_mode == HardStringTransitionMode::Custom_Range) {
+    if (hard_string_transition_start_energy < 10.0) {
+      throw std::invalid_argument(
+          "Custom string transition: hard_string_transition_start_energy (" +
+          std::to_string(hard_string_transition_start_energy) +
+          " GeV) must be >= 10 GeV.");
+    }
+
     if (hard_string_transition_start_energy >
         hard_string_transition_end_energy) {
       throw std::invalid_argument(
-          "When using a custom string transition region, the start "
-          "center-of-mass "
-          "energy must be smaller than or equal to the end energy.");
+          "Custom string transition: hard_string_transition_start_energy (" +
+          std::to_string(hard_string_transition_start_energy) +
+          " GeV) must be <= hard_string_transition_end_energy (" +
+          std::to_string(hard_string_transition_end_energy) + " GeV).");
     }
   }
 
