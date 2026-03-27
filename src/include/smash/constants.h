@@ -135,15 +135,6 @@ constexpr double minimum_sqrts_pythia_can_handle = 10.0;  // GeV
 constexpr std::uint32_t ID_PROCESS_PHOTON =
     std::numeric_limits<std::uint32_t>::max();
 
-/**
- * Process ID for any dilepton bremsstrahlung process.
- *
- * It is chosen such that it will not conflict with any other process,
- * including above photon process.
- */
-constexpr std::uint32_t ID_PROCESS_DILEPTON_BREMS =
-    std::numeric_limits<std::uint32_t>::max() - 1;
-
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_CONSTANTS_H_

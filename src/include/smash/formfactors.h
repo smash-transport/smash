@@ -150,7 +150,7 @@ inline double form_factor_delta([[maybe_unused]] double m) { return 3.12; }
  * \return Squared pion electromagnetic form factor |F_pi(M²)|²
  * for the internal pion propagator in pn -> pne⁺e⁻ bremsstrahlung.
  *
- * FF1: pure vector-meson dominance
+ * FF1: pure vector-meson dominance, direct rho_0 coupling
  * FF2: mixed direct-quark + rho0 coupling (Shyam & Mosel 2010, FF2) 
  * 
  * \param M_sq  Invariant dilepton mass squared M² [GeV²]

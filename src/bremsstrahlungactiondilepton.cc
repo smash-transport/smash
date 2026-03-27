@@ -31,7 +31,7 @@ static constexpr int LScatterAction = LogArea::ScatterAction::id;
 // ── Constructor ──────────────────────────────────────────────────────────────
 BremsstrahlungActionDilepton::BremsstrahlungActionDilepton(
     const ParticleList &in, const double time,
-    const double hadronic_cross_section_input, FormFactorType ff_type)
+    const double hadronic_cross_section_input, DileptonBremsFormFactor ff_type)
     : ScatterAction(in[0], in[1], time),
       reac_(dilepton_brems_reaction_type(in)),
       hadronic_cross_section_(hadronic_cross_section_input),
@@ -59,7 +59,6 @@ BremsstrahlungActionDilepton::dilepton_brems_reaction_type(const ParticleList &i
       return ReactionType::np;
 
     default:
-      //TODO: Throw an error if the incoming particles are not part of any implemented reaction.
       return ReactionType::no_reaction;
   }
 }
@@ -157,9 +156,6 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   const double m_p = outgoing_particles_[0].type().mass();  // proton
   const double m_n = outgoing_particles_[1].type().mass();  // neutron
 
-  // DOCUMENT: Fixed electron mass [GeV] included in constants.h now.
-  //           Not sure if this would immediately work the same way as above via
-  //           ParticleType, but to be seen. 
   const double m_e = outgoing_particles_[2].type().mass();  // electron mass
 
   // ── Step 1: Sample invariant mass M of dilepton pair ────────────────────────
@@ -181,7 +177,11 @@ void BremsstrahlungActionDilepton::generate_final_state() {
     return;
   }
   // If it is kinematically possible, sample M uniformly in the allowed range
-  // and set delta_M accordingly. 
+  // and set delta_M accordingly.
+  // Note: Maybe it would be more physical to sample M according to the expected 
+  //       distribution, but this would require some non-trivial changes in the 
+  //       code and the weight calculation. Hence, left for future work and 
+  //       keeping it simple for now.
   else {
     M_ = random::uniform(M_min, M_max);
     delta_M = M_max - M_min;
@@ -302,12 +302,6 @@ void BremsstrahlungActionDilepton::generate_final_state() {
       -total_momentum_of_outgoing_particles().velocity());
   }
 
-  // Not sure if the process here is similar to the photon process and also
-  // not really part of the normal processes. A constant arbitrary number 
-  // has been set in a similar fashion without interacting with the existing one.
-  //TODO: After discussion with Ren, this part can be removed completely.
-  const auto id_process = ID_PROCESS_DILEPTON_BREMS;
-  Action::check_conservation(id_process);
 }
 
 // ── Stage 2: "Decay" of subsystem ─────────────────────────────────────────────
@@ -442,11 +436,11 @@ double BremsstrahlungActionDilepton::pion_em_form_factor_sq(
 
   switch (form_factor_type_)
   {
-  case FormFactorType::FF1:
+  case DileptonBremsFormFactor::FF1:
     return pion_em_form_factor_sqr_FF1(M_sq, m_rho, Gamma);
-  case FormFactorType::FF2:
+  case DileptonBremsFormFactor::FF2:
     return pion_em_form_factor_sqr_FF2(M_sq, m_rho, Gamma);
-  case FormFactorType::no_form_factor:
+  case DileptonBremsFormFactor::Off:
   // If no form factor is applied, return 1.
     return 1.0;
   default:
@@ -459,13 +453,6 @@ double BremsstrahlungActionDilepton::pion_em_form_factor_sq(
 // ── Energy-dependent Gamma_rho ────────────────────────────────────────────────
 //
 double BremsstrahlungActionDilepton::gamma_rho(double M_sq) const {
-// TODO: Physikalische Frage für späteren Klärungsbedarf:
-// Warum ist Gamma_rho(M²) im PEFF-Propagator die rho->pipi-Breite,
-// obwohl der eigentliche Prozess virt.photon -> e⁺e⁻ ist?
-// Stichwort: Vektormeson-Dominanz (VMD), zeitartiger Pionformfaktor,
-// Kopplung des virtuellen Photons an hadronische Zustände über rho-Propagator.
-// Referenz: Shyam & Mosel 2010, Sec. II; Gale & Kapusta 1991.
-
   // The energy-dependent width Gamma_rho(M²) as provided in Brown et.al (1986)
   // is given by the formula:
   // Gamma_rho(M²) = gamma0_rho * m_rho³ / [M * (2 * m_rho² - M²)]

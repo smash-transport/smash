@@ -727,9 +727,6 @@ class Experiment : public ExperimentBase {
 template <typename Modus>
 std::ostream &operator<<(std::ostream &out, const Experiment<Modus> &e) {
   out << "End time: " << e.end_time_ << " fm\n";
-  // DOCUMENT: Hint on dilepton bremsstrahlung switch can be removed later
-  out << "Dilepton bremsstrahlung: "
-      << (e.dileptons_bremsstrahlung_switch_ ? "on" : "off") << "\n";
   out << e.modus_;
   return out;
 }
@@ -1037,8 +1034,6 @@ Experiment<Modus>::Experiment(Configuration &config,
                   modus_.sqrt_s_NN() >= 200. ? -1. : 1.);
 
   // create finders
-  //TODO: Add dilepton finder for bremsstrahlung as well or make it possible 
-  // to use the same one for both decays and bremsstrahlung here
   if (dileptons_switch_) {
     dilepton_finder_ = std::make_unique<DecayActionsFinderDilepton>();
   }
@@ -2476,21 +2471,15 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     brems_act.perform_bremsstrahlung(outputs_);
   }
 
-  //DOCUMENT: Below code is working but still in testing!
+  //DOCUMENT: Below code successfully passed first testing. 
+  //          Large scale analyses of invariant mass spektrum outstanding.
+  //          Plan: No bremsstrahlung vs Bremsstrahlung with form factor "Off" vs
+  //                form factor "FF1" vs. form factor "FF2" 
   if (dileptons_bremsstrahlung_switch_ &&
       BremsstrahlungActionDilepton::is_dilepton_brems_reaction(
           action.incoming_particles())) {
     // Time in the action constructor is relative to current time of incoming
     constexpr double action_time = 0.;
-
-    //Setting the form factor to a fixed value for the time being
-    //TODO: Make this another configurable parameter (input key) later.
-    //      This also triggers adjustments to be made in configuration.h 
-    //      (similar to e.g. SpinInteractionType() therein) and stringify.h
-    //      (to be able to read the form factor type from the config afaiu). 
-    //const BremsstrahlungActionDilepton::FormFactorType form_factor_type = 
-    //    BremsstrahlungActionDilepton::FormFactorType::FF2;
-    //const auto form_factor_type = parameters_.dilepton_brems_form_factor_type;
     
     // Create the dilepton bremsstrahlung action with the respective form factor.
     BremsstrahlungActionDilepton dilepton_brems_act(

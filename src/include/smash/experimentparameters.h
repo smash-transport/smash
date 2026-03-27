@@ -169,9 +169,9 @@ struct ExperimentParameters {
 
   // DOCUMENT: Trying to read the form factor as experiment parameter.
   /**
-   * Setting the specific form factor for dilepton bremsstrahlung.
+   * Setting the specific form factor for dilepton bremsstrahlung (optional).
    */
-  FormFactorType dilepton_brems_form_factor_type;
+  DileptonBremsFormFactor dilepton_brems_form_factor_type;
 
   /**
    * Whether to include spin interactions.

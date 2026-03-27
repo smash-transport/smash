@@ -3909,18 +3909,18 @@ struct InputKeys {
   // DOCUMENT: Added entry on Level Collision_Term -> Dileptons -> Form_Factor
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
-   * \optional_key{key_CT_dileptons_form_factor_,Form_Factor,string,"no_form_factor"}
+   * \optional_key{key_CT_dileptons_form_factor_,Form_Factor,string,"Off"}
    *
+   * - `"Off"` &rarr; Implicitly using a factor of 1.
    * - `"FF1"` &rarr; Photon couples to pion direclty via \rho_0 meson. 
    * - `"FF2"` &rarr; Photon couples 50% directly to intrinsic quark structure of 
    *                  pion and 50% indirectly via \rho_0 meson.
-   * - `"no_form_factor"` &rarr; Implicitly using a factor of 1.
    */
   /**
    * \see_key{key_CT_dileptons_form_factor_}
    */
-  inline static const Key<FormFactorType> collTerm_dileptons_form_factor{
-      InputSections::c_dileptons + "Form_Factor", FormFactorType::no_form_factor, {"3.4"}};
+  inline static const Key<DileptonBremsFormFactor> collTerm_dileptons_form_factor{
+      InputSections::c_dileptons + "Form_Factor", DileptonBremsFormFactor::Off, {"3.4"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
@@ -7700,7 +7700,8 @@ struct InputKeys {
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<FermiMotion>>,
-      std::reference_wrapper<const Key<FormFactorType>>,
+      // DOCUMENT: Added alias for Dilepton Bremsstrahlung Form Factor
+      std::reference_wrapper<const Key<DileptonBremsFormFactor>>,
       std::reference_wrapper<const Key<FieldDerivativesMode>>,
       std::reference_wrapper<const Key<FluidizableProcessesBitSet>>,
       std::reference_wrapper<const Key<FluidizationType>>,

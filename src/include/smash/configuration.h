@@ -1089,24 +1089,24 @@ class Configuration {
     /**
      * Set form factor from configuration values.
      *
-     * \return Form factor type.
+     * \return Dilepton form factor type.
      * \throw IncorrectTypeInAssignment in case a form factor value that is
      * not available is provided as a configuration value.
      */
-    operator FormFactorType() const {
+    operator DileptonBremsFormFactor() const {
       const std::string s = operator std::string();
       if (s == "FF1") {
-        return FormFactorType::FF1;
+        return DileptonBremsFormFactor::FF1;
       }
       if (s == "FF2") {
-        return FormFactorType::FF2;
+        return DileptonBremsFormFactor::FF2;
       }
-      if (s == "no_form_factor") {
-        return FormFactorType::no_form_factor;
+      if (s == "Off") {
+        return DileptonBremsFormFactor::Off;
       }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +
-          "\" should be \"FF1\" or \"FF2\" or \"no_form_factor\".");
+          "\" should be \"FF1\" or \"FF2\" or \"Off\".");
     }
 
     /**

@@ -62,28 +62,20 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   enum class ReactionType {no_reaction, np};
 
   /**
-   * Choice of pion electromagnetic form factor parametrization acc. to
-   * Shyam & Mosel (2010).:
-   * FF1: photon couples to pion via pure \rho0 meson
-   * FF2: photon couples 50% directly to intrinsic quark structure of pion
-   *      and 50% indirectly via \rho0 meson
-   */
-  enum class FormFactorType {FF1, FF2, no_form_factor};
-
-  /**
    * Construct a BremsstrahlungActionDilepton object.
    *
    * \param[in] in ParticleList of incoming particles (n+p only).
    * \param[in] time Time relative to underlying hadronic action.
    * \param[in] hadronic_cross_section_input Total np hadronic cross section.
-   * \param[in] ff_type Which form factor parametrization to use.
+   * \param[in] ff_type Which form factor parametrization to use (taken globally 
+   *            from forwarddeclarations.h).
    *
    * \return The constructed object.
    */
   // ──────── Constructor ─────────────────────────────────────────────────────── 
   BremsstrahlungActionDilepton(const ParticleList &in, const double time,
                        const double hadronic_cross_section_input, 
-                       FormFactorType ff_type);
+                       DileptonBremsFormFactor ff_type);
   
   // ──────── Static methods for preprocessing checks ─────────────────────────── 
   /**
@@ -250,8 +242,8 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   /// Total hadronic cross section
   const double hadronic_cross_section_;
 
-  /// Form factor type: FF1, FF2 or no_form_factor.
-  const FormFactorType form_factor_type_;
+  /// Form factor type: Off (FF=1), FF1, FF2.
+  const DileptonBremsFormFactor form_factor_type_;
 
   /// Sampled 3-momentum of dilepton pair in pn-CM frame (virtual photon momentum)
   double q_;
