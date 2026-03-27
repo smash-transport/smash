@@ -59,6 +59,7 @@ BremsstrahlungActionDilepton::dilepton_brems_reaction_type(const ParticleList &i
       return ReactionType::np;
 
     default:
+      //TODO: Throw an error if the incoming particles are not part of any implemented reaction.
       return ReactionType::no_reaction;
   }
 }
@@ -304,9 +305,7 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   // Not sure if the process here is similar to the photon process and also
   // not really part of the normal processes. A constant arbitrary number 
   // has been set in a similar fashion without interacting with the existing one.
-  //TODO: Check with Ren how this is needed for the dilepton bremsstrahlung process 
-  //      and if it can be set to a constant like this or we have to keep the 
-  //      photon one due to the scatteractionphoton.cc implementation.
+  //TODO: After discussion with Ren, this part can be removed completely.
   const auto id_process = ID_PROCESS_DILEPTON_BREMS;
   Action::check_conservation(id_process);
 }
@@ -416,15 +415,6 @@ double BremsstrahlungActionDilepton::diff_xs_pn_dilepton(
   // The differential cross-section goes dsigma/dM -> dsigma/dM * |F_pi(M²)|²
   diff_xs *= pion_em_form_factor_sq(M * M);
 
-  // Debug output to check values.
-  logg[LScatterAction].info()
-    << "M=" << M << " q=" << q << " sqrts=" << sqrts
-    << " E=" << E
-    << " sigma_bar=" << sigma_bar
-    << " R2_s=" << R2_s
-    << " s2=" << s2
-    << " R2_s2=" << R2_s2
-    << " diff_xs=" << diff_xs;
   return diff_xs;
 }
 
@@ -457,11 +447,11 @@ double BremsstrahlungActionDilepton::pion_em_form_factor_sq(
   case FormFactorType::FF2:
     return pion_em_form_factor_sqr_FF2(M_sq, m_rho, Gamma);
   case FormFactorType::no_form_factor:
+  // If no form factor is applied, return 1.
+    return 1.0;
   default:
-  // TODO: Maybe additionally log something for the default case and split it
-  //       into a separate case to inform the user. But check later again with
-  //       class definition and handling there. Maybe I already included
-  //       a logging message there. For now, fall through behaviour.
+  // TODO: Change this to throw an error if the form factor type is not recognized,
+  // as there should be no case where this happens.
     return 1.0;
   }
 }

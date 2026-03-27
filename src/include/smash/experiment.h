@@ -2488,13 +2488,14 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     //      This also triggers adjustments to be made in configuration.h 
     //      (similar to e.g. SpinInteractionType() therein) and stringify.h
     //      (to be able to read the form factor type from the config afaiu). 
-    const BremsstrahlungActionDilepton::FormFactorType form_factor_type = 
-        BremsstrahlungActionDilepton::FormFactorType::FF2;
+    //const BremsstrahlungActionDilepton::FormFactorType form_factor_type = 
+    //    BremsstrahlungActionDilepton::FormFactorType::FF2;
+    //const auto form_factor_type = parameters_.dilepton_brems_form_factor_type;
     
     // Create the dilepton bremsstrahlung action with the respective form factor.
     BremsstrahlungActionDilepton dilepton_brems_act(
         action.incoming_particles(), action_time, action.get_total_weight(), 
-        form_factor_type);
+        parameters_.dilepton_brems_form_factor_type);
 
     // Add a dummy process to the dilepton bremsstrahlung action. The
     // only important thing is that its cross section is equal to the cross 

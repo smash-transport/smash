@@ -3892,6 +3892,7 @@ struct InputKeys {
       {"0.50"},
       detail::get_default_validator<bool>()};
 
+  // DOCUMENT: Added entry on Level Collision_Term -> Dileptons -> Bremsstrahlung
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_bremsstrahlung_,Bremsstrahlung,bool,false}
@@ -3904,8 +3905,23 @@ struct InputKeys {
    */
   inline static const Key<bool> collTerm_dileptons_bremsstrahlung{
       InputSections::c_dileptons + "Bremsstrahlung", false, {"3.4"}};
-  // TODO: Maybe change version to 3.4 or lower if this doesnt work at the moment.
-  
+
+  // DOCUMENT: Added entry on Level Collision_Term -> Dileptons -> Form_Factor
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_dileptons
+   * \optional_key{key_CT_dileptons_form_factor_,Form_Factor,string,"no_form_factor"}
+   *
+   * - `"FF1"` &rarr; Photon couples to pion direclty via \rho_0 meson. 
+   * - `"FF2"` &rarr; Photon couples 50% directly to intrinsic quark structure of 
+   *                  pion and 50% indirectly via \rho_0 meson.
+   * - `"no_form_factor"` &rarr; Implicitly using a factor of 1.
+   */
+  /**
+   * \see_key{key_CT_dileptons_form_factor_}
+   */
+  inline static const Key<FormFactorType> collTerm_dileptons_form_factor{
+      InputSections::c_dileptons + "Form_Factor", FormFactorType::no_form_factor, {"3.4"}};
+
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
    * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false,\none}
@@ -7684,6 +7700,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<FermiMotion>>,
+      std::reference_wrapper<const Key<FormFactorType>>,
       std::reference_wrapper<const Key<FieldDerivativesMode>>,
       std::reference_wrapper<const Key<FluidizableProcessesBitSet>>,
       std::reference_wrapper<const Key<FluidizationType>>,
@@ -7867,8 +7884,8 @@ General:
  * <h3> Example of dileptons configuration </h3>
  *
  * The following example configures the dilepton production for dileptons
- * originating from resonance decays and bremsstrahlung. In addition, the extended OSCAR2013
- * dilepton output is enabled.
+ * originating from resonance decays and bremsstrahlung. In addition, the extended
+ * OSCAR2013 dilepton output is enabled.
  *
  *\verbatim
  Output:
@@ -7879,7 +7896,7 @@ General:
      Dileptons:
          Decays: True
          Bremsstrahlung: True
-        // TODO: To be adjusted further for the specific form factor once done.
+         Form Factor Type: "FF1"
  \endverbatim
  *
  * <hr>

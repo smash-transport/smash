@@ -311,6 +311,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
           config.take(InputKeys::collTerm_forceDecaysAtEnd),
           config.take(InputKeys::collTerm_ignoreDecayWidthAtTheEnd),
           config.take(InputKeys::collTerm_decayInitial),
+          config.take(InputKeys::collTerm_dileptons_form_factor),
           config.take(InputKeys::collTerm_spinInteractions),
           std::nullopt};
 }

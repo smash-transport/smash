@@ -51,6 +51,19 @@ std::string to_string(CalculationFrame frame) {
   throw_unhandled_enum("CalculationFrame", static_cast<int>(frame));
 }
 
+// DOCUMENT: New function for dilepton bremsstrahlung form factor
+std::string to_string(FormFactorType factor) {
+  switch (factor) {
+    case FormFactorType::FF1:
+      return "FF1";
+    case FormFactorType::FF2:
+      return "FF2";
+    case FormFactorType::no_form_factor:
+      return "no_form_factor";
+  }
+  throw_unhandled_enum("FormFactorType", static_cast<int>(factor));
+}
+
 std::string to_string(FermiMotion motion) {
   switch (motion) {
     case FermiMotion::Off:

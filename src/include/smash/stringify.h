@@ -39,6 +39,17 @@ std::string to_string(ThermodynamicQuantity quantity);
  */
 std::string to_string(CalculationFrame frame);
 
+// DOCUMENT: New function for dilepton bremsstrahlung form factor
+/**
+ * Convert a FormFactorType enum value to its corresponding string.
+ *
+ * \param[in] factor The FormFactorType enum value to convert.
+ *
+ * \return std::string Corresponding string representation.
+ * \throws std::invalid_argument If the enum value is unhandled.
+ */
+std::string to_string(FormFactorType factor);
+
 /**
  * Convert a FermiMotion enum value to its corresponding string.
  *

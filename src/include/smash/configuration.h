@@ -1085,6 +1085,30 @@ class Configuration {
           "or \"fixed target\".");
     }
 
+    // DOCUMENT: Newly introduced form factor operator
+    /**
+     * Set form factor from configuration values.
+     *
+     * \return Form factor type.
+     * \throw IncorrectTypeInAssignment in case a form factor value that is
+     * not available is provided as a configuration value.
+     */
+    operator FormFactorType() const {
+      const std::string s = operator std::string();
+      if (s == "FF1") {
+        return FormFactorType::FF1;
+      }
+      if (s == "FF2") {
+        return FormFactorType::FF2;
+      }
+      if (s == "no_form_factor") {
+        return FormFactorType::no_form_factor;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"FF1\" or \"FF2\" or \"no_form_factor\".");
+    }
+
     /**
      * (De-)Activate Fermi motion from configuration values.
      *
