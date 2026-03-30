@@ -1532,11 +1532,10 @@ CollisionBranchList CrossSections::nk_xx(const ReactionsBitSet& included_2to2,
       break;
     }
     case pdg::K_z: {
-      // K+ and K0 have the same mass and spin, so their cross sections are
-      // assumed to only differ in isospin factors. For the initial state, we
-      // assume that K0 p is equivalent to K+ n and K0 n equivalent to K+ p,
-      // like for the elastic background.
-
+      /* K+ and K0 have the same mass and spin, so their cross sections are
+       * assumed to only differ in isospin factors. For the initial state, we
+       * assume that K0 p is equivalent to K+ n and K0 n equivalent to K+ p,
+       * like for the elastic background. */
       switch (pdg_nucleon) {
         case pdg::p: {
           if (incl_KN_to_KDelta) {
@@ -1567,8 +1566,7 @@ CollisionBranchList CrossSections::nk_xx(const ReactionsBitSet& included_2to2,
             add_channel(
                 process_list,
                 [&] {
-                  // The isospin factor is 1, see the parametrizations
-                  // tests.
+                  // The isospin factor is 1, see the parametrizations tests.
                   return kplusn_k0p(s);
                 },
                 sqrt_s_, type_K_p, type_n);
@@ -1734,8 +1732,7 @@ CollisionBranchList CrossSections::nk_xx(const ReactionsBitSet& included_2to2,
             add_channel(
                 process_list,
                 [&] {
-                  // The isospin factor is 1, see the parametrizations
-                  // tests.
+                  // The isospin factor is 1, see the parametrizations tests.
                   return kplusn_k0p(s);
                 },
                 sqrt_s_, type_K_m, type_n_bar);
@@ -2295,8 +2292,8 @@ double CrossSections::xs_dpi_dprimepi(const double sqrts, const double cm_mom,
   const double s = sqrts * sqrts;
   // same matrix element for πd and πd̅
   const double tmp = sqrts - pion_mass - deuteron_mass;
-  // Matrix element is fit to match the inelastic pi+ d -> pi+ n p
-  // cross-section from the Fig. 5 of [\iref{Arndt:1994bs}].
+  /* Matrix element is fit to match the inelastic pi+ d -> pi+ n p cross-section
+   * from the Fig. 5 of [\iref{Arndt:1994bs}]. */
   const double matrix_element =
       295.5 + 2.862 / (0.00283735 + pow_int(sqrts - 2.181, 2)) +
       0.0672 / pow_int(tmp, 2) - 6.61753 / tmp;
@@ -2530,9 +2527,8 @@ CollisionBranchList CrossSections::string_excitation(
    * anti-quark pair. See StringProcess::next_BBbarAnn() */
   double sig_annihilation = 0.0;
   if (can_annihilate) {
-    /* In the case of baryon-antibaryon pair,
-     * the parametrized cross section for annihilation will be added.
-     * See xs_ppbar_annihilation(). */
+    /* In the case of baryon-antibaryon pair, the parametrized cross section for
+     * annihilation will be added. See xs_ppbar_annihilation(). */
     mandelstam_s = effective_AQM_s(
         mandelstam_s, incoming_particles_[0].effective_mass(),
         incoming_particles_[1].effective_mass(), nucleon_mass, nucleon_mass);
@@ -2551,8 +2547,7 @@ CollisionBranchList CrossSections::string_excitation(
    * first non-diffractive, then double-diffractive, then
    * single-diffractive AB->AX and AB->XB in equal proportion.
    * The way it is done here is not unique. I (ryu) think that at high energy
-   * collision this is not an issue, but at sqrt_s < 10 GeV it may
-   * matter. */
+   * collision this is not an issue, but at sqrt_s < 10 GeV it may matter. */
   std::array<double, 3> xs = string_process->cross_sections_diffractive(
       pdgid[0], pdgid[1], std::sqrt(mandelstam_s));
   if (finder_parameters.use_AQM) {
@@ -2578,9 +2573,8 @@ CollisionBranchList CrossSections::string_excitation(
   double nondiffractive_soft = 0.;
   double nondiffractive_hard = 0.;
   if (nondiffractive_all > 0.) {
-    /* Hard string process is added by hard cross section
-     * in conjunction with multipartion interaction picture
-     * \iref{Sjostrand:1987su}. */
+    /* Hard string process is added by hard cross section in conjunction with
+     * multipartion interaction picture \iref{Sjostrand:1987su}. */
     const double hard_xsec = AQM_scaling * string_hard_cross_section();
     nondiffractive_soft =
         nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
@@ -2594,10 +2588,10 @@ CollisionBranchList CrossSections::string_excitation(
   logg[LCrossSections].debug("Hard non-diffractive: ", nondiffractive_hard);
   logg[LCrossSections].debug("B-Bbar annihilation: ", sig_annihilation);
 
-  /* cross section of soft string excitation including annihilation */
+  // cross section of soft string excitation including annihilation
   const double sig_string_soft = total_string_xs - nondiffractive_hard;
 
-  /* fill the list of process channels */
+  // fill the list of process channels
   if (sig_string_soft > 0.) {
     channel_list.push_back(std::make_unique<CollisionBranch>(
         single_diffr_AX, ProcessType::StringSoftSingleDiffractiveAX));
