@@ -67,10 +67,10 @@ enum class DileptonBremsFormFactor {
   /// Don't use form factors, i.e. multiply by 1.
   Off,
   /// Photon couples to pion only via \rho_0 meson.
-  FF1, 
+  FF1,
   /// Photon couples 50% directly to intrinsice quark structure of pion and
   /// 50% indirectly via \rho_0 meson.
-  FF2, 
+  FF2,
 };
 
 /// Option to use Fermi Motion

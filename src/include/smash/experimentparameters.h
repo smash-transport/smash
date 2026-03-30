@@ -10,8 +10,9 @@
 #include <memory>
 #include <optional>
 #include <set>
-#include "forwarddeclarations.h"
+
 #include "clock.h"
+#include "forwarddeclarations.h"
 
 namespace smash {
 
@@ -167,7 +168,6 @@ struct ExperimentParameters {
    */
   bool decay_initial_particles;
 
-  // DOCUMENT: Trying to read the form factor as experiment parameter.
   /**
    * Setting the specific form factor for dilepton bremsstrahlung (optional).
    */

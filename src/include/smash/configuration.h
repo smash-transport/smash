@@ -1085,7 +1085,6 @@ class Configuration {
           "or \"fixed target\".");
     }
 
-    // DOCUMENT: Newly introduced form factor operator
     /**
      * Set form factor from configuration values.
      *

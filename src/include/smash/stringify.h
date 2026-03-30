@@ -39,7 +39,6 @@ std::string to_string(ThermodynamicQuantity quantity);
  */
 std::string to_string(CalculationFrame frame);
 
-// DOCUMENT: New function for dilepton bremsstrahlung form factor
 /**
  * Convert a DileptonBremsFormFactor enum value to its corresponding string.
  *

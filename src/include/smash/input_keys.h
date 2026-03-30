@@ -3892,13 +3892,13 @@ struct InputKeys {
       {"0.50"},
       detail::get_default_validator<bool>()};
 
-  // DOCUMENT: Added entry on Level Collision_Term -> Dileptons -> Bremsstrahlung
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_bremsstrahlung_,Bremsstrahlung,bool,false}
    *
    * Whether or not to enable dilepton production from NN bremsstrahlung.
-   * The approach follows the meson-exchange approximation depicted in Shyam,Mosel (2010).
+   * The approach follows the meson-exchange approximation depicted in
+   * Shyam,Mosel (2010).
    */
   /**
    * \see_key{key_CT_dileptons_bremsstrahlung_}
@@ -3906,21 +3906,22 @@ struct InputKeys {
   inline static const Key<bool> collTerm_dileptons_bremsstrahlung{
       InputSections::c_dileptons + "Bremsstrahlung", false, {"3.4"}};
 
-  // DOCUMENT: Added entry on Level Collision_Term -> Dileptons -> Form_Factor
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_form_factor_,Form_Factor,string,"Off"}
    *
    * - `"Off"` &rarr; Implicitly using a factor of 1.
-   * - `"FF1"` &rarr; Photon couples to pion direclty via \rho_0 meson. 
-   * - `"FF2"` &rarr; Photon couples 50% directly to intrinsic quark structure of 
-   *                  pion and 50% indirectly via \rho_0 meson.
+   * - `"FF1"` &rarr; Photon couples to pion direclty via \rho_0 meson.
+   * - `"FF2"` &rarr; Photon couples 50% directly to intrinsic quark structure
+   * of pion and 50% indirectly via \rho_0 meson.
    */
   /**
    * \see_key{key_CT_dileptons_form_factor_}
    */
-  inline static const Key<DileptonBremsFormFactor> collTerm_dileptons_form_factor{
-      InputSections::c_dileptons + "Form_Factor", DileptonBremsFormFactor::Off, {"3.4"}};
+  inline static const Key<DileptonBremsFormFactor>
+      collTerm_dileptons_form_factor{InputSections::c_dileptons + "Form_Factor",
+                                     DileptonBremsFormFactor::Off,
+                                     {"3.4"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
@@ -7700,7 +7701,6 @@ struct InputKeys {
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<FermiMotion>>,
-      // DOCUMENT: Added alias for Dilepton Bremsstrahlung Form Factor
       std::reference_wrapper<const Key<DileptonBremsFormFactor>>,
       std::reference_wrapper<const Key<FieldDerivativesMode>>,
       std::reference_wrapper<const Key<FluidizableProcessesBitSet>>,
@@ -7885,7 +7885,8 @@ General:
  * <h3> Example of dileptons configuration </h3>
  *
  * The following example configures the dilepton production for dileptons
- * originating from resonance decays and bremsstrahlung. In addition, the extended
+ * originating from resonance decays and bremsstrahlung. In addition, the
+ extended
  * OSCAR2013 dilepton output is enabled.
  *
  *\verbatim

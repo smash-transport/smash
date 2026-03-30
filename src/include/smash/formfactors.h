@@ -8,6 +8,7 @@
 #ifndef SRC_INCLUDE_SMASH_FORMFACTORS_H_
 #define SRC_INCLUDE_SMASH_FORMFACTORS_H_
 
+#include <algorithm>
 #include <complex>
 #include <string>
 
@@ -145,35 +146,34 @@ inline double em_form_factor_sqr_vec(PdgCode pdg, double mass) {
  */
 inline double form_factor_delta([[maybe_unused]] double m) { return 3.12; }
 
-// DOCUMENT: Newly introduced form factors for dilepton bremsstrahlung process.
 /**
- * \return Squared pion electromagnetic form factor |F_pi(M²)|²
- * for the internal pion propagator in pn -> pne⁺e⁻ bremsstrahlung.
+ * \return Squared pion electromagnetic form factor |F_π(M²)|²
+ * for the internal pion propagator in p n -> p n e⁺ e⁻ bremsstrahlung.
  *
- * FF1: pure vector-meson dominance, direct rho_0 coupling
- * FF2: mixed direct-quark + rho0 coupling (Shyam & Mosel 2010, FF2) 
- * 
+ * FF1: pure vector-meson dominance, direct ρ⁰ coupling
+ * FF2: mixed direct-quark + ρ⁰ coupling (Shyam & Mosel 2010, FF2)
+ *
  * \param M_sq  Invariant dilepton mass squared M² [GeV²]
- * \param m_rho rho0 pole mass [GeV]
- * \param Gamma_rho Energy-dependent rho0 width Γ_ρ(M²) [GeV]
+ * \param m_rho ρ⁰ pole mass [GeV]
+ * \param Gamma_rho Energy-dependent ρ⁰ width Γ_ρ(M²) [GeV]
  */
-inline double pion_em_form_factor_sqr_FF1(
-    double M_sq, double m_rho, double Gamma_rho) {
+inline double pion_em_form_factor_sqr_FF1(double M_sq, double m_rho,
+                                          double Gamma_rho) {
   const double m_rho_sq = m_rho * m_rho;
   const double Gamma_safe = std::max(Gamma_rho, really_small);
   const std::complex<double> denom(m_rho_sq - M_sq, -m_rho * Gamma_safe);
   return std::norm(std::complex<double>(m_rho_sq, 0.0) / denom);
 }
 
-inline double pion_em_form_factor_sqr_FF2(
-    double M_sq, double m_rho, double Gamma_rho) {
+inline double pion_em_form_factor_sqr_FF2(double M_sq, double m_rho,
+                                          double Gamma_rho) {
   const double m_rho_sq = m_rho * m_rho;
   const double Gamma_safe = std::max(Gamma_rho, really_small);
   const std::complex<double> denom(m_rho_sq - M_sq, -m_rho * Gamma_safe);
   const std::complex<double> F =
-      std::complex<double>(0.4 / (1.0 - M_sq / lambda_sq_FF2), 0.0)
-      + 0.6 / (1.0 - M_sq / (2 * m_rho_sq)) 
-      * std::complex<double>(m_rho_sq, 0.0) / denom;
+      std::complex<double>(0.4 / (1.0 - M_sq / lambda_sq_FF2), 0.0) +
+      0.6 / (1.0 - M_sq / (2 * m_rho_sq)) *
+          std::complex<double>(m_rho_sq, 0.0) / denom;
   return std::norm(F);
 }
 

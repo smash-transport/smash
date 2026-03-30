@@ -56,7 +56,6 @@ class DecayActionsFinderDilepton {
    */
   void shine_final(const Particles& search_list, OutputInterface* output,
                    bool only_res = false) const;
-
 };
 
 }  // namespace smash

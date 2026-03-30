@@ -604,12 +604,11 @@ class Experiment : public ExperimentBase {
 
   /// This indicates whether dileptons are switched on.
   const bool dileptons_switch_;
-  
-  // DOCUMENT: Newly introduced switch for dilepton bremsstrahlung
+
   /**
-   * This indicates whether dilepton production via bremsstrahlung is 
+   * This indicates whether dilepton production via bremsstrahlung is
    * switched on.
-   */ 
+   */
   const bool dileptons_bremsstrahlung_switch_;
 
   /// This indicates whether photons are switched on.
@@ -935,7 +934,6 @@ Experiment<Modus>::Experiment(Configuration &config,
       metric_(config.take(InputKeys::gen_metricType),
               config.take(InputKeys::gen_expansionRate)),
       dileptons_switch_(config.take(InputKeys::collTerm_dileptons_decays)),
-      // DOCUMENT: Newly introduced switch for dilepton bremsstrahlung is read
       dileptons_bremsstrahlung_switch_(
           config.take(InputKeys::collTerm_dileptons_bremsstrahlung)),
       photons_switch_(
@@ -2471,36 +2469,33 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     brems_act.perform_bremsstrahlung(outputs_);
   }
 
-  //DOCUMENT: Below code successfully passed first testing. 
-  //          Large scale analyses of invariant mass spektrum outstanding.
-  //          Plan: No bremsstrahlung vs Bremsstrahlung with form factor "Off" vs
-  //                form factor "FF1" vs. form factor "FF2" 
   if (dileptons_bremsstrahlung_switch_ &&
       BremsstrahlungActionDilepton::is_dilepton_brems_reaction(
           action.incoming_particles())) {
     // Time in the action constructor is relative to current time of incoming
     constexpr double action_time = 0.;
-    
-    // Create the dilepton bremsstrahlung action with the respective form factor.
+
+    // Create the dilepton bremsstrahlung action with the respective form
+    // factor.
     BremsstrahlungActionDilepton dilepton_brems_act(
-        action.incoming_particles(), action_time, action.get_total_weight(), 
+        action.incoming_particles(), action_time, action.get_total_weight(),
         parameters_.dilepton_brems_form_factor_type);
 
     // Add a dummy process to the dilepton bremsstrahlung action. The
-    // only important thing is that its cross section is equal to the cross 
-    // section of the hadronic action. This can be done, because the dilepton 
-    // bremsstrahlung action is never actually performed, only the final state is 
-    // generated and printed to the dilepton output (similar to the photon output).
+    // only important thing is that its cross section is equal to the cross
+    // section of the hadronic action. The dilepton bremsstrahlung action is
+    // never performed, only the final state is generated and printed to the
+    // dilepton output (similar to the photon output).
     //
-    // Furthermore, the add_single_process() logic used in the photon bremsstrahlung
+    // The add_single_process() logic used in the photon bremsstrahlung
     // becomes obsolet since there are no sub-branches leading to the output at
-    // the moment. Therefore, the very reduced logic from this function is 
+    // the moment. Therefore, the very reduced logic from this function is
     // incorporated into add_dummy_hadronic_process.
     dilepton_brems_act.add_dummy_hadronic_process(action.get_total_weight());
-    
+
     dilepton_brems_act.perform_dilepton_bremsstrahlung(outputs_);
   }
-  
+
   logg[LExperiment].debug(~einhard::Green(), "✔ ", action);
   return true;
 }
