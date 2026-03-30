@@ -39,6 +39,7 @@
 # from the documentation.
 #
 /**
+\page doxypage_software_execution Software execution
 \page doxypage_input_short_ref Input short reference
 \page doxypage_input Input
     <div class="invisible-content">
@@ -169,7 +170,6 @@
     \page doxypage_output_collisions_box_modus Collision output in box modus
     \page doxypage_output_spin Spin output
 
-\page doxypage_smash_invocation SMASH invocation
 \ifnot user
 \page doxypage_unit_testing Unit testing
     <div class="invisible-content">
