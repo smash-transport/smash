@@ -9,6 +9,7 @@
 #ifndef SRC_INCLUDE_SMASH_PARAMETRIZATIONS_H_
 #define SRC_INCLUDE_SMASH_PARAMETRIZATIONS_H_
 
+#include <optional>
 #include <unordered_map>
 #include <utility>
 
@@ -806,6 +807,96 @@ double sigmaplussigmaminus_ximinusp(double sqrts_sqrts0);
  * \return the parametrized cross-section [mb]
  */
 double sigmaplussigmaminus_xi0n(double sqrts_sqrts0);
+
+/**
+ * D⁰π⁺ elastic cross section \iref{Abreu:2011ic}. Charge conjugated cross
+ * section D̄⁰π⁻ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dzeropiplus_elastic(double sqrts);
+
+/**
+ * D⁰π⁺ -> D⁺π⁰ cross section \iref{Abreu:2011ic}. Charge conjugated cross
+ * section D̄⁰π⁻ -> D⁻π⁰ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double Dzeropiplus_Dpluspizero(double sqrts);
+
+/**
+ * D⁰π⁻ elastic cross section \iref{Abreu:2011ic}. Charge conjugated cross
+ * section D̄⁰π⁺ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dzeropiminus_elastic(double sqrts);
+
+/**
+ * D⁰π⁰ elastic cross section \iref{Abreu:2011ic}. Charge conjugated cross
+ * section D̄⁰π⁰ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dzeropizero_elastic(double sqrts);
+
+/**
+ * D⁰π⁰ -> D⁺π⁻ cross section \iref{Abreu:2011ic}. Charge conjugated cross
+ * section D̄⁰π⁰ -> D⁻π⁺ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double Dzeropizero_Dpluspiminus(double sqrts);
+
+/**
+ * D⁺π⁺ elastic cross section \iref{Abreu:2011ic}. Charge conjugated cross
+ * section D⁻π⁻ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dpluspiplus_elastic(double sqrts);
+
+/**
+ * D⁺π⁻ elastic cross section \iref{Abreu:2011ic}. Charge conjugated cross
+ * section D⁻π⁺ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dpluspiminus_elastic(double sqrts);
+
+/**
+ * D⁺π⁻ -> D⁰π⁰ cross section \iref{Abreu:2011ic}. Charge conjugated cross
+ * section D⁻π⁺ -> D̄⁰π⁰ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double Dpluspiminus_Dzeropizero(double sqrts);
+
+/**
+ * D⁺π⁰ elastic cross section \iref{Abreu:2011ic}. Charge conjugated cross
+ * section D⁻π⁰ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dpluspizero_elastic(double sqrts);
+
+/**
+ * D⁺π⁰ -> D⁰π⁺ cross section \iref{Abreu:2011ic}. Charge conjugated cross
+ * section D⁻π⁰ -> D̄⁰π⁻ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double Dpluspizero_Dzeropiplus(double sqrts);
 
 }  // namespace smash
 

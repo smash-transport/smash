@@ -19,8 +19,8 @@
 #include "smash/average.h"
 #include "smash/clebschgordan.h"
 #include "smash/constants.h"
+#include "smash/interpolation.h"
 #include "smash/kinematics.h"
-#include "smash/logging.h"
 #include "smash/lowess.h"
 #include "smash/parametrizations_data.h"
 #include "smash/pow.h"
@@ -900,6 +900,174 @@ double sigmaplussigmaminus_ximinusp(double sqrts_sqrts0) {
 
 double sigmaplussigmaminus_xi0n(double sqrts_sqrts0) {
   return sigmaplussigmaminus_ximinusp(sqrts_sqrts0);
+}
+
+std::optional<double> Dzeropiplus_elastic(double sqrts) {
+  if (Dzeropiplus_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DPI_SQRTS, DZEROPIPLUS_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    Dzeropiplus_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DPI_SQRTS.begin());
+  const double last = *(DPI_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*Dzeropiplus_elastic_interpolation)(sqrts);
+  }
+}
+
+double Dzeropiplus_Dpluspizero(double sqrts) {
+  if (Dzeropiplus_Dpluspizero_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DPI_SQRTS, DZEROPIPLUS_DPLUSPIZERO_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    Dzeropiplus_Dpluspizero_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dzeropiplus_Dpluspizero_interpolation)(sqrts);
+}
+
+std::optional<double> Dzeropiminus_elastic(double sqrts) {
+  if (Dzeropiminus_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DPI_SQRTS, DZEROPIMINUS_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    Dzeropiminus_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DPI_SQRTS.begin());
+  const double last = *(DPI_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*Dzeropiminus_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> Dzeropizero_elastic(double sqrts) {
+  if (Dzeropizero_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DPI_SQRTS, DZEROPIZERO_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    Dzeropizero_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DPI_SQRTS.begin());
+  const double last = *(DPI_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*Dzeropizero_elastic_interpolation)(sqrts);
+  }
+}
+
+double Dzeropizero_Dpluspiminus(double sqrts) {
+  if (Dzeropizero_Dpluspiminus_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DPI_SQRTS, DZEROPIZERO_DPLUSPIMINUS_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    Dzeropizero_Dpluspiminus_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dzeropizero_Dpluspiminus_interpolation)(sqrts);
+}
+
+std::optional<double> Dpluspiplus_elastic(double sqrts) {
+  if (Dpluspiplus_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DPI_SQRTS, DPLUSPIPLUS_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    Dpluspiplus_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DPI_SQRTS.begin());
+  const double last = *(DPI_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*Dpluspiplus_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> Dpluspiminus_elastic(double sqrts) {
+  if (Dpluspiminus_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DPI_SQRTS, DPLUSPIMINUS_DZEROPIZERO_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.5, 5);
+    Dpluspiminus_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DPI_SQRTS.begin());
+  const double last = *(DPI_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*Dpluspiminus_elastic_interpolation)(sqrts);
+  }
+}
+
+double Dpluspiminus_Dzeropizero(double sqrts) {
+  if (Dpluspiminus_Dzeropizero_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DPI_SQRTS, DPLUSPIMINUS_DZEROPIZERO_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.5, 5);
+    Dpluspiminus_Dzeropizero_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dpluspiminus_Dzeropizero_interpolation)(sqrts);
+}
+
+std::optional<double> Dpluspizero_elastic(double sqrts) {
+  if (Dpluspizero_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DPI_SQRTS, DPLUSPIZERO_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    Dpluspizero_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DPI_SQRTS.begin());
+  const double last = *(DPI_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*Dpluspizero_elastic_interpolation)(sqrts);
+  }
+}
+
+double Dpluspizero_Dzeropiplus(double sqrts) {
+  if (Dpluspizero_Dzeropiplus_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DPI_SQRTS, DPLUSPIZERO_DZEROPIPLUS_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    Dpluspizero_Dzeropiplus_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dpluspizero_Dzeropiplus_interpolation)(sqrts);
 }
 
 }  // namespace smash
