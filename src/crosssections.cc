@@ -438,6 +438,19 @@ double CrossSections::elastic_parametrization(
       // Elastic (Anti-)deuteron (Anti-)Nucleon Scattering
       elastic_xs = deuteron_nucleon_elastic(sqrt_s_ * sqrt_s_);
     }
+  } else if ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
+             (pdg_a.is_pion() && pdg_b.is_Dmeson())) {
+    std::optional<double> tmp_elastic_xs = Dpi_elastic();
+    if (tmp_elastic_xs.has_value()) {
+      elastic_xs = tmp_elastic_xs.value();
+    } else if (use_AQM) {
+      const double m1 = incoming_particles_[0].effective_mass();
+      const double m2 = incoming_particles_[1].effective_mass();
+      const double s = sqrt_s_ * sqrt_s_;
+      elastic_xs = 2. / 3. * piplusp_elastic_AQM(s, m1, m2) *
+                   finder_parameters.AQM_scaling_factor(pdg_a) *
+                   finder_parameters.AQM_scaling_factor(pdg_b);
+    }
   } else if (use_AQM) {
     const double m1 = incoming_particles_[0].effective_mass();
     const double m2 = incoming_particles_[1].effective_mass();
@@ -900,6 +913,61 @@ double CrossSections::nk_el() const {
   } else {
     throw_xsec_is_negative(sqrt_s_, sig_el, incoming_particles_[0],
                            incoming_particles_[1], __func__);
+  }
+}
+
+std::optional<double> CrossSections::Dpi_elastic() const {
+  const ParticleType& a = incoming_particles_[0].type();
+  const ParticleType& b = incoming_particles_[1].type();
+  const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
+  const ParticleType& type_pion = a.pdgcode().is_Dmeson() ? b : a;
+
+  const auto pdg_D = type_D.pdgcode().code();
+  const auto pdg_pion = type_pion.pdgcode().code();
+  assert(pdg_pion != pdg_D);
+
+  std::optional<double> sig_el = std::nullopt;
+  switch (pack(pdg_D, pdg_pion)) {
+    case pack(pdg::D_z, pdg::pi_p):
+    case pack(pdg::Dbar_z, pdg::pi_m): {  // Same xsec for charge conjugation.
+      sig_el = Dzeropiplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::pi_m):
+    case pack(pdg::Dbar_z, pdg::pi_p): {  // Same xsec for charge conjugation.
+      sig_el = Dzeropiminus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::pi_z):
+    case pack(pdg::Dbar_z, pdg::pi_z): {  // Same xsec for charge conjugation.
+      sig_el = Dzeropizero_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, pdg::pi_p):
+    case pack(pdg::D_m, pdg::pi_m): {  // Same xsec for charge conjugation.
+      sig_el = Dpluspiplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, pdg::pi_m):
+    case pack(pdg::D_m, pdg::pi_p): {  // Same xsec for charge conjugation.
+      sig_el = Dpluspiminus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, pdg::pi_z):
+    case pack(pdg::D_m, pdg::pi_z): {  // Same xsec for charge conjugation.
+      sig_el = Dpluspizero_elastic(sqrt_s_);
+      break;
+    }
+    default:
+      throw_xsec_is_not_implemented(incoming_particles_[0],
+                                    incoming_particles_[1], __func__);
+  }
+
+  if (sig_el.has_value() && sig_el.value() < 0.) {
+    throw_xsec_is_negative(sqrt_s_, sig_el.value(), incoming_particles_[0],
+                           incoming_particles_[1], __func__);
+  } else {
+    return sig_el;
   }
 }
 

@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_CROSSSECTIONS_H_
 
 #include <memory>
+#include <optional>
 #include <utility>
 
 #include "smash/forwarddeclarations.h"
@@ -392,6 +393,20 @@ class CrossSections {
    * \throw std::runtime_error if positive cross section cannot be specified.
    */
   double nk_el() const;
+
+  /**
+   * Determine the elastic cross section for a D meson-pion (Dpi) collision.
+   * If the center-of-mass energy for the collision is below the lower bound of
+   * the energy range of the underlying cross section data, the return value
+   * will be 0. If it is above the upper bound, the return value will be
+   * `std::nullopt`.
+   *
+   * \return Elastic cross section for Dpi
+   *
+   * \throw std::runtime_error if incoming particles are not D meson+pion.
+   * \throw std::runtime_error if positive cross section cannot be specified.
+   */
+  std::optional<double> Dpi_elastic() const;
 
   /**
    * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.
