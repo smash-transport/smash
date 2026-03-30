@@ -2490,7 +2490,8 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     // only important thing is that its cross section is equal to the cross 
     // section of the hadronic action. This can be done, because the dilepton 
     // bremsstrahlung action is never actually performed, only the final state is 
-    // generated and printed to the dilepton output.
+    // generated and printed to the dilepton output (similar to the photon output).
+    //
     // Furthermore, the add_single_process() logic used in the photon bremsstrahlung
     // becomes obsolet since there are no sub-branches leading to the output at
     // the moment. Therefore, the very reduced logic from this function is 

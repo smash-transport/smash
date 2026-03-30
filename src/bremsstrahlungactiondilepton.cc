@@ -89,14 +89,15 @@ void BremsstrahlungActionDilepton::add_dummy_hadronic_process(
   // Third, add the dilepton bremsstrahlung process branch to the final state list.
   CollisionBranchList final_state_list;
 
-  // TODO: This part is commented out for now as reac_ is for sure 'np', 
-  //       but it can be reworked in case we want to add more reactions in the future.
-  //       In this case, the function needs to be changed as current return is void.
-  /**
-   * if (reac_ != ReactionType::np) {
-   *     return final_state_list;
-   * }
-   */
+  // DOCUMENT: Although the reac_ is for sure 'np', throw an exception in case a
+  //           third-party program uses SMASH as library and ends up here.
+  if (reac_ == ReactionType::no_reaction) {
+    logg[LScatterAction].fatal()
+        << "Problem in BremsstrahlungActionDilepton::add_dummy_hadronic_process().\n"
+           "Process called for ReactionType::no_reaction — this should never happen.\n"
+           "Check is_dilepton_brems_reaction().";
+    throw std::runtime_error("");
+  }
 
   // For the 'np' reaction, the final state is 'pn e⁺e⁻' in this order. 
   // The order of particles written in CollisionBranch is relevant for the usage
