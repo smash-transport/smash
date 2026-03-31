@@ -37,9 +37,14 @@ VtkOutput::~VtkOutput() {}
 
 /*!\Userguide
  * \page doxypage_output_vtk
- * In general VTK is a very versatile format, which allows many possible
- * structures. For information on the generic VTK format, please visit <a
- * href="http://vtk.org">the official VTK website</a>. This page describes only
+ *
+ * In general, VTK is a very versatile format which allows many possible
+ * structures. For information on the generic VTK format, please visit
+ * <a href="http://vtk.org">the official VTK website</a>. VTK output is known to
+ * work with <a href="http://paraview.org">ParaView</a>, a free visualization
+ * and data analysis software. Files of this format are supposed to be used as a
+ * black box and opened with <a href="http://paraview.org">ParaView</a>, but at
+ * the same time they are human-readable text files. This page describes only
  * SMASH-specific VTK format.
  *
  * SMASH VTK files contain a snapshot of the simulation for a certain output
@@ -47,19 +52,42 @@ VtkOutput::~VtkOutput() {}
  * i.e. the starting time of an event, and at every output time step specified
  * by either \ref key_output_out_interval_ "Output_Interval" or \ref
  * key_output_out_times_ "Output_Times". For every output time step a separate
- * VTK file is written. File names are constructed as follows:
- * `pos_ev<event>_ens<ensemble>_tstep<timestep_counter>.vtk`.
+ * VTK file is written.
  *
- * Files contain particle coordinates, momenta, PDG codes, cross-section
- * scaling factors, information if a particle is already formed, ID, number of
- * collisions, baryon number, strangeness, and masses. VTK output is known to
- * work with <a href="http://paraview.org">ParaView</a>, a free visualization
- * and data analysis software. Files of this format are supposed to be used as a
- * black box and opened with <a href="http://paraview.org">ParaView</a>, but at
- * the same time they are human-readable text files.
+ * VTK output is currently implemented for the following \ref output_contents_
+ * "output contents":
  *
- * There is also a possibility to print a lattice with thermodynamical
- * quantities to VTK files, see \ref doxypage_output_vtk_lattice.
+ * - \b %Particles:
+ *         - Filename structure:
+ *           `pos_ev<event>_ens<ensemble>_tstep<timestep_counter>.vtk`
+ *         - Files contain particle coordinates, momenta, PDG codes,
+ *           cross-section scaling factors, information if a particle is already
+ *           formed, ID, number of collisions, baryon number, strangeness, and
+ *           masses.
+ *
+ * - \b Coulomb:
+ *         - Filename structure:
+ *           - Electric field: `Efield_<event>_tstep<timestep_counter>.vtk`
+ *           - Magnetic field: `Bfield_<event>_tstep<timestep_counter>.vtk`
+ *         - Files contain a three vector per lattice cell for the fields.
+ *           This output requires a \ref doxypage_input_conf_lattice and
+ *           \ref doxypage_input_conf_pot_coulomb "coulomb potential" in the
+ *           configuration file.
+ *
+ * - \b Thermodynamics:
+ *         - Density on the lattice can be printed out in the VTK format of
+ *           structured grid.
+ *           - Filename structure:
+ *    `<density_type>_<density_name>_<event_number>_tstep<timestep_counter>.vtk`
+ *         - Additionally to density, energy-momentum tensor \f$T^{\mu\nu}\f$,
+ *           energy-momentum tensor in Landau rest frame \f$T^{\mu\nu}_L \f$
+ *           and velocity of Landau rest frame \f$v_L\f$ on the lattice can be
+ *           printed out in the VTK format of structured grid.
+ *           - Filename structure:
+ *        `<density_type>_<quantity>_<event_number>_tstep<timestep_counter>.vtk`
+ *
+ * For the possible output configurations see
+ * \ref input_output_content_specific_ "content-specific output options".
  */
 
 void VtkOutput::at_eventstart(const Particles &particles,
@@ -176,14 +204,6 @@ void VtkOutput::write(const Particles &particles) {
   }
 }
 
-/*!\Userguide
- * \page doxypage_output_vtk_lattice
- * Density on the lattice can be printed out in the VTK format of structured
- * grid. At every output time step a new VTK file is created. The name format is
- * `<density_type>_<density_name>_<event_number>_tstep<timestep_counter>.vtk`.
- * Files can be opened directly with <a href="http://paraview.org">ParaView</a>.
- */
-
 template <typename T>
 void VtkOutput::write_vtk_header(std::ofstream &file,
                                  RectangularLattice<T> &lattice,
@@ -260,20 +280,6 @@ void VtkOutput::thermodynamics_output(
                    [&](DensityOnLattice &node) { return node.rho(); });
   vtk_density_output_counter_++;
 }
-
-/*!\Userguide
- * \page doxypage_output_vtk_lattice
- * Additionally to density, energy-momentum tensor \f$T^{\mu\nu} \f$,
- * energy-momentum tensor in Landau rest frame \f$T^{\mu\nu}_L \f$ and
- * velocity of Landau rest frame \f$v_L\f$ on the lattice can be printed out
- * in the VTK format of structured grid. At every output time step a new VTK
- * file is created. The name format is
- * `<density_type>_<quantity>_<event_number>_tstep<timestep_counter>.vtk`. Files
- * can be opened directly with <a href="http://paraview.org">ParaView</a>.
- *
- * For configuring the output see \ref input_output_content_specific_
- * "content-specific output options".
- */
 
 void VtkOutput::thermodynamics_output(
     const ThermodynamicQuantity tq, const DensityType dens_type,

@@ -48,11 +48,8 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
 }
 
 /*!\Userguide
- * \page doxypage_input_conf_output
+ * \page doxypage_input_conf_output_examples
  *
- * ---
- *
- * \section config_output_examples Examples for configuring the SMASH output
  * The following example configures the output to be printed in an interval of
  * 1 fm and with the net baryon density being printed to the header.
  * The particles output is generated in "Oscar1999", VTK and "Root" format,
@@ -116,8 +113,8 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
          Extended: False
  \endverbatim
  * The HepMC_asciiv3 and/or HepMC_treeroot ouputs are enabled by specifying
- * these output options under Particles or Collisions depdening on the content
- * wanted.
+ * these output options under %Particles or Collisions depending on the desired
+ * content.
  *\verbatim
  Output:
      Particles:
@@ -129,6 +126,7 @@ ExperimentPtr ExperimentBase::create(Configuration &config,
  * for the electric and magnetic fields is available. It can be obtained by
  * adding the following to the output section of the configuration:
  *\verbatim
+ Output:
      Coulomb:
          Format: ["VTK"]
  \endverbatim
