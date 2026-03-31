@@ -139,46 +139,98 @@ namespace {
  * the exit status is EXIT_FAIL.
  */
 void usage(const int rc, const std::string &progname) {
-  std::printf("\nUsage: %s [option]\n\n", progname.c_str());
+  // Implement some tools to format helper using Einhard colors
+  const auto colorize = [](const auto &color,
+                           const std::string s) -> std::string {
+    return color + s + einhard::NoColor_t_::ANSI();
+  };
+  const auto print_option = [&colorize](
+                                const std::string &short_option,
+                                const std::string &long_option,
+                                std::optional<std::string> value_placeholder,
+                                const std::string &description) {
+    const auto option_color = std::string{einhard::Cyan_t_::ANSI()};
+    const auto value_color = std::string{einhard::DCyan_t_::ANSI()};
+    const auto default_color = std::string{einhard::NoColor_t_::ANSI()};
+    const int indentation = 2;
+    const int effective_option_column_width = 29;
+    /* Calculate the width of the option column including the bytes from the
+     * ANSI color code which don't appear on screen but are "eaten up" by
+     * std::printf and thus must be added here. */
+    const int option_column_width =
+        effective_option_column_width +
+        3 * (option_color.length() + default_color.length());
+    const int padding = indentation + effective_option_column_width;
+    const int raw_option_length =
+        short_option.length() + 2 + long_option.length() +
+        ((value_placeholder) ? (1 + value_placeholder->length()) : 0);
+    const std::string option{
+        colorize(option_color, short_option) + ", " +
+        colorize(option_color, long_option) + (value_placeholder ? " " : "") +
+        colorize(value_color, value_placeholder.value_or(""))};
+    std::printf("%*s%-*s", indentation, "", option_column_width,
+                option.c_str());
+    bool skip_padding = true;
+    if (raw_option_length >= effective_option_column_width) {
+      std::printf("\n");
+      skip_padding = false;
+    }
+    for (const auto &line : smash::split(description, '\n')) {
+      std::printf("%*s%s\n", (skip_padding) ? 0 : padding, "", line.c_str());
+      skip_padding = false;
+    }
+  };
+
+  // Print synopsis
   std::printf(
-      "  -h, --help               Print usage information\n"
-      "  -v, --version            Print version\n"
-      "\n"
-      "  -i, --inputfile <file>   Path to input configuration file "
-      "(default: ./config.yaml)\n"
-      "  -o, --output <dir>       Output directory (default: ./data/<runid>)\n"
-      "  -f, --force              Force overwriting files in the output "
-      "directory\n"
-      "  -d, --decaymodes <file>  Override default decay modes from file\n"
-      "  -p, --particles <file>   Override default particles from file\n"
-      "  -q, --quiet              Suppress disclaimer printout\n"
-      "  -n, --no-cache           Disable caching integrals on disk\n"
-      "\n"
-      "  -c, --config <YAML>      Specify config value overrides "
-      "(multiple -c arguments are supported)\n"
-      "  -m, --modus <modus>      Shortcut for -c 'General: { Modus: <modus> "
-      "}'\n"
-      "  -e, --endtime <time>     Shortcut for -c 'General: { End_Time: <time> "
-      "}'\n"
-      "\n"
-      "  -l, --list-2-to-n        Print list of all possible 2->n reactions "
-      "(with n>1)\n"
-      "  -r, --resonance <pdg>    Print width(m) and m*spectral function(m^2)"
-      " for resonance pdg\n"
-      "  -s, --cross-sections <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]\n"
-      "                           Print all partial cross-sections of "
-      "pdg1 + pdg2 reactions versus sqrt(s)\n"
-      "  -S, --cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]\n"
-      "                           Print an approximation of the final-state"
-      " cross-sections of pdg1 + pdg2\n"
-      "                           reactions versus sqrt(s). Contributions from "
-      "strings are not considered\n"
-      "                           for the final state. Masses are optional, by "
-      "default pole masses are used.\n"
-      "                           Note the required comma and no spaces\n"
-      "  -x, --dump_iSS           Print particles table in iSS format. This "
-      "format is used in MUSIC and\n"
-      "                           CLVisc relativistic hydro codes\n\n");
+      "\n Usage: %s\n\n",
+      colorize(einhard::Yellow_t_::ANSI(), progname + " [option]").c_str());
+
+  // Print options
+  print_option("-h", "--help", std::nullopt, "Print usage information");
+  print_option("-v", "--version", std::nullopt, "Print version");
+  std::printf("\n");
+  print_option("-i", "--inputfile", "<file>",
+               "Path to input configuration file (default: ./config.yaml)");
+  print_option("-o", "--output", "<dir>",
+               "Output directory (default: ./data/<runid>)");
+  print_option("-f", "--force", std::nullopt,
+               "Force overwriting files in the output directory");
+  print_option("-d", "--decaymodes", "<file>",
+               "Override default decay modes from file");
+  print_option("-p", "--particles", "<file>",
+               "Override default particles from file");
+  print_option("-q", "--quiet", std::nullopt, "Suppress disclaimer printout");
+  print_option("-n", "--no-cache", std::nullopt,
+               "Disable caching integrals on disk");
+  std::printf("\n");
+  print_option(
+      "-c", "--config", "<YAML string>",
+      "Specify config value overrides (multiple -c arguments are supported)");
+  print_option("-m", "--modus", "<modus>",
+               "Shortcut for -c 'General: { Modus: <modus> }'");
+  print_option("-e", "--endtime", "<time>",
+               "Shortcut for -c 'General: { End_Time: <time> }'");
+  std::printf("\n");
+  print_option("-l", "--list-2-to-n", std::nullopt,
+               "Print list of all possible 2->n reactions (with n>1)");
+  print_option("-r", "--resonance", "<pdg>",
+               "Print width(m) and m*spectral function(m^2) for resonance pdg");
+  print_option(
+      "-s", "--cross-sections", "<pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]",
+      "Print all partial cross-sections of pdg1 + pdg2 reactions versus "
+      "sqrt(s)");
+  print_option("-S", "--cross-sections-fs",
+               "<pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]",
+               "Print an approximation of the final-state cross-sections of "
+               "pdg1 + pdg2\nreactions versus sqrt(s). Contributions from "
+               "strings are not considered\nfor the final state. Masses are "
+               "optional, by default pole masses are used.\nNote the required "
+               "comma and no spaces");
+  print_option("-x", "--dump_iSS", std::nullopt,
+               "Print particles table in iSS format. This format is used in "
+               "MUSIC and\nCLVisc relativistic hydro codes");
+  std::printf("\n");
   std::exit(rc);
 }
 
