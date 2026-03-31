@@ -458,6 +458,15 @@ class CrossSections {
                             double KN_offset) const;
 
   /**
+   * Find all inelastic 2->2 processes for D meson-pion (Dpi) scattering.
+   *
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   *
+   * \return List of all possible Dpi reactions with their cross sections
+   * */
+  CollisionBranchList Dpi_xx(const ReactionsBitSet& included_2to2) const;
+
+  /**
    * Find all inelastic 2->2 processes for Delta-Kaon (DeltaK) Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible DeltaK reactions with their cross sections

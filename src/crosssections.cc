@@ -1063,6 +1063,12 @@ CollisionBranchList CrossSections::two_to_two(
       // Delta Kaon Scattering
       process_list = deltak_xx(included_2to2);
     }
+  } else if (type_a.is_meson() && type_b.is_meson()) {
+    if ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
+        (pdg_b.is_Dmeson() && pdg_a.is_pion())) {
+      // D Meson Pion Scattering
+      process_list = Dpi_xx(included_2to2);
+    }
   } else if (type_a.is_nucleus() || type_b.is_nucleus()) {
     if ((type_a.is_nucleon() && type_b.is_nucleus()) ||
         (type_b.is_nucleon() && type_a.is_nucleus())) {
@@ -2567,6 +2573,102 @@ CollisionBranchList CrossSections::dn_xx(
                                type_N.name(), produced_nucleus->name(), " at ",
                                sqrt_s_, " GeV, xs[mb] = ", xsection);
   }
+  return process_list;
+}
+
+CollisionBranchList CrossSections::Dpi_xx(
+    const ReactionsBitSet& included_2to2) const {
+  CollisionBranchList process_list;
+  if (included_2to2[IncludedReactions::Dpi_to_Dpi] == 0) {
+    return process_list;
+  }
+  const ParticleType& a = incoming_particles_[0].type();
+  const ParticleType& b = incoming_particles_[1].type();
+  const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
+  const ParticleType& type_pion = a.pdgcode().is_Dmeson() ? b : a;
+
+  const auto pdg_D = type_D.pdgcode().code();
+  const auto pdg_pion = type_pion.pdgcode().code();
+
+  /* Adding the following channels, a check for detailed balance is not needed
+   * because the parametrization is explicit. */
+  switch (pack(pdg_D, pdg_pion)) {
+    case pack(pdg::D_z, pdg::pi_p): {
+      const auto& type_D_p = ParticleType::find(pdg::D_p);
+      const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+      // D0pi+ -> D+pi0
+      add_channel(
+          process_list, [&] { return Dzeropiplus_Dpluspizero(sqrt_s_); },
+          sqrt_s_, type_D_p, type_pi_z);
+      break;
+    }
+    case pack(pdg::Dbar_z, pdg::pi_m): {
+      const auto& type_D_m = ParticleType::find(pdg::D_m);
+      const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+      // D0barpi- -> D-pi0 (charge conjugation of D0pi+ -> D+pi0)
+      add_channel(
+          process_list, [&] { return Dzeropiplus_Dpluspizero(sqrt_s_); },
+          sqrt_s_, type_D_m, type_pi_z);
+      break;
+    }
+    case pack(pdg::D_z, pdg::pi_z): {
+      const auto& type_D_p = ParticleType::find(pdg::D_p);
+      const auto& type_pi_m = ParticleType::find(pdg::pi_m);
+      // D0pi0 -> D+pi-
+      add_channel(
+          process_list, [&] { return Dzeropizero_Dpluspiminus(sqrt_s_); },
+          sqrt_s_, type_D_p, type_pi_m);
+      break;
+    }
+    case pack(pdg::Dbar_z, pdg::pi_z): {
+      const auto& type_D_m = ParticleType::find(pdg::D_m);
+      const auto& type_pi_p = ParticleType::find(pdg::pi_p);
+      // D0barpi0 -> D-pi+ (charge conjugation of D0pi0 -> D+pi-)
+      add_channel(
+          process_list, [&] { return Dzeropizero_Dpluspiminus(sqrt_s_); },
+          sqrt_s_, type_D_m, type_pi_p);
+      break;
+    }
+    case pack(pdg::D_p, pdg::pi_m): {
+      const auto& type_D_z = ParticleType::find(pdg::D_z);
+      const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+      // D+pi- -> D0pi0
+      add_channel(
+          process_list, [&] { return Dpluspiminus_Dzeropizero(sqrt_s_); },
+          sqrt_s_, type_D_z, type_pi_z);
+      break;
+    }
+    case pack(pdg::D_m, pdg::pi_p): {
+      const auto& type_Dbar_z = ParticleType::find(pdg::Dbar_z);
+      const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+      // D-pi+ -> D0barpi0 (charge conjugation of D+pi- -> D0pi0)
+      add_channel(
+          process_list, [&] { return Dpluspiminus_Dzeropizero(sqrt_s_); },
+          sqrt_s_, type_Dbar_z, type_pi_z);
+      break;
+    }
+    case pack(pdg::D_p, pdg::pi_z): {
+      const auto& type_D_z = ParticleType::find(pdg::D_z);
+      const auto& type_pi_p = ParticleType::find(pdg::pi_p);
+      // D+pi0 -> D0pi+
+      add_channel(
+          process_list, [&] { return Dpluspizero_Dzeropiplus(sqrt_s_); },
+          sqrt_s_, type_D_z, type_pi_p);
+      break;
+    }
+    case pack(pdg::D_m, pdg::pi_z): {
+      const auto& type_Dbar_z = ParticleType::find(pdg::Dbar_z);
+      const auto& type_pi_m = ParticleType::find(pdg::pi_m);
+      // D-pi0 -> D0barpi- (charge conjugation of D+pi0 -> D0pi+)
+      add_channel(
+          process_list, [&] { return Dpluspizero_Dzeropiplus(sqrt_s_); },
+          sqrt_s_, type_Dbar_z, type_pi_m);
+      break;
+    }
+    default:
+      break;
+  }
+
   return process_list;
 }
 
