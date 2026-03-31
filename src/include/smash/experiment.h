@@ -1748,10 +1748,10 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
 
   // Create lattices
-  bool has_lattice = config.has_section(InputSections::lattice);
+  const bool has_lattice = config.has_section(InputSections::lattice);
   if (has_lattice) {
-    bool automatic = config.take(InputKeys::lattice_automatic);
-    bool all_geometrical_properties_specified =
+    const bool automatic = config.take(InputKeys::lattice_automatic);
+    const bool all_geometrical_properties_specified =
         config.has_value(InputKeys::lattice_cellNumber) &&
         config.has_value(InputKeys::lattice_origin) &&
         config.has_value(InputKeys::lattice_sizes);
@@ -1767,7 +1767,8 @@ Experiment<Modus>::Experiment(Configuration &config,
           "lattice geometrical properties were specified. In this case you\n"
           "need to set \"Automatic: False\".");
     }
-    bool periodic = config.take(InputKeys::lattice_periodic, modus_.is_box());
+    const bool periodic =
+        config.take(InputKeys::lattice_periodic, modus_.is_box());
     const auto [l, n, origin] = [&config, automatic, this]() {
       if (!automatic) {
         return std::make_tuple<std::array<double, 3>, std::array<int, 3>,
@@ -1948,8 +1949,8 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
 
   // Error messages for missing lattice or coulomb potential config requirements
-  bool has_coulomb_potential = potentials_ && potentials_->use_coulomb();
-  bool has_lattice_td_output =
+  const bool has_coulomb_potential = potentials_ && potentials_->use_coulomb();
+  const bool has_lattice_td_output =
       printout_lattice_td_ || printout_full_lattice_any_td_;
   if (has_lattice_td_output && !has_lattice) {
     logg[LExperiment].error(

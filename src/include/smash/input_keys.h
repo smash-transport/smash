@@ -2130,16 +2130,17 @@ struct InputKeys {
    *   equation. The stochastic criterion is the only criterion that allows to
    *   treat multi-particle reactions. For more details, see
    *   \iref{Staudenmaier:2021lrg}.
-   *   \note
-   *   The stochastic criterion is only applicable within limits. For example,
-   *   it might not lead to reasonable results for very dilute systems like pp
-   *   collisions. Futhermore, the fixed time step mode is required. The
-   *   assumption for the criterion is that only one reaction per particle per
-   *   timestep occurs. Therefore, small enough timesteps (<tt>\ref
-   *   key_gen_delta_time_ "Delta_Time"</tt>) have to be used. In doubt, test if
-   *   the results change with smaller timesteps. Since the probability value is
-   *   not by defintion limited to 1 in case of large timesteps, an error is
-   *   thrown if it gets larger than 1.
+   *
+   * \note
+   * The stochastic criterion is only applicable within limits. For example,
+   * it might not lead to reasonable results for very dilute systems like pp
+   * collisions. Futhermore, the fixed time step mode is required. The
+   * assumption for the criterion is that only one reaction per particle per
+   * timestep occurs. Therefore, small enough timesteps (<tt>\ref
+   * key_gen_delta_time_ "Delta_Time"</tt>) have to be used. In doubt, test if
+   * the results change with smaller timesteps. Since the probability value is
+   * not by defintion limited to 1 in case of large timesteps, an error is
+   * thrown if it gets larger than 1.
    */
   /**
    * \see_key{key_CT_collision_criterion_}
