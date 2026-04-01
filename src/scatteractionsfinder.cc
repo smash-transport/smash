@@ -1092,7 +1092,7 @@ void ScatterActionsFinder::dump_cross_sections(
           std::abs(energy_and_xs[j].first - sqrts) < really_small) {
         xs = energy_and_xs[j].second;
       }
-      std::printf("%16.6f", xs);  // Same alignment as in the header.
+      std::printf("%24.6f", xs);  // Same alignment as in the header.
     }
     std::printf("\n");
   }
