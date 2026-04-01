@@ -143,6 +143,9 @@ TEST(validators_general) {
   VERIFY(InputKeys::gen_endTime.validate(0.5));
   VERIFY(!InputKeys::gen_endTime.validate(0));
   VERIFY(!InputKeys::gen_endTime.validate(-6.6));
+  VERIFY(InputKeys::gen_nevents.validate(20));
+  VERIFY(!InputKeys::gen_nevents.validate(0));
+  VERIFY(!InputKeys::gen_nevents.validate(-5));
 }
 
 #if 0

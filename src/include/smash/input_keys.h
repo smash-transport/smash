@@ -1278,7 +1278,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \required_key{key_gen_nevents_,Nevents,int}
+   * \required_key{key_gen_nevents_,Nevents,int,\f$x>0\f$}
    *
    * Number of events to calculate.
    *
@@ -1289,8 +1289,10 @@ struct InputKeys {
   /**
    * \see_key{key_gen_nevents_}
    */
-  inline static const Key<int> gen_nevents{InputSections::general + "Nevents",
-                                           {"0.50"}};
+  inline static const Key<int> gen_nevents{
+      InputSections::general + "Nevents",
+      {"0.50"},
+      [](const int &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
