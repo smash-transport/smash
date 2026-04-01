@@ -165,14 +165,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     box_length = config.read(InputKeys::modi_listBox_length);
   }
 
-  /* If this Delta_Time option is absent (this can be for timestepless mode)
-   * just assign 1.0 fm, reasonable value will be set at event initialization
-   */
   const double dt = config.take(InputKeys::gen_deltaTime);
-  if (dt <= 0.) {
-    throw std::invalid_argument("Delta_Time cannot be zero or negative.");
-  }
-
   const double t_end = config.read(InputKeys::gen_endTime);
 
   // Enforce a small time step, if the box modus is used

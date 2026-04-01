@@ -1326,7 +1326,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general_mne
-   * \required_key{key_gen_mnee_number_,Number,int}
+   * \required_key{key_gen_mnee_number_,Number,int,\f$x>0\f$}
    *
    * The number of desired non-empty ensembles.\n
    */
@@ -1334,7 +1334,9 @@ struct InputKeys {
    * \see_key{key_gen_mnee_number_}
    */
   inline static const Key<int> gen_minNonEmptyEnsembles_number{
-      InputSections::g_minEnsembles + "Number", {"1.3"}};
+      InputSections::g_minEnsembles + "Number",
+      {"1.3"},
+      [](const int &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1344,7 +1346,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key_no_line{key_gen_delta_time_,Delta_Time,double,1.0}
+   * \optional_key_no_line{key_gen_delta_time_,Delta_Time,double,1.0,\f$x>0\f$}
    *
    * Fixed time step \unit{in fm} at which the collision-finding grid is
    * recreated, and, if potentials are on, momenta are updated according to the
@@ -1365,7 +1367,10 @@ struct InputKeys {
    * \see_key{key_gen_delta_time_}
    */
   inline static const Key<double> gen_deltaTime{
-      InputSections::general + "Delta_Time", 1.0, {"0.50"}};
+      InputSections::general + "Delta_Time",
+      1.0,
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1394,7 +1399,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_discrete_weight_,Discrete_Weight,double,1./3}
+   * \optional_key{key_gen_discrete_weight_,Discrete_Weight,double,1./3,\f$\frac{1}{7}<x<1\f$}
    *
    * Parameter for Discrete smearing: Weight given to particle density at the
    * the center node; cannot be smaller than 1./7 (the boundary case of 1./7
@@ -1405,11 +1410,14 @@ struct InputKeys {
    * \see_key{key_gen_discrete_weight_}
    */
   inline static const Key<double> gen_smearingDiscreteWeight{
-      InputSections::general + "Discrete_Weight", 1. / 3, {"2.1"}};
+      InputSections::general + "Discrete_Weight",
+      1. / 3,
+      {"2.1"},
+      [](const double &value) noexcept { return value > 1. / 7. && value < 1.; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_ensembles_,Ensembles,int,1}
+   * \optional_key{key_gen_ensembles_,Ensembles,int,1,\f$x\geq1\f$}
    *
    * Number of parallel ensembles in the simulation.
    *
@@ -1435,11 +1443,14 @@ struct InputKeys {
    * \see_key{key_gen_ensembles_}
    */
   inline static const Key<int> gen_ensembles{
-      InputSections::general + "Ensembles", 1, {"2.1"}};
+      InputSections::general + "Ensembles",
+      1,
+      {"2.1"},
+      [](const int &value) noexcept { return value >= 1; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_expansion_rate_,Expansion_Rate,double,0.1}
+   * \optional_key{key_gen_expansion_rate_,Expansion_Rate,double,0.1,\none}
    *
    * Corresponds to the speed of expansion of the universe in non-Minkowski
    * metrics if <tt>\ref key_gen_metric_type_ "Metric_Type"</tt> is any other
@@ -1453,7 +1464,10 @@ struct InputKeys {
    * \see_key{key_gen_expansion_rate_}
    */
   inline static const Key<double> gen_expansionRate{
-      InputSections::general + "Expansion_Rate", 0.1, {"1.1"}};
+      InputSections::general + "Expansion_Rate",
+      0.1,
+      {"1.1"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general

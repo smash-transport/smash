@@ -145,8 +145,6 @@ TEST(validators_particles_and_decaymodes) {
 }
 
 TEST(validators_general) {
-  VERIFY(InputKeys::particles.validate("dummy"));
-  VERIFY(InputKeys::decaymodes.validate("dummy"));
   VERIFY(InputKeys::gen_endTime.validate(0.5));
   VERIFY(!InputKeys::gen_endTime.validate(0));
   VERIFY(!InputKeys::gen_endTime.validate(-6.6));
@@ -156,6 +154,24 @@ TEST(validators_general) {
   VERIFY(InputKeys::gen_randomseed.validate(0));
   VERIFY(InputKeys::gen_randomseed.validate(1234567890123456789LL));
   VERIFY(InputKeys::gen_randomseed.validate(-1));
+  VERIFY(InputKeys::gen_minNonEmptyEnsembles_number.validate(1));
+  VERIFY(!InputKeys::gen_minNonEmptyEnsembles_number.validate(0));
+  VERIFY(!InputKeys::gen_minNonEmptyEnsembles_number.validate(-1));
+  VERIFY(InputKeys::gen_deltaTime.validate(1.0));
+  VERIFY(!InputKeys::gen_deltaTime.validate(0.0));
+  VERIFY(!InputKeys::gen_deltaTime.validate(-1.0));
+  VERIFY(InputKeys::gen_smearingDiscreteWeight.validate(0.15));
+  VERIFY(InputKeys::gen_smearingDiscreteWeight.validate(0.99));
+  VERIFY(!InputKeys::gen_smearingDiscreteWeight.validate(1.0 / 7.0));
+  VERIFY(!InputKeys::gen_smearingDiscreteWeight.validate(1.0));
+  VERIFY(!InputKeys::gen_smearingDiscreteWeight.validate(1.1));
+  VERIFY(InputKeys::gen_ensembles.validate(1));
+  VERIFY(InputKeys::gen_ensembles.validate(10));
+  VERIFY(!InputKeys::gen_ensembles.validate(0));
+  VERIFY(!InputKeys::gen_ensembles.validate(-1));
+  VERIFY(InputKeys::gen_expansionRate.validate(-10.));
+  VERIFY(InputKeys::gen_expansionRate.validate(0.));
+  VERIFY(InputKeys::gen_expansionRate.validate(10.));
 }
 
 #if 0
