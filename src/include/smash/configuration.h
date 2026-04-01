@@ -321,6 +321,13 @@ class Configuration {
   struct TakeSameKeyTwice : public std::logic_error {
     using std::logic_error::logic_error;
   };
+  /**
+   * \ingroup exception
+   * Thrown if a Key has an invalid value.
+   */
+  struct InvalidKeyValue : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
 
   /**
    * Flag to mark initialization with a YAML formatted string.
@@ -1629,9 +1636,8 @@ class Configuration {
     if (key.validate(value)) {
       return value;
     } else {
-      throw std::invalid_argument(
-          "Invalid value detected in configuration file:\n " +
-          key.as_yaml(value));
+      throw InvalidKeyValue("Invalid value detected in configuration file:\n " +
+                            key.as_yaml(value));
     }
   }
 

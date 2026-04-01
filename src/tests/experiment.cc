@@ -93,7 +93,7 @@ TEST(create_experiment_with_default_lattice) {
 }
 
 TEST_CATCH(create_experiment_with_invalid_modus,
-           ExperimentBase::InvalidModusRequest) {
+           Configuration::InvalidKeyValue) {
   Test::experiment(Configuration{"General: {Modus: Invalid}"});
 }
 
