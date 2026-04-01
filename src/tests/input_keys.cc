@@ -154,6 +154,9 @@ TEST(validators_general) {
   VERIFY(InputKeys::gen_randomseed.validate(0));
   VERIFY(InputKeys::gen_randomseed.validate(1234567890123456789LL));
   VERIFY(InputKeys::gen_randomseed.validate(-1));
+  VERIFY(InputKeys::gen_minNonEmptyEnsembles_maximumEnsembles.validate(100));
+  VERIFY(!InputKeys::gen_minNonEmptyEnsembles_maximumEnsembles.validate(0));
+  VERIFY(!InputKeys::gen_minNonEmptyEnsembles_maximumEnsembles.validate(-1));
   VERIFY(InputKeys::gen_minNonEmptyEnsembles_number.validate(1));
   VERIFY(!InputKeys::gen_minNonEmptyEnsembles_number.validate(0));
   VERIFY(!InputKeys::gen_minNonEmptyEnsembles_number.validate(-1));
@@ -179,6 +182,17 @@ TEST(validators_general) {
   VERIFY(InputKeys::gen_modus.validate("Sphere"));
   VERIFY(!InputKeys::gen_modus.validate("Invalid"));
   VERIFY(InputKeys::gen_derivativesMode.validate(DerivativesMode::Off));
+  VERIFY(InputKeys::gen_fieldDerivativesMode.validate(
+      FieldDerivativesMode::ChainRule));
+  VERIFY(InputKeys::gen_smearingGaussCutoffInSigma.validate(3.0));
+  VERIFY(InputKeys::gen_smearingGaussCutoffInSigma.validate(6.5));
+  VERIFY(InputKeys::gen_smearingGaussCutoffInSigma.validate(10.0));
+  VERIFY(!InputKeys::gen_smearingGaussCutoffInSigma.validate(2.9));
+  VERIFY(!InputKeys::gen_smearingGaussCutoffInSigma.validate(10.1));
+  VERIFY(InputKeys::gen_smearingGaussianSigma.validate(2.99));
+  VERIFY(!InputKeys::gen_smearingGaussianSigma.validate(0.1));
+  VERIFY(!InputKeys::gen_smearingGaussianSigma.validate(3.0));
+  VERIFY(InputKeys::gen_metricType.validate(ExpansionMode::NoExpansion));
 }
 
 #if 0

@@ -1331,7 +1331,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general_mne
-   * \required_key{key_gen_mnee_maximum_ensembles_,Maximum_Ensembles_Run,int}
+   * \required_key{key_gen_mnee_maximum_ensembles_,Maximum_Ensembles_Run,int,\f$x>0\f$}
    *
    * Maximum number of ensembles run. This number serves as a safeguard
    * against SMASH unexpectedly running for a long time.
@@ -1340,7 +1340,9 @@ struct InputKeys {
    * \see_key{key_gen_mnee_maximum_ensembles_}
    */
   inline static const Key<int> gen_minNonEmptyEnsembles_maximumEnsembles{
-      InputSections::g_minEnsembles + "Maximum_Ensembles_Run", {"2.2"}};
+      InputSections::g_minEnsembles + "Maximum_Ensembles_Run",
+      {"2.2"},
+      [](const int &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general_mne
@@ -1493,7 +1495,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_general
    * \optional_key{key_gen_field_derivatives_mode_,Field_Derivatives_Mode,string,
-   * "Chain Rule"}
+   * "Chain Rule",\any_valid}
    *
    * The mode of calculating field derivatives entering the equations of motion
    * (only available for the VDF potentials). The mean-field equations of motion
@@ -1519,37 +1521,50 @@ struct InputKeys {
   inline static const Key<FieldDerivativesMode> gen_fieldDerivativesMode{
       InputSections::general + "Field_Derivatives_Mode",
       FieldDerivativesMode::ChainRule,
-      {"2.1"}};
+      {"2.1"},
+      detail::get_default_validator<FieldDerivativesMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_gauss_cutoff_in_sigma_,Gauss_Cutoff_In_Sigma,double,4.0}
+   * \optional_key{key_gen_gauss_cutoff_in_sigma_,Gauss_Cutoff_In_Sigma,double,4.0,
+   * \f$3\leq x\leq10\f$}
    *
    * Parameter for Covariant Gaussian smearing: Distance in sigma at which
-   * gaussian is considered 0.
+   * gaussian is considered 0. Lower bound avoids density loss; upper bound
+   * avoids slow computation.
    */
   /**
    * \see_key{key_gen_gauss_cutoff_in_sigma_}
    */
   inline static const Key<double> gen_smearingGaussCutoffInSigma{
-      InputSections::general + "Gauss_Cutoff_In_Sigma", 4.0, {"0.80"}};
+      InputSections::general + "Gauss_Cutoff_In_Sigma",
+      4.0,
+      {"0.80"},
+      [](const double &value) noexcept {
+        return value >= 3.0 && value <= 10.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_gaussian_sigma_,Gaussian_Sigma,double,1.0}
+   * \optional_key{key_gen_gaussian_sigma_,Gaussian_Sigma,double,1.0,\f$0.1<x<3\f$}
    *
    * Parameter for Covariant Gaussian smearing: Width \unit{in fm} of Gaussian
-   * distributions that represent Wigner density of particles.
+   * distributions that represent Wigner density of particles. Technically any
+   * positive value is allowed, but other than accepted values may lead to
+   * unstable behavior.
    */
   /**
    * \see_key{key_gen_gaussian_sigma_}
    */
   inline static const Key<double> gen_smearingGaussianSigma{
-      InputSections::general + "Gaussian_Sigma", 1.0, {"0.60"}};
+      InputSections::general + "Gaussian_Sigma",
+      1.0,
+      {"0.60"},
+      [](const double &value) noexcept { return value > 0.1 && value < 3.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_metric_type_,Metric_Type,string,"NoExpansion"}
+   * \optional_key{key_gen_metric_type_,Metric_Type,string,"NoExpansion",\any_valid}
    *
    * Select which kind of expansion the metric should have. This needs only be
    * specified for the sphere modus. Possible values:
@@ -1564,7 +1579,8 @@ struct InputKeys {
   inline static const Key<ExpansionMode> gen_metricType{
       InputSections::general + "Metric_Type",
       ExpansionMode::NoExpansion,
-      {"1.1"}};
+      {"1.1"},
+      detail::get_default_validator<ExpansionMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
