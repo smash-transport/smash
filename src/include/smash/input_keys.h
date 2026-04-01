@@ -1178,12 +1178,12 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  *            as for the other existing keys. In particular, one of the Doxygen
  *            aliases among `\required_key`, `\required_key_no_line`,
  *            `\optional_key` and `\optional_key_no_line` should be used. The
- *            first two need three arguments (anchor in documentation, key name,
- *            key type) while the last two need 4 (the same three as for
- *            required keys plus the default key value). Add as well a Doxygen
- *            documentation to the new class member, by simply using there the
- *            `\see_key` alias that needs as single argument the key anchor in
- *            documentation you defined in the user guide.
+ *            first two need four arguments (anchor in documentation, key name,
+ *            key type, validator) while the last two need 5 (the same four as
+ *            for required keys plus the default key value). Add as well a
+ *            Doxygen documentation to the new class member, by simply using
+ *            there the `\see_key` alias that needs as single argument the key
+ *            anchor in documentation you defined in the user guide.
  *         -# If the newly introduced key has a new type w.r.t. all existing
  *            keys, you need to add it to the \c key_references_variant alias.
  *            In particular, you need to add a type to the \c std::variant which
@@ -1192,6 +1192,18 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  *         -# Add a reference to the newly introduced variable to the
  *            InputKeys::list container. This must be done using \c std::cref as
  *            for the other references. Respecting the members order is welcome.
+ *
+ * @note Validators are functions that take a value of the key type as an
+ *       argument and return a boolean indicating whether the value is valid or
+ *       not. If a key does not require a validator, use the default one
+ *       provided in the `detail` namespace. The C++ type system together with
+ *       how the Configuration class is implemented (cf. Configuration::Value
+ *       conversion operators) ensure that keys of types like `enum` (or `bool`)
+ *       cannot be assigned invalid values, so they do not require a validator.
+ *       However, this is an implementation detail and in the user guide all of
+ *       these keys are simply strings. Therefore, it is important to specify
+ *       that only valid values are accepted for such keys, which can be done by
+ *       using the <tt>\\any_valid</tt> Doxygen alias.
  *
  * @attention If you need to deprecate or to mark a key as not valid anymore,
  *            add the corresponding SMASH version to the \c Key member
@@ -1254,7 +1266,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \required_key{key_gen_modus_,Modus,string}
+   * \required_key{key_gen_modus_,Modus,string,\any_valid}
    *
    * Selects a modus for the calculation, e.g.\ infinite matter
    * calculation, collision of two particles or collision of nuclei. The modus
@@ -1276,7 +1288,13 @@ struct InputKeys {
    * \see_key{key_gen_modus_}
    */
   inline static const Key<std::string> gen_modus{
-      InputSections::general + "Modus", {"0.50"}};
+      InputSections::general + "Modus",
+      {"0.50"},
+      [](const std::string &value) noexcept {
+        const std::set<std::string> valid_values = {"Box", "List", "ListBox",
+                                                    "Collider", "Sphere"};
+        return valid_values.count(value) > 0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1375,7 +1393,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_general
    * \optional_key{key_gen_derivatives_mode_,Derivatives_Mode,string,"Covariant
-   * Gaussian"}
+   * Gaussian",\any_valid}
    *
    * The mode of calculating the gradients, for example gradients of baryon
    * current. Currently SMASH supports two derivatives modes:
@@ -1395,7 +1413,8 @@ struct InputKeys {
   inline static const Key<DerivativesMode> gen_derivativesMode{
       InputSections::general + "Derivatives_Mode",
       DerivativesMode::CovariantGaussian,
-      {"2.1"}};
+      {"2.1"},
+      detail::get_default_validator<DerivativesMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1413,7 +1432,9 @@ struct InputKeys {
       InputSections::general + "Discrete_Weight",
       1. / 3,
       {"2.1"},
-      [](const double &value) noexcept { return value > 1. / 7. && value < 1.; }};
+      [](const double &value) noexcept {
+        return value > 1. / 7. && value < 1.;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general

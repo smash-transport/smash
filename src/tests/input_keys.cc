@@ -172,6 +172,13 @@ TEST(validators_general) {
   VERIFY(InputKeys::gen_expansionRate.validate(-10.));
   VERIFY(InputKeys::gen_expansionRate.validate(0.));
   VERIFY(InputKeys::gen_expansionRate.validate(10.));
+  VERIFY(InputKeys::gen_modus.validate("Box"));
+  VERIFY(InputKeys::gen_modus.validate("Collider"));
+  VERIFY(InputKeys::gen_modus.validate("List"));
+  VERIFY(InputKeys::gen_modus.validate("ListBox"));
+  VERIFY(InputKeys::gen_modus.validate("Sphere"));
+  VERIFY(!InputKeys::gen_modus.validate("Invalid"));
+  VERIFY(InputKeys::gen_derivativesMode.validate(DerivativesMode::Off));
 }
 
 #if 0
