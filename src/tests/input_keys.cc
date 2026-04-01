@@ -139,13 +139,23 @@ TEST(are_all_enum_keys_convertible_to_string) {
   check_to_string_for_enums<InputKeys::key_references_variant>::validate();
 }
 
+TEST(validators_particles_and_decaymodes) {
+  VERIFY(InputKeys::particles.validate("dummy"));
+  VERIFY(InputKeys::decaymodes.validate("dummy"));
+}
+
 TEST(validators_general) {
+  VERIFY(InputKeys::particles.validate("dummy"));
+  VERIFY(InputKeys::decaymodes.validate("dummy"));
   VERIFY(InputKeys::gen_endTime.validate(0.5));
   VERIFY(!InputKeys::gen_endTime.validate(0));
   VERIFY(!InputKeys::gen_endTime.validate(-6.6));
   VERIFY(InputKeys::gen_nevents.validate(20));
   VERIFY(!InputKeys::gen_nevents.validate(0));
   VERIFY(!InputKeys::gen_nevents.validate(-5));
+  VERIFY(InputKeys::gen_randomseed.validate(0));
+  VERIFY(InputKeys::gen_randomseed.validate(1234567890123456789LL));
+  VERIFY(InputKeys::gen_randomseed.validate(-1));
 }
 
 #if 0
