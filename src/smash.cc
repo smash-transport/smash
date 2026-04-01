@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2024
+ *    Copyright (c) 2012-2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -28,7 +28,7 @@
 namespace smash {
 
 /*!\Userguide
- * \page doxypage_smash_invocation
+ * \page doxypage_software_execution
  *
  * SMASH can be run simply by executing the binary without any options (i.e.
  * there are no required arguments). It does require an input file, though
@@ -47,6 +47,16 @@ namespace smash {
  * <tr><td>`-i <file>` <td>`--inputfile <file>`
  * <td>Overrides the location of the default '`config.yaml`' input file. The
  *     input settings will be read from the specified file instead.
+ * <tr><td>`-o <dir>` <td>`--output <dir>`
+ * <td>Sets the output directory. The default output directory is
+ *     `./data/<runid>`, where `<rundid>` is an automatically incrementing
+ *     integer. Note that this might cause races if several instances of SMASH
+ *     run in parallel. In that case, make sure to specify a different output
+ *     directory for every instance of SMASH.
+ * <tr><td>`-f` <td>`--force`
+ * <td>Forces overwriting files in the output directory. By default, if an
+ *     output directory is specified with `-o`, the directory must be empty.
+ *     With `-f` this check is skipped.
  * <tr><td>`-d <file>` <td>`--decaymodes <file>`
  * <td>The default decay modes are compiled in. With this argument you can
  *     override the decay modes to the exact set defined in the file. Multiple
@@ -55,8 +65,18 @@ namespace smash {
  * <td>The default particle data is compiled in. With this argument you can
  *     override the particles to the exact set defined in the file. Multiple
  *     `-p` arguments are not supported.
- * <tr><td>`-c <YAML string>` <td>`--config <YAML string>`
- * <td>The string argument to `-c` contains YAML markup to override input key
+ * <tr><td>`-q` <td>`--quiet`
+ * <td>Quiets the disclaimer for scenarios where no printout is wanted. To
+ *     suppress the entire SMASH printout, logging needs to be disabled in the
+ *     configuration file.
+ * <tr><td>`-n` <td>`--no-cache`
+ * <td>Disables caching integrals in form of tabulations on the disk. Usually,
+ *     in order for future SMASH runs to save computational time, the
+ *     tabulations folder is created next to the output directory and contains
+ *     the results of integrals stored in many different files. Using this
+ *     option, such a folder is not created.
+ * <tr><td>`-c <%YAML string>` <td>`--config <%YAML string>`
+ * <td>The string argument to `-c` contains %YAML markup to override input key
  *     values of the input file (`-i`) and/or supply additional keys. Multiple
  *     `-c` arguments are supported. Later specified values of the same key
  *     will override preceding settings. This can be a handy way to test
@@ -67,36 +87,28 @@ namespace smash {
  * <tr><td>`-e <time>` <td>`--endtime <time>`
  * <td>This is a shortcut for <tt>-c 'General: { End_Time: \<time\> }'</tt>.
  * Note that `-e` always overrides `-c`.
- * <tr><td>`-o <dir>` <td>`--output <dir>`
- * <td>Sets the output directory. The default output directory is
- *     `./data/<runid>`, where `<rundid>` is an automatically incrementing
- *     integer. Note that this might cause races if several instances of SMASH
- *     run in parallel. In that case, make sure to specify a different output
- *     directory for every instance of SMASH.
- * <tr><td>`-l <dir>` <td>`--list-2-to-n <dir>`
- * <td>Dumps the list of all possible 2 &rarr; n reactions (n > 1). Note that
+ * <tr><td>`-l` <td>`--list-2-to-n`
+ * <td>Prints the list of all possible 2 &rarr; n reactions (n > 1). Note that
  *     resonance decays and formations are NOT dumped. Every particle
  *     available in SMASH is collided against every and reactions with
  *     non-zero cross-section are dumped. Both colliding particles are
  *     assigned momenta from 0.1 to 10 GeV in the opposite directions to
- *     scan the possible &radic;S.
+ *     scan the possible \f$\sqrt{s}\f$.
  * <tr><td>`-r <pdg>` <td>`--resonance <pdg>`
- * <td>Dumps the width(m) and m * spectral function(m^2) versus resonance
+ * <td>Prints the width(m) and m * spectral function(m^2) versus resonance
  *     mass m.
  * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
  * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
- * <td>Dumps all the partial cross-sections of `<pdg1> + <pdg2>` with
+ * <td>Prints all the partial cross-sections of `<pdg1> + <pdg2>` with
  *     masses `mass1` and `mass2`. Masses are optional, default values are
  *     pole masses. Optionally, the lab frame momenta (fixed target) in GeV
  *     can be specified. The value of `plab1` depends on the order of the
  *     particles. The first particle is considered to be the projectile,
  *     the second one the target. These cross sections are not rescaled to
  *     match the parametrized total.
- * <tr><td>`-f` <td>`--force`
- * <td>Forces overwriting files in the output directory.
  * <tr><td>`-S <pdg1>,<pdg2>[,mass1,mass2]`
  * <td>`--cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
- * <td>Dumps an approximation of the final-state cross-sections of `<pdg1> +
+ * <td>Prints an approximation of the final-state cross-sections of `<pdg1> +
  *     <pdg2>` with masses `mass1` and `mass2`. Masses are optional, default
  *     values are pole masses. Optionally, the lab frame momenta (fixed
  *     target) in GeV can be specified. The value of `plab1` depends on the
@@ -108,19 +120,9 @@ namespace smash {
  *     Typically, this results in errors of less than 1 mb in the worst case.
  *     Also, contributions from strings are not considered, and the values are
  *     not rescaled to match the parametrized total cross section.
- * <tr><td>`-f` <td>`--force`
- * <td>Forces overwriting files in the output directory. Normally, if you
- *     specify an output directory with `-o`, the directory must be empty.
- *     With `-f` this check is skipped.
- * <tr><td>`-n` <td>`--no-cache`
- * <td>Don't cache integrals in form of tabulations on the disk. Usually, in
- *     order for future smash runs to save computational time, the tabulations
- *     folder is created next to the output directory and contains the results
- *     of integrals stored in many different files. Using this option, such a
- *     folder is not created.
- * <tr><td>`-q` <td>`--quiet`
- * <td>Quiets the disclaimer for scenarios where no printout is wanted. To
- *     get no printout, you also need to disable logging from the config.
+ * <tr><td>`-x` <td> `--dump_iSS`
+ * <td>Prints a particles table in iSS format. This format is used in MUSIC and
+ *     CLVisc relativistic hydro codes.
  * </table>
  */
 
@@ -137,48 +139,98 @@ namespace {
  * the exit status is EXIT_FAIL.
  */
 void usage(const int rc, const std::string &progname) {
-  std::printf("\nUsage: %s [option]\n\n", progname.c_str());
+  // Implement some tools to format helper using Einhard colors
+  const auto colorize = [](const auto &color,
+                           const std::string s) -> std::string {
+    return color + s + einhard::NoColor_t_::ANSI();
+  };
+  const auto print_option = [&colorize](
+                                const std::string &short_option,
+                                const std::string &long_option,
+                                std::optional<std::string> value_placeholder,
+                                const std::string &description) {
+    const auto option_color = std::string{einhard::Cyan_t_::ANSI()};
+    const auto value_color = std::string{einhard::DCyan_t_::ANSI()};
+    const auto default_color = std::string{einhard::NoColor_t_::ANSI()};
+    const int indentation = 2;
+    const int effective_option_column_width = 29;
+    /* Calculate the width of the option column including the bytes from the
+     * ANSI color code which don't appear on screen but are "eaten up" by
+     * std::printf and thus must be added here. */
+    const int option_column_width =
+        effective_option_column_width +
+        3 * (option_color.length() + default_color.length());
+    const int padding = indentation + effective_option_column_width;
+    const int raw_option_length =
+        short_option.length() + 2 + long_option.length() +
+        ((value_placeholder) ? (1 + value_placeholder->length()) : 0);
+    const std::string option{
+        colorize(option_color, short_option) + ", " +
+        colorize(option_color, long_option) + (value_placeholder ? " " : "") +
+        colorize(value_color, value_placeholder.value_or(""))};
+    std::printf("%*s%-*s", indentation, "", option_column_width,
+                option.c_str());
+    bool skip_padding = true;
+    if (raw_option_length >= effective_option_column_width) {
+      std::printf("\n");
+      skip_padding = false;
+    }
+    for (const auto &line : smash::split(description, '\n')) {
+      std::printf("%*s%s\n", (skip_padding) ? 0 : padding, "", line.c_str());
+      skip_padding = false;
+    }
+  };
+
+  // Print synopsis
   std::printf(
-      "  -h, --help              usage information\n"
-      "\n"
-      "  -i, --inputfile <file>  path to input configuration file\n"
-      "                          (default: ./config.yaml)\n"
-      "  -d, --decaymodes <file> override default decay modes from file\n"
-      "  -p, --particles <file>  override default particles from file\n"
-      "\n"
-      "  -c, --config <YAML>     specify config value overrides\n"
-      "                          (multiple -c arguments are supported)\n"
-      "  -m, --modus <modus>     shortcut for -c 'General: { Modus: <modus> "
-      "}'\n"
-      "  -e, --endtime <time>    shortcut for -c 'General: { End_Time: <time> "
-      "}'"
-      "\n"
-      "\n"
-      "  -o, --output <dir>      output directory (default: ./data/<runid>)\n"
-      "  -l, --list-2-to-n       list all possible 2->n reactions (with n>1)\n"
-      "  -r, --resonance <pdg>   dump width(m) and m*spectral function(m^2)"
-      " for resonance pdg\n"
-      "  -s, --cross-sections    <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]] \n"
-      "                          dump all partial cross-sections of "
-      "pdg1 + pdg2 reactions versus sqrt(s).\n"
-      "  -S, --cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]] \n"
-      "                          dump an approximation of the final-state"
-      " cross-sections\n"
-      "                          of pdg1 + pdg2 reactions versus sqrt(s).\n"
-      "                          Contributions from strings are not considered"
-      " for the final state.\n"
-      "                          Masses are optional, by default pole masses"
-      " are used.\n"
-      "                          Note the required comma and no spaces.\n"
-      "  -f, --force             force overwriting files in the output "
-      "directory"
-      "\n"
-      "  -x, --dump_iSS          Dump particle table in iSS format\n"
-      "                          This format is used in MUSIC and CLVisc\n"
-      "                          relativistic hydro codes\n"
-      "  -q, --quiet             Supress disclaimer print-out\n"
-      "  -n, --no-cache          Don't cache integrals on disk\n"
-      "  -v, --version\n\n");
+      "\n Usage: %s\n\n",
+      colorize(einhard::Yellow_t_::ANSI(), progname + " [option]").c_str());
+
+  // Print options
+  print_option("-h", "--help", std::nullopt, "Print usage information");
+  print_option("-v", "--version", std::nullopt, "Print version");
+  std::printf("\n");
+  print_option("-i", "--inputfile", "<file>",
+               "Path to input configuration file (default: ./config.yaml)");
+  print_option("-o", "--output", "<dir>",
+               "Output directory (default: ./data/<runid>)");
+  print_option("-f", "--force", std::nullopt,
+               "Force overwriting files in the output directory");
+  print_option("-d", "--decaymodes", "<file>",
+               "Override default decay modes from file");
+  print_option("-p", "--particles", "<file>",
+               "Override default particles from file");
+  print_option("-q", "--quiet", std::nullopt, "Suppress disclaimer printout");
+  print_option("-n", "--no-cache", std::nullopt,
+               "Disable caching integrals on disk");
+  std::printf("\n");
+  print_option(
+      "-c", "--config", "<YAML string>",
+      "Specify config value overrides (multiple -c arguments are supported)");
+  print_option("-m", "--modus", "<modus>",
+               "Shortcut for -c 'General: { Modus: <modus> }'");
+  print_option("-e", "--endtime", "<time>",
+               "Shortcut for -c 'General: { End_Time: <time> }'");
+  std::printf("\n");
+  print_option("-l", "--list-2-to-n", std::nullopt,
+               "Print list of all possible 2->n reactions (with n>1)");
+  print_option("-r", "--resonance", "<pdg>",
+               "Print width(m) and m*spectral function(m^2) for resonance pdg");
+  print_option(
+      "-s", "--cross-sections", "<pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]",
+      "Print all partial cross-sections of pdg1 + pdg2 reactions versus "
+      "sqrt(s)");
+  print_option("-S", "--cross-sections-fs",
+               "<pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]",
+               "Print an approximation of the final-state cross-sections of "
+               "pdg1 + pdg2\nreactions versus sqrt(s). Contributions from "
+               "strings are not considered\nfor the final state. Masses are "
+               "optional, by default pole masses are used.\nNote the required "
+               "comma and no spaces");
+  print_option("-x", "--dump_iSS", std::nullopt,
+               "Print particles table in iSS format. This format is used in "
+               "MUSIC and\nCLVisc relativistic hydro codes");
+  std::printf("\n");
   std::exit(rc);
 }
 

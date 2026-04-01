@@ -7,7 +7,7 @@ Please see [Phys. Rev. C 94, 054905 (2016)](https://arxiv.org/abs/1606.06642) fo
 A BibTeX entry for the software DOI is found on the respective Zenodo pages.
 
 See [CONTRIBUTING](CONTRIBUTING.md) for development hints.
-A complete [User Guide](https://theory.gsi.de/~smash/userguide/current/) as well as a more detailed [development documentation](http://theory.gsi.de/~smash/doc/current/) are available for the latest version of the code.
+A complete [user guide](https://theory.gsi.de/~smash/userguide/current/) as well as a more detailed [development documentation](http://theory.gsi.de/~smash/doc/current/) are available for the latest version of the code.
 For documentation of older versions, refer to links in the [releases pages](https://github.com/smash-transport/smash/releases).
 
 If Pythia is used, please cite the following references (both article and the codebase release you used):
@@ -63,12 +63,12 @@ make
 Please note that the `make` command builds everything (executables, tests, and libraries) and this might take a while.
 You can use `make smash` if you are interested only in the SMASH executable or use `make smash_shared` to exclusively build the libraries (needed e.g. in another project using SMASH as a library &ndash; refer to the [INSTALL](INSTALL.md) FAQ for more detailed information).
 
-You can run SMASH with specific settings (e.g. at a given collision energy or impact parameter) by modifying the config.yaml file, for example with
+You can run SMASH with specific settings (e.g., at a given collision energy or impact parameter) by modifying the config.yaml file, for example with
 ```console
 vi config.yaml
 ./smash
 ```
-Refer to the [section below](#running-smash-with-example-input-files) for more information.
+Refer to the [section below](#running-smash-with-example-input-files) and the [user guide](https://theory.gsi.de/~smash/userguide/current/) for more information.
 
 If you want to install SMASH system-wide (into `/usr/local`) use
 ```console
@@ -79,7 +79,6 @@ make install
 It is not guaranteed that this minimum setup is appropriate for your needs or your specific computing environment.
 For example, several different options can be passed e.g. to the `cmake` command.
 We strongly advise you to further refer to the [INSTALL](INSTALL.md) file for more guidance, especially if you encounter any issues.
-
 
 ## Using the Docker containers
 
@@ -119,7 +118,7 @@ However, this is not always guaranteed to work and it might be necessary to buil
 
 <a id="running-smash-with-example-input-files"></a>
 
-## Running SMASH with Example Input Files
+## Running SMASH with example input files
 
 SMASH ships example configuration files for running in the collider, box, sphere, and list mode (`Modus` in the configuration jargon).
 By default, i.e. by running `./smash`, the simulation is set up from the collider configuration file, called _config.yaml_, and using the default particles and decay modes files (_particles.txt_ and _decaymodes.txt_, respectively).
@@ -158,6 +157,7 @@ and it might be useful to redirect warnings and error messages, that will still 
 ./smash > /dev/null 2> /path/to/error-and-warnings-file
 ```
 
+Visit the [user guide](https://theory.gsi.de/~smash/userguide/current/) for more information on configuring and executing SMASH.
 
 ## License
 
@@ -180,8 +180,7 @@ For more information about the licenses, see [LICENSE](LICENSE.md).
 > All rights for files not explicitly mentioned here above are reserved to the SMASH team.
 > Feel free to contact us in case of doubt or need.
 
-
-## Projects Using SMASH
+## Projects using SMASH
 
 SMASH source and documentation are provided to check and reproduce published results of the authors.
 Cooperation and joint projects with outside researchers are encouraged and comparison to results by experimental collaborations is supported.
