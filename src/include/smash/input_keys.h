@@ -1440,7 +1440,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_ensembles_,Ensembles,int,1,\f$x\geq1\f$}
+   * \optional_key{key_gen_ensembles_,Ensembles,int,1,\f$x>0\f$}
    *
    * Number of parallel ensembles in the simulation.
    *
@@ -1469,7 +1469,7 @@ struct InputKeys {
       InputSections::general + "Ensembles",
       1,
       {"2.1"},
-      [](const int &value) noexcept { return value >= 1; }};
+      [](const int &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1594,12 +1594,13 @@ struct InputKeys {
       gen_restFrameDensityDerivativeMode{
           InputSections::general + "Rest_Frame_Density_Derivatives_Mode",
           RestFrameDensityDerivativesMode::Off,
-          {"2.1", "3.0", "3.0"}};
+          {"2.1", "3.0", "3.0"},
+          detail::get_default_validator<RestFrameDensityDerivativesMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
    * \optional_key{key_gen_smearing_mode_,Smearing_Mode,string,"Covariant
-   * Gaussian"}
+   * Gaussian",\any_valid}
    *
    * The mode of smearing for density calculation.
    *
@@ -1653,11 +1654,12 @@ struct InputKeys {
   inline static const Key<SmearingMode> gen_smearingMode{
       InputSections::general + "Smearing_Mode",
       SmearingMode::CovariantGaussian,
-      {"2.1"}};
+      {"2.1"},
+      detail::get_default_validator<SmearingMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_testparticles_,Testparticles,int,1}
+   * \optional_key{key_gen_testparticles_,Testparticles,int,1,\f$x>0\f$}
    *
    * Number of test-particles per real particle in the simulation.
    *
@@ -1683,11 +1685,14 @@ struct InputKeys {
    * \see_key{key_gen_testparticles_}
    */
   inline static const Key<int> gen_testparticles{
-      InputSections::general + "Testparticles", 1, {"0.50"}};
+      InputSections::general + "Testparticles",
+      1,
+      {"0.50"},
+      [](const int &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_time_step_mode_,Time_Step_Mode,string,"Fixed"}
+   * \optional_key{key_gen_time_step_mode_,Time_Step_Mode,string,"Fixed",\any_valid}
    *
    * The mode of time stepping. Possible values:
    * - `"None"` &rarr; `Delta_Time` is set to the `End_Time`. This cannot be
@@ -1707,11 +1712,14 @@ struct InputKeys {
    * \see_key{key_gen_time_step_mode_}
    */
   inline static const Key<TimeStepMode> gen_timeStepMode{
-      InputSections::general + "Time_Step_Mode", TimeStepMode::Fixed, {"0.85"}};
+      InputSections::general + "Time_Step_Mode",
+      TimeStepMode::Fixed,
+      {"0.85"},
+      detail::get_default_validator<TimeStepMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_triangular_range_,Triangular_Range,double,2.0}
+   * \optional_key{key_gen_triangular_range_,Triangular_Range,double,2.0,\f$x>0\f$}
    *
    * Parameter for Triangular smearing: Half of the base of a symmetric triangle
    * that represents particle density, in units of lattice spacings.
@@ -1720,11 +1728,14 @@ struct InputKeys {
    * \see_key{key_gen_triangular_range_}
    */
   inline static const Key<double> gen_smearingTriangularRange{
-      InputSections::general + "Triangular_Range", 2.0, {"2.1"}};
+      InputSections::general + "Triangular_Range",
+      2.0,
+      {"2.1"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_use_grid_,Use_Grid,bool,true}
+   * \optional_key{key_gen_use_grid_,Use_Grid,bool,true,\none}
    *
    * - `true` &rarr; A grid is used to reduce the combinatorics of interaction
    * lookup.
@@ -1734,7 +1745,10 @@ struct InputKeys {
    * \see_key{key_gen_use_grid_}
    */
   inline static const Key<bool> gen_useGrid{
-      InputSections::general + "Use_Grid", true, {"0.80"}};
+      InputSections::general + "Use_Grid",
+      true,
+      {"0.80"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging

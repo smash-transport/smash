@@ -193,6 +193,17 @@ TEST(validators_general) {
   VERIFY(!InputKeys::gen_smearingGaussianSigma.validate(0.1));
   VERIFY(!InputKeys::gen_smearingGaussianSigma.validate(3.0));
   VERIFY(InputKeys::gen_metricType.validate(ExpansionMode::NoExpansion));
+  VERIFY(InputKeys::gen_restFrameDensityDerivativeMode.validate(
+      RestFrameDensityDerivativesMode::On));
+  VERIFY(InputKeys::gen_smearingMode.validate(SmearingMode::Discrete));
+  VERIFY(InputKeys::gen_testparticles.validate(42));
+  VERIFY(!InputKeys::gen_testparticles.validate(0));
+  VERIFY(!InputKeys::gen_testparticles.validate(-1));
+  VERIFY(InputKeys::gen_timeStepMode.validate(TimeStepMode::Fixed));
+  VERIFY(InputKeys::gen_smearingTriangularRange.validate(2.345));
+  VERIFY(!InputKeys::gen_smearingTriangularRange.validate(0.0));
+  VERIFY(!InputKeys::gen_smearingTriangularRange.validate(-3.14));
+  VERIFY(InputKeys::gen_useGrid.validate(true));
 }
 
 #if 0
