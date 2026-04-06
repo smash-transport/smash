@@ -63,6 +63,7 @@ class CrossSections {
    *
    * \param[in] finder_parameters Parameters for collision finding, containing
    * cut for low energy NN interactions.
+   *
    * \return The appropriate total cross section value.
    */
   double parametrized_total(
@@ -356,6 +357,9 @@ class CrossSections {
    * scatterings
    *
    * \return Elastic cross section
+   *
+   * \throw std::runtime_error
+   *        if elastic cross section is negative.
    */
   double elastic_parametrization(
       const ScatterActionsFinderParameters& finder_parameters) const;

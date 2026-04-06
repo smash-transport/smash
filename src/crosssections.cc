@@ -465,7 +465,12 @@ double CrossSections::elastic_parametrization(
     elastic_xs *= finder_parameters.AQM_scaling_factor(pdg_a) *
                   finder_parameters.AQM_scaling_factor(pdg_b);
   }
-  return elastic_xs;
+  if (elastic_xs < 0.) {
+    throw_xsec_is_negative(sqrt_s_, elastic_xs, incoming_particles_[0],
+                           incoming_particles_[1], __func__);
+  } else {
+    return elastic_xs;
+  }
 }
 
 double CrossSections::nn_el() const {
