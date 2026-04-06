@@ -114,7 +114,9 @@ class CrossSections {
   CollisionBranchList two_to_one() const;
 
   /**
-   * Return the 2-to-1 resonance production cross section for a given resonance.
+   * Calculates the 2-to-1 resonance production cross section for a given
+   * resonance using the Breit-Wigner distribution as probability amplitude.
+   * See eq. (176) in \iref{Buss:2011mx}.
    *
    * \param[in] type_resonance Type information for the resonance to be
    * produced.
@@ -512,8 +514,8 @@ class CrossSections {
   double string_hard_cross_section() const;
 
   /**
-   * Calculate cross sections for resonance absorption
-   * (i.e. NR->NN and ΔR->NN).
+   * Calculate cross sections for 2 → 2 resonance absorption (i.e. NR → NN and
+   * ΔR → NN). See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
    *
    * \param[in] is_anti_particles Whether the colliding particles are
    * antiparticles
@@ -543,10 +545,12 @@ class CrossSections {
 
   /**
    * Utility function to avoid code replication in nn_xx().
+   *
    * \param[in] type_res_1 List of possible first final resonance types
    * \param[in] type_res_2 List of possible second final resonance types
    * \param[in] integrator Used to integrate over the kinematically allowed
-   * mass range of the Breit-Wigner distribution
+   *                       mass range of the Breit-Wigner distribution
+   *
    * \return List of all possible NN reactions with their cross sections
    * with different final states
    */

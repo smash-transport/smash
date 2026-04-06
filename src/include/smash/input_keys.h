@@ -3443,7 +3443,7 @@ struct InputKeys {
    * The initial distance of the two nuclei \unit{in fm}:
    * \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
    *
-   * Note that this distance is applied before the Lorentz boost to the chosen
+   * @note This distance is applied before the Lorentz boost to the chosen
    * calculation frame, and thus the actual distance may be different.
    */
   /**
@@ -6865,7 +6865,7 @@ General:
  center
  * of velocity, and the nuclei are not deformed. Refer to \ref
  * doxypage_input_conf_modi_C_proj_targ for information about the
- * `Particles` and `Target` sections.
+ * `%Particles` and `Target` sections.
  *
  *\verbatim
  Modi:
