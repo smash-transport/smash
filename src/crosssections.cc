@@ -120,24 +120,28 @@ static void append_list(CollisionBranchList& main_list,
 
 /**
  * Helper function:
- * Throw if elastic cross section is negative.
+ * Throw if cross section is negative.
  *
  * \param[in] sqrts center of mass energy of incoming particles
- * \param[in] sig_el elastic cross section
+ * \param[in] xsec cross section
  * \param[in] data_a incoming particle a
  * \param[in] data_b incoming particle b
+ * \param[in] func_name name of the function that encountered the throw
  */
-[[noreturn]] static void throw_negative_elastic_xsec(
-    const double sqrts, const double sig_el, const ParticleData& data_a,
-    const ParticleData& data_b) {
+[[noreturn]] static void throw_xsec_is_negative(const double sqrts,
+                                                const double xsec,
+                                                const ParticleData& data_a,
+                                                const ParticleData& data_b,
+                                                std::string func_name) {
   std::stringstream ss{};
   const ParticleType& a = data_a.type();
   const ParticleType& b = data_b.type();
   const PdgCode& pdg_a = a.pdgcode();
   const PdgCode& pdg_b = b.pdgcode();
-  ss << "Problem in CrossSections::elastic_parametrization: a=" << a.name()
-     << " b=" << b.name() << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
-     << " sigma=" << sig_el << " s=" << sqrts * sqrts << " sqrt(s)=" << sqrts;
+  ss << "Negative cross section encountered in function 'CrossSections::"
+     << func_name << "':\na=" << a.name() << " b=" << b.name()
+     << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin() << " sigma=" << xsec
+     << " s=" << sqrts * sqrts << " sqrt(s)=" << sqrts;
   throw std::runtime_error(ss.str());
 }
 
@@ -494,8 +498,8 @@ double CrossSections::nn_el() const {
   if (sig_el > 0.) {
     return sig_el;
   } else {
-    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
-                                incoming_particles_[1]);
+    throw_xsec_is_negative(sqrt_s_, sig_el, incoming_particles_[0],
+                           incoming_particles_[1], __func__);
   }
 }
 
@@ -571,8 +575,8 @@ double CrossSections::npi_el() const {
   if (sig_el > 0) {
     return sig_el;
   } else {
-    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
-                                incoming_particles_[1]);
+    throw_xsec_is_negative(sqrt_s_, sig_el, incoming_particles_[0],
+                           incoming_particles_[1], __func__);
   }
 }
 
@@ -890,8 +894,8 @@ double CrossSections::nk_el() const {
   if (sig_el > 0) {
     return sig_el;
   } else {
-    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
-                                incoming_particles_[1]);
+    throw_xsec_is_negative(sqrt_s_, sig_el, incoming_particles_[0],
+                           incoming_particles_[1], __func__);
   }
 }
 
