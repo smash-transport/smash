@@ -100,6 +100,26 @@ static void append_list(CollisionBranchList& main_list,
 
 /**
  * Helper function:
+ * Throw if elastic cross section between two particles is not implemented.
+ *
+ * \param[in] data_a incoming particle a
+ * \param[in] data_b incoming particle b
+ * \param[in] func_name name of the function that encountered the throw
+ */
+[[noreturn]] static void throw_elastic_xsec_is_not_implemented(
+    const ParticleData& data_a, const ParticleData& data_b,
+    const std::string func_name) {
+  std::stringstream ss{};
+  const ParticleType& a = data_a.type();
+  const ParticleType& b = data_b.type();
+  ss << "Elastic cross section for scattering of " << a.name() << " and "
+     << b.name()
+     << " is not implemented in function 'CrossSections::" << func_name << "'.";
+  throw std::runtime_error(ss.str());
+}
+
+/**
+ * Helper function:
  * Throw if elastic cross section is negative.
  *
  * \param[in] sqrts center of mass energy of incoming particles
@@ -544,9 +564,8 @@ double CrossSections::npi_el() const {
       }
       break;
     default:
-      throw std::runtime_error(
-          "only the elastic cross section for proton-pion "
-          "is implemented");
+      throw_elastic_xsec_is_not_implemented(incoming_particles_[0],
+                                            incoming_particles_[1], __func__);
   }
 
   if (sig_el > 0) {
@@ -864,9 +883,8 @@ double CrossSections::nk_el() const {
       }
       break;
     default:
-      throw std::runtime_error(
-          "elastic cross section for antinucleon-kaon "
-          "not implemented");
+      throw_elastic_xsec_is_not_implemented(incoming_particles_[0],
+                                            incoming_particles_[1], __func__);
   }
 
   if (sig_el > 0) {
