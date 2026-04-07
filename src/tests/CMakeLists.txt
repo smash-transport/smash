@@ -21,17 +21,9 @@ macro(smash_add_exe name)
     add_executable(${name} ${name}.cc)
     target_link_libraries(${name} PRIVATE smash_testlib)
     set_target_properties(${name} PROPERTIES CXX_EXTENSIONS OFF)
-    if(USE_SANITIZER)
-        set_target_properties(${name}
-                              PROPERTIES COMPILE_FLAGS
-                                         "${SANITIZER_FLAG} -DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/test_output/${name}\\\""
-                                         LINK_FLAGS ${SANITIZER_FLAG})
-    else()
-        set_target_properties(${name}
-                              PROPERTIES COMPILE_FLAGS
-                                         "-DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/test_output/${name}\\\""
-        )
-    endif()
+    target_compile_definitions(${name}
+                               PRIVATE SMASH_TEST_OUTPUT_PATH="${PROJECT_BINARY_DIR}/test_output/${name}"
+    )
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         # Disable variable tracking in debug mode (never used so far and gcc gives annoying notes
         # when failing to track them)
