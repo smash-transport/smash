@@ -17,7 +17,9 @@ option(FORMAT_TEST_OUTPUT_FOR_VIM
        "If ON the unit test output of run_* targets will work with the vim quickfix parser and vim will directly take you to the line that failed."
        OFF)
 
-macro(smash_add_exe name)
+# The following function adds an executable for a test, linking it to the test library and taking
+# care of some compiler options to be adjusted.
+function(smash_add_exe name)
     add_executable(${name} ${name}.cc)
     target_link_libraries(${name} PRIVATE smash_testlib)
     set_target_properties(${name} PROPERTIES CXX_EXTENSIONS OFF)
@@ -37,53 +39,60 @@ macro(smash_add_exe name)
         # the same way on all machines.
         target_compile_options(${name} PRIVATE "-ffp-contract=off")
     endif()
-endmacro()
+endfunction()
 
-# tests: Helper macro that adds a run_<name> target
-macro(smash_add_test name depends)
+# The following function adds a unit test associated to the <name> executable and creates a
+# run_<name> target with the correct dependencies. This enables running the test e.g. using make.
+function(smash_add_test name depends)
     add_test(NAME ${name} COMMAND ${ARGN})
+    set_tests_properties(${name} PROPERTIES LABELS "unit")
     if(APPLE)
         # Known false positive container overflow error of AddressSanitizer on Mac.
         # https://github.com/google/sanitizers/wiki/AddressSanitizerContainerOverflow
-        set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=detect_container_overflow=0")
+        set_tests_properties(${name} PROPERTIES ENVIRONMENT
+                                                "ASAN_OPTIONS=detect_container_overflow=0")
     endif()
     add_custom_target(run_${name}
                       COMMAND ${ARGN} $<$<BOOL:${FORMAT_TEST_OUTPUT_FOR_VIM}>:-v>
                       DEPENDS ${depends}
                       COMMENT "Executing test ${name}"
                       VERBATIM)
-endmacro()
+endfunction()
 
-# helper macro to run smash with certain arguments, choosing an output directory according to the
-# test name
-macro(smash_add_runtest name depends)
+# The following function add a "physics" test to run e.g. smash with certain arguments, choosing an
+# output directory according to the test name
+function(smash_add_runtest name depends)
     smash_add_test(${name}
                    ${depends}
                    ${ARGN}
                    -o
                    "${PROJECT_BINARY_DIR}/test_output/${name}"
                    -f)
-endmacro()
+endfunction()
 
-macro(smash_add_unittest name)
+# Function to add a unit test to SMASH
+function(smash_add_unittest name)
     smash_add_exe(${name})
     smash_add_test(${name} ${name} ${name})
-endmacro()
+endfunction()
 
-macro(smash_add_functionaltest name)
+# Function to add a functional test to SMASH
+function(smash_add_functionaltest name)
     add_test(NAME functional_${name}
              COMMAND ${Python3_EXECUTABLE} "${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py"
                      --source "${PROJECT_SOURCE_DIR}" --binary "${PROJECT_BINARY_DIR}")
-    set_tests_properties(functional_${name} PROPERTIES FIXTURES_REQUIRED fixture_compile_smash)
-endmacro()
+    set_tests_properties(functional_${name} PROPERTIES FIXTURES_REQUIRED fixture_compile_smash
+                                                       LABELS "functional")
+endfunction()
 
-# helper macro that calls a command with --version option and save the output in a variable
-macro(get_version_string command output_variable)
-    execute_process(COMMAND ${command} --version OUTPUT_VARIABLE ${output_variable}
+# Helper function that calls a command with --version option and save the output in a variable
+function(get_version_string command output_variable)
+    execute_process(COMMAND ${command} --version OUTPUT_VARIABLE result
                     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-endmacro()
+    set(${output_variable} "${result}" PARENT_SCOPE)
+endfunction()
 
-# variable defining the regular expression for a generic version number
+# Variable defining the regular expression for a generic version number
 set(GENERIC_VERSION_REGEX "[0-9]+([.][0-9]+([.][0-9]+([.][0-9]+)?)?)?")
 
 # test source code to be clean, requires cpplint in the path
