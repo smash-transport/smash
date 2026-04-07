@@ -200,6 +200,21 @@ inline double plab_from_s(double mandelstam_s, double m_projectile,
 }
 
 /**
+ * Convert Mandelstam-s to p_lab in a fixed-target collision.
+ * The mass of the two colliding particles have to be given and the heavier
+ * particle is assumed to be the target, i.e. at rest.
+ * \param[in] mandelstam_s the Mandelstam variable s [GeV^2]
+ * \param[in] m1 mass of first particle [GeV]
+ * \param[in] m2 mass of second particle [GeV]
+ * \return momentum of the projectile in the lab frame [GeV]
+ */
+inline double plab_from_s_heavier_particle_at_rest(double mandelstam_s,
+                                                   double m1, double m2) {
+  return (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1)
+                   : plab_from_s(mandelstam_s, m1, m2);
+}
+
+/**
  * Convert E_tot to Mandelstam-s for a fixed-target setup,
  * with a projectile of mass m_P and a total energy e_tot
  * and a target of mass m_T at rest.
