@@ -28,11 +28,6 @@ macro(smash_add_exe name)
         # Disable variable tracking in debug mode (never used so far and gcc gives annoying notes
         # when failing to track them)
         target_compile_options(${name} PRIVATE "-fno-var-tracking-assignments")
-        # The GNU -Wduplicated-branches flag makes compilation time of the lattice.cc test file
-        # increase by order(s) of magnitude and it cannot basically be used
-        if(${name} STREQUAL "lattice")
-            target_compile_options(${name} PRIVATE "-Wno-duplicated-branches")
-        endif()
     endif()
     if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
         # It turned out that the -ffp-contract option of GNU and LLVM compilers (whose default is
