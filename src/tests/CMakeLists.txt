@@ -21,21 +21,6 @@ if(FORMAT_TEST_OUTPUT_FOR_VIM)
     set(UNITTEST_ARGS "-v")
 endif()
 
-# tests: Helper macro that adds a run_<name> target
-macro(smash_add_test name depends)
-    add_test(NAME ${name} COMMAND ${ARGN})
-    if(APPLE)
-        # Known false positive container overflow error of AddressSanitizer on Mac.
-        # https://github.com/google/sanitizers/wiki/AddressSanitizerContainerOverflow
-        set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=detect_container_overflow=0")
-    endif()
-    add_custom_target(run_${name}
-                      COMMAND ${ARGN} ${UNITTEST_ARGS}
-                      DEPENDS ${depends}
-                      COMMENT "Executing test ${name}"
-                      VERBATIM)
-endmacro()
-
 macro(smash_add_exe name)
     add_executable(${name} ${name}.cc)
     target_link_libraries(${name} smash_testlib)
@@ -71,16 +56,19 @@ macro(smash_add_exe name)
     endif()
 endmacro()
 
-macro(smash_add_unittest name)
-    smash_add_exe(${name})
-    smash_add_test(${name} ${name} ${name})
-endmacro()
-
-macro(smash_add_functionaltest name)
-    add_test(NAME functional_${name}
-             COMMAND ${Python3_EXECUTABLE} "${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py"
-                     --source "${PROJECT_SOURCE_DIR}" --binary "${PROJECT_BINARY_DIR}")
-    set_tests_properties(functional_${name} PROPERTIES FIXTURES_REQUIRED fixture_compile_smash)
+# tests: Helper macro that adds a run_<name> target
+macro(smash_add_test name depends)
+    add_test(NAME ${name} COMMAND ${ARGN})
+    if(APPLE)
+        # Known false positive container overflow error of AddressSanitizer on Mac.
+        # https://github.com/google/sanitizers/wiki/AddressSanitizerContainerOverflow
+        set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=detect_container_overflow=0")
+    endif()
+    add_custom_target(run_${name}
+                      COMMAND ${ARGN} ${UNITTEST_ARGS}
+                      DEPENDS ${depends}
+                      COMMENT "Executing test ${name}"
+                      VERBATIM)
 endmacro()
 
 # helper macro to run smash with certain arguments, choosing an output directory according to the
@@ -92,6 +80,18 @@ macro(smash_add_runtest name depends)
                    -o
                    "${PROJECT_BINARY_DIR}/test_output/${name}"
                    -f)
+endmacro()
+
+macro(smash_add_unittest name)
+    smash_add_exe(${name})
+    smash_add_test(${name} ${name} ${name})
+endmacro()
+
+macro(smash_add_functionaltest name)
+    add_test(NAME functional_${name}
+             COMMAND ${Python3_EXECUTABLE} "${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py"
+                     --source "${PROJECT_SOURCE_DIR}" --binary "${PROJECT_BINARY_DIR}")
+    set_tests_properties(functional_${name} PROPERTIES FIXTURES_REQUIRED fixture_compile_smash)
 endmacro()
 
 # helper macro that calls a command with --version option and save the output in a variable
