@@ -479,14 +479,15 @@ smash_add_runtest(crosssection_dump smash smash -s 2112,2212)
 smash_add_runtest(resonance_spectral_function_dump smash smash -r 113)
 
 # Setup tests to check that default run has no memory leaks, if valgrind is available
-find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
-if(CTEST_MEMORYCHECK_COMMAND)
-    message(STATUS "Valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
-    get_version_string(${CTEST_MEMORYCHECK_COMMAND} VALGRIND_VERSION_STRING)
+find_program(VALGRIND_EXECUTABLE valgrind)
+if(VALGRIND_EXECUTABLE)
+    message(STATUS "Valgrind found at ${VALGRIND_EXECUTABLE}")
+    get_version_string(${VALGRIND_EXECUTABLE} VALGRIND_VERSION_STRING)
     if(VALGRIND_VERSION_STRING MATCHES "^valgrind-3.11")
         message(ATTENTION "There is a known bug with valgrind 3.11"
                           " (unrecognised instruction) - disabling memchecks.")
     else()
+        set(CTEST_MEMORYCHECK_COMMAND ${VALGRIND_EXECUTABLE})
         set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
         add_custom_target(memcheck_collider
                           COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
