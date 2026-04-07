@@ -434,7 +434,10 @@ if(BUILD_TESTING)
     # The static library for unit tests uses the same object files as smash_objlib but adds
     # test-specific definitions (BUILD_TESTS) and optional sanitizer instrumentation. Note that
     # smash_objlib itself is NOT modified, so main builds remain unaffected.
-    target_compile_definitions(smash_testlib PUBLIC BUILD_TESTS)
+    target_compile_definitions(smash_testlib
+                               PUBLIC "BUILD_TESTS"
+                                      "TEST_CONFIG_PATH=std::filesystem::path(\"${PROJECT_SOURCE_DIR}\")"
+    )
 
     if(USE_SANITIZER)
         target_compile_options(smash_testlib PUBLIC ${SANITIZER_FLAG})

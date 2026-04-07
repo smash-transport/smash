@@ -253,9 +253,6 @@ else()
     message(ATTENTION "gitstats not found. The gitstats target will not be created.")
 endif()
 
-add_definitions("-DTEST_CONFIG_PATH=std::filesystem::path(\"${PROJECT_SOURCE_DIR}\")")
-add_definitions("-DBUILD_TESTS")
-
 # compile-only tests
 smash_add_exe(angles_distribution)
 smash_add_exe(angles_zero)
