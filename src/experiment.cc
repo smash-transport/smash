@@ -136,9 +136,6 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
 
   const int ntest = config.take(InputKeys::gen_testparticles);
-  if (ntest <= 0) {
-    throw std::invalid_argument("Testparticle number should be positive!");
-  }
 
   // sets whether to consider only participants in thermodynamic outputs or not
   const bool only_participants =

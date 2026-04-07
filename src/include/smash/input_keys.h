@@ -1291,8 +1291,8 @@ struct InputKeys {
       InputSections::general + "Modus",
       {"0.50"},
       [](const std::string &value) noexcept {
-        const std::set<std::string> valid_values = {"Box", "List", "ListBox",
-                                                    "Collider", "Sphere"};
+        const std::set<std::string> valid_values = {"Box", "Collider", "List",
+                                                    "ListBox", "Sphere"};
         return valid_values.count(value) > 0;
       }};
 
@@ -1482,6 +1482,9 @@ struct InputKeys {
    * It corresponds to \f$b_r/l_0\f$ if the metric type is `"MasslessFRW"` or
    * `"MassiveFRW"`, and to the parameter b in the exponential expansion where
    * \f$a(t) ~ e^{bt/2}\f$.
+   *
+   * Refer to section 2 of \iref{Tindall:2016try} for more information about
+   * possible range of values and their physical meaning.
    */
   /**
    * \see_key{key_gen_expansion_rate_}
@@ -1506,7 +1509,7 @@ struct InputKeys {
    * take finite differences of the baryon number density (chain rule field
    * derivatives). Using direct field derivatives is numerically (slightly) more
    * stable. For more information and explicit equations, see section 4.2.5 (p.
-   * 130) and Table 4.3 (p. 137) of https://arxiv.org/abs/2109.08105.
+   * 130) and Table 4.3 (p. 137) of \iref{Sorensen:2021zxd}.
    *
    * - `"Direct"` &rarr; Induces using the computed values of the baryon
    *   4-current on the lattice to calculate a lattice of the 4-field
@@ -1572,6 +1575,9 @@ struct InputKeys {
    * - `"MasslessFRW"` &rarr; FRW expansion going as \f$t^{1/2}\f$
    * - `"MassiveFRW"` &rarr; FRW expansion going as \f$t^{2/3}\f$
    * - `"Exponential"` &rarr; FRW expansion going as \f$e^{t/2}\f$
+   *
+   * Refer to section 2 of \iref{Tindall:2016try} for more information about
+   * possible range of values and their physical meaning.
    */
   /**
    * \see_key{key_gen_metric_type_}
@@ -1688,7 +1694,14 @@ struct InputKeys {
       InputSections::general + "Testparticles",
       1,
       {"0.50"},
-      [](const int &value) noexcept { return value > 0; }};
+      [](const int &value) noexcept {
+        if (value > 100) {
+          logg[LogArea::Configuration::id].warn(
+              "Number of testparticles is very large, which may lead to long"
+              "runtime. Make sure that this is intended.");
+        }
+        return value > 0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1696,7 +1709,7 @@ struct InputKeys {
    *
    * The mode of time stepping. Possible values:
    * - `"None"` &rarr; `Delta_Time` is set to the `End_Time`. This cannot be
-   * used with potentials.
+   *   used with potentials.
    * - `"Fixed"`&rarr; Fixed-sized time steps at which collision-finding grid is
    *   created. More efficient for systems with many particles. The `Delta_Time`
    *   is provided by user.
