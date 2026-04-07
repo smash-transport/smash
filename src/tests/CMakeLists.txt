@@ -1,14 +1,11 @@
 ########################################################
 #
-#    Copyright (c) 2012-2025
+#    Copyright (c) 2012-2026
 #      SMASH Team
 #
 #    BSD 3-clause license
 #
 ########################################################
-
-# Add 3rd-party virtest library
-include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rdparty/virtest")
 
 # Copy needed input file to build directory
 file(COPY ../../input/config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
