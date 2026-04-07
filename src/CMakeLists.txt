@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2012-2025
+#    Copyright (c) 2012-2026
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -11,51 +11,103 @@ include(CheckLibraryExists)
 include(AddCompilerFlag)
 include(FindPkgConfig)
 
+# According to modern CMake mental model: Declare the targets early, and then feed it sources, link
+# dependencies, compile definitions, etc. incrementally. The "object library" target is used to
+# compile the sources only once see https://stackoverflow.com/a/29824424 and all its features will
+# be PUBLIC since this is a library to serve internally both the executable and the shared library
+# and all its properties must propagate. Here we use the smash_api interface library to collect
+# everything that should be exposed to users of the shared library. NOTE: shared libraries need PIC
+# and this is already set for all targets through CMAKE_POSITION_INDEPENDENT_CODE
+add_library(smash_objlib OBJECT)
+add_executable(smash smash.cc $<TARGET_OBJECTS:smash_objlib>)
+add_library(smash_shared SHARED $<TARGET_OBJECTS:smash_objlib>)
+add_library(smash_api INTERFACE)
+
+# Both smash executable and shared library are linked privately to the object library because the
+# object is only an implementation detail and we do not want to expose it to clients, but also to
+# avoid that the dependency on the external libraries is propagated to users of the shared library,
+# which should not be aware of them (dependency on external library is introduced in the Config
+# file). What has to be propagated to clients belongs to smash_api interface target.
+target_link_libraries(smash_objlib PUBLIC smash_project_build_requirements smash_api)
+target_link_libraries(smash_api INTERFACE smash_project_usage_requirements)
+target_link_libraries(smash PRIVATE smash_objlib smash_api)
+target_link_libraries(smash_shared PRIVATE smash_objlib PUBLIC smash_api)
+
+# Disable compiler-specific extensions for all targets. This cannot be done through INTERFACE
+# libraries because properties like CXX_EXTENSIONS do not propagate through them.
+set_target_properties(smash_objlib smash smash_shared PROPERTIES CXX_EXTENSIONS OFF)
+
+# Call shared library smash (e.g. libsmash.so). Note that, since "the build-tree runtime path will
+# not be used for binaries in the install tree" (CMake documentation), we request here to set the
+# INSTALL_RPATH in the library to ensure that projects linking to SMASH finds at run time libraries
+# like Pythia, which are likely to be in not standard places.
+set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
+                                              INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# Set up include paths for SMASH and its clients using the smash_api interface target.
+target_include_directories(smash_api
+                           INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                                     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+                                     $<INSTALL_INTERFACE:include>)
+
 # Prepare list variables to collect libraries, compiler definitions for internal usage in SMASH,
 # compiler definitions for users of SMASH, internal compile options and so on
-set(SMASH_LIBRARIES
-    einhard
-    yaml-cpp
-    cuhre
-    suave
-    divonne
-    vegas)
-set(SMASH_INTERNAL_DEFINITIONS "")
-set(SMASH_CLIENT_DEFINITIONS "")
-set(SMASH_PRIVATE_COMPILE_OPTIONS "")
+target_link_libraries(smash_objlib
+                      PUBLIC einhard
+                             yaml-cpp
+                             cuhre
+                             suave
+                             divonne
+                             vegas)
 
-# Enable warnings for supported compilers only --> Here we know the compilers support the flag, do
-# not test!
+# Enable warnings for supported compilers only (we know the compilers support the flag, do not test)
 if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
-    set(CMAKE_CXX_FLAGS
-        "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Wfloat-conversion -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch"
-    )
+    target_compile_options(smash_objlib
+                           PUBLIC -W
+                                  -Wall
+                                  -Wextra
+                                  -Wmissing-declarations
+                                  -Wpointer-arith
+                                  -Wshadow
+                                  -Wuninitialized
+                                  -Wfloat-conversion
+                                  -Winit-self
+                                  -Wundef
+                                  -Wcast-align
+                                  -Wformat=2
+                                  -Wold-style-cast
+                                  -Werror=switch)
+    # GNU specific options
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        set(CMAKE_CXX_FLAGS
-            "${CMAKE_CXX_FLAGS} -Wlogical-op -Wnull-dereference -Wduplicated-cond -Wrestrict -Wduplicated-branches -Wsuggest-override"
-        )
+        target_compile_options(smash_objlib
+                               PUBLIC -Wlogical-op
+                                      -Wnull-dereference
+                                      -Wduplicated-cond
+                                      -Wrestrict
+                                      -Wduplicated-branches
+                                      -Wsuggest-override)
         # Needed for workaround about C++17 compatibility (bug in some GNU versions)
-        add_compile_definitions(GCC_COMPILER)
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        set(CMAKE_CXX_FLAGS
-            "${CMAKE_CXX_FLAGS} -Wno-missing-braces -Winconsistent-missing-override")
-        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "14")
-            # Use of contracted mathematical expression like FMA (if the hardware supports them) are
-            # controlled by a flag whose default unfortunately varies among compilers and versions
-            # thereof. Since clang-14 changed the default from "off" to "on", we set here the value
-            # to "on" also for older versions. GNU default is "fast", but this seems to be similar
-            # to clang's "on" (which fuses in the same statement) than to clang's "fast" (which
-            # fuses across statements). Here we simply try to have the same behaviour across the
-            # supported compilers.
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffp-contract=on")
+        target_compile_definitions(smash_objlib PUBLIC GCC_COMPILER)
+    else()
+        # LLVM specific options
+        target_compile_options(smash_objlib PUBLIC -Wno-missing-braces
+                                                   -Winconsistent-missing-override)
+        # Use of contracted mathematical expression like FMA (if the hardware supports them) are
+        # controlled by a flag whose default unfortunately varies among compilers and versions
+        # thereof. Since clang-14 changed the default from "off" to "on", we set here the value to
+        # "on" also for older versions. GNU default is "fast", but this seems to be similar to
+        # clang's "on" (which fuses in the same statement) than to clang's "fast" (which fuses
+        # across statements). Here we simply try to have the same behaviour across the supported
+        # compilers.
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 14)
+            target_compile_options(smash_objlib PUBLIC -ffp-contract=on)
         endif()
     endif()
-    # Enable warnings about deprecated C functions
-    option(DEPRECATE_C_FNS "Turn this on to enable warning about deprecated C funtions in SMASH."
-           OFF)
+    # Enable warnings about deprecated C functions by default.
+    option(DEPRECATE_C_FNS "Enable warnings about deprecated C functions in SMASH." OFF)
     if(DEPRECATE_C_FNS)
-        list(APPEND SMASH_INTERNAL_DEFINITIONS "DONT_ASSERT_TEST")
-        list(APPEND SMASH_PRIVATE_COMPILE_OPTIONS "-include" "smash/deprecate_c_functions.h")
+        target_compile_definitions(smash_objlib PUBLIC DONT_ASSERT_TEST)
+        target_compile_options(smash_objlib PUBLIC -include smash/deprecate_c_functions.h)
     endif()
 endif()
 
@@ -74,11 +126,25 @@ endif(GIT_FOUND)
 
 string(TIMESTAMP BUILD_DATE)
 
+# Note that we look for Pythia first (and especially before ROOT, HepMC3 and Rivet) to ensure it is
+# linked before all the other and it is meant to avoid possible issues with e.g. ROOT whose include
+# directories might contain a Pythia.h header that might not be the one of the Pythia linked to
+# SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
+find_package(Pythia 8.316 EXACT REQUIRED)
+if(Pythia_FOUND)
+    if(NOT TARGET Pythia::Pythia)
+        message(FATAL_ERROR "Pythia library found, but its target is somehow missing.\n"
+                            "Ensure to be using the provided CMake module to find it.\n")
+    endif()
+    target_link_libraries(smash_objlib PUBLIC Pythia::Pythia)
+    target_compile_definitions(smash_objlib PUBLIC "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+                                                   "PYTHIA_FOUND")
+endif()
+
 find_package(GSL 2.0 REQUIRED)
 if(GSL_FOUND)
     if(TARGET GSL::gsl AND TARGET GSL::gslcblas)
-        create_system_wrapper_target(GSL_bundle GSL::gsl GSL::gslcblas)
-        list(APPEND SMASH_LIBRARIES GSL_bundle)
+        target_link_libraries(smash_objlib PUBLIC GSL::gsl GSL::gslcblas)
     else()
         message(FATAL_ERROR " \n" " GSL library found, but its targets are somehow missing.\n"
                             " Ensure to be using the official CMake module to find it.\n")
@@ -88,7 +154,7 @@ endif()
 find_package(Eigen3 3.0 REQUIRED)
 if(EIGEN3_FOUND)
     if(TARGET Eigen3::Eigen)
-        list(APPEND SMASH_LIBRARIES Eigen3::Eigen)
+        target_link_libraries(smash_objlib PUBLIC Eigen3::Eigen)
     else()
         message(FATAL_ERROR " \n" " Eigen3 library found, but its target is somehow missing.\n"
                             " Ensure to be using the provided CMake module to find it.\n")
@@ -108,9 +174,8 @@ if(TRY_USE_ROOT)
     endif()
     if(ROOT_FOUND)
         message(STATUS "Found ROOT: ${ROOT_INCLUDE_DIRS} (version ${ROOT_VERSION})")
-        create_system_wrapper_target(ROOT_bundle ROOT::Core ROOT::RIO ROOT::Tree)
-        list(APPEND SMASH_LIBRARIES ROOT_bundle)
-        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_ROOT")
+        target_link_libraries(smash_objlib PUBLIC ROOT::Core ROOT::RIO ROOT::Tree)
+        target_compile_definitions(smash_api INTERFACE "SMASH_USE_ROOT")
     else()
         message(STATUS "Suitable ROOT not found. Support disabled. "
                        "See README for more information.")
@@ -142,11 +207,10 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
         else()
             message(STATUS "HepMC3_treeroot output support enabled")
             list(APPEND HEPMC3_TARGETS HepMC3::rootIO)
-            list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_HEPMC_ROOTIO")
+            target_compile_definitions(smash_api INTERFACE "SMASH_USE_HEPMC_ROOTIO")
         endif()
-        create_system_wrapper_target(HepMC3_bundle ${HEPMC3_TARGETS})
-        list(APPEND SMASH_LIBRARIES HepMC3_bundle)
-        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_HEPMC")
+        target_link_libraries(smash_objlib PUBLIC ${HEPMC3_TARGETS})
+        target_compile_definitions(smash_api INTERFACE "SMASH_USE_HEPMC")
     else()
         message(STATUS "Suitable HepMC3 not found. Support disabled. "
                        "See README for more information.")
@@ -173,32 +237,13 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
             message(FATAL_ERROR " \n" " Rivet library found, but its target is somehow missing.\n"
                                 " Ensure to be using the provided CMake module to find it.\n")
         endif()
-        list(APPEND SMASH_LIBRARIES Rivet::Rivet)
-        list(APPEND SMASH_CLIENT_DEFINITIONS "SMASH_USE_RIVET")
+        target_link_libraries(smash_objlib PUBLIC Rivet::Rivet)
+        target_compile_definitions(smash_api INTERFACE "SMASH_USE_RIVET")
     else()
         message(STATUS "Suitable Rivet not found. Support disabled. "
                        "See README for more information.")
     endif()
 endif()
-
-find_package(Pythia 8.316 EXACT REQUIRED)
-if(Pythia_FOUND)
-    if(NOT TARGET Pythia::Pythia)
-        message(FATAL_ERROR "Pythia library found, but its target is somehow missing.\n"
-                            "Ensure to be using the provided CMake module to find it.\n")
-    endif()
-    # Here we PREPEND the Pythia target to the list of libraries to ensure that it is linked before
-    # all the other and it is meant to avoid possible issues with e.g. ROOT whose include
-    # directories might contain a Pythia.h header that might not be the one of the Pythia linked to
-    # SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
-    list(PREPEND SMASH_LIBRARIES Pythia::Pythia)
-    list(APPEND SMASH_INTERNAL_DEFINITIONS "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
-         "PYTHIA_FOUND")
-endif()
-
-# set up include paths
-include_directories(include)
-include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 
 # ~~~
 # For GNU and Clang compilers, link to C++ filesystem library if compiler version requires it
@@ -209,100 +254,100 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}/include")
 # ~~~
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.1)
-        set(SMASH_LIBRARIES ${SMASH_LIBRARIES} stdc++fs)
+        target_link_libraries(smash_objlib PUBLIC stdc++fs)
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
-        set(SMASH_LIBRARIES ${SMASH_LIBRARIES} c++fs)
+        target_link_libraries(smash_objlib PUBLIC c++fs)
     endif()
 endif()
 
 # list the source files
-set(smash_src
-    action.cc
-    boxmodus.cc
-    binaryoutput.cc
-    bremsstrahlungaction.cc
-    chemicalpotential.cc
-    clebschgordan.cc
-    clebschgordan_lookup.cc
-    collidermodus.cc
-    configuration.cc
-    crosssections.cc
-    crosssectionsphoton.cc
-    customnucleus.cc
-    decayaction.cc
-    decayactionsfinder.cc
-    decaymodes.cc
-    decaytype.cc
-    deformednucleus.cc
-    alphaclusterednucleus.cc
-    density.cc
-    decayactiondilepton.cc
-    decayactionsfinderdilepton.cc
-    dynamicfluidfinder.cc
-    distributions.cc
-    energymomentumtensor.cc
-    experiment.cc
-    fields.cc
-    file.cc
-    filelock.cc
-    fluidizationaction.cc
-    fourvector.cc
-    fpenvironment.cc
-    grandcan_thermalizer.cc
-    grid.cc
-    hadgas_eos.cc
-    hypersurfacecrossingfinder.cc
-    icoutput.cc
-    inputfunctions.cc
-    interpolation.cc
-    interpolation2D.cc
-    isoparticletype.cc
-    library.cc
-    listmodus.cc
-    logging.cc
-    nucleus.cc
-    oscaroutput.cc
-    pauliblocking.cc
-    parametrizations.cc
-    particledata.cc
-    particles.cc
-    particletype.cc
-    pdgcode.cc
-    potentials.cc
-    potential_globals.cc
-    processbranch.cc
-    stringprocess.cc
-    propagation.cc
-    quantumnumbers.cc
-    quantumsampling.cc
-    random.cc
-    scatteraction.cc
-    scatteractionmulti.cc
-    scatteractionphoton.cc
-    scatteractionsfinder.cc
-    setup_particles_decaymodes.cc
-    sha256.cc
-    spheremodus.cc
-    stringfunctions.cc
-    stringify.cc
-    tabulation.cc
-    thermalizationaction.cc
-    thermodynamiclatticeoutput.cc
-    thermodynamicoutput.cc
-    threevector.cc
-    vtkoutput.cc
-    wallcrossingaction.cc)
+target_sources(smash_objlib
+               PRIVATE action.cc
+                       boxmodus.cc
+                       binaryoutput.cc
+                       bremsstrahlungaction.cc
+                       chemicalpotential.cc
+                       clebschgordan.cc
+                       clebschgordan_lookup.cc
+                       collidermodus.cc
+                       configuration.cc
+                       crosssections.cc
+                       crosssectionsphoton.cc
+                       customnucleus.cc
+                       decayaction.cc
+                       decayactionsfinder.cc
+                       decaymodes.cc
+                       decaytype.cc
+                       deformednucleus.cc
+                       alphaclusterednucleus.cc
+                       density.cc
+                       decayactiondilepton.cc
+                       decayactionsfinderdilepton.cc
+                       dynamicfluidfinder.cc
+                       distributions.cc
+                       energymomentumtensor.cc
+                       experiment.cc
+                       fields.cc
+                       file.cc
+                       filelock.cc
+                       fluidizationaction.cc
+                       fourvector.cc
+                       fpenvironment.cc
+                       grandcan_thermalizer.cc
+                       grid.cc
+                       hadgas_eos.cc
+                       hypersurfacecrossingfinder.cc
+                       icoutput.cc
+                       inputfunctions.cc
+                       interpolation.cc
+                       interpolation2D.cc
+                       isoparticletype.cc
+                       library.cc
+                       listmodus.cc
+                       logging.cc
+                       nucleus.cc
+                       oscaroutput.cc
+                       pauliblocking.cc
+                       parametrizations.cc
+                       particledata.cc
+                       particles.cc
+                       particletype.cc
+                       pdgcode.cc
+                       potentials.cc
+                       potential_globals.cc
+                       processbranch.cc
+                       stringprocess.cc
+                       propagation.cc
+                       quantumnumbers.cc
+                       quantumsampling.cc
+                       random.cc
+                       scatteraction.cc
+                       scatteractionmulti.cc
+                       scatteractionphoton.cc
+                       scatteractionsfinder.cc
+                       setup_particles_decaymodes.cc
+                       sha256.cc
+                       spheremodus.cc
+                       stringfunctions.cc
+                       stringify.cc
+                       tabulation.cc
+                       thermalizationaction.cc
+                       thermodynamiclatticeoutput.cc
+                       thermodynamicoutput.cc
+                       threevector.cc
+                       vtkoutput.cc
+                       wallcrossingaction.cc)
 
 if(TRY_USE_ROOT AND ROOT_FOUND)
-    set(smash_src ${smash_src} rootoutput.cc)
+    target_sources(smash_objlib PRIVATE rootoutput.cc)
 endif()
 
 if(TRY_USE_HEPMC AND HepMC3_FOUND)
-    set(smash_src ${smash_src} hepmcoutput.cc hepmcinterface.cc)
+    target_sources(smash_objlib PRIVATE hepmcoutput.cc hepmcinterface.cc)
     if(TRY_USE_RIVET AND Rivet_FOUND)
-        set(smash_src ${smash_src} rivetoutput.cc)
+        target_sources(smash_objlib PRIVATE rivetoutput.cc)
     endif()
 endif()
 
@@ -312,22 +357,10 @@ if(ENABLE_NANOBENCHMARKING)
     if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "^arm")
         message(WARNING "Nanobenchmarking is not supported on ARM processors and it was disabled.")
     else()
-        set(smash_src ${smash_src} tsc.cc)
-        list(APPEND SMASH_INTERNAL_DEFINITIONS "USE_NANOBENCHMARKING_CODE")
+        target_sources(smash_objlib PRIVATE tsc.cc)
+        target_compile_definitions(smash_objlib PUBLIC "USE_NANOBENCHMARKING_CODE")
     endif()
 endif()
-
-# this is the "object library" target: compiles the sources only once see
-# https://stackoverflow.com/a/29824424 NOTE: shared libraries need PIC and this is already set for
-# all targets through CMAKE_POSITION_INDEPENDENT_CODE
-add_library(smash_objlib OBJECT ${smash_src})
-target_compile_definitions(smash_objlib PUBLIC ${SMASH_CLIENT_DEFINITIONS}
-                                               ${SMASH_INTERNAL_DEFINITIONS})
-target_compile_options(smash_objlib PUBLIC ${SMASH_PRIVATE_COMPILE_OPTIONS})
-target_link_libraries(smash_objlib PUBLIC ${SMASH_LIBRARIES})
-
-add_executable(smash smash.cc $<TARGET_OBJECTS:smash_objlib>)
-target_link_libraries(smash PRIVATE smash_objlib)
 
 # configure a header file to pass some of the CMake settings to the source code
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/smash/config.h.in"
@@ -356,25 +389,14 @@ endmacro()
 generate_headers(particles.txt decaymodes.txt)
 set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated_headers}")
 
-# Create a shared library out of the whole SMASH. Note that, since "the build-tree runtime path will
-# not be used for binaries in the install tree" (CMake documentation), we request here to set the
-# INSTALL_RPATH in the library to ensure that projects linking to SMASH finds at run time libraries
-# like Pythia, which are likely to be in not standard places. Furthermore, smash_shared is linked
-# privately to the object library to avoid that the dependency on the external libraries is
-# propagated to users of the shared library, which should not be aware of them. The client
-# definitions are re-exposed to users of the shared library since they are needed to use it.
-add_library(smash_shared SHARED $<TARGET_OBJECTS:smash_objlib>)
-target_link_libraries(smash_shared PRIVATE smash_objlib)
-target_compile_definitions(smash_shared PUBLIC ${SMASH_CLIENT_DEFINITIONS})
-set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
-                                              INSTALL_RPATH_USE_LINK_PATH TRUE)
-
 # tests:
 if(BUILD_TESTING)
-    # library for unit tests
+    # Add library for unit tests. Note that we link to smash_objlib publicly to propagate all SMASH
+    # internal features to tests targets that will link against this library.
     add_library(smash_testlib STATIC $<TARGET_OBJECTS:smash_objlib>)
-    target_link_libraries(smash_testlib PUBLIC smash_objlib)
-    set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash)
+    target_link_libraries(smash_testlib PUBLIC smash_objlib smash_api)
+    set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash CXX_EXTENSIONS OFF)
+
     # Look for sanitizers supported by the compiler. Sanitizers add instrumentation code to the
     # executable that test correctness of the code:
     #
@@ -385,20 +407,23 @@ if(BUILD_TESTING)
     # If the undefined sanitizer is not available with the compiler it will fall back to address
     # sanitizer only. If this ones also not available the sanitizer build will be skipped
     # altogether.
-    set(SANITIZER_FLAG -fsanitize=address,undefined)
-    set(_tmp "${CMAKE_REQUIRED_FLAGS}")
-    set(CMAKE_REQUIRED_FLAGS ${SANITIZER_FLAG}) # add_compiler_flag only adds the flag for
-                                                # compilation - it's also required with the link
-                                                # command, though
-    add_compiler_flag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
-    set(CMAKE_REQUIRED_FLAGS "${_tmp}")
+    function(check_sanitizer_flag_support flag result_var)
+        set(_saved_flags "${CMAKE_REQUIRED_FLAGS}")
+        set(CMAKE_REQUIRED_FLAGS "${flag}") # add_compiler_flag only adds the flag for
+        # compilation - it's also required with the link command, though
+        add_compiler_flag("${flag}" CXX_RESULT _have_flag)
+        set(CMAKE_REQUIRED_FLAGS "${_saved_flags}")
+        set(${result_var} ${_have_flag} PARENT_SCOPE)
+    endfunction()
+
+    set(SANITIZER_FLAG "-fsanitize=address,undefined")
+    check_sanitizer_flag_support("${SANITIZER_FLAG}" HAVE_SANITIZER)
     if(NOT HAVE_SANITIZER)
-        set(SANITIZER_FLAG -fsanitize=address)
-        set(CMAKE_REQUIRED_FLAGS ${SANITIZER_FLAG})
-        add_compiler_flag(${SANITIZER_FLAG} CXX_RESULT HAVE_SANITIZER)
-        set(CMAKE_REQUIRED_FLAGS "${_tmp}")
+        set(SANITIZER_FLAG "-fsanitize=address")
+        check_sanitizer_flag_support("${SANITIZER_FLAG}" HAVE_SANITIZER)
     endif()
 
+    # Offer option to disable sanitizer usage, if available.
     if(HAVE_SANITIZER)
         option(USE_SANITIZER
                "Use available address and undefined behavior sanitizers for test code." ON)
@@ -406,22 +431,20 @@ if(BUILD_TESTING)
         set(USE_SANITIZER FALSE)
     endif()
 
-    # define BUILD_TESTS for smash_testlib in order to enable small code changes for the unit tests.
-    # It is an unfortunate side effect that the sanitzer build now also compiles to slightly
-    # different code. To fix this we'd have to compile all source files a third time... not sure we
-    # prefer that.
+    # The static library for unit tests uses the same object files as smash_objlib but adds
+    # test-specific definitions (BUILD_TESTS) and optional sanitizer instrumentation. Note that
+    # smash_objlib itself is NOT modified, so main builds remain unaffected.
+    target_compile_definitions(smash_testlib PUBLIC BUILD_TESTS)
+
     if(USE_SANITIZER)
-        set_target_properties(smash_testlib
-                              PROPERTIES COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
-                                         LINK_FLAGS ${SANITIZER_FLAG})
+        target_compile_options(smash_testlib PUBLIC ${SANITIZER_FLAG})
+        target_link_options(smash_testlib PUBLIC ${SANITIZER_FLAG})
 
         add_executable(smash_sanitizer smash.cc)
-        set_target_properties(smash_sanitizer
-                              PROPERTIES COMPILE_FLAGS "${SANITIZER_FLAG} -DBUILD_TESTS"
-                                         LINK_FLAGS ${SANITIZER_FLAG})
-        target_link_libraries(smash_sanitizer smash_testlib)
-    else()
-        set_target_properties(smash_testlib PROPERTIES COMPILE_FLAGS "-DBUILD_TESTS")
+        target_compile_definitions(smash_sanitizer PUBLIC BUILD_TESTS)
+        target_compile_options(smash_sanitizer PUBLIC ${SANITIZER_FLAG})
+        target_link_options(smash_sanitizer PUBLIC ${SANITIZER_FLAG})
+        target_link_libraries(smash_sanitizer PRIVATE smash_testlib)
     endif()
 
     add_subdirectory(tests)

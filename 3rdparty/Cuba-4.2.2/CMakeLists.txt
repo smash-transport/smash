@@ -49,10 +49,14 @@ add_subdirectory(src/vegas)
 add_subdirectory(src/divonne)
 
 set(CUBA_TARGETS cuhre suave vegas divonne)
+set(flags_to_be_added "-Wall")
+if(SMASH_ARCH_FLAG)
+    list(APPEND flags_to_be_added "-march=${SMASH_ARCH_FLAG}")
+endif()
 
 target_add_compiler_flag_if_supported(TARGETS ${CUBA_TARGETS}
                                       LANGUAGE C
-                                      FLAGS "-Wall" "-march=native"
+                                      FLAGS ${flags_to_be_added}
                                       SCOPE PRIVATE)
 
 foreach(target IN LISTS CUBA_TARGETS)

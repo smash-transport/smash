@@ -8,8 +8,10 @@ SHELL ["/bin/bash", "-c"]
 
 # Set the proper general cpu family architecture flag.
 # Please, for more information refer to the documentation of your compiler.
+# The default value is set to "x86-64-v2" which is a conservative choice for modern
+# x86-64 CPUs (cf. https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels)
 
-ARG TARGET_ARCHITECTURE="x86-64"
+ARG TARGET_ARCHITECTURE="x86-64-v2"
 
 # Add some info about authors and contents using the rules o the OCI Image Format Specification
 # https://github.com/opencontainers/image-spec/blob/main/annotations.md#pre-defined-annotation-keys
@@ -19,7 +21,17 @@ LABEL org.opencontainers.image.authors="SMASH team"
 LABEL org.opencontainers.image.url="https://smash-transport.github.io"
 LABEL org.opencontainers.image.source="https://github.com/smash-transport/smash"
 LABEL org.opencontainers.image.description="\
-Basic SMASH image (sources, compiler and bare executable, without ROOT, HepMC3 and Rivet)."
+Basic SMASH image tuned for ${TARGET_ARCHITECTURE} architecture\
+ (sources, compiler and bare executable, without ROOT, HepMC3 and Rivet)."
+
+# Fail if TARGET_ARCHITECTURE is set to "native" (this is not allowed in this Dockerfile
+# since it would make the image non portable)
+
+RUN <<EOF
+  if [[ "$TARGET_ARCHITECTURE" = "native" ]]; then
+    echo "Warning: TARGET_ARCHITECTURE is set to 'native' - be sure this is desired." >&2
+  fi
+EOF
 
 # Install minimal set of requirements
 
@@ -92,8 +104,7 @@ RUN <<EOF
   cd smash/build
   set +e
   cmake -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config \
-        -DCMAKE_C_FLAGS="${C_CXX_ARCH_FLAG}" \
-        -DCMAKE_CXX_FLAGS="${C_CXX_ARCH_FLAG}" ..
+        -DSMASH_ARCH_FLAG="${C_CXX_ARCH_FLAG}" ..
   if [[ $? -ne 0 ]]; then
     echo "Error: cmake SMASH build configuration failed!"
     exit 1

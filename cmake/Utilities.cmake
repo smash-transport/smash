@@ -54,6 +54,7 @@ endfunction()
 # target_add_compiler_flag_if_supported(TARGETS   <target> [<target> ...]   # One or more targets
 #                                       LANGUAGE <C|CXX>                    # Language of the flags
 #                                       FLAGS    <flag> [<flag> ...]        # Flags to test and add
+#                                       [RESULT <variable>]                 # Variable filled if specified
 #                                       [COMPILER <AUTO|MIC>]               # Default AUTO
 #                                       [SCOPE <PRIVATE|INTERFACE|PUBLIC>]) # Default PRIVATE
 # For each target and each flag:
@@ -61,12 +62,16 @@ endfunction()
 # 2. Else, check if the compiler supports the flag using check_compiler_flag_is_supported()
 # 3. If supported, add the flag to the target with target_compile_options()
 # 4. SCOPE is applied to all targets uniformly
+# 5. If RESULT is specified, this variable is set to a list of TRUE/FALSE values indicating whether
+#    the flag was added or not to each target. The length of this list is the number of targets passed
+#    multiplied by the number of flags passed. The order is the same as the order of targets and flags
+#    passed. A flag skipped because already present is considered as added, hence TRUE in the result list.
 # ~~~
 include("${CMAKE_CURRENT_LIST_DIR}/CheckCompilerFlag.cmake")
 function(target_add_compiler_flag_if_supported)
     cmake_parse_arguments(arg_of
                           ""
-                          "LANGUAGE;COMPILER;SCOPE"
+                          "LANGUAGE;COMPILER;SCOPE;RESULT"
                           "TARGETS;FLAGS"
                           ${ARGN})
 
@@ -105,6 +110,10 @@ function(target_add_compiler_flag_if_supported)
         set(_compiler AUTO)
     endif()
 
+    if(arg_of_RESULT)
+        set(_result_list "")
+    endif()
+
     foreach(_target IN LISTS arg_of_TARGETS)
         # Collect existing target compile options and interface compile options (if needed) to check
         # if the flag is already present and avoid adding it twice. Note that possibly existing
@@ -127,6 +136,9 @@ function(target_add_compiler_flag_if_supported)
             if(_found_index GREATER -1)
                 message(ATTENTION "The target '${_target}' already has the flag '${_flag}',"
                                   " skipping it.")
+                if(arg_of_RESULT)
+                    list(APPEND _result_list TRUE) # Skipped flags considered “added”
+                endif()
                 continue()
             endif()
             set(MESSAGE_QUIET ON)
@@ -136,6 +148,9 @@ function(target_add_compiler_flag_if_supported)
                                              COMPILER ${_compiler})
             unset(MESSAGE_QUIET)
             if(NOT _flag_supported)
+                if(arg_of_RESULT)
+                    list(APPEND _result_list FALSE)
+                endif()
                 continue()
             else()
                 # Note that the generator expression is expanded as late as possible and the
@@ -144,199 +159,15 @@ function(target_add_compiler_flag_if_supported)
                 # but for mixed one it would be wrong not do do so.
                 target_compile_options(${_target} ${_scope}
                                        $<$<COMPILE_LANGUAGE:${arg_of_LANGUAGE}>:${_flag}>)
+                if(arg_of_RESULT)
+                    list(APPEND _result_list TRUE)
+                endif()
             endif()
         endforeach()
     endforeach()
-endfunction()
 
-# Creates an INTERFACE target that links to the given existing targets and re-exposes all of their
-# INTERFACE include directories as SYSTEM.
-#
-# SYNOPSIS: create_system_wrapper_target(<new_target> <target1> [<target2> ...])
-#
-# The original targets are not modified. If <new_target> already exists, the function is a no-op.
-function(create_system_wrapper_target new_target)
-    if(TARGET ${new_target})
-        return()
-    endif()
-    if(ARGC LESS 2)
-        message(FATAL_ERROR "create_system_wrapper_target(${new_target}): "
-                            "At least one existing target must be provided.")
-    endif()
-    add_library(${new_target} INTERFACE)
-    foreach(dependence IN LISTS ARGN)
-        if(NOT TARGET ${dependence})
-            message(FATAL_ERROR "create_system_wrapper_target(${new_target}): "
-                                "Target ${dependence} does not exist.")
-        endif()
-        target_link_libraries(${new_target} INTERFACE ${dependence})
-        target_include_directories(${new_target} SYSTEM
-                                   INTERFACE $<TARGET_PROPERTY:${dependence},INTERFACE_INCLUDE_DIRECTORIES>
-        )
-    endforeach()
-endfunction()
-
-# Add utility function to add a compiler flag in a sound way (i.e. testing if it is supported) and
-# possibly warn or fail if it is not. Syntax:
-# ~~~
-#    add_compiler_flags_if_supported(<flag(s)> [ADD_IF_PRESENT]
-#                                    [VERBOSE] [ON_FAILURE <value>]
-#                                    [C_FLAGS <var>] [CXX_FLAGS <var>])
-# ~~~
-# Passing either C_FLAGS or CXX_FLAGS or both make the function only add the flag to the passed flag
-# variable(s). If none is passed the flag is added to both CMAKE_C_FLAGS and CMAKE_CXX_FLAGS.
-# ON_FAILURE accepted values are QUIET|WARN|FATAL and WARN is the used one if nothing is passed.
-# ADD_IF_PRESENT makes the function add any flag irrespectively of it being already in the flag
-# variable(s).
-#
-# TECHNICAL NOTES:
-#
-# 1. The function is prepared to work for flags containing ';' as well, but this case is excluded at
-#    the moment, since the add_compiler_flag macro, which is used internally, does not support such
-#    possibility. It was decided to postpone a fix till a real need occurs. The PARSE_ARGV variant of
-#    cmake_parse_arguments can only be used in functions and not in macro, hence this must be a
-#    function.
-# 2. This function has variables semantically very similar to the add_compiler_flag macro. However,
-#    the same name cannot/should not be used, because there would be a clash due to how macros work.
-#    Functions, instead, have their own scope, but changing the add_compiler_flag macro into a
-#    function would also not naively work, since its <...>_RESULT variables have to be set in the
-#    calling scope. This is possible using set(... PARENT_SCOPE) but was not done. As convention,
-#    local variables here have been prefixed with a double underscore "__".
-include("${CMAKE_CURRENT_LIST_DIR}/AddCompilerFlag.cmake")
-function(add_compiler_flags_if_supported)
-    message(WARNING " \n" " add_compiler_flags_if_supported() is deprecated.\n"
-                    " Use target_add_compiler_flag_if_supported() instead.\n")
-    # Parse arguments and do logic to set up needed variables
-    cmake_parse_arguments(PARSE_ARGV
-                          0
-                          "_"
-                          "VERBOSE;ADD_IF_PRESENT"
-                          "ON_FAILURE;C_FLAGS;CXX_FLAGS"
-                          "")
-    list(LENGTH __UNPARSED_ARGUMENTS __number_of_flags)
-    if(__number_of_flags EQUAL 0)
-        message(FATAL_ERROR "No flag passed to add_compiler_flags_if_supported!")
-    else()
-        set(__flags "${__UNPARSED_ARGUMENTS}")
-    endif()
-    if(__C_FLAGS)
-        set(__c_flags "${__C_FLAGS}")
-    endif()
-    if(__CXX_FLAGS)
-        set(__cxx_flags "${__CXX_FLAGS}")
-    endif()
-    if(NOT __C_FLAGS AND NOT __CXX_FLAGS)
-        set(__c_flags "CMAKE_C_FLAGS")
-        set(__cxx_flags "CMAKE_CXX_FLAGS")
-    endif()
-    if(__ON_FAILURE)
-        set(__mode "${__ON_FAILURE}")
-    else()
-        set(__mode "WARN")
-    endif()
-    if(__mode STREQUAL "QUIET")
-        unset(__action_on_failure)
-    elseif(__mode STREQUAL "WARN")
-        set(__action_on_failure "ATTENTION")
-        set(__unused_flag_message " and this will not be used")
-    elseif(__mode STREQUAL "FATAL")
-        set(__action_on_failure "FATAL_ERROR")
-    else()
-        message(FATAL_ERROR "Syntax error for add_compiler_flags_if_supported (wrong verbosity)")
-    endif()
-    # Finally check/add flags and report to user
-    foreach(__flag ${__flags})
-        if(__flag MATCHES ";")
-            if(DEFINED __action_on_failure)
-                message(ATTENTION "Compiler flags containing a semicolon cannot be added, ignoring '${__flag}'."
-                )
-            endif()
-            continue()
-        endif()
-        # At each iteration (re)set what should be done
-        if(DEFINED __c_flags AND DEFINED __cxx_flags)
-            set(__add_to_c "TRUE")
-            set(__add_to_cxx "TRUE")
-        elseif(DEFINED __c_flags)
-            set(__add_to_c "TRUE")
-        elseif(DEFINED __cxx_flags)
-            set(__add_to_cxx "TRUE")
-        else()
-            message(FATAL_ERROR "Unexpected case for add_compiler_flags_if_supported")
-        endif()
-        # Check if some flag was already present
-        if(NOT __ADD_IF_PRESENT)
-            string(REGEX REPLACE "=.*$" "" __part_of_flag_till_equal "${__flag}")
-            if(__add_to_c)
-                if(${__c_flags} MATCHES "(^| )${__part_of_flag_till_equal}")
-                    unset(__add_to_c)
-                    if(DEFINED __action_on_failure)
-                        message(STATUS "C flag '${__part_of_flag_till_equal}' already present in ${__c_flags}, '${__flag}' will not be added."
-                        )
-                    endif()
-                endif()
-            endif()
-            if(__add_to_cxx)
-                if(${__cxx_flags} MATCHES "(^| )${__part_of_flag_till_equal}")
-                    unset(__add_to_cxx)
-                    if(DEFINED __action_on_failure)
-                        message(STATUS "C++ flag '${__part_of_flag_till_equal}' already present in ${__cxx_flags}, '${__flag}' will not be added."
-                        )
-                    endif()
-                endif()
-            endif()
-        endif()
-        set(MESSAGE_QUIET ON)
-        if(__add_to_c AND __add_to_cxx)
-            add_compiler_flag("${__flag}"
-                              C_FLAGS ${__c_flags}
-                              CXX_FLAGS ${__cxx_flags}
-                              C_RESULT __c_result
-                              CXX_RESULT __cxx_result)
-        elseif(__add_to_c)
-            add_compiler_flag("${__flag}" C_FLAGS ${__c_flags} C_RESULT __c_result)
-        elseif(__add_to_cxx)
-            add_compiler_flag("${__flag}" CXX_FLAGS ${__cxx_flags} CXX_RESULT __cxx_result)
-        endif()
-        unset(MESSAGE_QUIET)
-        if(__add_to_c)
-            if(__c_result)
-                set(__added_to "${__c_flags}")
-            else()
-                set(__unsupported_lang "C")
-            endif()
-        endif()
-        if(__add_to_cxx)
-            if(__cxx_result)
-                set(__added_to ${__added_to} "${__cxx_flags}")
-            else()
-                set(__unsupported_lang ${__unsupported_lang} "C++")
-            endif()
-        endif()
-        if(DEFINED __action_on_failure)
-            if(DEFINED __unsupported_lang)
-                list(JOIN __unsupported_lang "/" __unsupported_lang)
-                message(${__action_on_failure}
-                        "Your ${__unsupported_lang} compiler does not support the '${__flag}' flag${__unused_flag_message}!"
-                )
-            endif()
-        endif()
-        if(__VERBOSE)
-            if(DEFINED __added_to)
-                list(JOIN __added_to " and " __added_to)
-                message(STATUS "Compiler flag '${__flag}' added to ${__added_to}.")
-            endif()
-        endif()
-        # Unset variables needed for next iteration
-        unset(__c_result)
-        unset(__cxx_result)
-        unset(__added_to)
-        unset(__unsupported_lang)
-    endforeach()
-    if(DEFINED __c_flags)
-        set(${__c_flags} "${${__c_flags}}" PARENT_SCOPE)
-    endif()
-    if(DEFINED __cxx_flags)
-        set(${__cxx_flags} "${${__cxx_flags}}" PARENT_SCOPE)
+    # If RESULT variable is specified, set it in the calling scope
+    if(arg_of_RESULT)
+        set(${arg_of_RESULT} "${_result_list}" PARENT_SCOPE)
     endif()
 endfunction()

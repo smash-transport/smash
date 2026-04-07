@@ -20,9 +20,10 @@ When updating either Cuba or YAML,
 * similarly the `add_subdirectory` and `install` commands in _3rdparty/CMakeLists.txt_ must be changed;
 * the _cmake/FindSMASH.cmake_ file contains few occurrences that require the same type of adjustment.
 
-Cuba and Einhard libraries use the `-march=native` flag that is not supported by e.g. Appleclang 13.0 compiler on M1 machines.
+Cuba and Einhard libraries use by default the `-march=native` flag that is not supported by e.g. Appleclang 13.0 compiler on M1 machines.
 Hence, it is important to add this flag using the `target_add_compiler_flag_if_supported` CMake function.
 This is already in place and it has to be maintained.
+Furthermore, `-march=native` should not be hard-coded, but the `SMASH_ARCH_FLAG` variable should be used, because this allows the user to compile SMASH changing the architecture tuning.
 
 It is worth adding a last remark about how libraries are to be compiled.
 This should not require any maintenance change, although it is not guaranteed to be so in the future.

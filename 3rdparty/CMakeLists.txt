@@ -7,8 +7,10 @@
 #
 #########################################################
 
-# Let 3rd-party library use their own C++ standard
-unset(CMAKE_CXX_STANDARD)
+# Note that here we do not use smash_project_build_requirements and smash_project_usage_requirements
+# interface libraries, because we do not want to force SMASH specific decisions onto vendored
+# libraries coming from 3rd-party sources. For example, we do not want to force them to necessarily
+# be built with the same C++ standard as SMASH, because this might not be always possible.
 
 message(CHECK_START "Setting up Cuba library")
 list(APPEND CMAKE_MESSAGE_INDENT "   ")
@@ -31,9 +33,6 @@ set(YAML_CPP_BUILD_CONTRIB OFF CACHE INTERNAL "")
 add_subdirectory(yaml-cpp-0.9.0)
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 message(CHECK_PASS "done")
-
-# Restore SMASH C++ standard
-set(CMAKE_CXX_STANDARD ${CXX_SMASH_STANDARD})
 
 # To make sure that we do not get warnings from YAML, we want to treat its include as SYSTEM. For
 # Einhard and Cuba we have changed their CMakeLists files and set it up there already, but for YAML
