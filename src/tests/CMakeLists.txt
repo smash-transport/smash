@@ -16,10 +16,6 @@ configure_file(../../input/config.yaml ${CMAKE_CURRENT_BINARY_DIR}/config.yaml C
 option(FORMAT_TEST_OUTPUT_FOR_VIM
        "If ON the unit test output of run_* targets will work with the vim quickfix parser and vim will directly take you to the line that failed."
        OFF)
-set(UNITTEST_ARGS "")
-if(FORMAT_TEST_OUTPUT_FOR_VIM)
-    set(UNITTEST_ARGS "-v")
-endif()
 
 macro(smash_add_exe name)
     add_executable(${name} ${name}.cc)
@@ -65,7 +61,7 @@ macro(smash_add_test name depends)
         set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=detect_container_overflow=0")
     endif()
     add_custom_target(run_${name}
-                      COMMAND ${ARGN} ${UNITTEST_ARGS}
+                      COMMAND ${ARGN} $<$<BOOL:${FORMAT_TEST_OUTPUT_FOR_VIM}>:-v>
                       DEPENDS ${depends}
                       COMMENT "Executing test ${name}"
                       VERBATIM)
