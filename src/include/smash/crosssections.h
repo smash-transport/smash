@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2014,2018-2024
+ *    Copyright (c) 2013-2014,2018-2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -23,19 +23,18 @@
 namespace smash {
 
 /**
- * The cross section class assembels everything that is needed to
- * calculate the cross section and returns a list of all possible reactions
- * for the incoming particles at the given energy with the calculated cross
- * sections.
+ * The CrossSections class assembles everything that is needed to calculate
+ * cross sections and gathers a list of all possible reactions for the incoming
+ * particles at the given energy with the calculated cross sections.
  */
 class CrossSections {
  public:
   /**
    * Construct CrossSections instance.
    *
-   * \param[in] incoming_particles Particles that are reacting.
+   * \param[in] incoming_particles Particles that are interacting.
    * \param[in] sqrt_s Center-of-mass energy of the reaction.
-   * \param[in] potentials Potentials at the interacting point. they are
+   * \param[in] potentials Potentials at the interacting point. They are
    *            used to calculate the corrections on the thresholds.
    */
   CrossSections(const ParticleList& incoming_particles, double sqrt_s,
@@ -44,7 +43,7 @@ class CrossSections {
   /**
    * Generate a list of all possible collisions between the incoming particles
    * with the given c.m. energy and the calculated cross sections.
-   * The string processes are not added at this step if it's not triggerd
+   * The string processes are not added at this step if it is not triggerd
    * according to the probability. It will then be added in
    * add_all_scatterings in scatteraction.cc
    *
@@ -236,33 +235,6 @@ class CrossSections {
    *
    */
   CollisionBranchPtr NNbar_to_5pi(double scale_xs) const;
-
-  /**
-   * Parametrization of deuteron-pion inelastic cross section
-   *
-   * \param[in] pion_kinetic_energy pion kinetic energy [GeV]
-   *             in the deuteron rest frame
-   * \return cross section [mb]
-   */
-  static double d_pi_inelastic_xs(double pion_kinetic_energy);
-
-  /**
-   * Parametrization of deuteron-nucleon inelastic cross section
-   *
-   * \param[in] N_kinetic_energy Nucleon kinetic energy [GeV]
-   *            in the deuteron rest frame
-   * \return cross section [mb]
-   */
-  static double d_N_inelastic_xs(double N_kinetic_energy);
-
-  /**
-   * Parametrization of deuteron-antinucleon inelastic cross section
-   *
-   * \param[in] aN_kinetic_energy [GeV] Anti-nucleon kinetic energy
-   *             in the deuteron rest frame
-   * \return cross section [mb]
-   */
-  static double d_aN_inelastic_xs(double aN_kinetic_energy);
 
   /**
    * Determine 2->3 cross section for the scattering of the given particle

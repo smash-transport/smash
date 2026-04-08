@@ -796,12 +796,13 @@ struct InputSections {
  * values are interpolated.
  *
  * The configuration of a lattice is usually not necessary, it is however
- * required if the \ref doxypage_output_vtk_lattice "Thermodynamic VTK Output",
- * the \ref doxypage_output_thermodyn_lattice "Thermodynamic Lattice Output" or
+ * required if the \ref doxypage_output_vtk "Thermodynamic VTK Output",
+ * the \ref doxypage_output_thermodyn_lattice "Thermodynamic Lattice Output",
  * the <tt>\ref key_lattice_pot_affect_threshold_
- * "Potentials_Affect_Thresholds"</tt> option is enabled. To configure the
- * thermodynamic output, use \ref doxypage_input_conf_output "the \c Output
- * section".
+ * "Potentials_Affect_Thresholds"</tt>, the \ref doxypage_input_conf_pot_coulomb
+ * "Coulomb potentials", or the \ref input_output_coulomb_ "Coulomb VTK output"
+ * option is enabled. To configure the thermodynamic output, use
+ * \ref doxypage_input_conf_output "the \c Output section".
  *
  * To enable a lattice it is necessary to add a `Lattice` section with the
  * following parameters. If no `Lattice` section is used in the configuration,
@@ -905,7 +906,7 @@ struct InputSections {
  * doxypage_input_conf_lattice "Lattice"</tt> while for the other potentials it
  * can be used as an optimisation.
  *
- * <h3> Configuring VDF Potentials </h3>
+ * <h3> Configuring VDF potentials </h3>
  *
  * The following snippets from the configuration file configure SMASH such
  * that the VDF potential is activated for the simulation.
@@ -1140,16 +1141,18 @@ struct InputSections {
  *            that were existing in the past and are not accepted anymore.
  *            After having added the version in which the key has been
  *            deprecated or removed to the member definition, <b>adjust the user
- *            documentation by either saying that the key is deprecated or by
- *            moving it to the list of removed keys in the dedicated page (in
- *            the user guide, only)</b>. This shall be done using the
- *            `\list_removed_key` Doxygen alias. If doing so a full page is
- *            removed, make sure that all reference to it are removed, too. If a
- *            key is removed and no user guide to refer to exists anymore (which
- *            is almost always the case), change the `\see_key` Doxygen alias to
- *            `\removed_key` in the member documentation (pass the SMASH version
- *            number to it in which the key has been removed as second
- *            additional argument). Look at already removed keys for an example.
+ *            documentation by either stating that the key is deprecated or by
+ *            moving it to the list of removed keys in the for this purpose
+ *            \ref doxypage_input_conf_removed_keys "dedicated page"</b>. This
+ *            shall be done using the `\list_removed_key` Doxygen alias. If in
+ *            doing so a full page is removed, make sure that all references to
+ *            it are removed, too. If a key is removed and no user guide key to
+ *            refer to exists anymore (which is almost always the case), change
+ *            the `\see_key` Doxygen alias to `\removed_key` in the member
+ *            documentation (pass the SMASH version number to it in which the
+ *            key has been removed as second additional argument). Look at
+ *            already \ref doxypage_input_conf_removed_keys "removed keys" for
+ *            examples.
  *
  * @note Ordering of members in this class is imposed by how keys shall appear
  *       in the documentation. For example, in the `General` section, all
@@ -1460,18 +1463,6 @@ struct InputKeys {
       InputSections::general + "Metric_Type",
       ExpansionMode::NoExpansion,
       {"1.1"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_general
-   * \optional_key{key_gen_rfdd_mode_,Rest_Frame_Density_Derivatives_Mode,string,"Off"}
-   *
-   * The mode of calculating the gradients of currents, decides whether the rest
-   * frame density derivatives are computed (these derivatives are needed for
-   * the VDF potentials, but not for the Skyrme potentials).
-   */
-  /**
-   * \see_key{key_gen_rfdd_mode_}
-   */
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -2115,7 +2106,7 @@ struct InputKeys {
    * \optional_key{key_CT_HF_AQM_b_suppression_,AQM_Bottom_Suppression,double,0.93}
    *
    * Suppression parameter for AQM cross sections involving a bottom hadron.
-   * Default value taken from Angantyr.
+   * Default value taken from Angantyr (\iref{Bierlich:2022pfr}).
    */
   /**
    * \see_key{key_CT_additional_el_cs_}
@@ -2128,7 +2119,7 @@ struct InputKeys {
    * \optional_key{key_CT_HF_AQM_c_suppression_,AQM_Charm_Suppression,double,0.8}
    *
    * Suppression parameter for AQM cross sections involving a charm hadron.
-   * Default value taken from Angantyr.
+   * Default value taken from Angantyr (\iref{Bierlich:2022pfr}).
    */
   /**
    * \see_key{key_CT_additional_el_cs_}
@@ -2160,6 +2151,14 @@ struct InputKeys {
    *
    * The following collision criterions can be used.
    *
+   * - `"Covariant"` &rarr; <b>Covariant collision criterion</b>\n
+   *   The covariant collision criterion uses a covariant expression of the
+   *   two-particle impact parameter in the two-particle center-of-momentum
+   *   frame, which allows for its calculation in the computational frame
+   *   without boosting. Furthermore, it calculates the collision times used for
+   *   the collision ordering in the two-particle center-of-momentum frame.
+   *   Further details are described in \iref{Hirano:2012yy}.
+   *
    * - `"Geometric"` &rarr; <b>Geometric collision criterion</b>\n
    *   The geometric collision criterion calculates the two-particle impact
    *   parameter as the closest approach distance in the two-particle
@@ -2175,24 +2174,17 @@ struct InputKeys {
    *   equation. The stochastic criterion is the only criterion that allows to
    *   treat multi-particle reactions. For more details, see
    *   \iref{Staudenmaier:2021lrg}.
-   *   \note
-   *   The stochastic criterion is only applicable within limits. For example,
-   *   it might not lead to reasonable results for very dilute systems like pp
-   *   collisions. Futhermore, the fixed time step mode is required. The
-   *   assumption for the criterion is that only one reaction per particle per
-   *   timestep occurs. Therefore, small enough timesteps (<tt>\ref
-   *   key_gen_delta_time_ "Delta_Time"</tt>) have to be used. In doubt, test if
-   *   the results change with smaller timesteps. Since the probability value is
-   *   not by defintion limited to 1 in case of large timesteps, an error is
-   *   thrown if it gets larger than 1.
    *
-   * - `"Covariant"` &rarr; <b>Covariant collision criterion</b>\n
-   *   The covariant collision criterion uses a covariant expression of the
-   *   two-particle impact parameter in the two-particle center-of-momentum
-   *   frame, which allows for its calculation in the computational frame
-   *   without boosting. Furthermore, it calculates the collision times used for
-   *   the collision ordering in the two-particle center-of-momentum frame.
-   *   Further details are described in \iref{Hirano:2012yy}.
+   * \note
+   * The stochastic criterion is only applicable within limits. For example,
+   * it might not lead to reasonable results for very dilute systems like pp
+   * collisions. Futhermore, the fixed time step mode is required. The
+   * assumption for the criterion is that only one reaction per particle per
+   * timestep occurs. Therefore, small enough timesteps (<tt>\ref
+   * key_gen_delta_time_ "Delta_Time"</tt>) have to be used. In doubt, test if
+   * the results change with smaller timesteps. Since the probability value is
+   * not by defintion limited to 1 in case of large timesteps, an error is
+   * thrown if it gets larger than 1.
    */
   /**
    * \see_key{key_CT_collision_criterion_}
@@ -2284,7 +2276,7 @@ struct InputKeys {
    *
    * Allow or prohibit initial state particles from decaying before their first
    * collision. This is relevant when, for instance, studying the interactions
-   * a resonance can go through.
+   * a resonance can go through. This prevails over \key `Force_Decays_At_End`
    */
   /**
    * \see_key{key_CT_decay_initial_}
@@ -2320,7 +2312,8 @@ struct InputKeys {
    *
    * \warning If `"Elastic"` is the only process allowed, the
    * `"Total_Cross_Section_Strategy"` must be set as `"BottomUp"`, otherwise
-   * SMASH fails. \see_key{key_CT_totXsStrategy_}
+   * SMASH fails. See <tt>\ref key_CT_totXsStrategy_
+   * "Total_Cross_Section_Strategy"</tt> for more information.
    */
   /**
    * \see_key{key_CT_included_2to2_}
@@ -2703,13 +2696,25 @@ struct InputKeys {
    * {\sigma^{\mathrm{AQM}}_\mathrm{ref\_process}}
    * \sigma^{\mathrm{param}}_\mathrm{ref\_process}
    * \f]
-   * where \f$ \sigma^{\mathrm{AQM}}_x = 40 \left( \frac{2}{3}
-   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) \f$, with
-   * \f$n_\mathrm{meson}\f$ being the number of mesons in the process,
-   * \f$x^s_{1,2}\f$ the fraction of strange quarks in the participant.
-   * "process" is then a generic process and "ref_process" a reference process
-   * such as PP for which solid parametrizations exist.
-   * (\iref{Bass:1998ca})
+   * where "process" refers to a generic process and "ref_process" to a
+   * reference process such as PP for which solid parametrizations exist.
+   * The AQM cross-section for a process involving the incoming particles
+   * \f$a\f$ and \f$b\f$ is determined by the following calculation:
+   * \f[
+   * \sigma^{\mathrm{AQM}}_{ab} = 40 \left( \frac{2}{3}
+   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_a) (1 - 0.4 x^s_b) (1 - \kappa^c
+   * x^c_a) (1 - \kappa^c x^c_b) (1 - \kappa^b x^b_a) (1 - \kappa^b x^b_b) \f]
+   * with \f$n_\mathrm{meson}\f$ being the number of mesons in the process,
+   * \f$x^s_{a,b}\f$ the fraction of strange quarks, \f$x^c_{a,b}\f$ the
+   * fraction of charm quarks, and \f$x^b_{a,b}\f$ the fraction of bottom quarks
+   * of the hadrons \f$a\f$ and \f$b\f$. \f$ \kappa^c \f$ and \f$ \kappa^b \f$
+   * are the respective suppression factors for interactions involving charm and
+   * bottom hadrons (see
+   * <tt>\ref key_CT_HF_AQM_c_suppression_ "AQM_Charm_Suppression"</tt> and
+   * <tt>\ref key_CT_HF_AQM_b_suppression_ "AQM_Bottom_Suppression"</tt> for the
+   * default values and how to specify alternate values in the configuration
+   * file). See \iref{Bass:1998ca} for AQM only considering strangeness and
+   * \iref{Bierlich:2022pfr} for the charm and bottom suppression factors.
    */
   /**
    * \see_key{key_CT_use_aqm_}
@@ -5172,8 +5177,8 @@ struct InputKeys {
    * \anchor input_output_content_specific_
    *
    * Every possible content-specific section is documented in the following.
-   * Refer to \ref config_output_examples "this page" for concrete output
-   * configuration examples.
+   * Refer to \ref doxypage_input_conf_output_examples for a small selection of
+   * possible output configurations.
    *
    * <hr>
    * <h3> &diams; %Particles </h3>
@@ -5641,13 +5646,16 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * <hr>
+   * <hr> \anchor input_output_coulomb_
    * <h3> &diams; Coulomb </h3>
    * &rArr; Only `VTK` format.
    *
    * No content-specific output options, apart from the <tt>\ref
-   * key_output_content_format_ "Format"</tt> key which accept `["VTK"]` value
-   * only.
+   * key_output_content_format_ "Format"</tt> key which only accepts `["VTK"]`.
+   * \note This output requires \ref doxypage_input_conf_pot_coulomb
+   *    "coulomb potential" to be enabled which in turn requires a
+   *    \ref doxypage_input_conf_lattice, both of which have to be specified in
+   *    the conguration file.
    */
 
   /*!\Userguide
@@ -5657,14 +5665,14 @@ struct InputKeys {
    *
    * The user can print thermodynamical quantities
    * -# on the spatial lattice to VTK output;
-   * -# on the spatial lattice to ASCII output;
+   * -# on the spatial lattice to ASCII or Binary output;
    * -# at a given point to ASCII output;
    * -# averaged over all particles to ASCII output.
    *
    * <b>About 1 and 2:</b> Note that this output requires a lattice, which needs
    * to be enabled in the conguration file and is regulated by the options of
-   * \ref doxypage_input_conf_lattice. See \ref doxypage_output_vtk_lattice for
-   * further information.
+   * \ref doxypage_input_conf_lattice. See \ref doxypage_output_vtk for
+   * further information on 1 and \ref doxypage_output_thermodyn_lattice for 2.
    *
    * <b>About 3 and 4:</b> See \ref doxypage_output_thermodyn for
    * further information.
@@ -5684,6 +5692,27 @@ struct InputKeys {
    */
   inline static const Key<bool> output_thermodynamics_onlyParticipants{
       InputSections::o_thermodynamics + "Only_Participants", false, {"2.1"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_output
+   * \optional_key_no_line{key_output_thermo_ignore_unformed_,Ignore_Unformed,
+   * bool, false}
+   *
+   * Whether the thermodynamic calculation should consider unformed (or
+   * preformed) particles or not.
+   *
+   * Unformed particles are traditionally those created by string fragmentation,
+   * such that their density should contribute to thermodynamics. However, we
+   * use the formation time also to ignore particles that are not really present
+   * yet in the simulation, for example in afterburner/ListModus calculations.
+   * In these cases, one might want to ignore unformed particles when evaluating
+   * thermodynamic properties.
+   */
+  /**
+   * \see_key{key_output_thermo_ignore_unformed_}
+   */
+  inline static const Key<bool> output_thermodynamics_ignoreUnformed{
+      InputSections::o_thermodynamics + "Ignore_Unformed", false, {"3.4"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -6491,6 +6520,7 @@ struct InputKeys {
       std::cref(output_rivet_weights_nominal),
       std::cref(output_rivet_weights_select),
       std::cref(output_thermodynamics_onlyParticipants),
+      std::cref(output_thermodynamics_ignoreUnformed),
       std::cref(output_thermodynamics_position),
       std::cref(output_thermodynamics_quantites),
       std::cref(output_thermodynamics_smearing),

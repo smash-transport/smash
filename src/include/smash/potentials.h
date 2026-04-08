@@ -114,7 +114,7 @@ class Potentials {
    * \param[in] jmu_B Baryon current density at pos
    * \param[in] mass mass of the particle of interest
    * \return the energy of a particle in the calculation frame
-   **/
+   */
   double calculation_frame_energy(const ThreeVector &momentum,
                                   const FourVector &jmu_B, double mass) const {
     std::function<double(double)> root_equation = [momentum, jmu_B, mass,

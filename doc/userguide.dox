@@ -2,7 +2,7 @@
 \mainpage SMASH User Guide
 
 Welcome to the SMASH user guide. Here you will find information about \ref
-README.md "installation", \ref doxypage_smash_invocation "invocation"
+README.md "installation", \ref doxypage_software_execution "execution"
 and supported \ref doxypage_input "input" and \ref doxypage_output "output" options.
 For a more detailed development documentation, have a look
 <a href=../../doc/current/index.html> here</a>.

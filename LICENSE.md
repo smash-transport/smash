@@ -1,3 +1,5 @@
+# License
+
 ### Overview
 
 This document contains the licenses currently in use for SMASH:

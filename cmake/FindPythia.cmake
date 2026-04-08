@@ -16,33 +16,32 @@
 #   A. Verbytskyi, Max-Planck Institute für Physics, January 2022
 #   <andrii.verbytskyi@mpp.mpg.de>
 #=============================================================================
-# - Locate pythia library
+# - Locate Pythia library
 #
 # Exploits the environment variables:
 #  PYTHIA_ROOT_DIR or PYTHIA8
 # or the options
 #  -DPythia_CONFIG_EXECUTABLE or -DPYTHIA_ROOT_DIR
 #
-# Tries to find the version defined in the variable:
-#
-#  Pythia_VERSION
-#
-# Defines:
+# Defines the following variables:
 #
 #  Pythia_FOUND
 #  Pythia_VERSION
 #  Pythia_INCLUDE_DIR
-#  PYTHIA_XMLDOC_DIR
-#  Pythia_xmldoc_PATH
 #  Pythia_INCLUDE_DIRS
 #  Pythia_LIBRARY
 #  Pythia_LIBDIR
 #  Pythia_LHAPDFDummy_LIBRARY
-#  Pythia_LIBRARIES : includes 3 libraries above; not to be used if lhapdf is used
+#  Pythia_LIBRARIES
+#  Pythia_xmldoc_PATH
+#
+# Additionally defines the Pythia::Pythia imported target, which provides:
+#   - SYSTEM include directories
+#   - Link dependency on the Pythia library
 #=============================================================================
 # cmake-format: on
 
-if(NOT ("${Pythia_CONFIG_EXECUTABLE}" STREQUAL ""))
+if(Pythia_CONFIG_EXECUTABLE)
     message(STATUS "Trying to locate Pythia using variable Pythia_CONFIG_EXECUTABLE = ${Pythia_CONFIG_EXECUTABLE}"
     )
     find_program(Pythia_CONFIG_EXECUTABLE NAMES pythia8-config)
@@ -85,20 +84,20 @@ if(Pythia_INCLUDE_DIR AND Pythia_XMLDOC_DIR)
     get_filename_component(Pythia_LIBDIR ${Pythia_LIBRARY} DIRECTORY)
     find_library(Pythia_LHAPDFDummy_LIBRARY NAMES lhapdfdummy HINTS ${PYTHIA_ROOT_DIR}/lib
                                                                     ${PYTHIA_ROOT_DIR}/lib64)
-    set(Pythia_INCLUDE_DIRS ${Pythia_INCLUDE_DIR} ${Pythia_INCLUDE_DIR}/Pythia
-                            ${Pythia_INCLUDE_DIR}/PythiaPlugins)
+    set(Pythia_INCLUDE_DIRS ${Pythia_INCLUDE_DIR})
     set(Pythia_LIBRARIES ${Pythia_LIBRARY})
-    file(READ ${Pythia_INCLUDE_DIR}/Pythia8/Pythia.h Pythia_header)
+    set(Pythia_xmldoc_PATH ${Pythia_XMLDOC_DIR})
+    if(EXISTS ${Pythia_INCLUDE_DIR}/Pythia8/Pythia.h)
+        set(_PYTHIA_HEADER ${Pythia_INCLUDE_DIR}/Pythia8/Pythia.h)
+    elseif(EXISTS ${Pythia_INCLUDE_DIR}/Pythia.h)
+        set(_PYTHIA_HEADER ${Pythia_INCLUDE_DIR}/Pythia.h)
+    endif()
+    file(READ ${_PYTHIA_HEADER} Pythia_header)
     string(REGEX MATCH "#define PYTHIA_VERSION_INTEGER ([0-9])([0-9][0-9][0-9])" _ ${Pythia_header})
     set(Pythia_VERSION_MAJOR ${CMAKE_MATCH_1})
     set(Pythia_VERSION_MINOR ${CMAKE_MATCH_2})
     set(Pythia_VERSION ${Pythia_VERSION_MAJOR}.${Pythia_VERSION_MINOR})
-else()
-    set(Pythia_FOUND FALSE)
 endif()
-
-set(Pythia_INCLUDE_DIRS ${Pythia_INCLUDE_DIR})
-set(Pythia_xmldoc_PATH ${Pythia_XMLDOC_DIR})
 
 # handle the QUIETLY and REQUIRED arguments
 include(FindPackageHandleStandardArgs)
@@ -122,3 +121,13 @@ mark_as_advanced(Pythia_FOUND
                  Pythia_XMLDOC_DIR
                  Pythia_LIBDIR
                  Pythia_CONFIG_EXECUTABLE)
+
+if(Pythia_FOUND AND NOT TARGET Pythia::Pythia)
+    add_library(Pythia::Pythia UNKNOWN IMPORTED)
+    set_target_properties(Pythia::Pythia PROPERTIES IMPORTED_LOCATION ${Pythia_LIBRARY})
+    target_include_directories(Pythia::Pythia INTERFACE ${Pythia_INCLUDE_DIRS})
+    if(CMAKE_DL_LIBS)
+        set_property(TARGET Pythia::Pythia APPEND PROPERTY INTERFACE_LINK_LIBRARIES
+                                                           ${CMAKE_DL_LIBS})
+    endif()
+endif()

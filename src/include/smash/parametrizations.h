@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2018,2020,2023-2024
+ *    Copyright (c) 2013-2018,2020,2023-2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -372,6 +372,33 @@ double deuteron_pion_elastic(double mandelstam_s);
 double deuteron_nucleon_elastic(double mandelstam_s);
 
 /**
+ * Parametrization of deuteron-pion inelastic cross section
+ *
+ * \param[in] pion_kinetic_energy pion kinetic energy [GeV]
+ *             in the deuteron rest frame
+ * \return cross section [mb]
+ */
+double deuteron_pion_inelastic(double pion_kinetic_energy);
+
+/**
+ * Parametrization of deuteron-nucleon inelastic cross section
+ *
+ * \param[in] N_kinetic_energy Nucleon kinetic energy [GeV]
+ *            in the deuteron rest frame
+ * \return cross section [mb]
+ */
+double deuteron_nucleon_inelastic(double N_kinetic_energy);
+
+/**
+ * Parametrization of deuteron-antinucleon inelastic cross section
+ *
+ * \param[in] aN_kinetic_energy [GeV] Anti-nucleon kinetic energy
+ *             in the deuteron rest frame
+ * \return cross section [mb]
+ */
+double deuteron_antinucleon_inelastic(double aN_kinetic_energy);
+
+/**
  * K+ p total cross section parametrization.
  * Source: \iref{Buss:2011mx}, B.3.8
  *
@@ -622,21 +649,13 @@ double kminusp_pi0lambda(double sqrts);
  * K- n <-> pi- Sigma0 cross section parametrization
  * Follow from the parametrization with the same strange
  * product via isospin symmetry.
+ * K- n <-> pi0 Sigma- cross section parametrization is
+ * also handled with this.
  *
  * \param[in] sqrts the rest frame total energy [GeV]
  * \return the parametrized cross-section [mb]
  */
 double kminusn_piminussigma0(double sqrts);
-
-/**
- * K- n <-> pi0 Sigma- cross section parametrization
- * Follow from the parametrization with the same strange
- * product via isospin symmetry.
- *
- * \param[in] sqrts the rest frame total energy [GeV]
- * \return the parametrized cross-section [mb]
- */
-double kminusn_pi0sigmaminus(double sqrts);
 
 /**
  * K- n <-> pi- Lambda cross section parametrization

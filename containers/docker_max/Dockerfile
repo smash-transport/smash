@@ -12,8 +12,10 @@ SHELL ["/bin/bash", "-c"]
 
 # Set the proper general cpu family architecture flag.
 # Please, for more information refer to the documentation of your compiler.
+# The default value is set to "x86-64-v2" which is a conservative choice for modern
+# x86-64 CPUs (cf. https://en.wikipedia.org/wiki/X86-64#Microarchitecture_levels)
 
-ARG TARGET_ARCHITECTURE="x86-64"
+ARG TARGET_ARCHITECTURE="x86-64-v2"
 
 # Declare all together the versions of the going to be installed codebases
 
@@ -51,7 +53,17 @@ LABEL org.opencontainers.image.authors="SMASH team"
 LABEL org.opencontainers.image.url="https://smash-transport.github.io"
 LABEL org.opencontainers.image.source="https://github.com/smash-transport/smash"
 LABEL org.opencontainers.image.description="\
-SMASH with ROOT ${ROOT_VERSION}, HepMC3 ${HEPMC_VERSION}, Rivet ${RIVET_VERSION} and several other tools"
+SMASH with ROOT ${ROOT_VERSION}, HepMC3 ${HEPMC_VERSION}, Rivet ${RIVET_VERSION}\
+ and several other tools (tuned for ${TARGET_ARCHITECTURE} architecture)."
+
+# Fail if TARGET_ARCHITECTURE is set to "native" (this is not allowed in this Dockerfile
+# since it would make the image non portable)
+
+RUN <<EOF
+  if [[ "$TARGET_ARCHITECTURE" = "native" ]]; then
+    echo "Warning: TARGET_ARCHITECTURE is set to 'native' - be sure this is desired." >&2
+  fi
+EOF
 
 # Update the distribution installing several additional packages non interactively
 
@@ -435,7 +447,7 @@ RUN <<EOF
     mkdir -p smash_bin
     cd smash_bin
     cmake -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia_install/bin/pythia8-config\
-          -DCMAKE_INSTALL_PREFIX=${HEPMC_INSTALL} /SMASH/smash
+          -DSMASH_ARCH_FLAG="${TARGET_ARCHITECTURE}" /SMASH/smash
     make -j$(nproc)
     cd /SMASH
     if [ ! -f /SMASH/smash_bin/smash ]

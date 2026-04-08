@@ -27,12 +27,6 @@
 
 namespace smash {
 static constexpr int LFindScatter = LogArea::FindScatter::id;
-/*!\Userguide
- * \page doxypage_input_conf_ct_string_parameters
- *
- *
- *
- */
 
 ScatterActionsFinder::ScatterActionsFinder(
     Configuration& config, const ExperimentParameters& parameters)
@@ -1067,8 +1061,8 @@ void ScatterActionsFinder::dump_cross_sections(
     }
   }
   // Get rid of cross sections that are zero.
-  // (This only happens if their is a resonance in the final state that cannot
-  // decay with our simplified assumptions.)
+  // This only happens if there is a resonance in the final state that cannot
+  // decay with our simplified assumptions.
   for (auto it = begin(xs_dump); it != end(xs_dump);) {
     // Sum cross section over all energies.
     const xs_saver& xs = (*it).second;
@@ -1127,7 +1121,7 @@ void ScatterActionsFinder::dump_cross_sections(
           std::abs(energy_and_xs[j].first - sqrts) < really_small) {
         xs = energy_and_xs[j].second;
       }
-      std::printf("%16.6f", xs);  // Same alignment as in the header.
+      std::printf("%24.6f", xs);  // Same alignment as in the header.
     }
     std::printf("\n");
   }

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2018,2020-2022,2024
+ *    Copyright (c) 2015-2018,2020-2022,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,7 +11,104 @@
 
 #include "smash/lattice.h"
 
+#include <sstream>
+#include <string>
+
 #include "smash/fourvector.h"
+
+/*
+ * =============================================================================
+ * IMPORTANT NOTE ON STREAMING IN ASSERTIONS
+ *
+ * This test file intentionally avoids chaining operator<< inside assertion
+ * macros such as COMPARE_RELATIVE_ERROR.
+ *
+ * Example of what NOT to do:
+ *
+ *     COMPARE_RELATIVE_ERROR(...)
+ *         << "node: (" << ix << ", " << iy << ", " << iz << "), |r| = " << d;
+ *
+ * Although this style is idiomatic, it can lead to extremely poor compile-time
+ * performance with GCC when certain warning flags are enabled (in particular
+ * -Wduplicated-branches).
+ *
+ * To avoid this issue, construct diagnostic messages separately and pass them
+ * as a single string:
+ *
+ *     COMPARE_RELATIVE_ERROR(...)
+ *         << log_info("node: (", ix, ", ", iy, ", ", iz, "), |r| = ", d);
+ *
+ * This approach:
+ *   - reduces the number of conditional branches generated,
+ *   - avoids large template-generated expression trees,
+ *   - keeps compiler analysis tractable,
+ *   - preserves full diagnostic output.
+ *
+ * If despite using log_info you still encounter long compile times, consider
+ * disabling -Wduplicated-branches for this test file passing
+ * -Wno-duplicated-branches to the compiler in the tests CMakeLists.txt file.
+ *
+ * NOTE: This issue has been encountered while refactoring CMake code and did
+ * not occur before. In particular, it seems that enabling that warning before
+ * the optimization -O flag makes GCC manage to compile the test file, while
+ * enabling it after -O causes the issue to manifest. This is consistent with
+ * the fact that inlining and optimization can increase the size and complexity
+ * of the generated code, exacerbating the problem.
+ *
+ * -----------------------------------------------------------------------------
+ * Technical explanation
+ * -----------------------------------------------------------------------------
+ *
+ * The operator<< overloads provided by the test framework are templated and
+ * internally contain conditional logic of the form:
+ *
+ *   template <typename T>
+ *   VIR_ALWAYS_INLINE const Compare &operator<<(const T &x) const
+ *   {
+ *     if (VIR_IS_UNLIKELY(m_failed)) {
+ *       print(x);
+ *     }
+ *     return *this;
+ *   }
+ *
+ * A chained expression such as:
+ *
+ *     COMPARE(...) << a << b << c << d;
+ *
+ * expands into a sequence of calls equivalent to:
+ *
+ *     ((COMPARE(...) << a) << b) << c << d;
+ *
+ * After inlining, this produces many consecutive conditional blocks:
+ *
+ *     if (m_failed) { print(a); }
+ *     if (m_failed) { print(b); }
+ *     if (m_failed) { print(c); }
+ *     if (m_failed) { print(d); }
+ *
+ * In template-heavy contexts (as in this test file since each lattice object is
+ * also a template instantiation), each of these blocks may contain complex,
+ * deeply nested expressions.
+ *
+ * When the compiler runs the -Wduplicated-branches analysis, it attempts to
+ * detect identical or equivalent branch bodies. This requires structural
+ * comparison of these blocks.
+ *
+ * Due to the large number of similar branches and the complexity of their
+ * contents, this analysis can become extremely expensive (potentially
+ * superlinear), leading to very long compile times or apparent hangs in GCC.
+ *
+ * This behavior is consistent with a known GCC bug (PR82952). See:
+ *    https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82952
+ * and in particular the comment #6 there.
+ * =============================================================================
+ */
+template <typename... Args>
+static std::string log_info(Args &&...args) {
+  std::ostringstream os;
+  (os << ... << std::forward<Args>(args));
+  return os.str();
+}
 
 using namespace smash;
 
@@ -329,15 +426,14 @@ TEST(gradient) {
         d = r.abs();
         if (d > 2.0) {
           expected_grad = -r / (d * d * d);
+          auto node_info =
+              log_info("node: (", ix, ", ", iy, ", ", iz, "), |r| = ", d);
           COMPARE_RELATIVE_ERROR(node.x1(), expected_grad.x1(), 6.e-2)
-              << "node: (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << d;
+              << node_info;
           COMPARE_RELATIVE_ERROR(node.x2(), expected_grad.x2(), 6.e-2)
-              << "node: (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << d;
+              << node_info;
           COMPARE_RELATIVE_ERROR(node.x3(), expected_grad.x3(), 6.e-2)
-              << "node: (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << d;
+              << node_info;
         }
       });
 }
@@ -375,6 +471,7 @@ TEST(gradient_periodic) {
       {0, 0, 0}, grad_lat.n_cells(),
       [&](ThreeVector &node, int ix, int iy, int iz) {
         r = grad_lat.cell_center(ix, iy, iz);
+        auto node_info = log_info("node: (", ix, ", ", iy, ", ", iz, ")");
         expected_grad.set_x1(-2 * M_PI / l[0] *
                              std::sin(2 * M_PI * r.x1() / l[0]) *
                              std::cos(2 * M_PI * r.x2() / l[1]) *
@@ -389,11 +486,11 @@ TEST(gradient_periodic) {
                              std::sin(2 * M_PI * r.x3() / l[2]));
 
         COMPARE_RELATIVE_ERROR(node.x1(), expected_grad.x1(), 3.e-3)
-            << "node: (" << ix << ", " << iy << ", " << iz << ")";
+            << node_info;
         COMPARE_RELATIVE_ERROR(node.x2(), expected_grad.x2(), 3.e-3)
-            << "node: (" << ix << ", " << iy << ", " << iz << ")";
+            << node_info;
         COMPARE_RELATIVE_ERROR(node.x3(), expected_grad.x3(), 3.e-3)
-            << "node: (" << ix << ", " << iy << ", " << iz << ")";
+            << node_info;
       });
 }
 
@@ -494,6 +591,8 @@ TEST(compute_four_gradient_lattice) {
       [&](std::array<FourVector, 4> &node, int ix, int iy, int iz) {
         position = grad_lat.cell_center(ix, iy, iz);
         r = position.abs();
+        auto node_info =
+            log_info("node: (", ix, ", ", iy, ", ", iz, "), |r| = ", r);
         // get inverse of r unless r is zero:
         double inv_r = (r > 0.0) ? (1.0 / r) : 0.0;
 
@@ -501,63 +600,47 @@ TEST(compute_four_gradient_lattice) {
         expected_dt = inv_r / time_step;
         // dA0 / dt
         COMPARE_RELATIVE_ERROR(node[0].x0(), expected_dt, 6.e-2)
-            << "dA0 / dt \t node: (" << ix << ", " << iy << ", " << iz
-            << "), |r| = " << r;
+            << log_info("dA0 / dt \t", node_info);
         // dA1 / dt
         COMPARE_RELATIVE_ERROR(node[0].x1(), expected_dt, 6.e-2)
-            << "dA1 / dt \t node: (" << ix << ", " << iy << ", " << iz
-            << "), |r| = " << r;
+            << log_info("dA1 / dt \t", node_info);
         // dA2 / dt
         COMPARE_RELATIVE_ERROR(node[0].x2(), expected_dt, 6.e-2)
-            << "dA2 / dt \t node: (" << ix << ", " << iy << ", " << iz
-            << "), |r| = " << r;
+            << log_info("dA2 / dt \t", node_info);
         // dA3 / dt
         COMPARE_RELATIVE_ERROR(node[0].x3(), expected_dt, 6.e-2)
-            << "dA3 / dt \t node: (" << ix << ", " << iy << ", " << iz
-            << "), |r| = " << r;
+            << log_info("dA3 / dt \t", node_info);
 
         // the spatial derivatives we only compare for r > 2.0:
         if (r > 2.0) {
           expected_grad = -position / (r * r * r);
           // grad x:
           COMPARE_RELATIVE_ERROR(node[1].x0(), expected_grad.x1(), 6.e-2)
-              << "dA0 / dx \t node[1].x0(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA0 / dx \t", node_info);
           COMPARE_RELATIVE_ERROR(node[1].x1(), expected_grad.x1(), 6.e-2)
-              << "dA1 / dx \t node[1].x1(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA1 / dx \t", node_info);
           COMPARE_RELATIVE_ERROR(node[1].x2(), expected_grad.x1(), 6.e-2)
-              << "dA2 / dx \t node[1].x2(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA2 / dx \t", node_info);
           COMPARE_RELATIVE_ERROR(node[1].x3(), expected_grad.x1(), 6.e-2)
-              << "dA3 / dx \t node[1].x3(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA3 / dx \t", node_info);
           // grad y:
           COMPARE_RELATIVE_ERROR(node[2].x0(), expected_grad.x2(), 6.e-2)
-              << "dA0 / dy \t node[2].x0(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA0 / dy \t", node_info);
           COMPARE_RELATIVE_ERROR(node[2].x1(), expected_grad.x2(), 6.e-2)
-              << "dA1 / dx \t node[2].x1(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA1 / dy \t", node_info);
           COMPARE_RELATIVE_ERROR(node[2].x2(), expected_grad.x2(), 6.e-2)
-              << "dA2 / dx \t node[2].x2(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA2 / dy \t", node_info);
           COMPARE_RELATIVE_ERROR(node[2].x3(), expected_grad.x2(), 6.e-2)
-              << "dA3 / dx \t node[2].x3(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA3 / dy \t", node_info);
           // grad z:
           COMPARE_RELATIVE_ERROR(node[3].x0(), expected_grad.x3(), 6.e-2)
-              << "dA0 / dz \t node[3].x0(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA0 / dz \t", node_info);
           COMPARE_RELATIVE_ERROR(node[3].x1(), expected_grad.x3(), 6.e-2)
-              << "dA1 / dz \t node[3].x1(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA1 / dz \t", node_info);
           COMPARE_RELATIVE_ERROR(node[3].x2(), expected_grad.x3(), 6.e-2)
-              << "dA2 / dz \t node[3].x2(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA2 / dz \t", node_info);
           COMPARE_RELATIVE_ERROR(node[3].x3(), expected_grad.x3(), 6.e-2)
-              << "dA3 / dz \t node[3].x3(): (" << ix << ", " << iy << ", " << iz
-              << "), |r| = " << r;
+              << log_info("dA3 / dz \t", node_info);
         }
       });
 }
@@ -623,21 +706,18 @@ TEST(compute_four_gradient_lattice_periodic) {
         double func = std::cos(2 * M_PI * pos.x1() / l[0]) *
                       std::cos(2 * M_PI * pos.x2() / l[1]) *
                       std::cos(2 * M_PI * pos.x3() / l[2]);
-
+        auto coordinates = log_info("(", ix, ", ", iy, ", ", iz, ")");
+        auto node_info = log_info("node: ", coordinates);
         // the time derivatives:
         expected_dt = func / time_step;
         // dA0 / dt
-        COMPARE_RELATIVE_ERROR(node[0].x0(), expected_dt, 3.e-3)
-            << "node: (" << ix << ", " << iy << ", " << iz << ")";
+        COMPARE_RELATIVE_ERROR(node[0].x0(), expected_dt, 3.e-3) << node_info;
         // dA1 / dt
-        COMPARE_RELATIVE_ERROR(node[0].x1(), expected_dt, 3.e-3)
-            << "node: (" << ix << ", " << iy << ", " << iz << ")";
+        COMPARE_RELATIVE_ERROR(node[0].x1(), expected_dt, 3.e-3) << node_info;
         // dA2 / dt
-        COMPARE_RELATIVE_ERROR(node[0].x2(), expected_dt, 3.e-3)
-            << "node: (" << ix << ", " << iy << ", " << iz << ")";
+        COMPARE_RELATIVE_ERROR(node[0].x2(), expected_dt, 3.e-3) << node_info;
         // dA3 / dt
-        COMPARE_RELATIVE_ERROR(node[0].x3(), expected_dt, 3.e-3)
-            << "node: (" << ix << ", " << iy << ", " << iz << ")";
+        COMPARE_RELATIVE_ERROR(node[0].x3(), expected_dt, 3.e-3) << node_info;
 
         // the spatial derivatives:
         expected_grad.set_x1(-2 * M_PI / l[0] *
@@ -655,31 +735,31 @@ TEST(compute_four_gradient_lattice_periodic) {
 
         // grad x:
         COMPARE_RELATIVE_ERROR(node[1].x0(), expected_grad.x1(), 3.e-3)
-            << "node[1].x0(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[1].x0(): ", coordinates);
         COMPARE_RELATIVE_ERROR(node[1].x1(), expected_grad.x1(), 3.e-3)
-            << "node[1].x1(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[1].x1(): ", coordinates);
         COMPARE_RELATIVE_ERROR(node[1].x2(), expected_grad.x1(), 3.e-3)
-            << "node[1].x2(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[1].x2(): ", coordinates);
         COMPARE_RELATIVE_ERROR(node[1].x3(), expected_grad.x1(), 3.e-3)
-            << "node[1].x3(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[1].x3(): ", coordinates);
         // grad y:
         COMPARE_RELATIVE_ERROR(node[2].x0(), expected_grad.x2(), 3.e-3)
-            << "node[2].x0(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[2].x0(): ", coordinates);
         COMPARE_RELATIVE_ERROR(node[2].x1(), expected_grad.x2(), 3.e-3)
-            << "node[2].x1(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[2].x1(): ", coordinates);
         COMPARE_RELATIVE_ERROR(node[2].x2(), expected_grad.x2(), 3.e-3)
-            << "node[2].x2(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[2].x2(): ", coordinates);
         COMPARE_RELATIVE_ERROR(node[2].x3(), expected_grad.x2(), 3.e-3)
-            << "node[2].x3(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[2].x3(): ", coordinates);
         // grad z:
         COMPARE_RELATIVE_ERROR(node[3].x0(), expected_grad.x3(), 3.e-3)
-            << "node[3].x0(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[3].x0(): ", coordinates);
         COMPARE_RELATIVE_ERROR(node[3].x1(), expected_grad.x3(), 3.e-3)
-            << "node[3].x1(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[3].x1(): ", coordinates);
         COMPARE_RELATIVE_ERROR(node[3].x2(), expected_grad.x3(), 3.e-3)
-            << "node[3].x2(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[3].x2(): ", coordinates);
         COMPARE_RELATIVE_ERROR(node[3].x3(), expected_grad.x3(), 3.e-3)
-            << "node[3].x3(): (" << ix << ", " << iy << ", " << iz << ")";
+            << log_info("node[3].x3(): ", coordinates);
       });
 }
 
@@ -756,18 +836,19 @@ TEST(iterate_in_cube) {
       r0, r_cut, [&](FourVector &node, int, int, int) { node = mark; });
   /* Iterate all the lattice and check that marked nodes are within r_cut cube,
      while not marked nodes are out of r_cut cube */
-  lattice->iterate_sublattice(
-      {0, 0, 0}, lattice->n_cells(),
-      [&](FourVector &node, int ix, int iy, int iz) {
-        r = lattice->cell_center(ix, iy, iz);
-        if (std::abs(r[0] - r0[0]) <= r_cut &&
-            std::abs(r[1] - r0[1]) <= r_cut &&
-            std::abs(r[2] - r0[2]) <= r_cut) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else {
-          COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;
-        }
-      });
+  lattice->iterate_sublattice({0, 0, 0}, lattice->n_cells(),
+                              [&](FourVector &node, int ix, int iy, int iz) {
+                                r = lattice->cell_center(ix, iy, iz);
+                                auto coordinates =
+                                    log_info("(", ix, ", ", iy, ", ", iz, ")");
+                                if (std::abs(r[0] - r0[0]) <= r_cut &&
+                                    std::abs(r[1] - r0[1]) <= r_cut &&
+                                    std::abs(r[2] - r0[2]) <= r_cut) {
+                                  COMPARE(node, mark) << coordinates;
+                                } else {
+                                  COMPARE(node, FourVector()) << coordinates;
+                                }
+                              });
 
   // 2) Lattice is periodic: here d(x1, x2) = |x2 - x1 - int((x2-x1)/l)*l|
   lattice = create_lattice(true);
@@ -784,6 +865,7 @@ TEST(iterate_in_cube) {
       {0, 0, 0}, lattice->n_cells(),
       [&](FourVector &node, int ix, int iy, int iz) {
         r = lattice->cell_center(ix, iy, iz);
+        auto coordinates = log_info("(", ix, ", ", iy, ", ", iz, ")");
         for (int i = 0; i < 3; i++) {
           d1[i] = r[i] - r0[i];
           l = lattice->lattice_sizes()[i];
@@ -798,9 +880,9 @@ TEST(iterate_in_cube) {
           d[i] = (d1[i] < d2[i]) ? d1[i] : d2[i];
         }
         if (d[0] <= r_cut && d[1] <= r_cut && d[2] <= r_cut) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
+          COMPARE(node, mark) << coordinates;
         } else {
-          COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;
+          COMPARE(node, FourVector()) << coordinates;
         }
       });
 }
@@ -830,16 +912,15 @@ TEST(iterate_in_rectangle) {
   lattice->iterate_sublattice({0, 0, 0}, lattice->n_cells(),
                               [&](FourVector &node, int ix, int iy, int iz) {
                                 r = lattice->cell_center(ix, iy, iz);
+                                auto node_info =
+                                    log_info("(", ix, ", ", iy, ", ", iz,
+                                             ")\t periodic = false");
                                 if (std::abs(r[0] - r0[0]) <= rectangle[0] &&
                                     std::abs(r[1] - r0[1]) <= rectangle[1] &&
                                     std::abs(r[2] - r0[2]) <= rectangle[2]) {
-                                  COMPARE(node, mark)
-                                      << ix << " " << iy << " " << iz
-                                      << "\t periodic = false";
+                                  COMPARE(node, mark) << node_info;
                                 } else {
-                                  COMPARE(node, FourVector())
-                                      << ix << " " << iy << " " << iz
-                                      << "\t periodic = false";
+                                  COMPARE(node, FourVector()) << node_info;
                                 }
                               });
 
@@ -878,25 +959,22 @@ TEST(iterate_in_rectangle) {
         }
         if (d[0] <= rectangle[0] && d[1] <= rectangle[1] &&
             d[2] <= rectangle[2]) {
-          COMPARE(node, mark)
-              << ix << " " << iy << " " << iz << "\t periodic = true"
-              << "\n d[0] = " << d[0] << "\td[1] = " << d[1]
-              << "\td[2] = " << d[2];
+          COMPARE(node, mark) << log_info(
+              ix, " ", iy, " ", iz, "\t periodic = true", "\n d[0] = ", d[0],
+              "\td[1] = ", d[1], "\td[2] = ", d[2]);
         } else {
-          COMPARE(node, FourVector())
-              << ix << " " << iy << " " << iz << "\t periodic = true"
-              << "\n   lattice n_cells = (" << lattice->n_cells()[0] << ", "
-              << lattice->n_cells()[1] << ", " << lattice->n_cells()[2] << ")"
-              << "\nlattice cell_sizes = (" << lattice->cell_sizes()[0] << ", "
-              << lattice->cell_sizes()[1] << ", " << lattice->cell_sizes()[2]
-              << ")"
-              << "\n     lattice sizes = (" << lattice->lattice_sizes()[0]
-              << ", " << lattice->lattice_sizes()[1] << ", "
-              << lattice->lattice_sizes()[2] << ")"
-              << "\n node = " << node << "\n   r0 = " << r0 << "\n    r = " << r
-              << "\n   d1 = (" << d1[0] << ", " << d1[1] << ", " << d1[2] << ")"
-              << "\n   d2 = (" << d2[0] << ", " << d2[1] << ", " << d2[2] << ")"
-              << "\n    d = (" << d[0] << ", " << d[1] << ", " << d[2] << ")";
+          COMPARE(node, FourVector()) << log_info(
+              ix, " ", iy, " ", iz, "\t periodic = true",
+              "\n   lattice n_cells = (", lattice->n_cells()[0], ", ",
+              lattice->n_cells()[1], ", ", lattice->n_cells()[2], ")",
+              "\nlattice cell_sizes = (", lattice->cell_sizes()[0], ", ",
+              lattice->cell_sizes()[1], ", ", lattice->cell_sizes()[2], ")",
+              "\n     lattice sizes = (", lattice->lattice_sizes()[0], ", ",
+              lattice->lattice_sizes()[1], ", ", lattice->lattice_sizes()[2],
+              ")", "\n node = ", node, "\n   r0 = ", r0, "\n    r = ", r,
+              "\n   d1 = (", d1[0], ", ", d1[1], ", ", d1[2], ")",
+              "\n   d2 = (", d2[0], ", ", d2[1], ", ", d2[2], ")",
+              "\n    d = (", d[0], ", ", d[1], ", ", d[2], ")");
         }
       });
 }
@@ -936,28 +1014,28 @@ TEST(iterate_nearest_neighbors) {
   int current_index = 0;
   // Iterate all the lattice and check that the center node and the neighboring
   // nodes are marked
-  lattice->iterate_sublattice(
-      {0, 0, 0}, lattice->n_cells(),
-      [&](FourVector &node, int ix, int iy, int iz) {
-        current_index = lattice->index1d(ix, iy, iz);
-        if (current_index == center_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == left_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == right_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == down_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == up_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == backward_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == forward_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else {
-          COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;
-        }
-      });
+  lattice->iterate_sublattice({0, 0, 0}, lattice->n_cells(),
+                              [&](FourVector &node, int ix, int iy, int iz) {
+                                current_index = lattice->index1d(ix, iy, iz);
+                                auto site = log_info(ix, " ", iy, " ", iz);
+                                if (current_index == center_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == left_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == right_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == down_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == up_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == backward_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == forward_index) {
+                                  COMPARE(node, mark) << site;
+                                } else {
+                                  COMPARE(node, FourVector()) << site;
+                                }
+                              });
 
   // 2) Lattice is periodic:
   lattice = create_lattice(true);
@@ -984,28 +1062,28 @@ TEST(iterate_nearest_neighbors) {
 
   // Iterate all the lattice and check that the center node and the neighboring
   // nodes are marked
-  lattice->iterate_sublattice(
-      {0, 0, 0}, lattice->n_cells(),
-      [&](FourVector &node, int ix, int iy, int iz) {
-        current_index = lattice->index1d(ix, iy, iz);
-        if (current_index == center_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == left_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == right_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == down_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == up_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == backward_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else if (current_index == forward_index) {
-          COMPARE(node, mark) << ix << " " << iy << " " << iz;
-        } else {
-          COMPARE(node, FourVector()) << ix << " " << iy << " " << iz;
-        }
-      });
+  lattice->iterate_sublattice({0, 0, 0}, lattice->n_cells(),
+                              [&](FourVector &node, int ix, int iy, int iz) {
+                                current_index = lattice->index1d(ix, iy, iz);
+                                auto site = log_info(ix, " ", iy, " ", iz);
+                                if (current_index == center_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == left_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == right_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == down_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == up_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == backward_index) {
+                                  COMPARE(node, mark) << site;
+                                } else if (current_index == forward_index) {
+                                  COMPARE(node, mark) << site;
+                                } else {
+                                  COMPARE(node, FourVector()) << site;
+                                }
+                              });
 }
 
 TEST(copy_constructor) {

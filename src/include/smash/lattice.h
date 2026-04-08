@@ -663,7 +663,7 @@ class RectangularLattice {
    * \param[in] rcut size of the integration volume. In total the intgration
    *                 volume will be a cube with edge length 2*rcut
    * \param[in] point center of the integration volume
-   **/
+   */
   template <typename F>
   void integrate_volume(F& integral,
                         F (*integrand)(ThreeVector, T&, ThreeVector),

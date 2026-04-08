@@ -147,7 +147,7 @@ class StringProcess {
    * model because the spacetime rapidity where a string fragment forms is not
    * equal to the fragment's momentum space rapidity. This cannot be easily
    * combined with possible interactions before the formation time.
-   **/
+   */
   bool mass_dependent_formation_times_;
   /**
    * Probability of splitting a nucleon into the quark flavour it has only

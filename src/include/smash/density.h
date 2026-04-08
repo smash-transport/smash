@@ -112,7 +112,8 @@ class DensityParameters {
         smearing_(par.smearing_mode),
         central_weight_(par.discrete_weight),
         triangular_range_(par.triangular_range),
-        only_participants_(par.only_participants) {
+        only_participants_(par.only_participants),
+        ignore_unformed_(par.ignore_unformed) {
     r_cut_sqr_ = r_cut_ * r_cut_;
     const double two_sig_sqr = 2 * sig_ * sig_;
     two_sig_sqr_inv_ = 1. / two_sig_sqr;
@@ -151,6 +152,8 @@ class DensityParameters {
   double norm_factor_sf() const { return norm_factor_sf_; }
   /// \return counting only participants (true) or also spectators (false)
   bool only_participants() const { return only_participants_; }
+  /// \return whether unformed particles are ignored
+  bool ignore_unformed() const { return ignore_unformed_; }
 
  private:
   /// Gaussian smearing width [fm]
@@ -179,6 +182,8 @@ class DensityParameters {
   const double triangular_range_;
   /// Flag to take into account only participants
   bool only_participants_;
+  /// Flag to ignore unformed particles
+  const bool ignore_unformed_;
 };
 
 /**
@@ -542,6 +547,11 @@ void update_lattice_with_list_of_particles(RectangularLattice<T> *lat,
     if (par.only_participants()) {
       // if this conditions holds, the hadron is a spectator
       if (part.get_history().collisions_per_particle == 0) {
+        continue;
+      }
+    }
+    if (par.ignore_unformed()) {
+      if (part.xsec_scaling_factor() < 1) {
         continue;
       }
     }

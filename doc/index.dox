@@ -39,6 +39,7 @@
 # from the documentation.
 #
 /**
+\page doxypage_software_execution Software execution
 \page doxypage_input_short_ref Input short reference
 \page doxypage_input Input
     <div class="invisible-content">
@@ -105,6 +106,10 @@
             \page doxypage_input_conf_modi_list List
             \page doxypage_input_conf_modi_listbox ListBox
         \page doxypage_input_conf_output Output
+            <div class="invisible-content">
+            \subpage doxypage_input_conf_output_examples
+            </div>
+            \page doxypage_input_conf_output_examples %Configuration examples
         \page doxypage_input_conf_lattice Lattice
             <div class="invisible-content">
             \subpage doxypage_input_lattice_default_parameters
@@ -140,10 +145,10 @@
     \subpage doxypage_output_hepmc
     \subpage doxypage_output_rivet
     \subpage doxypage_output_vtk
-    \subpage doxypage_output_vtk_lattice
     \subpage doxypage_output_thermodyn
     \subpage doxypage_output_thermodyn_lattice
     \subpage doxypage_output_collisions_box_modus
+    \subpage doxypage_output_spin
     </div>
     \page doxypage_output_process_types Process types
     \page doxypage_output_oscar OSCAR format
@@ -162,13 +167,11 @@
     \page doxypage_output_hepmc HepMC Output
     \page doxypage_output_rivet Rivet output
     \page doxypage_output_vtk VTK format
-    \page doxypage_output_vtk_lattice Thermodynamics VTK output
     \page doxypage_output_thermodyn ASCII thermodynamics output
     \page doxypage_output_thermodyn_lattice Thermodynamics lattice output
     \page doxypage_output_collisions_box_modus Collision output in box modus
     \page doxypage_output_spin Spin output
 
-\page doxypage_smash_invocation SMASH invocation
 \ifnot user
 \page doxypage_unit_testing Unit testing
     <div class="invisible-content">

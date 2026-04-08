@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2018-2025
+ *    Copyright (c) 2018-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -96,6 +96,29 @@ static void append_list(CollisionBranchList& main_list,
     proc->set_weight(proc->weight() * weight);
     main_list.emplace_back(std::move(proc));
   }
+}
+
+/**
+ * Helper function:
+ * Throw if elastic cross section is negative.
+ *
+ * \param[in] sqrts center of mass energy of incoming particles
+ * \param[in] sig_el elastic cross section
+ * \param[in] data_a incoming particle a
+ * \param[in] data_b incoming particle b
+ */
+[[noreturn]] static void throw_negative_elastic_xsec(
+    const double sqrts, const double sig_el, const ParticleData& data_a,
+    const ParticleData& data_b) {
+  std::stringstream ss{};
+  const ParticleType& a = data_a.type();
+  const ParticleType& b = data_b.type();
+  const PdgCode& pdg_a = a.pdgcode();
+  const PdgCode& pdg_b = b.pdgcode();
+  ss << "Problem in CrossSections::elastic_parametrization: a=" << a.name()
+     << " b=" << b.name() << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
+     << " sigma=" << sig_el << " s=" << sqrts * sqrts << " sqrt(s)=" << sqrts;
+  throw std::runtime_error(ss.str());
 }
 
 /**
@@ -451,13 +474,8 @@ double CrossSections::nn_el() const {
   if (sig_el > 0.) {
     return sig_el;
   } else {
-    std::stringstream ss;
-    const auto name_a = incoming_particles_[0].type().name();
-    const auto name_b = incoming_particles_[1].type().name();
-    ss << "problem in CrossSections::elastic: a=" << name_a << " b=" << name_b
-       << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
-       << " sigma=" << sig_el << " s=" << s;
-    throw std::runtime_error(ss.str());
+    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
+                                incoming_particles_[1]);
   }
 }
 
@@ -534,13 +552,8 @@ double CrossSections::npi_el() const {
   if (sig_el > 0) {
     return sig_el;
   } else {
-    std::stringstream ss;
-    const auto name_a = incoming_particles_[0].type().name();
-    const auto name_b = incoming_particles_[1].type().name();
-    ss << "problem in CrossSections::elastic: a=" << name_a << " b=" << name_b
-       << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
-       << " sigma=" << sig_el << " s=" << s;
-    throw std::runtime_error(ss.str());
+    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
+                                incoming_particles_[1]);
   }
 }
 
@@ -859,13 +872,8 @@ double CrossSections::nk_el() const {
   if (sig_el > 0) {
     return sig_el;
   } else {
-    std::stringstream ss;
-    const auto name_a = incoming_particles_[0].type().name();
-    const auto name_b = incoming_particles_[1].type().name();
-    ss << "problem in CrossSections::elastic: a=" << name_a << " b=" << name_b
-       << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
-       << " sigma=" << sig_el << " s=" << s;
-    throw std::runtime_error(ss.str());
+    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
+                                incoming_particles_[1]);
   }
 }
 
@@ -1088,21 +1096,6 @@ CollisionBranchList CrossSections::two_to_four() const {
   return process_list;
 }
 
-double CrossSections::d_pi_inelastic_xs(double pion_kinetic_energy) {
-  const double x = pion_kinetic_energy;
-  return x * (4.3 + 10.0 * x) / ((x - 0.16) * (x - 0.16) + 0.007);
-}
-
-double CrossSections::d_N_inelastic_xs(double N_kinetic_energy) {
-  const double x = N_kinetic_energy;
-  return x * (1.0 + 50 * x) / (x * x + 0.01) +
-         4 * x / ((x - 0.008) * (x - 0.008) + 0.0004);
-}
-
-double CrossSections::d_aN_inelastic_xs(double aN_kinetic_energy) {
-  return 55.0 / (aN_kinetic_energy + 0.17);
-}
-
 double CrossSections::two_to_three_xs(const ParticleType& type_a,
                                       const ParticleType& type_b,
                                       double sqrts) {
@@ -1128,15 +1121,15 @@ double CrossSections::two_to_three_xs(const ParticleType& type_a,
   }
 
   if (type_catalyzer->is_pion()) {
-    xs = d_pi_inelastic_xs(Tkin);
+    xs = deuteron_pion_inelastic(Tkin);
   } else if (type_catalyzer->is_nucleon()) {
     if (type_nucleus->pdgcode().antiparticle_sign() ==
         type_catalyzer->pdgcode().antiparticle_sign()) {
       // Nd and N̅d̅
-      xs = d_N_inelastic_xs(Tkin);
+      xs = deuteron_nucleon_inelastic(Tkin);
     } else {
       // N̅d and Nd̅
-      xs = d_aN_inelastic_xs(Tkin);
+      xs = deuteron_antinucleon_inelastic(Tkin);
     }
   }
   return xs;
@@ -1165,15 +1158,15 @@ double CrossSections::two_to_four_xs(const ParticleType& type_a,
   }
 
   if (type_catalyzer->is_pion()) {
-    xs = A / 2. * d_pi_inelastic_xs(Tkin);
+    xs = A / 2. * deuteron_pion_inelastic(Tkin);
   } else if (type_catalyzer->is_nucleon()) {
     if (type_nucleus->pdgcode().antiparticle_sign() ==
         type_catalyzer->pdgcode().antiparticle_sign()) {
       // N + A, anti-N + anti-A
-      xs = A / 2. * d_N_inelastic_xs(Tkin);
+      xs = A / 2. * deuteron_nucleon_inelastic(Tkin);
     } else {
       // N̅ + A and N + anti-A
-      xs = A / 2. * d_aN_inelastic_xs(Tkin);
+      xs = A / 2. * deuteron_antinucleon_inelastic(Tkin);
     }
   }
   return xs;
@@ -1540,11 +1533,10 @@ CollisionBranchList CrossSections::nk_xx(const ReactionsBitSet& included_2to2,
       break;
     }
     case pdg::K_z: {
-      // K+ and K0 have the same mass and spin, so their cross sections are
-      // assumed to only differ in isospin factors. For the initial state, we
-      // assume that K0 p is equivalent to K+ n and K0 n equivalent to K+ p,
-      // like for the elastic background.
-
+      /* K+ and K0 have the same mass and spin, so their cross sections are
+       * assumed to only differ in isospin factors. For the initial state, we
+       * assume that K0 p is equivalent to K+ n and K0 n equivalent to K+ p,
+       * like for the elastic background. */
       switch (pdg_nucleon) {
         case pdg::p: {
           if (incl_KN_to_KDelta) {
@@ -1575,8 +1567,7 @@ CollisionBranchList CrossSections::nk_xx(const ReactionsBitSet& included_2to2,
             add_channel(
                 process_list,
                 [&] {
-                  // The isospin factor is 1, see the parametrizations
-                  // tests.
+                  // The isospin factor is 1, see the parametrizations tests.
                   return kplusn_k0p(s);
                 },
                 sqrt_s_, type_K_p, type_n);
@@ -1742,8 +1733,7 @@ CollisionBranchList CrossSections::nk_xx(const ReactionsBitSet& included_2to2,
             add_channel(
                 process_list,
                 [&] {
-                  // The isospin factor is 1, see the parametrizations
-                  // tests.
+                  // The isospin factor is 1, see the parametrizations tests.
                   return kplusn_k0p(s);
                 },
                 sqrt_s_, type_K_m, type_n_bar);
@@ -2303,8 +2293,8 @@ double CrossSections::xs_dpi_dprimepi(const double sqrts, const double cm_mom,
   const double s = sqrts * sqrts;
   // same matrix element for πd and πd̅
   const double tmp = sqrts - pion_mass - deuteron_mass;
-  // Matrix element is fit to match the inelastic pi+ d -> pi+ n p
-  // cross-section from the Fig. 5 of [\iref{Arndt:1994bs}].
+  /* Matrix element is fit to match the inelastic pi+ d -> pi+ n p cross-section
+   * from the Fig. 5 of [\iref{Arndt:1994bs}]. */
   const double matrix_element =
       295.5 + 2.862 / (0.00283735 + pow_int(sqrts - 2.181, 2)) +
       0.0672 / pow_int(tmp, 2) - 6.61753 / tmp;
@@ -2538,9 +2528,8 @@ CollisionBranchList CrossSections::string_excitation(
    * anti-quark pair. See StringProcess::next_BBbarAnn() */
   double sig_annihilation = 0.0;
   if (can_annihilate) {
-    /* In the case of baryon-antibaryon pair,
-     * the parametrized cross section for annihilation will be added.
-     * See xs_ppbar_annihilation(). */
+    /* In the case of baryon-antibaryon pair, the parametrized cross section for
+     * annihilation will be added. See xs_ppbar_annihilation(). */
     mandelstam_s = effective_AQM_s(
         mandelstam_s, incoming_particles_[0].effective_mass(),
         incoming_particles_[1].effective_mass(), nucleon_mass, nucleon_mass);
@@ -2559,8 +2548,7 @@ CollisionBranchList CrossSections::string_excitation(
    * first non-diffractive, then double-diffractive, then
    * single-diffractive AB->AX and AB->XB in equal proportion.
    * The way it is done here is not unique. I (ryu) think that at high energy
-   * collision this is not an issue, but at sqrt_s < 10 GeV it may
-   * matter. */
+   * collision this is not an issue, but at sqrt_s < 10 GeV it may matter. */
   std::array<double, 3> xs = string_process->cross_sections_diffractive(
       pdgid[0], pdgid[1], std::sqrt(mandelstam_s));
   if (finder_parameters.use_AQM) {
@@ -2619,10 +2607,10 @@ CollisionBranchList CrossSections::string_excitation(
   logg[LCrossSections].debug("Hard non-diffractive: ", nondiffractive_hard);
   logg[LCrossSections].debug("B-Bbar annihilation: ", sig_annihilation);
 
-  /* cross section of soft string excitation including annihilation */
+  // cross section of soft string excitation including annihilation
   const double sig_string_soft = total_string_xs - nondiffractive_hard;
 
-  /* fill the list of process channels */
+  // fill the list of process channels
   if (sig_string_soft > 0.) {
     channel_list.push_back(std::make_unique<CollisionBranch>(
         single_diffr_AX, ProcessType::StringSoftSingleDiffractiveAX));

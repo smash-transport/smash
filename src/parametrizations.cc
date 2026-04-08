@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2025
+ *    Copyright (c) 2013-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -173,15 +173,15 @@ static double piplusp_elastic_pdg(double mandelstam_s) {
 }
 
 double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
-  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1)
-                                 : plab_from_s(mandelstam_s, m1, m2);
+  const double p_lab =
+      plab_from_s_heavier_particle_at_rest(mandelstam_s, m1, m2);
   const auto logp = std::log(p_lab);
   return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
 }
 
 double piplusp_elastic_AQM(double mandelstam_s, double m1, double m2) {
-  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1)
-                                 : plab_from_s(mandelstam_s, m1, m2);
+  const double p_lab =
+      plab_from_s_heavier_particle_at_rest(mandelstam_s, m1, m2);
   if (p_lab < 3.05) {  // the plab from which the param starts to explode
     return 7.5;        // this will be scaled down by 2/3 for meson-meson
   } else {
@@ -380,8 +380,8 @@ double pp_elastic(double mandelstam_s) {
 }
 
 double pp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
-  const double p_lab = (m1 > m2) ? plab_from_s(mandelstam_s, m2, m1)
-                                 : plab_from_s(mandelstam_s, m1, m2);
+  const double p_lab =
+      plab_from_s_heavier_particle_at_rest(mandelstam_s, m1, m2);
   const auto logp = std::log(p_lab);
   return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
          1.85 * logp;
@@ -482,6 +482,21 @@ double deuteron_nucleon_elastic(double mandelstam_s) {
   const double excess_sqr = excess * excess;
   return 2500.0 * std::exp(-excess_sqr / 0.003) +
          600.0 * std::exp(-excess_sqr / 0.1) + 10.0;
+}
+
+double deuteron_pion_inelastic(double pion_kinetic_energy) {
+  const double x = pion_kinetic_energy;
+  return x * (4.3 + 10.0 * x) / ((x - 0.16) * (x - 0.16) + 0.007);
+}
+
+double deuteron_nucleon_inelastic(double N_kinetic_energy) {
+  const double x = N_kinetic_energy;
+  return x * (1.0 + 50 * x) / (x * x + 0.01) +
+         4 * x / ((x - 0.008) * (x - 0.008) + 0.0004);
+}
+
+double deuteron_antinucleon_inelastic(double aN_kinetic_energy) {
+  return 55.0 / (aN_kinetic_energy + 0.17);
 }
 
 double kplusp_total(double mandelstam_s) {
@@ -746,8 +761,7 @@ double KaonNucleonRatios::get_ratio(const ParticleType& a,
                                     const ParticleType& c,
                                     const ParticleType& d) const {
   /* If this method is called with anti-nucleons, flip all particles to
-   * anti-particles;
-   * the ratio is equal */
+   * anti-particles; the ratio is equal */
   int flip = 0;
   for (const auto& p : {&a, &b, &c, &d}) {
     if (p->is_nucleon()) {

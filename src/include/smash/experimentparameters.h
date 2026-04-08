@@ -145,8 +145,19 @@ struct ExperimentParameters {
    */
   bool only_participants;
 
+  /**
+   * Ignore unformed particles in thermodynamic outputs.
+   */
+  bool ignore_unformed;
+
+  /**
+   * This indicates whether we force all resonances to decay in the last
+   * timestep.
+   */
+  bool force_decays_at_end;
+
   /// Do non-strong decays at the end
-  bool do_non_strong_decays;
+  bool ignore_minimum_width_at_end;
 
   /**
    * Whether to decay initial state particles.

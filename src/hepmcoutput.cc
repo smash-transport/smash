@@ -31,7 +31,7 @@ namespace smash {
  * - _HepMC_treeroot_ ROOT Tree binary format, readable by ROOT
  *
  * You can find a snippet of the configuration for this output in \ref
- * config_output_examples.
+ * doxypage_input_conf_output_examples.
  *
  * Producing HepMC output in asciiv3 format requires HepMC3 to be installed.
  * Download the tarball from http://hepmc.web.cern.ch/hepmc/
@@ -108,7 +108,7 @@ namespace smash {
  * documentation for more details.
  *
  * Here there is an example of the first lines of the HepMC_asciiv3 output, in
- * \key Collider modus and \key Particles output type:
+ * \key Collider modus and \key %Particles output type:
 
  \verbatim
 
@@ -248,7 +248,7 @@ namespace smash {
  * HepMC3 output of a subtype (asciiv3 or treeroot) into the other without
  * loss of information.
  *
- **/
+ */
 
 // clang-format on
 HepMcOutput::HepMcOutput(const std::filesystem::path &path, std::string name,

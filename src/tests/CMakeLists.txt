@@ -38,7 +38,8 @@ endmacro()
 
 macro(smash_add_exe name)
     add_executable(${name} ${name}.cc)
-    target_link_libraries(${name} smash_static ${SMASH_LIBRARIES})
+    target_link_libraries(${name} smash_testlib)
+    set_target_properties(${name} PROPERTIES CXX_EXTENSIONS OFF)
     if(USE_SANITIZER)
         set_target_properties(${name}
                               PROPERTIES COMPILE_FLAGS

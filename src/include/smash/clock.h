@@ -83,7 +83,7 @@ static constexpr int LClock = LogArea::Clock::id;
  * \see operator<(double) const
  * \see operator>(double) const
  *
- **/
+ */
 class Clock {
  public:
   /// The type used for counting ticks/time.

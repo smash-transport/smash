@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2025
+ *    Copyright (c) 2013-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -527,6 +527,9 @@ class Experiment : public ExperimentBase {
   /// point by point, in any format
   bool printout_full_lattice_any_td_ = false;
 
+  /// Whether to write the electric and magnetic fields to VTK files
+  bool printout_coulomb_vtk_ = false;
+
   /// Instance of class used for forced thermalization
   std::unique_ptr<GrandCanThermalizer> thermalizer_;
 
@@ -591,12 +594,6 @@ class Experiment : public ExperimentBase {
    * Stored here so that the next event will remember this.
    */
   const double delta_time_startup_;
-
-  /**
-   * This indicates whether we force all resonances to decay in the last
-   * timestep.
-   */
-  const bool force_decays_;
 
   /// This indicates whether to use the grid.
   const bool use_grid_;
@@ -850,6 +847,7 @@ void Experiment<Modus>::create_output(const std::string &format,
         "HepMC output requested, but HepMC support not compiled in");
 #endif
   } else if (content == "Coulomb" && format == "VTK") {
+    printout_coulomb_vtk_ = true;
     outputs_.emplace_back(
         std::make_unique<VtkOutput>(output_path, "Fields", out_par));
   } else if (content == "Rivet") {
@@ -925,7 +923,6 @@ Experiment<Modus>::Experiment(Configuration &config,
       ensembles_(parameters_.n_ensembles),
       end_time_(config.take(InputKeys::gen_endTime)),
       delta_time_startup_(parameters_.labclock->timestep_duration()),
-      force_decays_(config.take(InputKeys::collTerm_forceDecaysAtEnd)),
       use_grid_(config.take(InputKeys::gen_useGrid)),
       metric_(config.take(InputKeys::gen_metricType),
               config.take(InputKeys::gen_expansionRate)),
@@ -1054,9 +1051,8 @@ Experiment<Modus>::Experiment(Configuration &config,
           "inelastically (e.g. resonance chains), else SMASH is known to "
           "hang.");
     }
-    action_finders_.emplace_back(std::make_unique<DecayActionsFinder>(
-        parameters_.res_lifetime_factor, parameters_.do_non_strong_decays,
-        force_decays_, parameters_.spin_interaction_type));
+    action_finders_.emplace_back(
+        std::make_unique<DecayActionsFinder>(parameters_));
   }
   bool no_coll = config.take(InputKeys::collTerm_noCollisions);
   if ((parameters_.two_to_one || parameters_.included_2to2.any() ||
@@ -1170,7 +1166,8 @@ Experiment<Modus>::Experiment(Configuration &config,
    * means the physical information contained in the output (e.g. list of
    * particles, list of interactions, thermodynamics, etc) and format (e.g.
    * ASCII, binary or ROOT). The same content can be printed out in several
-   * formats _simultaneously_. See \ref config_output_examples for examples.
+   * formats _simultaneously_. See \ref doxypage_input_conf_output_examples for
+   * examples.
    *
    * These are the possible contents offered by SMASH:
    *
@@ -1200,23 +1197,29 @@ Experiment<Modus>::Experiment(Configuration &config,
    *         \ref doxypage_output_oscar_collisions, \ref doxypage_output_ascii,
    *         \ref doxypage_output_binary, \ref doxypage_output_root.
    * - \b Thermodynamics:
-   *          This output allows to print out thermodynamic quantities, see \ref
-   *          input_output_thermodynamics_.
+   *         This output allows to print out thermodynamic quantities, see
+   *         \ref input_output_thermodynamics_ "Thermodynamics".
    *    - Available formats:
-   *          \ref doxypage_output_thermodyn,
-   *          \ref doxypage_output_thermodyn_lattice,
-   *          \ref doxypage_output_vtk_lattice.
+   *         \ref doxypage_output_thermodyn,
+   *         \ref doxypage_output_thermodyn_lattice,
+   *         \ref doxypage_output_vtk.
    * - \b Initial_Conditions:
-   *          Special initial conditions output, see
-   *          \ref doxypage_output_initial_conditions for details.
+   *         Special initial conditions output, see
+   *         \ref doxypage_output_initial_conditions for details.
    *   - Available formats:
    *         \ref doxypage_output_oscar_particles,
    *         \ref doxypage_output_initial_conditions.
    * - \b Rivet:
-   *          Run Rivet analysis on generated events and output results, see
-   *          \ref doxypage_output_rivet for details.
+   *         Run Rivet analysis on generated events and output results, see
+   *         \ref doxypage_output_rivet for details.
    *    - Available formats:
-   *          \ref doxypage_output_rivet.
+   *         \ref doxypage_output_rivet.
+   * - \b Coulomb:
+   *         Electric and magnetic fields, see \ref input_output_coulomb_
+   *         "Coulomb" and \ref doxypage_input_conf_pot_coulomb
+   *         "Coulomb potential" for further information.
+   *    - Available formats:
+   *         \ref doxypage_output_vtk
    *
    * \attention At the moment, the \b Initial_Conditions and \b Rivet outputs
    * content as well as the \b HepMC format cannot be used <u>with multiple
@@ -1282,8 +1285,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    *     <a href=https://docs.enthought.com/mayavi/mayavi/data.html>Mayavi</a>
    *     or <a
    *     href=https://reference.wolfram.com/language/ref/format/VTK.html>Mathematica</a>.
-   *   - For "Particles" content \ref doxypage_output_vtk
-   *   - For "Thermodynamics" content \ref doxypage_output_vtk_lattice
+   *   - Visit \ref doxypage_output_vtk for further information
    * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
    *   Tree ROOT format see \ref doxypage_output_hepmc for details
    * - \b "YODA", \b "YODA-full" - compact ASCII text format used by the
@@ -1328,7 +1330,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * As dileptons are treated perturbatively, the produced dileptons are
    * only written to the dilepton output, but neither to the usual collision
    * output, nor to the particle lists.
-   **/
+   */
 
   /*!\Userguide
    * \page doxypage_output_photons
@@ -1361,7 +1363,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * The photon output is available in binary, OSCAR1999, OSCAR2013 and
    * OSCAR2013 extended format. \n
    *
-   **/
+   */
 
   /*!\Userguide
    * \page doxypage_output_initial_conditions
@@ -1417,7 +1419,7 @@ Experiment<Modus>::Experiment(Configuration &config,
    * 1. Spin interactions have to be enabled in the collision term section of
    * the configuration file.
    * 2. The spin components `spin0`, `spinx`, `spiny` and `spinz` have to be
-   * specified in the `Quantities` list of the Particles output subsection.
+   * specified in the `Quantities` list of the %Particles output subsection.
    * \see_key{key_output_particles_quantities_}
    *
    * Spin output is available in OSCAR2013 format. If spins are enabled, the
@@ -1746,9 +1748,10 @@ Experiment<Modus>::Experiment(Configuration &config,
   }
 
   // Create lattices
-  if (config.has_section(InputSections::lattice)) {
-    bool automatic = config.take(InputKeys::lattice_automatic);
-    bool all_geometrical_properties_specified =
+  const bool has_lattice = config.has_section(InputSections::lattice);
+  if (has_lattice) {
+    const bool automatic = config.take(InputKeys::lattice_automatic);
+    const bool all_geometrical_properties_specified =
         config.has_value(InputKeys::lattice_cellNumber) &&
         config.has_value(InputKeys::lattice_origin) &&
         config.has_value(InputKeys::lattice_sizes);
@@ -1764,7 +1767,8 @@ Experiment<Modus>::Experiment(Configuration &config,
           "lattice geometrical properties were specified. In this case you\n"
           "need to set \"Automatic: False\".");
     }
-    bool periodic = config.take(InputKeys::lattice_periodic, modus_.is_box());
+    const bool periodic =
+        config.take(InputKeys::lattice_periodic, modus_.is_box());
     const auto [l, n, origin] = [&config, automatic, this]() {
       if (!automatic) {
         return std::make_tuple<std::array<double, 3>, std::array<int, 3>,
@@ -1942,14 +1946,36 @@ Experiment<Modus>::Experiment(Configuration &config,
       jmu_custom_lat_ = std::make_unique<DensityLattice>(
           l, n, origin, periodic, LatticeUpdate::AtOutput);
     }
-  } else if (printout_lattice_td_ || printout_full_lattice_any_td_) {
+  }
+
+  // Error messages for missing lattice or coulomb potential config requirements
+  const bool has_coulomb_potential = potentials_ && potentials_->use_coulomb();
+  const bool has_lattice_td_output =
+      printout_lattice_td_ || printout_full_lattice_any_td_;
+  if (has_lattice_td_output && !has_lattice) {
     logg[LExperiment].error(
-        "If you want Therm. VTK or Lattice output, configure a lattice for "
-        "it.");
-  } else if (potentials_ && potentials_->use_coulomb()) {
+        "If you want Thermodynamic VTK or Lattice output, configure a "
+        "lattice for it.");
+  }
+  if (has_coulomb_potential && !has_lattice) {
     logg[LExperiment].error(
-        "Coulomb potential requires a lattice. Please add one to the "
-        "configuration");
+        "Coulomb potential requires a lattice. Please set it up in the "
+        "configuration file.");
+  }
+  if (printout_coulomb_vtk_) {
+    if (!has_lattice && !has_coulomb_potential) {
+      logg[LExperiment].error(
+          "Coulomb VTK output requires coulomb potential and a lattice. "
+          "Please add both to the configuration file.");
+    } else if (!has_lattice) {
+      logg[LExperiment].error(
+          "Coulomb VTK output requires a lattice. "
+          "Please set it up in the configuration file.");
+    } else if (!has_coulomb_potential) {
+      logg[LExperiment].error(
+          "Coulomb VTK output requires coulomb potential. "
+          "Please add it to the configuration file.");
+    }
   }
 
   // Warning for the mean field calculation if lattice is not on.

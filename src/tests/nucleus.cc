@@ -92,7 +92,7 @@ TEST(center) {
    *  sqrt(int( x**4/(exp((x-7.11)/.545)+1),x=0..infinity)/int(
    *  x**2/(exp((x-7.2)/.001)+1),x=0..infinity))
    *  \code
-   **/
+   */
   double threesigma = 3 * 5.86817 / std::sqrt(N_TEST);
   VERIFY(std::abs(middle.x1()) < threesigma)
       << " x=" << middle.x1() << " vs. 3σ=" << threesigma
@@ -115,7 +115,7 @@ TEST(center_hard_sphere) {
   /**
    * Here, we can actually calculate the exact value for the width:
    * \f$\sigma = R\sqrt{\frac{3}{5}}\f$.
-   **/
+   */
   double threesigma =
       3 * lead.default_nuclear_radius() * std::sqrt(0.6) / std::sqrt(N_TEST);
   VERIFY(std::abs(middle.x1()) < threesigma)

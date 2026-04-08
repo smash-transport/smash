@@ -594,6 +594,8 @@ TEST(try_create_particle_with_spin_func) {
       1.0,
       false,
       false,
+      true,  // force decays at the end
+      false,
       true,
       SpinInteractionType::On,
       std::nullopt};
