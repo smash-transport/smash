@@ -5,7 +5,7 @@ with section("parse"):
 
   # Specify structure for custom cmake functions
   additional_commands = {
-    "smash_add_runtest": {
+    "smash_add_run_test": {
       "pargs": 3,
       "flags": [],
       "kwargs": {

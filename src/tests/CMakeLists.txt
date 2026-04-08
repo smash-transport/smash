@@ -21,215 +21,217 @@ option(FORMAT_TEST_OUTPUT_FOR_VIM
 include(TestsUtilities)
 
 # -------------------------------- Unit tests  --------------------------------
-smash_add_unittest(action)
-smash_add_unittest(actions)
-smash_add_unittest(alphaclusterednucleus)
-smash_add_unittest(angles)
-smash_add_unittest(angles_distribution)
-smash_add_unittest(angles_zero)
-smash_add_unittest(average)
-smash_add_unittest(binaryoutput)
-smash_add_unittest(clebschgordan)
-smash_add_unittest(clebschgordan_lookup)
-smash_add_unittest(clock)
-smash_add_unittest(configuration)
-smash_add_unittest(decayaction)
-smash_add_unittest(decaymodes)
-smash_add_unittest(decaytree)
-smash_add_unittest(deformednucleus)
-smash_add_unittest(density)
-smash_add_unittest(dileptons)
-smash_add_unittest(distributions)
-smash_add_unittest(dynamic_fluidization)
-smash_add_unittest(enable_float_traps)
-smash_add_unittest(energymomentumtensor)
-smash_add_unittest(experiment)
-smash_add_unittest(filelock)
-smash_add_unittest(formfactors)
-smash_add_unittest(fourvector)
-smash_add_unittest(icoutput)
-smash_add_unittest(grandcan_thermalizer)
-smash_add_unittest(grid)
-smash_add_unittest(hadgas_eos)
-smash_add_unittest(hadgas_eos2)
-smash_add_unittest(hypersurfacecrossing)
-smash_add_unittest(initial_conditions)
-smash_add_unittest(input_keys)
-smash_add_unittest(integrate)
-smash_add_unittest(interpolation)
-smash_add_unittest(interpolation2D)
-smash_add_unittest(isospin)
-smash_add_unittest(key)
-smash_add_unittest(kinematics)
-smash_add_unittest(lattice)
-smash_add_unittest(listmodus)
-smash_add_unittest(lorentzboost)
-smash_add_unittest(lowess)
-smash_add_unittest(mass_sampling)
-smash_add_unittest(nucleus)
-smash_add_unittest(numeric_cast)
-smash_add_unittest(oscar2013output)
-smash_add_unittest(oscar1999output)
-smash_add_unittest(outputformatter)
-smash_add_unittest(parametrizations)
-smash_add_unittest(particledata)
-smash_add_unittest(particles)
-smash_add_unittest(particletype)
-smash_add_unittest(pauliblocking)
-smash_add_unittest(pdgcode)
-smash_add_unittest(photons)
-smash_add_unittest(potentials)
-smash_add_unittest(processbranch)
-smash_add_unittest(stringprocess)
-smash_add_unittest(propagate)
-smash_add_unittest(quantumnumbers)
-smash_add_unittest(quantumsampling)
-smash_add_unittest(random)
-smash_add_unittest(rootsolver)
-smash_add_unittest(sanity)
-smash_add_unittest(scatteraction)
-smash_add_unittest(scatteractionmulti)
-smash_add_unittest(scatteractionsfinder)
-smash_add_unittest(sha256)
-smash_add_unittest(spheremodus)
-smash_add_unittest(spectral_functions)
-smash_add_unittest(stringfunctions)
-smash_add_unittest(tabulation)
-smash_add_unittest(threevector)
-smash_add_unittest(traits)
-smash_add_unittest(two_unstable_products)
-smash_add_unittest(vtkoutput)
-smash_add_unittest(width)
-smash_add_unittest(without_float_traps)
-smash_add_unittest(woods-saxon)
-smash_add_unittest(yamltest)
+smash_add_unit_test(action)
+smash_add_unit_test(actions)
+smash_add_unit_test(alphaclusterednucleus)
+smash_add_unit_test(angles)
+smash_add_unit_test(angles_distribution)
+smash_add_unit_test(angles_zero)
+smash_add_unit_test(average)
+smash_add_unit_test(binaryoutput)
+smash_add_unit_test(clebschgordan)
+smash_add_unit_test(clebschgordan_lookup)
+smash_add_unit_test(clock)
+smash_add_unit_test(configuration)
+smash_add_unit_test(decayaction)
+smash_add_unit_test(decaymodes)
+smash_add_unit_test(decaytree)
+smash_add_unit_test(deformednucleus)
+smash_add_unit_test(density)
+smash_add_unit_test(dileptons)
+smash_add_unit_test(distributions)
+smash_add_unit_test(dynamic_fluidization)
+smash_add_unit_test(enable_float_traps)
+smash_add_unit_test(energymomentumtensor)
+smash_add_unit_test(filelock)
+smash_add_unit_test(formfactors)
+smash_add_unit_test(fourvector)
+smash_add_unit_test(icoutput)
+smash_add_unit_test(grandcan_thermalizer)
+smash_add_unit_test(grid)
+smash_add_unit_test(hadgas_eos)
+smash_add_unit_test(hadgas_eos2)
+smash_add_unit_test(hypersurfacecrossing)
+smash_add_unit_test(initial_conditions)
+smash_add_unit_test(input_keys)
+smash_add_unit_test(integrate)
+smash_add_unit_test(interpolation)
+smash_add_unit_test(interpolation2D)
+smash_add_unit_test(isospin)
+smash_add_unit_test(key)
+smash_add_unit_test(kinematics)
+smash_add_unit_test(lattice)
+smash_add_unit_test(listmodus)
+smash_add_unit_test(lorentzboost)
+smash_add_unit_test(lowess)
+smash_add_unit_test(mass_sampling)
+smash_add_unit_test(nucleus)
+smash_add_unit_test(numeric_cast)
+smash_add_unit_test(oscar2013output)
+smash_add_unit_test(oscar1999output)
+smash_add_unit_test(outputformatter)
+smash_add_unit_test(parametrizations)
+smash_add_unit_test(particledata)
+smash_add_unit_test(particles)
+smash_add_unit_test(particletype)
+smash_add_unit_test(pauliblocking)
+smash_add_unit_test(pdgcode)
+smash_add_unit_test(photons)
+smash_add_unit_test(potentials)
+smash_add_unit_test(processbranch)
+smash_add_unit_test(stringprocess)
+smash_add_unit_test(propagate)
+smash_add_unit_test(quantumnumbers)
+smash_add_unit_test(quantumsampling)
+smash_add_unit_test(random)
+smash_add_unit_test(rootsolver)
+smash_add_unit_test(sanity)
+smash_add_unit_test(scatteraction)
+smash_add_unit_test(scatteractionmulti)
+smash_add_unit_test(scatteractionsfinder)
+smash_add_unit_test(sha256)
+smash_add_unit_test(spheremodus)
+smash_add_unit_test(spectral_functions)
+smash_add_unit_test(stringfunctions)
+smash_add_unit_test(tabulation)
+smash_add_unit_test(threevector)
+smash_add_unit_test(traits)
+smash_add_unit_test(two_unstable_products)
+smash_add_unit_test(vtkoutput)
+smash_add_unit_test(width)
+smash_add_unit_test(without_float_traps)
+smash_add_unit_test(woods-saxon)
+smash_add_unit_test(yamltest)
+
+# ----------------------------- Integration tests  -----------------------------
+smash_add_integration_test(experiment)
 
 # ----------------------------- Functional tests  -----------------------------
 option(ENABLE_FUNCTIONAL_TESTS "Turn this on to enable SMASH functional tests." OFF)
 if(ENABLE_FUNCTIONAL_TESTS)
     do_setup_for_functional_tests(setup_was_successful)
     if(setup_was_successful)
-        smash_add_functionaltest(ic_for_hybrid)
+        smash_add_functional_test(ic_for_hybrid)
     endif()
 else()
     message(STATUS "Functional tests disabled.")
 endif()
 
 # -------------------------------- Run tests  ---------------------------------
-smash_add_runtest(smash_help smash smash -h)
+smash_add_run_test(smash_help smash smash -h)
 # Verify that the binary runs with the various modi. Here we use the shipped default configurations
 # file, while particles and decay modes files are taken from the input directory.
-smash_add_runtest(smash_run smash smash)
-smash_add_runtest(box_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/box/config.yaml
-                  -p ${PROJECT_SOURCE_DIR}/input/box/particles.txt
-                  -d ${PROJECT_SOURCE_DIR}/input/box/decaymodes.txt)
-smash_add_runtest(stochastic_box_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/stochastic_box/config.yaml
-                  -p ${PROJECT_SOURCE_DIR}/input/stochastic_box/particles_only_pi0.txt
-                  -d ${PROJECT_SOURCE_DIR}/input/stochastic_box/decaymodes_all_off.txt)
-smash_add_runtest(multi_particle_box_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/multi_particle_box/config.yaml
-                  -p ${PROJECT_SOURCE_DIR}/input/multi_particle_box/particles.txt
-                  -d ${PROJECT_SOURCE_DIR}/input/multi_particle_box/decaymodes.txt)
-smash_add_runtest(collider_run smash smash -m Collider)
-smash_add_runtest(collider_frozen_fermi_run smash smash -m Collider
-                  -c "Modi: {Collider: {Fermi_Motion: frozen}}")
-smash_add_runtest(sphere_run smash smash -i ${PROJECT_SOURCE_DIR}/input/sphere/config.yaml)
-smash_add_runtest(list_run smash smash -i ${PROJECT_SOURCE_DIR}/input/list/config.yaml
-                  -c "Modi: {List: {File_Directory: ${PROJECT_SOURCE_DIR}/input/list}}")
-smash_add_runtest(dilepton_run smash smash -i ${PROJECT_SOURCE_DIR}/input/dileptons/config.yaml
-                  -d ${PROJECT_SOURCE_DIR}/input/dileptons/decaymodes.txt)
-smash_add_runtest(light_nuclei_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/config.yaml
-                  -p ${PROJECT_SOURCE_DIR}/input/light_nuclei/particles.txt
-                  -d ${PROJECT_SOURCE_DIR}/input/light_nuclei/decaymodes.txt)
-smash_add_runtest(custom_nucleus_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/custom_nucleus/config.yaml
-                  -c "General: {Nevents: 2}"
-                  -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
-                  -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
+smash_add_run_test(smash_run smash smash)
+smash_add_run_test(box_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/box/config.yaml
+                   -p ${PROJECT_SOURCE_DIR}/input/box/particles.txt
+                   -d ${PROJECT_SOURCE_DIR}/input/box/decaymodes.txt)
+smash_add_run_test(stochastic_box_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/stochastic_box/config.yaml
+                   -p ${PROJECT_SOURCE_DIR}/input/stochastic_box/particles_only_pi0.txt
+                   -d ${PROJECT_SOURCE_DIR}/input/stochastic_box/decaymodes_all_off.txt)
+smash_add_run_test(multi_particle_box_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/multi_particle_box/config.yaml
+                   -p ${PROJECT_SOURCE_DIR}/input/multi_particle_box/particles.txt
+                   -d ${PROJECT_SOURCE_DIR}/input/multi_particle_box/decaymodes.txt)
+smash_add_run_test(collider_run smash smash -m Collider)
+smash_add_run_test(collider_frozen_fermi_run smash smash -m Collider
+                   -c "Modi: {Collider: {Fermi_Motion: frozen}}")
+smash_add_run_test(sphere_run smash smash -i ${PROJECT_SOURCE_DIR}/input/sphere/config.yaml)
+smash_add_run_test(list_run smash smash -i ${PROJECT_SOURCE_DIR}/input/list/config.yaml
+                   -c "Modi: {List: {File_Directory: ${PROJECT_SOURCE_DIR}/input/list}}")
+smash_add_run_test(dilepton_run smash smash -i ${PROJECT_SOURCE_DIR}/input/dileptons/config.yaml
+                   -d ${PROJECT_SOURCE_DIR}/input/dileptons/decaymodes.txt)
+smash_add_run_test(light_nuclei_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/config.yaml
+                   -p ${PROJECT_SOURCE_DIR}/input/light_nuclei/particles.txt
+                   -d ${PROJECT_SOURCE_DIR}/input/light_nuclei/decaymodes.txt)
+smash_add_run_test(custom_nucleus_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/custom_nucleus/config.yaml
+                   -c "General: {Nevents: 2}"
+                   -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
+                   -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
 )
-smash_add_runtest(potentials_run smash smash -i ${PROJECT_SOURCE_DIR}/input/potentials/config.yaml)
-smash_add_runtest(deformednucleus_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/deformed_nucleus/config.yaml)
+smash_add_run_test(potentials_run smash smash -i ${PROJECT_SOURCE_DIR}/input/potentials/config.yaml)
+smash_add_run_test(deformednucleus_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/deformed_nucleus/config.yaml)
 # Further verify that smash binary runs for a certain time (this corresponds to 20 steps)
-smash_add_runtest(box_steps smash smash
-                  -e 2.0
-                  -c "General: {Delta_Time: 0.1}"
-                  -m Box
-                  -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
-                  -c "Modi: {Box: {Length: 10.0}}"
-                  -c "Modi: {Box: {Temperature: 0.2}}"
-                  -c "Modi: {Box: {Start_Time: 0.0}}"
-                  -c "Modi: {Box: {Init_Multiplicities: {211: 100}}}"
-                  -c "Modi: {Box: {Init_Multiplicities: {-211: 100}}}"
-                  -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
-                  -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
-                  -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}")
-smash_add_runtest(collider_steps smash smash
-                  -e 2.0
-                  -c "General: {Delta_Time: 0.1}"
-                  -m Collider)
-smash_add_runtest(sphere_steps smash smash
-                  -e 2.0
-                  -c "General: {Delta_Time: 0.1}"
-                  -m Sphere
-                  -c "Modi: {Sphere: {Radius: 5.0}}"
-                  -c "Modi: {Sphere: {Temperature: 0.2}}"
-                  -c "Modi: {Sphere: {Start_Time: 0.0}}"
-                  -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
-                  -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
-                  -c "Modi: {Sphere: {Init_Multiplicities: {-211: 100}}}"
-                  -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
-                  -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
-                  -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}")
+smash_add_run_test(box_steps smash smash
+                   -e 2.0
+                   -c "General: {Delta_Time: 0.1}"
+                   -m Box
+                   -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                   -c "Modi: {Box: {Length: 10.0}}"
+                   -c "Modi: {Box: {Temperature: 0.2}}"
+                   -c "Modi: {Box: {Start_Time: 0.0}}"
+                   -c "Modi: {Box: {Init_Multiplicities: {211: 100}}}"
+                   -c "Modi: {Box: {Init_Multiplicities: {-211: 100}}}"
+                   -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
+                   -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
+                   -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}")
+smash_add_run_test(collider_steps smash smash
+                   -e 2.0
+                   -c "General: {Delta_Time: 0.1}"
+                   -m Collider)
+smash_add_run_test(sphere_steps smash smash
+                   -e 2.0
+                   -c "General: {Delta_Time: 0.1}"
+                   -m Sphere
+                   -c "Modi: {Sphere: {Radius: 5.0}}"
+                   -c "Modi: {Sphere: {Temperature: 0.2}}"
+                   -c "Modi: {Sphere: {Start_Time: 0.0}}"
+                   -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                   -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
+                   -c "Modi: {Sphere: {Init_Multiplicities: {-211: 100}}}"
+                   -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
+                   -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
+                   -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}")
 # Verify that also other behavior of smash executable runs without crashing
-smash_add_runtest(particle_table_dump smash smash -x)
-smash_add_runtest(reactions_dump smash smash -l)
-smash_add_runtest(crosssection_dump smash smash -s 2112,2212)
-smash_add_runtest(resonance_spectral_function_dump smash smash -r 113)
+smash_add_run_test(particle_table_dump smash smash -x)
+smash_add_run_test(reactions_dump smash smash -l)
+smash_add_run_test(crosssection_dump smash smash -s 2112,2212)
+smash_add_run_test(resonance_spectral_function_dump smash smash -r 113)
 # If sanitizer is enabled, repeat few runs using it
 if(USE_SANITIZER)
-    smash_add_runtest(sanitizer_box smash_sanitizer smash_sanitizer
-                      -e 5.0
-                      -m Box
-                      -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
-                      -c "Modi: {Box: {Length: 10.0}}"
-                      -c "Modi: {Box: {Temperature: 0.2}}"
-                      -c "Modi: {Box: {Start_Time: 0.0}}"
-                      -c "Modi: {Box: {Init_Multiplicities: {211: 100}}}"
-                      -c "Modi: {Box: {Init_Multiplicities: {-211: 100}}}"
-                      -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
-                      -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
-                      -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}"
-                      -c "Collision_Term: {Strings: false}")
-    smash_add_runtest(sanitizer_collider smash_sanitizer smash_sanitizer
-                      -e 5.0
-                      -m Collider
-                      -c "Collision_Term: {Strings: false}")
-    smash_add_runtest(sanitizer_sphere smash_sanitizer smash_sanitizer
-                      -e 5.0
-                      -m Sphere
-                      -c "Modi: {Sphere: {Radius: 5.0}}"
-                      -c "Modi: {Sphere: {Temperature: 0.2}}"
-                      -c "Modi: {Sphere: {Start_Time: 0.0}}"
-                      -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
-                      -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
-                      -c "Modi: {Sphere: {Init_Multiplicities: {-211: 100}}}"
-                      -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
-                      -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
-                      -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}"
-                      -c "Collision_Term: {Strings: false}")
+    smash_add_run_test(sanitizer_box smash_sanitizer smash_sanitizer
+                       -e 5.0
+                       -m Box
+                       -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                       -c "Modi: {Box: {Length: 10.0}}"
+                       -c "Modi: {Box: {Temperature: 0.2}}"
+                       -c "Modi: {Box: {Start_Time: 0.0}}"
+                       -c "Modi: {Box: {Init_Multiplicities: {211: 100}}}"
+                       -c "Modi: {Box: {Init_Multiplicities: {-211: 100}}}"
+                       -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
+                       -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
+                       -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}"
+                       -c "Collision_Term: {Strings: false}")
+    smash_add_run_test(sanitizer_collider smash_sanitizer smash_sanitizer
+                       -e 5.0
+                       -m Collider
+                       -c "Collision_Term: {Strings: false}")
+    smash_add_run_test(sanitizer_sphere smash_sanitizer smash_sanitizer
+                       -e 5.0
+                       -m Sphere
+                       -c "Modi: {Sphere: {Radius: 5.0}}"
+                       -c "Modi: {Sphere: {Temperature: 0.2}}"
+                       -c "Modi: {Sphere: {Start_Time: 0.0}}"
+                       -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                       -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
+                       -c "Modi: {Sphere: {Init_Multiplicities: {-211: 100}}}"
+                       -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
+                       -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
+                       -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}"
+                       -c "Collision_Term: {Strings: false}")
 endif()
 # If ROOT, HepMC3 and Rivet are found, also make a run using them (through output files)
 if(ROOT_FOUND AND HepMC3_FOUND AND Rivet_FOUND)
-    smash_add_runtest(third_party_output_run smash smash
-                      -i ${PROJECT_SOURCE_DIR}/input/config.yaml
-                      -c "Output: {Particles: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
-                      -c "Output: {Collisions: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
-                      -c "Output: {Rivet: {Format: [YODA]}}"
-                      -c "Output: {Rivet: {Analyses: [MC_FSPARTICLES]}}")
+    smash_add_run_test(third_party_output_run smash smash
+                       -i ${PROJECT_SOURCE_DIR}/input/config.yaml
+                       -c "Output: {Particles: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
+                       -c "Output: {Collisions: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
+                       -c "Output: {Rivet: {Format: [YODA]}}"
+                       -c "Output: {Rivet: {Analyses: [MC_FSPARTICLES]}}")
 endif()
 # Finally mimic an external project using SMASH as a library, verifying that few executables linking
 # to smash library can be built and run without crashing.
