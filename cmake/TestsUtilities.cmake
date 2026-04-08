@@ -10,13 +10,13 @@
 # Function to add a unit test to SMASH
 function(smash_add_unit_test name)
     _smash_add_exe(${name})
-    _smash_add_test(${name} 'unit;code' ${name} ${name})
+    _smash_add_test(${name} "unit;code" ${name} ${name})
 endfunction()
 
 # Function to add an integration test to SMASH
 function(smash_add_integration_test name)
     _smash_add_exe(${name})
-    _smash_add_test(${name} 'integration;code' ${name} ${name})
+    _smash_add_test(${name} "integration;code" ${name} ${name})
 endfunction()
 
 # Function to add a functional test to SMASH
@@ -25,14 +25,14 @@ function(smash_add_functional_test name)
              COMMAND ${Python3_EXECUTABLE} "${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py"
                      --source "${PROJECT_SOURCE_DIR}" --binary "${PROJECT_BINARY_DIR}")
     set_tests_properties(functional_${name} PROPERTIES FIXTURES_REQUIRED fixture_compile_smash
-                                                       LABELS "functional")
+                                                       LABELS "functional;physics")
 endfunction()
 
 # The following function add a physics "test" to run e.g. smash with certain arguments, choosing an
 # output directory according to the test name
 function(smash_add_run_test name depends)
     _smash_add_test(${name}
-                    'run;physics'
+                    "run;physics"
                     ${depends}
                     ${ARGN}
                     -o
@@ -109,7 +109,7 @@ endfunction()
 # to be an implementation detail and the code adding test should not use this function.
 function(_smash_add_test name label depends)
     add_test(NAME ${name} COMMAND ${ARGN})
-    set_tests_properties(${name} PROPERTIES LABELS ${label})
+    set_tests_properties(${name} PROPERTIES LABELS "${label}")
     if(APPLE)
         # Known false positive container overflow error of AddressSanitizer on Mac.
         # https://github.com/google/sanitizers/wiki/AddressSanitizerContainerOverflow
