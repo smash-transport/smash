@@ -26,12 +26,11 @@ namespace smash {
  *
  * Implements dilepton production via the process pn -> pn e⁺e⁻ using
  * the phase-space corrected soft-photon approximation (SPA) as e.g. outlined
- * in Weil (2013) (see Eq. (40)–(43) in the reference document).
+ * in \iref{Weil:2013mya} (see eq. (40)–(43) in the reference document).
  *
- * The electromagnetic pion form factor (PEFF) from Shyam & Mosel (2010),
- * Phys. Rev. C 82, 062201(R) is optionally applied, modifying the
- * differential cross section by |F_pi(M²)|². The form factor accounts
- * for the internal charged pion propagator.
+ * The electromagnetic pion form factor (PEFF) from \iref{Shyam:2010vr} is
+ * optionally applied, modifying the differential cross section by |F_pi(M²)|².
+ * The form factor accounts for the internal charged pion propagator.
  *
  * Kinematic variables sampled (analogous to BremsstrahlungAction):
  *   - M:     invariant mass of the dilepton pair  [2me, M_max]
@@ -188,6 +187,13 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   double gamma_rho(double M_sq) const;
 
   // ── Little helper function ────────────────────────────────────────────
+  /**
+   * Helper function for calculating R_2 as defined in \iref{Weil:2013mya},
+   * eq. (42).
+   *
+   * \param[in] s Mandelstam variable s [GeV²]
+   * \return R_2(M²) (dimensionless)
+   */
   double R_2_helper(const double s) const;
   /**
    * Holds the bremsstrahlung branch. As of now, this will hold only one branch.

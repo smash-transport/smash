@@ -3911,9 +3911,9 @@ struct InputKeys {
    * \optional_key{key_CT_dileptons_form_factor_,Form_Factor,string,"Off"}
    *
    * - `"Off"` &rarr; Implicitly using a factor of 1.
-   * - `"FF1"` &rarr; Photon couples to pion direclty via $\rho_0$ meson.
+   * - `"FF1"` &rarr; Photon couples to pion direclty via \f$\rho_0\f$ meson.
    * - `"FF2"` &rarr; Photon couples 50% directly to intrinsic quark structure
-   * of pion and 50% indirectly via $\rho_0$ meson.
+   * of pion and 50% indirectly via \f$\rho_0\f$ meson.
    */
   /**
    * \see_key{key_CT_dileptons_form_factor_}
