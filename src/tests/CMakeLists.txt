@@ -20,7 +20,7 @@ option(FORMAT_TEST_OUTPUT_FOR_VIM
 # Load functionality to add different types of tests and setup the environment for functional tests
 include(TestsUtilities)
 
-# unit tests for classes:
+# -------------------------------- Unit tests  --------------------------------
 smash_add_unittest(action)
 smash_add_unittest(actions)
 smash_add_unittest(alphaclusterednucleus)
@@ -104,11 +104,21 @@ smash_add_unittest(without_float_traps)
 smash_add_unittest(woods-saxon)
 smash_add_unittest(yamltest)
 
-# verify that the binary has a cli help
-smash_add_runtest(smash_help smash smash -h)
+# ----------------------------- Functional tests  -----------------------------
+option(ENABLE_FUNCTIONAL_TESTS "Turn this on to enable SMASH functional tests." OFF)
+if(ENABLE_FUNCTIONAL_TESTS)
+    do_setup_for_functional_tests(setup_was_successful)
+    if(setup_was_successful)
+        smash_add_functionaltest(ic_for_hybrid)
+    endif()
+else()
+    message(STATUS "Functional tests disabled.")
+endif()
 
-# Verify that the binary runs with the various modi; reading the shipped default configs, particles
-# and decaymodes files from the input directory:
+# -------------------------------- Run tests  ---------------------------------
+smash_add_runtest(smash_help smash smash -h)
+# Verify that the binary runs with the various modi. Here we use the shipped default configurations
+# file, while particles and decay modes files are taken from the input directory.
 smash_add_runtest(smash_run smash smash)
 smash_add_runtest(box_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/box/config.yaml
@@ -140,39 +150,10 @@ smash_add_runtest(custom_nucleus_run smash smash
                   -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
                   -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
 )
-
-# Setup of functional tests. Since these are written in Python, here the interpreter is found, a
-# virtual environment is setup, the interpreter of the virtual environment is looked for and the
-# needed Python requirements are installed. If any step fails, functional tests are disabled. Note
-# that it is not necessary to activate or deactivate the virtual environment because we run
-# functional tests explicitly using the Python_EXECUTABLE which is now set to that of the virtual
-# environment.
-option(ENABLE_FUNCTIONAL_TESTS "Turn this on to enable SMASH functional tests." OFF)
-if(ENABLE_FUNCTIONAL_TESTS)
-    do_setup_for_functional_tests(setup_was_successful)
-    if(setup_was_successful)
-        smash_add_functionaltest(ic_for_hybrid)
-    endif()
-else()
-    message(STATUS "Functional tests disabled.")
-endif()
-
-if(ROOT_FOUND AND HepMC3_FOUND AND Rivet_FOUND)
-    smash_add_runtest(third_party_output_run smash smash
-                      -i ${PROJECT_SOURCE_DIR}/input/config.yaml
-                      -c "Output: {Particles: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
-                      -c "Output: {Collisions: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
-                      -c "Output: {Rivet: {Format: [YODA]}}"
-                      -c "Output: {Rivet: {Analyses: [MC_FSPARTICLES]}}")
-endif()
-
-# Test the shipped config files for potentials and deformed nuclei by verifying the binary runs with
-# them.
 smash_add_runtest(potentials_run smash smash -i ${PROJECT_SOURCE_DIR}/input/potentials/config.yaml)
 smash_add_runtest(deformednucleus_run smash smash
                   -i ${PROJECT_SOURCE_DIR}/input/deformed_nucleus/config.yaml)
-
-# verify that binary runs certain time (this corresponds to 20 steps)
+# Further verify that smash binary runs for a certain time (this corresponds to 20 steps)
 smash_add_runtest(box_steps smash smash
                   -e 2.0
                   -c "General: {Delta_Time: 0.1}"
@@ -203,11 +184,12 @@ smash_add_runtest(sphere_steps smash smash
                   -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
                   -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
                   -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}")
+# Verify that also other behavior of smash executable runs without crashing
 smash_add_runtest(particle_table_dump smash smash -x)
 smash_add_runtest(reactions_dump smash smash -l)
 smash_add_runtest(crosssection_dump smash smash -s 2112,2212)
 smash_add_runtest(resonance_spectral_function_dump smash smash -r 113)
-
+# If sanitizer is enabled, repeat few runs using it
 if(USE_SANITIZER)
     smash_add_runtest(sanitizer_box smash_sanitizer smash_sanitizer
                       -e 5.0
@@ -240,12 +222,21 @@ if(USE_SANITIZER)
                       -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}"
                       -c "Collision_Term: {Strings: false}")
 endif()
-
+# If ROOT, HepMC3 and Rivet are found, also make a run using them (through output files)
+if(ROOT_FOUND AND HepMC3_FOUND AND Rivet_FOUND)
+    smash_add_runtest(third_party_output_run smash smash
+                      -i ${PROJECT_SOURCE_DIR}/input/config.yaml
+                      -c "Output: {Particles: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
+                      -c "Output: {Collisions: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
+                      -c "Output: {Rivet: {Format: [YODA]}}"
+                      -c "Output: {Rivet: {Analyses: [MC_FSPARTICLES]}}")
+endif()
+# Finally mimic an external project using SMASH as a library, verifying that few executables linking
+# to smash library can be built and run without crashing.
 add_test(NAME usage_of_SMASH_as_library
          COMMAND bash run_examples_for_testing.bash "${PROJECT_SOURCE_DIR}"
                  "${Pythia_CONFIG_EXECUTABLE}"
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/examples/using_SMASH_as_library)
-
 set_tests_properties(usage_of_SMASH_as_library PROPERTIES ENVIRONMENT
                                                           SMASH_BUILD_DIR=${PROJECT_BINARY_DIR})
 

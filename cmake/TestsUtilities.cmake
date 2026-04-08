@@ -41,10 +41,17 @@ function(smash_add_runtest name depends)
 endfunction()
 
 # The following function sets up a Python virtual environment and installs the requirements for
-# functional tests. It also sets up a test fixture to ensure that smash is compiled before running
-# any functional test. The function sets a boolean variable passed as argument to TRUE if the setup
-# was successful and to FALSE otherwise. Furthermore it sets the Python3_EXECUTABLE in the parent
-# scope if the setup was successful, which is needed to run the functional tests.
+# functional tests.  Since these are written in Python, here the interpreter is found, a virtual
+# environment is setup, the interpreter of the virtual environment is looked for and the needed
+# Python requirements are installed. If any step fails, functional tests are disabled. Note that it
+# is not necessary to activate or deactivate the virtual environment because we run functional tests
+# explicitly using the Python_EXECUTABLE which is now set to that of the virtual environment.
+# ~~~
+# Function "side effects" are the following:
+#  - sets a variable passed as argument to TRUE if the setup was successful and to FALSE otherwise;
+#  - sets the Python3_EXECUTABLE in the parent scope if the setup was successful, which is needed
+#    to run the functional tests.
+# ~~~
 function(do_setup_for_functional_tests setup_was_successful)
     _smash_setup_python_venv(VENV_OK PYTHON_EXEC PYTHON_VENV_PATH)
     if(VENV_OK)
