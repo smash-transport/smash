@@ -66,10 +66,10 @@ enum class CalculationFrame {
 enum class DileptonBremsFormFactor {
   /// Don't use form factors, i.e. multiply by 1.
   Off,
-  /// Photon couples to pion only via \rho_0 meson.
+  /// Photon couples to pion only via $\rho_0$ meson.
   FF1,
   /// Photon couples 50% directly to intrinsice quark structure of pion and
-  /// 50% indirectly via \rho_0 meson.
+  /// 50% indirectly via $\rho_0$ meson.
   FF2,
 };
 
