@@ -362,7 +362,7 @@ generation](https://www.doxygen.nl/manual/docblocks.html). In
 general, it uses both comments and the source code itself to generate the
 documentation. In general documentation should look like this:
 
-``` cpp
+```cpp
 /**
  * \brief Brief description of the class
  * Full description of the class.
@@ -435,7 +435,9 @@ In order to refer to a paper inside a doxygen comment, the `\iref` command shoul
 be used:
 
 ```cpp
-/** ... this function implements ... as described in \iref{XXX}. */
+/**
+ * ... this function implements ... as described in \iref{XXX}.
+ */
 int fun int(x);
 ```
 
@@ -455,7 +457,9 @@ follows: A corresponding BibTex entry should be put into `doc/non_inspire.bib`
 manually. It can then be referenced via the `\cite` command:
 
 ```cpp
-/** ... this function implements ... as described in \cite XXX. */
+/**
+ * ... this function implements ... as described in \cite XXX.
+ */
 int fun int(x);
 ```
 
