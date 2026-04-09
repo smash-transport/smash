@@ -396,7 +396,7 @@ if(BUILD_TESTING)
     # internal features to tests targets that will link against this library.
     add_library(smash_testlib STATIC $<TARGET_OBJECTS:smash_objlib>)
     target_link_libraries(smash_testlib PUBLIC vir-test smash_objlib smash_api)
-    set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash CXX_EXTENSIONS OFF)
+    set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash-for-tests CXX_EXTENSIONS OFF)
 
     # Look for sanitizers supported by the compiler. Sanitizers add instrumentation code to the
     # executable that test correctness of the code:
