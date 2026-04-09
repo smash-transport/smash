@@ -1,106 +1,301 @@
 ########################################################
 #
-#    Copyright (c) 2012-2025
+#    Copyright (c) 2012-2026
 #      SMASH Team
 #
 #    BSD 3-clause license
 #
 ########################################################
 
-# Add 3rd-party virtest library
-include_directories(SYSTEM "${CMAKE_SOURCE_DIR}/3rdparty/virtest")
-
 # Copy needed input file to build directory
-file(COPY ../../input/config.yaml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+configure_file(../../input/config.yaml ${CMAKE_CURRENT_BINARY_DIR}/config.yaml COPYONLY)
 
+# Add option for Vim users to format the unit test output in a way that works with the Vim quickfix
+# parser. This allows them to directly jump to the line that failed in the test when running the
+# run_* targets. This serves few developers, but the maintenance cost is very low.
 option(FORMAT_TEST_OUTPUT_FOR_VIM
        "If ON the unit test output of run_* targets will work with the vim quickfix parser and vim will directly take you to the line that failed."
        OFF)
-set(UNITTEST_ARGS "")
-if(FORMAT_TEST_OUTPUT_FOR_VIM)
-    set(UNITTEST_ARGS "-v")
+
+# Load functionality to add different types of tests and setup the environment for functional tests
+include(TestsUtilities)
+
+# -------------------------------- Unit tests  --------------------------------
+smash_add_unit_test(action)
+smash_add_unit_test(actions)
+smash_add_unit_test(alphaclusterednucleus)
+smash_add_unit_test(angles)
+smash_add_unit_test(angles_distribution)
+smash_add_unit_test(angles_zero)
+smash_add_unit_test(average)
+smash_add_unit_test(binaryoutput)
+smash_add_unit_test(clebschgordan)
+smash_add_unit_test(clebschgordan_lookup)
+smash_add_unit_test(clock)
+smash_add_unit_test(configuration)
+smash_add_unit_test(decayaction)
+smash_add_unit_test(decaymodes)
+smash_add_unit_test(decaytree)
+smash_add_unit_test(deformednucleus)
+smash_add_unit_test(density)
+smash_add_unit_test(dileptons)
+smash_add_unit_test(distributions)
+smash_add_unit_test(dynamic_fluidization)
+smash_add_unit_test(enable_float_traps)
+smash_add_unit_test(energymomentumtensor)
+smash_add_unit_test(filelock)
+smash_add_unit_test(formfactors)
+smash_add_unit_test(fourvector)
+smash_add_unit_test(icoutput)
+smash_add_unit_test(grandcan_thermalizer)
+smash_add_unit_test(grid)
+smash_add_unit_test(hadgas_eos)
+smash_add_unit_test(hadgas_eos2)
+smash_add_unit_test(hypersurfacecrossing)
+smash_add_unit_test(initial_conditions)
+smash_add_unit_test(input_keys)
+smash_add_unit_test(integrate)
+smash_add_unit_test(interpolation)
+smash_add_unit_test(interpolation2D)
+smash_add_unit_test(isospin)
+smash_add_unit_test(key)
+smash_add_unit_test(kinematics)
+smash_add_unit_test(lattice)
+smash_add_unit_test(listmodus)
+smash_add_unit_test(lorentzboost)
+smash_add_unit_test(lowess)
+smash_add_unit_test(mass_sampling)
+smash_add_unit_test(nucleus)
+smash_add_unit_test(numeric_cast)
+smash_add_unit_test(oscar2013output)
+smash_add_unit_test(oscar1999output)
+smash_add_unit_test(outputformatter)
+smash_add_unit_test(parametrizations)
+smash_add_unit_test(particledata)
+smash_add_unit_test(particles)
+smash_add_unit_test(particletype)
+smash_add_unit_test(pauliblocking)
+smash_add_unit_test(pdgcode)
+smash_add_unit_test(photons)
+smash_add_unit_test(potentials)
+smash_add_unit_test(processbranch)
+smash_add_unit_test(stringprocess)
+smash_add_unit_test(propagate)
+smash_add_unit_test(quantumnumbers)
+smash_add_unit_test(quantumsampling)
+smash_add_unit_test(random)
+smash_add_unit_test(rootsolver)
+smash_add_unit_test(sanity)
+smash_add_unit_test(scatteraction)
+smash_add_unit_test(scatteractionmulti)
+smash_add_unit_test(scatteractionsfinder)
+smash_add_unit_test(sha256)
+smash_add_unit_test(spheremodus)
+smash_add_unit_test(spectral_functions)
+smash_add_unit_test(stringfunctions)
+smash_add_unit_test(tabulation)
+smash_add_unit_test(threevector)
+smash_add_unit_test(traits)
+smash_add_unit_test(two_unstable_products)
+smash_add_unit_test(vtkoutput)
+smash_add_unit_test(width)
+smash_add_unit_test(without_float_traps)
+smash_add_unit_test(woods-saxon)
+smash_add_unit_test(yamltest)
+
+# ----------------------------- Integration tests  -----------------------------
+smash_add_integration_test(experiment)
+
+# ----------------------------- Functional tests  -----------------------------
+option(ENABLE_FUNCTIONAL_TESTS "Turn this on to enable SMASH functional tests." OFF)
+if(ENABLE_FUNCTIONAL_TESTS)
+    do_setup_for_functional_tests(setup_was_successful)
+    if(setup_was_successful)
+        smash_add_functional_test(ic_for_hybrid)
+    endif()
+else()
+    message(STATUS "Functional tests disabled.")
 endif()
 
-# tests: Helper macro that adds a run_<name> target
-macro(smash_add_test name depends)
-    add_test(NAME ${name} COMMAND ${ARGN})
-    if(APPLE)
-        # Known false positive container overflow error of AddressSanitizer on Mac.
-        # https://github.com/google/sanitizers/wiki/AddressSanitizerContainerOverflow
-        set_property(TEST ${name} PROPERTY ENVIRONMENT "ASAN_OPTIONS=detect_container_overflow=0")
-    endif()
-    add_custom_target(run_${name}
-                      COMMAND ${ARGN} ${UNITTEST_ARGS}
-                      DEPENDS ${depends}
-                      COMMENT "Executing test ${name}"
-                      VERBATIM)
-endmacro()
+# -------------------------------- Run tests  ---------------------------------
+smash_add_run_test(smash_help smash smash -h)
+# Verify that the binary runs with the various modi. Here we use the shipped default configurations
+# file, while particles and decay modes files are taken from the input directory.
+smash_add_run_test(smash_run smash smash)
+smash_add_run_test(box_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/box/config.yaml
+                   -p ${PROJECT_SOURCE_DIR}/input/box/particles.txt
+                   -d ${PROJECT_SOURCE_DIR}/input/box/decaymodes.txt)
+smash_add_run_test(stochastic_box_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/stochastic_box/config.yaml
+                   -p ${PROJECT_SOURCE_DIR}/input/stochastic_box/particles_only_pi0.txt
+                   -d ${PROJECT_SOURCE_DIR}/input/stochastic_box/decaymodes_all_off.txt)
+smash_add_run_test(multi_particle_box_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/multi_particle_box/config.yaml
+                   -p ${PROJECT_SOURCE_DIR}/input/multi_particle_box/particles.txt
+                   -d ${PROJECT_SOURCE_DIR}/input/multi_particle_box/decaymodes.txt)
+smash_add_run_test(collider_run smash smash -m Collider)
+smash_add_run_test(collider_frozen_fermi_run smash smash -m Collider
+                   -c "Modi: {Collider: {Fermi_Motion: frozen}}")
+smash_add_run_test(sphere_run smash smash -i ${PROJECT_SOURCE_DIR}/input/sphere/config.yaml)
+smash_add_run_test(list_run smash smash -i ${PROJECT_SOURCE_DIR}/input/list/config.yaml
+                   -c "Modi: {List: {File_Directory: ${PROJECT_SOURCE_DIR}/input/list}}")
+smash_add_run_test(dilepton_run smash smash -i ${PROJECT_SOURCE_DIR}/input/dileptons/config.yaml
+                   -d ${PROJECT_SOURCE_DIR}/input/dileptons/decaymodes.txt)
+smash_add_run_test(light_nuclei_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/config.yaml
+                   -p ${PROJECT_SOURCE_DIR}/input/light_nuclei/particles.txt
+                   -d ${PROJECT_SOURCE_DIR}/input/light_nuclei/decaymodes.txt)
+smash_add_run_test(custom_nucleus_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/custom_nucleus/config.yaml
+                   -c "General: {Nevents: 2}"
+                   -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
+                   -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
+)
+smash_add_run_test(potentials_run smash smash -i ${PROJECT_SOURCE_DIR}/input/potentials/config.yaml)
+smash_add_run_test(deformednucleus_run smash smash
+                   -i ${PROJECT_SOURCE_DIR}/input/deformed_nucleus/config.yaml)
+# Further verify that smash binary runs for a certain time (this corresponds to 20 steps)
+smash_add_run_test(box_steps smash smash
+                   -e 2.0
+                   -c "General: {Delta_Time: 0.1}"
+                   -m Box
+                   -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                   -c "Modi: {Box: {Length: 10.0}}"
+                   -c "Modi: {Box: {Temperature: 0.2}}"
+                   -c "Modi: {Box: {Start_Time: 0.0}}"
+                   -c "Modi: {Box: {Init_Multiplicities: {211: 100}}}"
+                   -c "Modi: {Box: {Init_Multiplicities: {-211: 100}}}"
+                   -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
+                   -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
+                   -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}")
+smash_add_run_test(collider_steps smash smash
+                   -e 2.0
+                   -c "General: {Delta_Time: 0.1}"
+                   -m Collider)
+smash_add_run_test(sphere_steps smash smash
+                   -e 2.0
+                   -c "General: {Delta_Time: 0.1}"
+                   -m Sphere
+                   -c "Modi: {Sphere: {Radius: 5.0}}"
+                   -c "Modi: {Sphere: {Temperature: 0.2}}"
+                   -c "Modi: {Sphere: {Start_Time: 0.0}}"
+                   -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                   -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
+                   -c "Modi: {Sphere: {Init_Multiplicities: {-211: 100}}}"
+                   -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
+                   -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
+                   -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}")
+# Verify that also other behavior of smash executable runs without crashing
+smash_add_run_test(particle_table_dump smash smash -x)
+smash_add_run_test(reactions_dump smash smash -l)
+smash_add_run_test(crosssection_dump smash smash -s 2112,2212)
+smash_add_run_test(resonance_spectral_function_dump smash smash -r 113)
+# If sanitizer is enabled, repeat few runs using it
+if(USE_SANITIZER)
+    smash_add_run_test(sanitizer_box smash_sanitizer smash_sanitizer
+                       -e 5.0
+                       -m Box
+                       -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                       -c "Modi: {Box: {Length: 10.0}}"
+                       -c "Modi: {Box: {Temperature: 0.2}}"
+                       -c "Modi: {Box: {Start_Time: 0.0}}"
+                       -c "Modi: {Box: {Init_Multiplicities: {211: 100}}}"
+                       -c "Modi: {Box: {Init_Multiplicities: {-211: 100}}}"
+                       -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
+                       -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
+                       -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}"
+                       -c "Collision_Term: {Strings: false}")
+    smash_add_run_test(sanitizer_collider smash_sanitizer smash_sanitizer
+                       -e 5.0
+                       -m Collider
+                       -c "Collision_Term: {Strings: false}")
+    smash_add_run_test(sanitizer_sphere smash_sanitizer smash_sanitizer
+                       -e 5.0
+                       -m Sphere
+                       -c "Modi: {Sphere: {Radius: 5.0}}"
+                       -c "Modi: {Sphere: {Temperature: 0.2}}"
+                       -c "Modi: {Sphere: {Start_Time: 0.0}}"
+                       -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
+                       -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
+                       -c "Modi: {Sphere: {Init_Multiplicities: {-211: 100}}}"
+                       -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
+                       -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
+                       -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}"
+                       -c "Collision_Term: {Strings: false}")
+endif()
+# If ROOT, HepMC3 and Rivet are found, also make a run using them (through output files)
+if(ROOT_FOUND AND HepMC3_FOUND AND Rivet_FOUND)
+    smash_add_run_test(third_party_output_run smash smash
+                       -i ${PROJECT_SOURCE_DIR}/input/config.yaml
+                       -c "Output: {Particles: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
+                       -c "Output: {Collisions: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
+                       -c "Output: {Rivet: {Format: [YODA]}}"
+                       -c "Output: {Rivet: {Analyses: [MC_FSPARTICLES]}}")
+endif()
+# Finally mimic an external project using SMASH as a library, verifying that few executables linking
+# to smash library can be built and run without crashing.
+add_test(NAME usage_of_SMASH_as_library
+         COMMAND bash run_examples_for_testing.bash "${PROJECT_SOURCE_DIR}"
+                 "${Pythia_CONFIG_EXECUTABLE}"
+         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/examples/using_SMASH_as_library)
+set_tests_properties(usage_of_SMASH_as_library PROPERTIES ENVIRONMENT
+                                                          SMASH_BUILD_DIR=${PROJECT_BINARY_DIR})
 
-macro(smash_add_exe name)
-    add_executable(${name} ${name}.cc)
-    target_link_libraries(${name} smash_testlib)
-    set_target_properties(${name} PROPERTIES CXX_EXTENSIONS OFF)
-    if(USE_SANITIZER)
-        set_target_properties(${name}
-                              PROPERTIES COMPILE_FLAGS
-                                         "${SANITIZER_FLAG} -DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/test_output/${name}\\\""
-                                         LINK_FLAGS ${SANITIZER_FLAG})
-    else()
-        set_target_properties(${name}
-                              PROPERTIES COMPILE_FLAGS
-                                         "-DSMASH_TEST_OUTPUT_PATH=\\\"${PROJECT_BINARY_DIR}/test_output/${name}\\\""
-        )
-    endif()
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        # Disable variable tracking in debug mode (never used so far and gcc gives annoying notes
-        # when failing to track them)
-        target_compile_options(${name} PRIVATE "-fno-var-tracking-assignments")
-        # The GNU -Wduplicated-branches flag makes compilation time of the lattice.cc test file
-        # increase by order(s) of magnitude and it cannot basically be used
-        if(${name} STREQUAL "lattice")
-            target_compile_options(${name} PRIVATE "-Wno-duplicated-branches")
-        endif()
-    endif()
-    if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
-        # It turned out that the -ffp-contract option of GNU and LLVM compilers (whose default is
-        # different in the two compilers and among versions) is affecting reproducibility of results
-        # when e.g. optimizing for different architectures (e.g. -march=native VS -march=x86-64).
-        # Therefore, we decided to switch this feature off for tests to ensure that tests behave in
-        # the same way on all machines.
-        target_compile_options(${name} PRIVATE "-ffp-contract=off")
-    endif()
-endmacro()
+# =================================================================================================
 
-macro(smash_add_unittest name)
-    smash_add_exe(${name})
-    smash_add_test(${name} ${name} ${name})
-endmacro()
-
-macro(smash_add_functionaltest name)
-    add_test(NAME functional_${name}
-             COMMAND ${Python3_EXECUTABLE} "${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py"
-                     --source "${PROJECT_SOURCE_DIR}" --binary "${PROJECT_BINARY_DIR}")
-    set_tests_properties(functional_${name} PROPERTIES FIXTURES_REQUIRED fixture_compile_smash)
-endmacro()
-
-# helper macro to run smash with certain arguments, choosing an output directory according to the
-# test name
-macro(smash_add_runtest name depends)
-    smash_add_test(${name}
-                   ${depends}
-                   ${ARGN}
-                   -o
-                   "${PROJECT_BINARY_DIR}/test_output/${name}"
-                   -f)
-endmacro()
-
-# helper macro that calls a command with --version option and save the output in a variable
-macro(get_version_string command output_variable)
-    execute_process(COMMAND ${command} --version OUTPUT_VARIABLE ${output_variable}
+# Helper function that calls a command with --version option and save the output in a variable
+function(get_version_string command output_variable)
+    execute_process(COMMAND ${command} --version OUTPUT_VARIABLE result
                     ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
-endmacro()
+    set(${output_variable} "${result}" PARENT_SCOPE)
+endfunction()
 
-# variable defining the regular expression for a generic version number
+# Setup tests to check that default run has no memory leaks, if valgrind is available
+find_program(VALGRIND_EXECUTABLE valgrind)
+if(VALGRIND_EXECUTABLE)
+    message(STATUS "Valgrind found at ${VALGRIND_EXECUTABLE}")
+    get_version_string(${VALGRIND_EXECUTABLE} VALGRIND_VERSION_STRING)
+    if(VALGRIND_VERSION_STRING MATCHES "^valgrind-3.11")
+        message(ATTENTION "There is a known bug with valgrind 3.11"
+                          " (unrecognised instruction) - disabling memchecks.")
+    else()
+        set(CTEST_MEMORYCHECK_COMMAND ${VALGRIND_EXECUTABLE})
+        set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
+        add_custom_target(memcheck_collider
+                          COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+                                  ${PROJECT_BINARY_DIR}/smash -c
+                                  "General: {End_Time: 5.0, Delta_Time: 0.1}" -o
+                                  "${PROJECT_BINARY_DIR}/test_output/memcheck_collider" -f
+                          DEPENDS smash
+                          COMMENT "Executing test memcheck_collider."
+                          VERBATIM)
+        add_custom_target(memcheck_box
+                          COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+                                  ${PROJECT_BINARY_DIR}/smash -c
+                                  "General: {End_Time: 5.0, Delta_Time: 0.1}" -i
+                                  ${PROJECT_SOURCE_DIR}/input/box/config.yaml -p
+                                  ${PROJECT_SOURCE_DIR}/input/box/particles.txt -d
+                                  ${PROJECT_SOURCE_DIR}/input/box/decaymodes.txt -o
+                                  "${PROJECT_BINARY_DIR}/test_output/memcheck_box" -f
+                          DEPENDS smash
+                          COMMENT "Executing test memcheck_box."
+                          VERBATIM)
+        add_custom_target(memcheck_sphere
+                          COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
+                                  ${PROJECT_BINARY_DIR}/smash -c
+                                  "General: {End_Time: 5.0, Delta_Time: 0.1}" -i
+                                  ${PROJECT_SOURCE_DIR}/input/sphere/config.yaml -o
+                                  "${PROJECT_BINARY_DIR}/test_output/memcheck_sphere" -f
+                          DEPENDS smash
+                          COMMENT "Executing test memcheck_sphere."
+                          VERBATIM)
+    endif()
+else()
+    message(STATUS "Valgrind not found. Memcheck tests are disabled!")
+endif()
+
+# Variable defining the regular expression for a generic version number
 set(GENERIC_VERSION_REGEX "[0-9]+([.][0-9]+([.][0-9]+([.][0-9]+)?)?)?")
 
 # test source code to be clean, requires cpplint in the path
@@ -251,333 +446,4 @@ if(GITSTATS)
                       COMMENT "Generating git statistics")
 else()
     message(ATTENTION "gitstats not found. The gitstats target will not be created.")
-endif()
-
-add_definitions("-DTEST_CONFIG_PATH=std::filesystem::path(\"${PROJECT_SOURCE_DIR}\")")
-add_definitions("-DBUILD_TESTS")
-
-# compile-only tests
-smash_add_exe(angles_distribution)
-smash_add_exe(angles_zero)
-smash_add_exe(woods-saxon)
-
-# unit tests for classes:
-smash_add_unittest(action)
-smash_add_unittest(actions)
-smash_add_unittest(alphaclusterednucleus)
-smash_add_unittest(angles)
-smash_add_unittest(average)
-smash_add_unittest(binaryoutput)
-smash_add_unittest(clebschgordan)
-smash_add_unittest(clebschgordan_lookup)
-smash_add_unittest(clock)
-smash_add_unittest(configuration)
-smash_add_unittest(decayaction)
-smash_add_unittest(decaymodes)
-smash_add_unittest(decaytree)
-smash_add_unittest(deformednucleus)
-smash_add_unittest(density)
-smash_add_unittest(dileptons)
-smash_add_unittest(distributions)
-smash_add_unittest(dynamic_fluidization)
-smash_add_unittest(enable_float_traps)
-smash_add_unittest(energymomentumtensor)
-smash_add_unittest(experiment)
-smash_add_unittest(filelock)
-smash_add_unittest(formfactors)
-smash_add_unittest(fourvector)
-smash_add_unittest(icoutput)
-smash_add_unittest(grandcan_thermalizer)
-smash_add_unittest(grid)
-smash_add_unittest(hadgas_eos)
-smash_add_unittest(hadgas_eos2)
-smash_add_unittest(hypersurfacecrossing)
-smash_add_unittest(initial_conditions)
-smash_add_unittest(input_keys)
-smash_add_unittest(integrate)
-smash_add_unittest(interpolation)
-smash_add_unittest(interpolation2D)
-smash_add_unittest(isospin)
-smash_add_unittest(key)
-smash_add_unittest(kinematics)
-smash_add_unittest(lattice)
-smash_add_unittest(listmodus)
-smash_add_unittest(lorentzboost)
-smash_add_unittest(lowess)
-smash_add_unittest(mass_sampling)
-smash_add_unittest(nucleus)
-smash_add_unittest(numeric_cast)
-smash_add_unittest(oscar2013output)
-smash_add_unittest(oscar1999output)
-smash_add_unittest(outputformatter)
-smash_add_unittest(parametrizations)
-smash_add_unittest(particledata)
-smash_add_unittest(particles)
-smash_add_unittest(particletype)
-smash_add_unittest(pauliblocking)
-smash_add_unittest(pdgcode)
-smash_add_unittest(photons)
-smash_add_unittest(potentials)
-smash_add_unittest(processbranch)
-smash_add_unittest(stringprocess)
-smash_add_unittest(propagate)
-smash_add_unittest(quantumnumbers)
-smash_add_unittest(quantumsampling)
-smash_add_unittest(random)
-smash_add_unittest(rootsolver)
-smash_add_unittest(sanity)
-smash_add_unittest(scatteraction)
-smash_add_unittest(scatteractionmulti)
-smash_add_unittest(scatteractionsfinder)
-smash_add_unittest(sha256)
-smash_add_unittest(spheremodus)
-smash_add_unittest(spectral_functions)
-smash_add_unittest(stringfunctions)
-smash_add_unittest(tabulation)
-smash_add_unittest(threevector)
-smash_add_unittest(traits)
-smash_add_unittest(two_unstable_products)
-smash_add_unittest(vtkoutput)
-smash_add_unittest(width)
-smash_add_unittest(without_float_traps)
-smash_add_unittest(yamltest)
-
-# verify that the binary has a cli help
-smash_add_runtest(smash_help smash smash -h)
-
-# Verify that the binary runs with the various modi; reading the shipped default configs, particles
-# and decaymodes files from the input directory:
-smash_add_runtest(smash_run smash smash)
-smash_add_runtest(box_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/box/config.yaml
-                  -p ${PROJECT_SOURCE_DIR}/input/box/particles.txt
-                  -d ${PROJECT_SOURCE_DIR}/input/box/decaymodes.txt)
-smash_add_runtest(stochastic_box_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/stochastic_box/config.yaml
-                  -p ${PROJECT_SOURCE_DIR}/input/stochastic_box/particles_only_pi0.txt
-                  -d ${PROJECT_SOURCE_DIR}/input/stochastic_box/decaymodes_all_off.txt)
-smash_add_runtest(multi_particle_box_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/multi_particle_box/config.yaml
-                  -p ${PROJECT_SOURCE_DIR}/input/multi_particle_box/particles.txt
-                  -d ${PROJECT_SOURCE_DIR}/input/multi_particle_box/decaymodes.txt)
-smash_add_runtest(collider_run smash smash -m Collider)
-smash_add_runtest(collider_frozen_fermi_run smash smash -m Collider
-                  -c "Modi: {Collider: {Fermi_Motion: frozen}}")
-smash_add_runtest(sphere_run smash smash -i ${PROJECT_SOURCE_DIR}/input/sphere/config.yaml)
-smash_add_runtest(list_run smash smash -i ${PROJECT_SOURCE_DIR}/input/list/config.yaml
-                  -c "Modi: {List: {File_Directory: ${PROJECT_SOURCE_DIR}/input/list}}")
-smash_add_runtest(dilepton_run smash smash -i ${PROJECT_SOURCE_DIR}/input/dileptons/config.yaml
-                  -d ${PROJECT_SOURCE_DIR}/input/dileptons/decaymodes.txt)
-smash_add_runtest(light_nuclei_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/config.yaml
-                  -p ${PROJECT_SOURCE_DIR}/input/light_nuclei/particles.txt
-                  -d ${PROJECT_SOURCE_DIR}/input/light_nuclei/decaymodes.txt)
-smash_add_runtest(custom_nucleus_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/custom_nucleus/config.yaml
-                  -c "General: {Nevents: 2}"
-                  -c "Modi: {Collider: {Projectile: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
-                  -c "Modi: {Collider: {Target: {Custom: {File_Directory: ${PROJECT_SOURCE_DIR}/input/custom_nucleus}}}}"
-)
-
-# Setup of functional tests. Since these are written in Python, here the interpreter is found, a
-# virtual environment is setup, the interpreter of the virtual environment is looked for and the
-# needed Python requirements are installed. If any step fails, functional tests are disabled.
-option(ENABLE_FUNCTIONAL_TESTS "Turn this on to enable SMASH functional tests." OFF)
-if(ENABLE_FUNCTIONAL_TESTS)
-    message(STATUS "Looking for Python3")
-    find_package(Python3 3.3 QUIET COMPONENTS Interpreter Development)
-    if(Python3_FOUND)
-        # Set up virtual environment and skip functional tests if anything fails
-        set(PYTHON_VENV_PATH "${PROJECT_BINARY_DIR}/python_venv")
-        execute_process(COMMAND ${Python3_EXECUTABLE} -m venv "${PYTHON_VENV_PATH}"
-                        RESULT_VARIABLE venv_result)
-        if(venv_result AND NOT venv_result EQUAL 0)
-            message(ATTENTION "Setting up Python3 venv failed. Functional tests disabled.")
-            set(ENABLE_FUNCTIONAL_TESTS OFF)
-        endif()
-        # Look again for Python, this time to locate that of the venv (taken from CMake discourse)
-        set(SYSTEM_PYTHON_EXECUTABLE ${Python3_EXECUTABLE})
-        set(ENV{VIRTUAL_ENV} "${PYTHON_VENV_PATH}") # Update the environment with VIRTUAL_ENV
-                                                    # variable (mimic the activate script)
-        set(Python3_FIND_VIRTUALENV FIRST) # Change the context of the search
-        unset(Python3_EXECUTABLE) # Needed as it is also an input variable for find_package
-        find_package(Python3 QUIET COMPONENTS Interpreter Development)
-        if(SYSTEM_PYTHON_EXECUTABLE STREQUAL Python3_EXECUTABLE)
-            message(FATAL_ERROR " \n" " Python3 venv executable is the same as the system one.\n"
-                                " This should not happen and needs to be investigated.\n")
-        endif()
-        message(STATUS "Python3 venv for functional tests setup at '${PYTHON_VENV_PATH}'.")
-        message(STATUS "Found Python3: ${Python3_EXECUTABLE}")
-    else()
-        message(ATTENTION "Python3 not found. Functional tests disabled.")
-        set(ENABLE_FUNCTIONAL_TESTS OFF)
-    endif()
-endif()
-if(ENABLE_FUNCTIONAL_TESTS)
-    message(STATUS "Installing Python3 requirements for functional tests into venv")
-    execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --upgrade pip -r
-                            "${PROJECT_SOURCE_DIR}/src/tests/functional/requirements.txt"
-                    RESULT_VARIABLE pip_install_result
-                    OUTPUT_FILE "${PYTHON_VENV_PATH}/pip_install_requirements.log")
-    if(pip_install_result AND NOT pip_install_result EQUAL 0)
-        message(ATTENTION "Installing Python3 requirements failed. Functional tests disabled.")
-        set(ENABLE_FUNCTIONAL_TESTS OFF)
-    else()
-        message(STATUS "Installing Python3 requirements for functional tests into venv - done")
-    endif()
-endif()
-# Finally create functional tests. Note that it is not necessary to activate or deactivate the
-# virtual environment because we run functional tests explicitly using the Python_EXECUTABLE which
-# is now set to that of the virtual environment.
-if(ENABLE_FUNCTIONAL_TESTS)
-    # Since all functional tests need smash executable to be compiled before running, we want ctest
-    # to first compile SMASH and then run the functional tests. In order to do so we use tests
-    # fixtures setting up a "test" to compile SMASH and using this as setup fixture. See CMake doc
-    # https://cmake.org/cmake/help/latest/prop_test/FIXTURES_REQUIRED.html for further information.
-    # Please note that we do not want to always compile SMASH before each test and hence we wrap the
-    # SMASH compilation into a small bash test to skip it if the smash exectuable exists.
-    set(BASH_CODE_FOR_TEST
-        "[[ ! -f '${CMAKE_BINARY_DIR}/smash' ]] && \
-            ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --config ${CMAKE_BUILD_TYPE} \
-                             --target smash  || exit 0")
-    add_test(NAME compile_smash_executable COMMAND bash -c ${BASH_CODE_FOR_TEST})
-    set_tests_properties(compile_smash_executable PROPERTIES FIXTURES_SETUP fixture_compile_smash)
-    smash_add_functionaltest(ic_for_hybrid)
-else()
-    message(STATUS "Functional tests disabled.")
-endif()
-
-if(ROOT_FOUND AND HepMC3_FOUND AND Rivet_FOUND)
-    smash_add_runtest(third_party_output_run smash smash
-                      -i ${PROJECT_SOURCE_DIR}/input/config.yaml
-                      -c "Output: {Particles: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
-                      -c "Output: {Collisions: {Format: [Root, HepMC_treeroot, HepMC_asciiv3]}}"
-                      -c "Output: {Rivet: {Format: [YODA]}}"
-                      -c "Output: {Rivet: {Analyses: [MC_FSPARTICLES]}}")
-endif()
-
-# Test the shipped config files for potentials and deformed nuclei by verifying the binary runs with
-# them.
-smash_add_runtest(potentials_run smash smash -i ${PROJECT_SOURCE_DIR}/input/potentials/config.yaml)
-smash_add_runtest(deformednucleus_run smash smash
-                  -i ${PROJECT_SOURCE_DIR}/input/deformed_nucleus/config.yaml)
-
-# verify that binary runs certain time (this corresponds to 20 steps)
-smash_add_runtest(box_steps smash smash
-                  -e 2.0
-                  -c "General: {Delta_Time: 0.1}"
-                  -m Box
-                  -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
-                  -c "Modi: {Box: {Length: 10.0}}"
-                  -c "Modi: {Box: {Temperature: 0.2}}"
-                  -c "Modi: {Box: {Start_Time: 0.0}}"
-                  -c "Modi: {Box: {Init_Multiplicities: {211: 100}}}"
-                  -c "Modi: {Box: {Init_Multiplicities: {-211: 100}}}"
-                  -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
-                  -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
-                  -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}")
-smash_add_runtest(collider_steps smash smash
-                  -e 2.0
-                  -c "General: {Delta_Time: 0.1}"
-                  -m Collider)
-smash_add_runtest(sphere_steps smash smash
-                  -e 2.0
-                  -c "General: {Delta_Time: 0.1}"
-                  -m Sphere
-                  -c "Modi: {Sphere: {Radius: 5.0}}"
-                  -c "Modi: {Sphere: {Temperature: 0.2}}"
-                  -c "Modi: {Sphere: {Start_Time: 0.0}}"
-                  -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
-                  -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
-                  -c "Modi: {Sphere: {Init_Multiplicities: {-211: 100}}}"
-                  -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
-                  -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
-                  -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}")
-smash_add_runtest(particle_table_dump smash smash -x)
-smash_add_runtest(reactions_dump smash smash -l)
-smash_add_runtest(crosssection_dump smash smash -s 2112,2212)
-smash_add_runtest(resonance_spectral_function_dump smash smash -r 113)
-
-# Setup tests to check that default run has no memory leaks, if valgrind is available
-find_program(CTEST_MEMORYCHECK_COMMAND valgrind)
-if(CTEST_MEMORYCHECK_COMMAND)
-    message(STATUS "Valgrind found at ${CTEST_MEMORYCHECK_COMMAND}")
-    get_version_string(${CTEST_MEMORYCHECK_COMMAND} VALGRIND_VERSION_STRING)
-    if(VALGRIND_VERSION_STRING MATCHES "^valgrind-3.11")
-        message(ATTENTION "There is a known bug with valgrind 3.11"
-                          " (unrecognised instruction) - disabling memchecks.")
-    else()
-        set(CTEST_MEMORYCHECK_COMMAND_OPTIONS "-v" "--error-exitcode=1")
-        add_custom_target(memcheck_collider
-                          COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-                                  ${PROJECT_BINARY_DIR}/smash -c
-                                  "General: {End_Time: 5.0, Delta_Time: 0.1}" -o
-                                  "${PROJECT_BINARY_DIR}/test_output/memcheck_collider" -f
-                          DEPENDS smash
-                          COMMENT "Executing test memcheck_collider."
-                          VERBATIM)
-        add_custom_target(memcheck_box
-                          COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-                                  ${PROJECT_BINARY_DIR}/smash -c
-                                  "General: {End_Time: 5.0, Delta_Time: 0.1}" -i
-                                  ${PROJECT_SOURCE_DIR}/input/box/config.yaml -p
-                                  ${PROJECT_SOURCE_DIR}/input/box/particles.txt -d
-                                  ${PROJECT_SOURCE_DIR}/input/box/decaymodes.txt -o
-                                  "${PROJECT_BINARY_DIR}/test_output/memcheck_box" -f
-                          DEPENDS smash
-                          COMMENT "Executing test memcheck_box."
-                          VERBATIM)
-        add_custom_target(memcheck_sphere
-                          COMMAND ${CTEST_MEMORYCHECK_COMMAND} ${CTEST_MEMORYCHECK_COMMAND_OPTIONS}
-                                  ${PROJECT_BINARY_DIR}/smash -c
-                                  "General: {End_Time: 5.0, Delta_Time: 0.1}" -i
-                                  ${PROJECT_SOURCE_DIR}/input/sphere/config.yaml -o
-                                  "${PROJECT_BINARY_DIR}/test_output/memcheck_sphere" -f
-                          DEPENDS smash
-                          COMMENT "Executing test memcheck_sphere."
-                          VERBATIM)
-    endif()
-else()
-    message(STATUS "Valgrind not found. Memcheck tests are disabled!")
-endif()
-
-add_test(NAME usage_of_SMASH_as_library
-         COMMAND bash run_examples_for_testing.bash "${PROJECT_SOURCE_DIR}"
-                 "${Pythia_CONFIG_EXECUTABLE}"
-         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/examples/using_SMASH_as_library)
-
-set_tests_properties(usage_of_SMASH_as_library PROPERTIES ENVIRONMENT
-                                                          SMASH_BUILD_DIR=${PROJECT_BINARY_DIR})
-
-if(USE_SANITIZER)
-    smash_add_runtest(sanitizer_box smash_sanitizer smash_sanitizer
-                      -e 5.0
-                      -m Box
-                      -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
-                      -c "Modi: {Box: {Length: 10.0}}"
-                      -c "Modi: {Box: {Temperature: 0.2}}"
-                      -c "Modi: {Box: {Start_Time: 0.0}}"
-                      -c "Modi: {Box: {Init_Multiplicities: {211: 100}}}"
-                      -c "Modi: {Box: {Init_Multiplicities: {-211: 100}}}"
-                      -c "Modi: {Box: {Init_Multiplicities: {111: 100}}}"
-                      -c "Modi: {Box: {Init_Multiplicities: {2212: 50}}}"
-                      -c "Modi: {Box: {Init_Multiplicities: {2112: 50}}}"
-                      -c "Collision_Term: {Strings: false}")
-    smash_add_runtest(sanitizer_collider smash_sanitizer smash_sanitizer
-                      -e 5.0
-                      -m Collider
-                      -c "Collision_Term: {Strings: false}")
-    smash_add_runtest(sanitizer_sphere smash_sanitizer smash_sanitizer
-                      -e 5.0
-                      -m Sphere
-                      -c "Modi: {Sphere: {Radius: 5.0}}"
-                      -c "Modi: {Sphere: {Temperature: 0.2}}"
-                      -c "Modi: {Sphere: {Start_Time: 0.0}}"
-                      -c "Modi: {Box: {Initial_Condition: thermal momenta}}"
-                      -c "Modi: {Sphere: {Init_Multiplicities: {211: 100}}}"
-                      -c "Modi: {Sphere: {Init_Multiplicities: {-211: 100}}}"
-                      -c "Modi: {Sphere: {Init_Multiplicities: {111: 100}}}"
-                      -c "Modi: {Sphere: {Init_Multiplicities: {2212: 50}}}"
-                      -c "Modi: {Sphere: {Init_Multiplicities: {2112: 50}}}"
-                      -c "Collision_Term: {Strings: false}")
 endif()

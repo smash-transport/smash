@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2018,2020,2022,2024
+ *    Copyright (c) 2014-2015,2017-2018,2020,2022,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,7 +14,12 @@
 
 #include "smash/nucleus.h"
 #include "smash/numeric_cast.h"
+#include "smash/particletype.h"
 #include "smash/pdgcode.h"
+
+namespace particles_txt {
+#include <particles.txt.h>
+}
 
 using namespace smash;
 
@@ -29,10 +34,11 @@ constexpr bool PRINT = false;
 // vanilla distribution is shifted so that its center-of-mass is at
 // 0/0/0.
 TEST(woods_saxon) {
-  // this is where we store the distributions. Components (0,1,2,3) =
-  // (x,y,z,r)
+  // Initialize the particle types to be able to create the nucleus
+  ParticleType::create_type_list(particles_txt::data);
+  // this is where we store the distributions. Components (0,1,2,3) = (x,y,z,r)
   std::map<int, int> hist_vanilla[4]{};
-  std::map<int, int> hist_centerd[4]{};
+  std::map<int, int> hist_centered[4]{};
   char name[4] = {'x', 'y', 'z', 'r'};
   // binning width for the distribution:
   constexpr double dx = 0.05;
@@ -55,10 +61,10 @@ TEST(woods_saxon) {
       // hand instead of doing it in a dedicated function / loop.
       FourVector centered = p.position() - com;
       double R = centered.abs3();
-      ++hist_centerd[0][numeric_cast<int>(std::floor(centered.x1() / dx))];
-      ++hist_centerd[1][numeric_cast<int>(std::floor(centered.x2() / dx))];
-      ++hist_centerd[2][numeric_cast<int>(std::floor(centered.x3() / dx))];
-      ++hist_centerd[3][numeric_cast<int>(std::floor(R / dx))];
+      ++hist_centered[0][numeric_cast<int>(std::floor(centered.x1() / dx))];
+      ++hist_centered[1][numeric_cast<int>(std::floor(centered.x2() / dx))];
+      ++hist_centered[2][numeric_cast<int>(std::floor(centered.x3() / dx))];
+      ++hist_centered[3][numeric_cast<int>(std::floor(R / dx))];
     }
   }
   constexpr int sigmabins = 4;
@@ -73,7 +79,7 @@ TEST(woods_saxon) {
       // entries from vanilla distribution
       int vanilla = b.second;
       // corresponding entry in centered distribution
-      int centerd = hist_centerd[c][b.first];
+      int centerd = hist_centered[c][b.first];
       // In order to make sensible comparisons, we require the number of
       // entries in both histograms to be >= 10.
       if (vanilla < 10 || centerd < 10) {
