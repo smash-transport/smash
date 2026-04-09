@@ -13,6 +13,13 @@ configure_file(../../input/config.yaml ${CMAKE_CURRENT_BINARY_DIR}/config.yaml C
 # Load functionality to add different types of tests and setup the environment for functional tests
 include(TestsUtilities)
 
+# Add a no-op target which all tests will depend on, so that we can build all tests by just running
+# "make tests". The rationale behind this choice is that tests are set up by default, but we do not
+# want "make install" to build all of them. Since by default the install target depends on the all
+# target (and we do not wan to disable that), we exclude tests executables from the all target and
+# create here a custom target "tests" that depends on all the test executables.
+add_custom_target(tests)
+
 # -------------------------------- Unit tests  --------------------------------
 smash_add_unit_test(action)
 smash_add_unit_test(actions)

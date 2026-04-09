@@ -390,11 +390,12 @@ endmacro()
 generate_headers(particles.txt decaymodes.txt)
 set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated_headers}")
 
-# tests:
+# Targets preparation for tests
 if(BUILD_TESTING)
-    # Add library for unit tests. Note that we link to smash_objlib publicly to propagate all SMASH
-    # internal features to tests targets that will link against this library.
-    add_library(smash_testlib STATIC $<TARGET_OBJECTS:smash_objlib>)
+    # Add library for tests. Note that we link to smash_objlib publicly to propagate all SMASH
+    # internal features to tests targets that will link against this library. Furthermore, we
+    # exclude this library from all, as tests are and this library is to build tests only.
+    add_library(smash_testlib EXCLUDE_FROM_ALL STATIC $<TARGET_OBJECTS:smash_objlib>)
     target_link_libraries(smash_testlib PUBLIC vir-test smash_objlib smash_api)
     set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash-for-tests CXX_EXTENSIONS OFF)
 
@@ -443,8 +444,9 @@ if(BUILD_TESTING)
     if(USE_SANITIZER)
         target_compile_options(smash_testlib PUBLIC ${SANITIZER_FLAG})
         target_link_options(smash_testlib PUBLIC ${SANITIZER_FLAG})
-
-        add_executable(smash_sanitizer smash.cc)
+        # Create a smash exectuable with sanitizers enabled to be used by tests. As for tests,
+        # exclude this target from all target, since it is meant to be used by tests only.
+        add_executable(smash_sanitizer EXCLUDE_FROM_ALL smash.cc)
         target_compile_definitions(smash_sanitizer PUBLIC BUILD_TESTS)
         target_compile_options(smash_sanitizer PUBLIC ${SANITIZER_FLAG})
         target_link_options(smash_sanitizer PUBLIC ${SANITIZER_FLAG})

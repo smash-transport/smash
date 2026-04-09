@@ -83,7 +83,8 @@ endfunction()
 # The following function adds an executable for a test, linking it to the test library and taking
 # care of some compiler options to be adjusted.
 function(_smash_add_exe name)
-    add_executable(${name} ${name}.cc)
+    add_executable(${name} EXCLUDE_FROM_ALL ${name}.cc)
+    add_dependencies(tests ${name})
     target_link_libraries(${name} PRIVATE smash_testlib)
     set_target_properties(${name} PROPERTIES CXX_EXTENSIONS OFF)
     target_compile_definitions(${name}
