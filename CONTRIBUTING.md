@@ -47,21 +47,51 @@ to nomenclature and whatever else you might notice.
 
 ## Testing
 
-### Unit tests
+Tests are set up by default by CMake.
+This can be totally disabled by passing the `-DBUILD_TESTING=OFF` command line
+option to `cmake`.
+Although usually set up, tests executables are excluded from the `all` target and
+therefore are not built by default.
+To build them you need to explicitly use the `tests` target, e.g. via
+```
+make tests
+```
+Tests are labelled in a way that CTest is aware of the following tests categories:
+ 1. type of test and
+ 2. testing approach.
+
+| Category | Label | Meaning |
+| :------: | :---: | :-----: |
+| 1 | `unit` | Unit test |
+| 1 | `integration` | Integration test |
+| 1 | `run` | "Test" that runs `smash` executable with given options |
+| 1 | `functional` | Functional test, uses `smash` as black box running it from Python |
+| 2 | `code` | Tests code correctness ignoring physics |
+| 2 | `physics` | Probes physics correctness |
+
+This allows the user to selectively run all tests in a whole category as
+```
+ctest -j4 -L <label>
+```
+where the `-L` option can be repeated:
+
+> With multiple `-L`, run tests where each regular expression matches at least one label.
+
+### Unit and integration tests
 
 To run the various unit tests, use the following:
-
+```
     make test
-
-Another way to do this is to use the CMake test runner:
-
+```
+Another more standard way to do this is to use the CMake test runner:
+```
     ctest
-
+```
 This has the advantage that it can also be used for running tests in parallel on
 a multicore machine, e.g. via
-
+```
     ctest -j4
-
+```
 (on a quad-core machine).
 
 If a test crashes, there might be some leftover in the `test_output` folder,
@@ -70,29 +100,32 @@ the folder.
 
 ### Functional tests
 
-The functional tests require Python3.3 to create a virtual environment where modules can be imported. They are disabled by default, but can be enabled before building the project with
-
+The functional tests require Python to create a virtual environment where modules
+can be imported. At the moment a Python version between `3.3` (included) and `3.12`
+(excluded) is required. They are disabled by default, but can be enabled before
+building the project with
+```
     cmake -DENABLE_FUNCTIONAL_TESTS=ON ..
-
+```
 They can be run collectively with
-
-    ctest -R functional
-
+```
+    ctest -L functional
+```
 Notice that there is no executable created for them, and so they cannot be run by calling `make` as for the unit tests.
 
 ### Runtime memory checking with valgrind
 
 The SMASH binary memory usage can be checked for the different modi with the the
 following cmake targets:
-
+```
     make memcheck_collider
     make memcheck_box
     make memcheck_sphere
-
+```
 Alternatively, the binary can be checked manually via:
-
+```
     valgrind -v ./smash
-
+```
 Note: There is known bug with `valgrind-3.11` that leads to an error about an
 unrecognized instruction. The memchecks will not run with this version.
 
@@ -448,7 +481,7 @@ BibTex entry &ndash; you only need the key, which is in the first line. Doxygen
 will automatically translate <tt>\\iref{XXX}</tt> into a link to the paper on
 Inspire, i.e. you only need to insert the <tt>\\iref{XXX}</tt> into the source
 code, no manual additions to the `/doc/inspire.bib` file are necessary.
-After adding a new reference, you need to run the script `doc/get_bibtex.sh`,
+After adding a new reference, you need to run the script `doc/get_bibtex.bash`,
 which will update the file `/doc/inspire.bib` by fetching the BibTex entries of
 all `\iref` references from Inspire. It also reports references that are not
 found on Inspire.
@@ -474,7 +507,7 @@ comments of the form `/*!\Userguide ... */` will be used. Example:
 ```cpp
 /*!\Userguide
  * \if user
- * This text ONLY appears in the User Guide (useful for a headline that the
+ * This text appears in the User Guide (useful for a headline that the
    normal documentation already has in the preceeding section)
  * \endif
  * \ifnot user
