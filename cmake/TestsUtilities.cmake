@@ -117,7 +117,7 @@ function(_smash_add_test name label depends)
                                                 "ASAN_OPTIONS=detect_container_overflow=0")
     endif()
     add_custom_target(run_${name}
-                      COMMAND ${ARGN} $<$<BOOL:${FORMAT_TEST_OUTPUT_FOR_VIM}>:-v>
+                      COMMAND ${ARGN}
                       DEPENDS ${depends}
                       COMMENT "Executing test ${name}"
                       VERBATIM)

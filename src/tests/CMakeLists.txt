@@ -10,13 +10,6 @@
 # Copy needed input file to build directory
 configure_file(../../input/config.yaml ${CMAKE_CURRENT_BINARY_DIR}/config.yaml COPYONLY)
 
-# Add option for Vim users to format the unit test output in a way that works with the Vim quickfix
-# parser. This allows them to directly jump to the line that failed in the test when running the
-# run_* targets. This serves few developers, but the maintenance cost is very low.
-option(FORMAT_TEST_OUTPUT_FOR_VIM
-       "If ON the unit test output of run_* targets will work with the vim quickfix parser and vim will directly take you to the line that failed."
-       OFF)
-
 # Load functionality to add different types of tests and setup the environment for functional tests
 include(TestsUtilities)
 
