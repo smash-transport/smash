@@ -362,7 +362,7 @@ generation](https://www.doxygen.nl/manual/docblocks.html). In
 general, it uses both comments and the source code itself to generate the
 documentation. In general documentation should look like this:
 
-``` cpp
+```cpp
 /**
  * \brief Brief description of the class
  * Full description of the class.
@@ -435,17 +435,20 @@ In order to refer to a paper inside a doxygen comment, the `\iref` command shoul
 be used:
 
 ```cpp
-/** ... this function implements ... as described in \iref{XXX}. */
+/**
+ * ... this function implements ... as described in \iref{XXX}.
+ */
 int fun int(x);
 ```
 
-Here, `XXX` should be the BibTex key for the paper from Inspire e.g.
+Here, `XXX` should be the BibTex key for the paper from Inspire, e.g.,
 `Weil:2016zrk`. In order to find it, search for the paper on
 http://inspirehep.net and then click on 'BibTex', which will show the complete
-BibTex entry (you only need the key, which is in the first line). Doxygen will
-automatically translate `\iref{XXX}` into a link to the paper on Inspire.
-
-After adding a new reference, you should run the script `doc/get_bibtex.sh`,
+BibTex entry &ndash; you only need the key, which is in the first line. Doxygen
+will automatically translate <tt>\\iref{XXX}</tt> into a link to the paper on
+Inspire, i.e. you only need to insert the <tt>\\iref{XXX}</tt> into the source
+code, no manual additions to the `/doc/inspire.bib` file are necessary.
+After adding a new reference, you need to run the script `doc/get_bibtex.sh`,
 which will update the file `/doc/inspire.bib` by fetching the BibTex entries of
 all `\iref` references from Inspire. It also reports references that are not
 found on Inspire.
@@ -455,7 +458,9 @@ follows: A corresponding BibTex entry should be put into `doc/non_inspire.bib`
 manually. It can then be referenced via the `\cite` command:
 
 ```cpp
-/** ... this function implements ... as described in \cite XXX. */
+/**
+ * ... this function implements ... as described in \cite XXX.
+ */
 int fun int(x);
 ```
 
