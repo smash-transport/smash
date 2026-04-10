@@ -132,13 +132,14 @@ string(TIMESTAMP BUILD_DATE)
 # SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
 find_package(Pythia 8.316 EXACT REQUIRED)
 if(Pythia_FOUND)
-    if(NOT TARGET Pythia::Pythia)
+    if(TARGET Pythia::Pythia)
+        target_link_libraries(smash_objlib PUBLIC Pythia::Pythia)
+        target_compile_definitions(smash_objlib PUBLIC "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+                                                       "PYTHIA_FOUND")
+    else()
         message(FATAL_ERROR "Pythia library found, but its target is somehow missing.\n"
                             "Ensure to be using the provided CMake module to find it.\n")
     endif()
-    target_link_libraries(smash_objlib PUBLIC Pythia::Pythia)
-    target_compile_definitions(smash_objlib PUBLIC "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
-                                                   "PYTHIA_FOUND")
 endif()
 
 find_package(GSL 2.0 REQUIRED)
