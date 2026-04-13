@@ -4,8 +4,8 @@
 # Adjust the address as needed. In particular, be sure to use a base image compatible with your cpu.
 # The official Docker images are prepared for a generic Intel/AMD x86-64 cpu.
 
-FROM ghcr.io/smash-transport/smash:newest
-
+ARG BASE_IMAGE="ghcr.io/smash-transport/smash:newest"
+FROM ${BASE_IMAGE}
 # Set bash as the default shell in this Dockerfile
 
 SHELL ["/bin/bash", "-c"]

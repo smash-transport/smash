@@ -71,49 +71,49 @@ WORKDIR /SMASH
 
 RUN mkdir /MNT
 
-# Install pythia
-
-ARG pythiaV="8316"
+# Get and build public SMASH
+ARG SMASH_VERSION="main"
 ENV PYTHIA8=/SMASH/pythia_install/
+
 RUN <<EOF
   set -eux
-  wget https://pythia.org/download/pythia83/pythia${pythiaV}.tgz
-  tar xf pythia${pythiaV}.tgz && rm pythia${pythiaV}.tgz
-  cd pythia${pythiaV}
+  cd /SMASH
+
+  git clone https://github.com/smash-transport/smash.git
+  cd smash
+  git checkout "${SMASH_VERSION}"
+
+  PYTHIA_VERSION=$(grep 'Pythia' src/CMakeLists.txt | grep -Eo '[1-9]?[0-9]\.[0-9]{3}' | head -n1)
+  PYTHIA_VERSION_NODOT=${PYTHIA_VERSION/./}
+
+  if [[ -z "${PYTHIA_VERSION}" ]]; then
+    echo "Error: could not detect Pythia version from src/CMakeLists.txt"
+    exit 1
+  fi
+
+  echo "Detected Pythia version: ${PYTHIA_VERSION}"
+  echo "Using tarball version: ${PYTHIA_VERSION_NODOT}"
+
+  cd /SMASH
+  wget https://pythia.org/download/pythia83/pythia${PYTHIA_VERSION_NODOT}.tgz
+  tar xf pythia${PYTHIA_VERSION_NODOT}.tgz
+  rm pythia${PYTHIA_VERSION_NODOT}.tgz
+
+  cd /SMASH/pythia${PYTHIA_VERSION_NODOT}
   ./configure --cxx-common="${C_CXX_ARCH_FLAG} -O3 -std=c++17 -fPIC -pthread" --prefix=${PYTHIA8}
   make -j$(nproc)
   make install
   echo ${PYTHIA8}/lib >> /etc/ld.so.conf
   ldconfig
-EOF
 
-ENV PYTHIA8DATA=${PYTHIA8}/share/Pythia8/xmldoc
-ENV PYTHIA_LIBRARY=${PYTHIA8}/lib
-ENV PYTHIA_INCLUDE=${PYTHIA8}/include
-ENV LD_LIBRARY_PATH=${PYTHIA_LIBRARY}:${LD_LIBRARY_PATH}
-ENV PATH=${PYTHIA8}/bin:${PATH}
+  mkdir -p /SMASH/smash/build
+  mkdir -p /SMASH/smash_bin
+  cd /SMASH/smash/build
 
-# Get and build public SMASH
-
-RUN <<EOF
-  set -eux
-  cd /SMASH
-  git clone https://github.com/smash-transport/smash.git
-  mkdir -p smash/build
-  mkdir -p smash_bin
-  cd smash/build
-  set +e
-  cmake -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${pythiaV}/bin/pythia8-config \
+  cmake -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${PYTHIA_VERSION_NODOT}/bin/pythia8-config \
         -DSMASH_ARCH_FLAG="${C_CXX_ARCH_FLAG}" ..
-  if [[ $? -ne 0 ]]; then
-    echo "Error: cmake SMASH build configuration failed!"
-    exit 1
-  fi
-  cd /SMASH/smash/build || exit 1
   make smash -j$(nproc)
-  if [[ $? -ne 0 ]]; then
-    echo "Error: make SMASH compilation failed!"
-  fi
+
   if [[ -f /SMASH/smash/build/smash ]]; then
     cp /SMASH/smash/build/smash /SMASH/smash_bin/
     cp /SMASH/smash/build/config.yaml /SMASH/smash_bin/
@@ -123,7 +123,11 @@ RUN <<EOF
     exit 1
   fi
 EOF
-
+ENV PYTHIA8DATA=${PYTHIA8}/share/Pythia8/xmldoc
+ENV PYTHIA_LIBRARY=${PYTHIA8}/lib
+ENV PYTHIA_INCLUDE=${PYTHIA8}/include
+ENV LD_LIBRARY_PATH=${PYTHIA_LIBRARY}:${LD_LIBRARY_PATH}
+ENV PATH=${PYTHIA8}/bin:/SMASH/smash_bin:${PATH}
 ENV PATH=/SMASH/smash_bin:${PATH}
 
 # Set up shell prompts when using the container image under Docker or under
