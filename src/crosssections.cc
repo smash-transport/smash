@@ -2899,8 +2899,8 @@ double CrossSections::nn_to_resonance_matrix_element(double sqrts,
       (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
     return 68. / std::pow(sqrts - 1.104, 1.951);
     /**
-     * All other processes use a constant matrix element,
-     * similar to \iref{Bass:1998ca}, eq. (3.35).
+     * All other processes use a constant matrix element, similar to
+     * \iref{Bass:1998ca}, eq. (3.35).
      */
   } else if (((type_a.is_Nstar() && type_b.is_nucleon()) ||
               (type_b.is_Nstar() && type_a.is_nucleon())) &&

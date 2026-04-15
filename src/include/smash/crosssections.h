@@ -358,8 +358,7 @@ class CrossSections {
    *
    * \return Elastic cross section
    *
-   * \throw std::runtime_error
-   *        if elastic cross section is negative.
+   * \throw std::runtime_error if elastic cross section is negative.
    */
   double elastic_parametrization(
       const ScatterActionsFinderParameters& finder_parameters) const;
@@ -369,8 +368,7 @@ class CrossSections {
    * nucleon-nucleon (NN) collision.
    * \return Elastic cross section for NN
    *
-   * \throw std::runtime_error
-   *        if positive cross section cannot be specified.
+   * \throw std::runtime_error if positive cross section cannot be specified.
    */
   double nn_el() const;
 
@@ -379,10 +377,8 @@ class CrossSections {
    * It is given by a parametrization of experimental data.
    * \return Elastic cross section for Npi
    *
-   * \throw std::runtime_error
-   *        if incoming particles are not nucleon+pion.
-   * \throw std::runtime_error
-   *        if positive cross section cannot be specified.
+   * \throw std::runtime_error if incoming particles are not nucleon+pion.
+   * \throw std::runtime_error if positive cross section cannot be specified.
    */
   double npi_el() const;
 
@@ -391,10 +387,8 @@ class CrossSections {
    * It is given by a parametrization of experimental data.
    * \return Elastic cross section for NK
    *
-   * \throw std::runtime_error
-   *        if incoming particles are not nucleon+kaon.
-   * \throw std::runtime_error
-   *        if positive cross section cannot be specified.
+   * \throw std::runtime_error if incoming particles are not nucleon+kaon.
+   * \throw std::runtime_error if positive cross section cannot be specified.
    */
   double nk_el() const;
 
@@ -403,8 +397,7 @@ class CrossSections {
    * These scatterings are suppressed at high energies when strings are
    * turned on with probabilities, so they need to be added back manually.
    *
-   * \return List of all possible Npi -> YK reactions
-   *          with their cross sections
+   * \return List of all possible Npi -> YK reactions with their cross sections
    */
   CollisionBranchList npi_yk() const;
 
@@ -443,8 +436,7 @@ class CrossSections {
    * \param[in] KN_offset Offset to the minimum energy for string production in
    * KN scatterings
    *
-   * \return List of all possible NK reactions with their cross
-   * sections
+   * \return List of all possible NK reactions with their cross sections
    */
   CollisionBranchList nk_xx(const ReactionsBitSet& included_2to2,
                             double KN_offset) const;
