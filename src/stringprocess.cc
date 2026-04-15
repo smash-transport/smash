@@ -10,8 +10,9 @@
 #include "smash/stringprocess.h"
 
 #include <array>
+#include <cmath>
+#include <limits>
 
-#include "smash/angles.h"
 #include "smash/kinematics.h"
 #include "smash/pow.h"
 #include "smash/random.h"
@@ -26,7 +27,8 @@ StringProcess::StringProcess(
     double stringz_a_leading, double stringz_b_leading, double stringz_a,
     double stringz_b, double string_sigma_T, double factor_t_form,
     bool mass_dependent_formation_times, double prob_proton_to_d_uu,
-    bool separate_fragment_baryon, double popcorn_rate, bool use_monash_tune)
+    bool separate_fragment_baryon, double popcorn_rate, bool use_monash_tune,
+    double additional_xsec_supp)
     : pmin_gluon_lightcone_(gluon_pmin),
       pow_fgluon_beta_(gluon_beta),
       pow_fquark_alpha_(quark_alpha),
@@ -41,14 +43,14 @@ StringProcess::StringProcess(
       popcorn_rate_(popcorn_rate),
       string_sigma_T_(string_sigma_T),
       kappa_tension_string_(string_tension),
-      additional_xsec_supp_(0.7),
       time_formation_const_(time_formation),
       soft_t_form_(factor_t_form),
       time_collision_(0.),
       mass_dependent_formation_times_(mass_dependent_formation_times),
       prob_proton_to_d_uu_(prob_proton_to_d_uu),
       separate_fragment_baryon_(separate_fragment_baryon),
-      use_monash_tune_(use_monash_tune) {
+      use_monash_tune_(use_monash_tune),
+      additional_xsec_supp_(additional_xsec_supp) {
   // setup and initialize pythia for fragmentation
   pythia_hadron_ = std::make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
@@ -69,11 +71,11 @@ StringProcess::StringProcess(
    * cast the const reference to obtain the stored address.
    */
   pythia_sigmatot_.initInfoPtr(
-      const_cast<Pythia8::Info &>(pythia_hadron_->info));
+      const_cast<Pythia8::Info&>(pythia_hadron_->info));
   pythia_sigmatot_.init();
 
   pythia_stringflav_.initInfoPtr(
-      const_cast<Pythia8::Info &>(pythia_hadron_->info));
+      const_cast<Pythia8::Info&>(pythia_hadron_->info));
   pythia_stringflav_.init();
 
   event_intermediate_.init("intermediate partons",
@@ -86,7 +88,7 @@ StringProcess::StringProcess(
   final_state_.clear();
 }
 
-void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
+void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
                                         double strange_supp,
                                         double diquark_supp,
                                         double popcorn_rate, double stringz_a,
@@ -128,7 +130,7 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
   // No resonance decays, since the resonances will be handled by SMASH
   pythia_in->readString("HadronLevel:Decay = off");
   // set particle masses and widths in PYTHIA to be same with those in SMASH
-  for (auto &ptype : ParticleType::list_all()) {
+  for (auto& ptype : ParticleType::list_all()) {
     int pdgid = ptype.pdgcode().get_decimal();
     double mass_pole = ptype.mass();
     double width_pole = ptype.width_at_pole();
@@ -154,13 +156,15 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia *pythia_in,
 }
 
 // compute the formation time and fill the arrays with final-state particles
-int StringProcess::append_final_state(ParticleList &intermediate_particles,
-                                      const FourVector &uString,
-                                      const ThreeVector &evecLong) {
+int StringProcess::append_final_state(ParticleList& intermediate_particles,
+                                      const FourVector& uString,
+                                      const ThreeVector& evecLong,
+                                      double additional_xsec_supp,
+                                      bool find_and_scale_leading) {
   int nfrag = 0;
   int bstring = 0;
 
-  for (ParticleData &data : intermediate_particles) {
+  for (ParticleData& data : intermediate_particles) {
     nfrag += 1;
     bstring += data.pdgcode().baryon_number();
   }
@@ -168,8 +172,9 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
 
   /* compute the cross section scaling factor for leading hadrons
    * based on the number of valence quarks. */
-  assign_all_scaling_factors(bstring, intermediate_particles, evecLong,
-                             additional_xsec_supp_);
+  if (find_and_scale_leading)
+    assign_all_scaling_factors(bstring, intermediate_particles, evecLong,
+                               additional_xsec_supp);
 
   // Velocity three-vector to perform Lorentz boost.
   const ThreeVector vstring = uString.velocity();
@@ -210,7 +215,7 @@ int StringProcess::append_final_state(ParticleList &intermediate_particles,
   return nfrag;
 }
 
-void StringProcess::init(const ParticleList &incoming, double tcoll) {
+void StringProcess::init(const ParticleList& incoming, double tcoll) {
   PDGcodes_[0] = incoming[0].pdgcode();
   PDGcodes_[1] = incoming[1].pdgcode();
   massA_ = incoming[0].effective_mass();
@@ -323,9 +328,9 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
 }
 
 bool StringProcess::set_mass_and_direction_2strings(
-    const std::array<std::array<int, 2>, 2> &quarks,
-    const std::array<FourVector, 2> &pstr_com, std::array<double, 2> &m_str,
-    std::array<ThreeVector, 2> &evec_str) {
+    const std::array<std::array<int, 2>, 2>& quarks,
+    const std::array<FourVector, 2>& pstr_com, std::array<double, 2>& m_str,
+    std::array<ThreeVector, 2>& evec_str) {
   std::array<bool, 2> found_mass;
   for (int i = 0; i < 2; i++) {
     found_mass[i] = false;
@@ -360,10 +365,10 @@ bool StringProcess::set_mass_and_direction_2strings(
 }
 
 bool StringProcess::make_final_state_2strings(
-    const std::array<std::array<int, 2>, 2> &quarks,
-    const std::array<FourVector, 2> &pstr_com,
-    const std::array<double, 2> &m_str,
-    const std::array<ThreeVector, 2> &evec_str, bool flip_string_ends,
+    const std::array<std::array<int, 2>, 2>& quarks,
+    const std::array<FourVector, 2>& pstr_com,
+    const std::array<double, 2>& m_str,
+    const std::array<ThreeVector, 2>& evec_str, bool flip_string_ends,
     bool separate_fragment_baryon) {
   const std::array<FourVector, 2> ustr_com = {pstr_com[0] / m_str[0],
                                               pstr_com[1] / m_str[1]};
@@ -524,6 +529,152 @@ bool StringProcess::next_NDiffSoft() {
   return success;
 }
 
+std::vector<bool> StringProcess::compute_beam_valence_flags(
+    Pythia8::Pythia& pythia) {
+  const Pythia8::Event& event = pythia.event;
+
+  auto find_final_copy = [&](int iPos) -> int {
+    if (iPos <= 0 || iPos >= event.size())
+      return -1;
+    if (event[iPos].isFinal())
+      return iPos;
+
+    const int id = event[iPos].id();
+    const auto ds = event[iPos].daughterListRecursive();
+    for (int j : ds) {
+      if (j > 0 && j < event.size() && event[j].isFinal() &&
+          event[j].id() == id)
+        return j;
+    }
+    return -1;
+  };
+
+  auto tag_from_beam = [&](const Pythia8::BeamParticle& beam,
+                           std::vector<bool>& isValenceFinal) -> void {
+    for (int i = 0; i < beam.size(); ++i) {
+      const int j = find_final_copy(beam[i].iPos());
+      if (j >= 0)
+        isValenceFinal[j] = beam[i].isValence();
+    }
+  };
+
+  std::vector<bool> isValenceFinal(event.size(), false);
+  tag_from_beam(pythia.beamA, isValenceFinal);
+  tag_from_beam(pythia.beamB, isValenceFinal);
+  return isValenceFinal;
+}
+
+void StringProcess::tag_leading_hadron(Pythia8::Event& event,
+                                       const Pythia8::ParticleData& pd) {
+  // 1) Find the first two (di)quark endpoints in the event record
+  int idx1 = -1, idx2 = -1;
+  bool is_leading1 = false, is_leading2 = false;
+
+  for (const auto& part : event) {
+    if (part.isQuark() || part.isDiquark()) {
+      if (idx1 == -1) {
+        idx1 = part.index();
+        is_leading1 = (part.statusAbs() ==
+                       static_cast<int>(LeadingStatus::LEADING_PARTON));
+      } else {
+        idx2 = part.index();
+        is_leading2 = (part.statusAbs() ==
+                       static_cast<int>(LeadingStatus::LEADING_PARTON));
+        break;
+      }
+    }
+  }
+
+  if (idx1 < 0 || idx2 < 0) {
+    return;
+  }
+
+  // 2) Boost to the CM frame of the two endpoints
+  Pythia8::RotBstMatrix toRest;
+  toRest.toCMframe(event[idx1].p(), event[idx2].p());
+  event.rotbst(toRest);
+
+  // Helper: pick final hadron with pz closest to endpoint pz.
+  // If endpoint is diquark -> require baryon.
+  auto endpoint_required_flavours =
+      [&](const Pythia8::Particle& end) -> std::pair<std::array<int, 2>, int> {
+    std::array<int, 2> flavours{{0, 0}};
+
+    if (end.isDiquark()) {
+      int q1 = 0, q2 = 0, degeneracy = 0;
+      StringProcess::quarks_from_diquark(end.id(), q1, q2, degeneracy);
+
+      flavours[0] = std::abs(q1);
+      flavours[1] = std::abs(q2);
+      return {flavours, 2};
+    }
+
+    // single (anti)quark endpoint
+    flavours[0] = std::abs(end.id());
+    return {flavours, 1};
+  };
+
+  auto find_best_hadron = [&](int iEnd) -> int {
+    const auto& end = event[iEnd];
+    const double pzEnd = end.pz();
+    const bool endIsDiquark = end.isDiquark();
+
+    auto [req, nreq] = endpoint_required_flavours(end);
+
+    int bestIdx = -1;
+    double bestScore = std::numeric_limits<double>::infinity();
+
+    for (int i = 0; i < event.size(); ++i) {
+      const auto& p = event[i];
+
+      if (!p.isFinal() || !p.isHadron())
+        continue;
+
+      if (endIsDiquark && !pd.isBaryon(p.id()))
+        continue;
+
+      // Flavour containment check (ignore sign)
+      const PdgCode had = PdgCode::from_decimal(p.id());
+      bool ok = true;
+      for (int k = 0; k < nreq; ++k) {
+        if (!had.contains_quark(req[k])) {
+          ok = false;
+          break;
+        }
+      }
+      if (!ok)
+        continue;
+
+      const double score = std::abs(p.pz() - pzEnd);
+      if (score < bestScore) {
+        bestScore = score;
+        bestIdx = i;
+      }
+    }
+    return bestIdx;
+  };
+
+  // 3) Tag matching hadrons (still in CM frame, but indices/status are the
+  // same)
+
+  if (is_leading1) {
+    const int h1 = find_best_hadron(idx1);
+    if (h1 >= 0) {
+      event[h1].status(leading_hadron_status_from_endpoint(event[idx1]));
+    }
+  }
+
+  if (is_leading2) {
+    const int h2 = find_best_hadron(idx2);
+    if (h2 >= 0) {
+      event[h2].status(leading_hadron_status_from_endpoint(event[idx2]));
+    }
+  }
+
+  // 4) Boost back
+  event.rotbst(toRest.inverse());
+}
+
 // hard non-diffractive
 bool StringProcess::next_NDiffHard() {
   NpartFinal_ = 0;
@@ -576,7 +727,6 @@ bool StringProcess::next_NDiffHard() {
                         string_sigma_T_);
 
     hard_map_[idAB]->settings.flag("Beams:allowVariableEnergy", true);
-
     hard_map_[idAB]->settings.mode("Beams:idA", idAB.first);
     hard_map_[idAB]->settings.mode("Beams:idB", idAB.second);
     hard_map_[idAB]->settings.parm("Beams:eCM", sqrtsAB_);
@@ -598,7 +748,7 @@ bool StringProcess::next_NDiffHard() {
   // Change the energy using the Pythia 8.302+ feature
 
   // Short notation for Pythia event
-  Pythia8::Event &event_hadron = pythia_hadron_->event;
+  Pythia8::Event& event_hadron = pythia_hadron_->event;
   logg[LPythia].debug("Pythia hard event created");
   // we update the collision energy in the CM frame
   hard_map_[idAB]->setKinematics(sqrtsAB_);
@@ -607,6 +757,12 @@ bool StringProcess::next_NDiffHard() {
                       final_state_success);
   if (!final_state_success) {
     return false;
+  }
+  auto valance_tags = compute_beam_valence_flags(*hard_map_[idAB]);
+  for (auto& p : hard_map_[idAB]->event) {
+    if (valance_tags[p.index()] && p.isFinal()) {
+      p.statusCode(static_cast<int>(LeadingStatus::LEADING_PARTON));
+    }
   }
 
   ParticleList new_intermediate_particles;
@@ -655,7 +811,6 @@ bool StringProcess::next_NDiffHard() {
     logg[LPythia].debug("failed to find correct partonic constituents.");
     return false;
   }
-
   int npart = event_intermediate_.size();
   int ipart = 0;
   while (ipart < npart) {
@@ -693,7 +848,6 @@ bool StringProcess::next_NDiffHard() {
       hadronize_success = false;
       break;
     }
-
     if (event_intermediate_.sizeJunction() > 0) {
       // identify string from a junction if there is any.
       compose_string_junction(find_forward_string, event_intermediate_,
@@ -705,8 +859,25 @@ bool StringProcess::next_NDiffHard() {
                             pythia_hadron_->event);
     }
 
+    bool is_open_string = false;
+    bool has_leading_partons = false;
+
+    if (pythia_hadron_->event.sizeJunction() == 0)
+      is_open_string = true;
+
+    for (const auto& particle : pythia_hadron_->event) {
+      if (is_leading_parton(particle)) {
+        has_leading_partons = true;
+        break;
+      }
+    }
+
     // fragment the (identified) string into hadrons.
     hadronize_success = pythia_hadron_->forceHadronLevel(false);
+    if (is_open_string && has_leading_partons) {
+      tag_leading_hadron(pythia_hadron_->event, pythia_hadron_->particleData);
+    }
+
     logg[LPythia].debug("Pythia hadronized, success = ", hadronize_success);
 
     new_intermediate_particles.clear();
@@ -731,9 +902,22 @@ bool StringProcess::next_NDiffHard() {
           logg[LPythia].debug("appending the particle ", pythia_id,
                               " to the intermediate particle list.");
           bool found_ptype = false;
+
           if (event_hadron[i].isHadron()) {
             found_ptype = append_intermediate_list(pythia_id, momentum,
                                                    new_intermediate_particles);
+
+            auto& p = new_intermediate_particles.back();
+            p.set_cross_section_scaling_factor(0.0);
+
+            if (is_open_string && has_leading_partons && found_ptype) {
+              if (is_leading_from_quark(event_hadron[i])) {
+                p.set_cross_section_scaling_factor(0.5 * additional_xsec_supp_);
+              } else if (is_leading_from_diquark(event_hadron[i])) {
+                p.set_cross_section_scaling_factor((2.0 / 3.0) *
+                                                   additional_xsec_supp_);
+              }
+            }
           } else {
             found_ptype = append_intermediate_list(pythia_id, momentum,
                                                    new_non_hadron_particles);
@@ -752,10 +936,11 @@ bool StringProcess::next_NDiffHard() {
     if (!hadronize_success) {
       break;
     }
-
+    bool should_assign = !is_open_string && has_leading_partons;
     FourVector uString = FourVector(1., 0., 0., 0.);
     ThreeVector evec = find_forward_string ? evecBasisAB_[0] : -evecBasisAB_[0];
-    int nfrag = append_final_state(new_intermediate_particles, uString, evec);
+    int nfrag = append_final_state(new_intermediate_particles, uString, evec,
+                                   additional_xsec_supp_, should_assign);
     NpartFinal_ += nfrag;
 
     find_forward_string = !find_forward_string;
@@ -775,10 +960,10 @@ bool StringProcess::next_NDiffHard() {
   return hadronize_success;
 }
 
-void StringProcess::find_excess_constituent(PdgCode &pdg_actual,
-                                            PdgCode &pdg_mapped,
-                                            std::array<int, 5> &excess_quark,
-                                            std::array<int, 5> &excess_antiq) {
+void StringProcess::find_excess_constituent(PdgCode& pdg_actual,
+                                            PdgCode& pdg_mapped,
+                                            std::array<int, 5>& excess_quark,
+                                            std::array<int, 5>& excess_antiq) {
   /* decompose PDG id of the actual hadron and mapped one
    * to get the valence quark constituents */
   std::array<int, 3> qcontent_actual = pdg_actual.quark_content();
@@ -810,7 +995,7 @@ void StringProcess::find_excess_constituent(PdgCode &pdg_actual,
 }
 
 void StringProcess::replace_constituent(
-    Pythia8::Particle &particle, std::array<int, 5> &excess_constituent) {
+    Pythia8::Particle& particle, std::array<int, 5>& excess_constituent) {
   // If the particle is neither quark nor diquark, nothing to do.
   if (!particle.isQuark() && !particle.isDiquark()) {
     return;
@@ -895,8 +1080,8 @@ void StringProcess::replace_constituent(
 }
 
 void StringProcess::find_total_number_constituent(
-    Pythia8::Event &event_intermediate, std::array<int, 5> &nquark_total,
-    std::array<int, 5> &nantiq_total) {
+    Pythia8::Event& event_intermediate, std::array<int, 5>& nquark_total,
+    std::array<int, 5>& nantiq_total) {
   for (int iflav = 0; iflav < 5; iflav++) {
     nquark_total[iflav] = 0;
     nantiq_total[iflav] = 0;
@@ -924,9 +1109,9 @@ void StringProcess::find_total_number_constituent(
 }
 
 bool StringProcess::splitting_gluon_qqbar(
-    Pythia8::Event &event_intermediate, std::array<int, 5> &nquark_total,
-    std::array<int, 5> &nantiq_total, bool sign_constituent,
-    std::array<std::array<int, 5>, 2> &excess_constituent) {
+    Pythia8::Event& event_intermediate, std::array<int, 5>& nquark_total,
+    std::array<int, 5>& nantiq_total, bool sign_constituent,
+    std::array<std::array<int, 5>, 2>& excess_constituent) {
   Pythia8::Vec4 pSum = event_intermediate[0].p();
 
   /* compute total number of quark and antiquark constituents
@@ -1057,9 +1242,9 @@ bool StringProcess::splitting_gluon_qqbar(
 }
 
 void StringProcess::rearrange_excess(
-    std::array<int, 5> &nquark_total,
-    std::array<std::array<int, 5>, 2> &excess_quark,
-    std::array<std::array<int, 5>, 2> &excess_antiq) {
+    std::array<int, 5>& nquark_total,
+    std::array<std::array<int, 5>, 2>& excess_quark,
+    std::array<std::array<int, 5>, 2>& excess_antiq) {
   for (int iflav = 0; iflav < 5; iflav++) {
     /* Find how many constituent will be in the system after
      * changing the flavors.
@@ -1114,9 +1299,9 @@ void StringProcess::rearrange_excess(
 }
 
 bool StringProcess::restore_constituent(
-    Pythia8::Event &event_intermediate,
-    std::array<std::array<int, 5>, 2> &excess_quark,
-    std::array<std::array<int, 5>, 2> &excess_antiq) {
+    Pythia8::Event& event_intermediate,
+    std::array<std::array<int, 5>, 2>& excess_quark,
+    std::array<std::array<int, 5>, 2>& excess_antiq) {
   Pythia8::Vec4 pSum = event_intermediate[0].p();
   const double energy_init = pSum.e();
   logg[LPythia].debug("  initial total energy [GeV] : ", energy_init);
@@ -1273,8 +1458,8 @@ bool StringProcess::restore_constituent(
 }
 
 void StringProcess::compose_string_parton(bool find_forward_string,
-                                          Pythia8::Event &event_intermediate,
-                                          Pythia8::Event &event_hadronize) {
+                                          Pythia8::Event& event_intermediate,
+                                          Pythia8::Event& event_hadronize) {
   Pythia8::Vec4 pSum = 0.;
   event_hadronize.reset();
 
@@ -1359,9 +1544,9 @@ void StringProcess::compose_string_parton(bool find_forward_string,
   event_hadronize[0].m(pSum.mCalc());
 }
 
-void StringProcess::compose_string_junction(bool &find_forward_string,
-                                            Pythia8::Event &event_intermediate,
-                                            Pythia8::Event &event_hadronize) {
+void StringProcess::compose_string_junction(bool& find_forward_string,
+                                            Pythia8::Event& event_intermediate,
+                                            Pythia8::Event& event_hadronize) {
   event_hadronize.reset();
 
   /* Move the first junction to the event record for hadronization
@@ -1462,9 +1647,9 @@ void StringProcess::compose_string_junction(bool &find_forward_string,
   find_forward_string = pSum.pz() > 0.;
 }
 
-void StringProcess::find_junction_leg(bool sign_color, std::vector<int> &col,
-                                      Pythia8::Event &event_intermediate,
-                                      Pythia8::Event &event_hadronize) {
+void StringProcess::find_junction_leg(bool sign_color, std::vector<int>& col,
+                                      Pythia8::Event& event_intermediate,
+                                      Pythia8::Event& event_hadronize) {
   Pythia8::Vec4 pSum = event_hadronize[0].p();
   for (unsigned int j = 0; j < col.size(); j++) {
     if (col[j] == 0) {
@@ -1636,7 +1821,7 @@ bool StringProcess::next_BBbarAnn() {
 }
 
 void StringProcess::make_orthonormal_basis(
-    ThreeVector &evec_polar, std::array<ThreeVector, 3> &evec_basis) {
+    ThreeVector& evec_polar, std::array<ThreeVector, 3>& evec_basis) {
   assert(std::fabs(evec_polar.sqr() - 1.) < really_small);
 
   if (std::abs(evec_polar.x3()) < (1. - 1.0e-8)) {
@@ -1691,8 +1876,8 @@ void StringProcess::compute_incoming_lightcone_momenta() {
   PNegB_ = (pcom_[1].x0() - evecBasisAB_[0] * pcom_[1].threevec()) * M_SQRT1_2;
 }
 
-void StringProcess::quarks_from_diquark(int diquark, int &q1, int &q2,
-                                        int &deg_spin) {
+void StringProcess::quarks_from_diquark(int diquark, int& q1, int& q2,
+                                        int& deg_spin) {
   // The 4-digit pdg id should be diquark.
   assert((std::abs(diquark) > 1000) && (std::abs(diquark) < 5510) &&
          (std::abs(diquark) % 100 < 10));
@@ -1720,7 +1905,7 @@ int StringProcess::diquark_from_quarks(int q1, int q2) {
   return (q1 < 0) ? -diquark : diquark;
 }
 
-void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2,
+void StringProcess::make_string_ends(const PdgCode& pdg, int& idq1, int& idq2,
                                      double xi) {
   std::array<int, 3> quarks = pdg.quark_content();
   if (pdg.is_nucleon()) {
@@ -1769,9 +1954,9 @@ void StringProcess::make_string_ends(const PdgCode &pdg, int &idq1, int &idq2,
 }
 
 int StringProcess::fragment_string(int idq1, int idq2, double mString,
-                                   ThreeVector &evecLong, bool flip_string_ends,
+                                   ThreeVector& evecLong, bool flip_string_ends,
                                    bool separate_fragment_baryon,
-                                   ParticleList &intermediate_particles) {
+                                   ParticleList& intermediate_particles) {
   pythia_hadron_->event.reset();
   intermediate_particles.clear();
 
@@ -2242,12 +2427,12 @@ int StringProcess::fragment_string(int idq1, int idq2, double mString,
 
 int StringProcess::fragment_off_hadron(
     bool from_forward, bool separate_fragment_baryon,
-    std::array<ThreeVector, 3> &evec_basis, double &ppos_string,
-    double &pneg_string, double &QTrx_string_pos, double &QTrx_string_neg,
-    double &QTry_string_pos, double &QTry_string_neg,
-    Pythia8::FlavContainer &flav_string_pos,
-    Pythia8::FlavContainer &flav_string_neg, std::vector<int> &pdgid_frag,
-    std::vector<FourVector> &momentum_frag) {
+    std::array<ThreeVector, 3>& evec_basis, double& ppos_string,
+    double& pneg_string, double& QTrx_string_pos, double& QTrx_string_neg,
+    double& QTry_string_pos, double& QTry_string_neg,
+    Pythia8::FlavContainer& flav_string_pos,
+    Pythia8::FlavContainer& flav_string_neg, std::vector<int>& pdgid_frag,
+    std::vector<FourVector>& momentum_frag) {
   /* How many times we try to find flavor of qqbar pair and corresponding
    * hadronic species */
   const int n_try = 10;
@@ -2620,7 +2805,7 @@ int StringProcess::get_hadrontype_from_quark(int idq1, int idq2) {
   /* loop over hadronic species
    * Any hadron with the same valence quark contents is allowed and
    * the probability goes like spin degeneracy over mass. */
-  for (auto &ptype : ParticleType::list_all()) {
+  for (auto& ptype : ParticleType::list_all()) {
     if (!ptype.is_hadron()) {
       continue;
     }
@@ -2727,7 +2912,7 @@ int StringProcess::get_resonance_from_quark(int idq1, int idq2, double mass) {
   std::vector<int> pdgid_possible;
   // Corresponding mass differences.
   std::vector<double> mass_diff;
-  for (auto &ptype : ParticleType::list_all()) {
+  for (auto& ptype : ParticleType::list_all()) {
     if (!ptype.is_hadron() || ptype.is_stable() ||
         ptype.pdgcode().baryon_number() != baryon) {
       // Only resonances with the same baryon number are considered.
@@ -2787,9 +2972,9 @@ int StringProcess::get_resonance_from_quark(int idq1, int idq2, double mass) {
 
 bool StringProcess::make_lightcone_final_two(
     bool separate_fragment_hadron, double ppos_string, double pneg_string,
-    double mTrn_had_forward, double mTrn_had_backward, double &ppos_had_forward,
-    double &ppos_had_backward, double &pneg_had_forward,
-    double &pneg_had_backward) {
+    double mTrn_had_forward, double mTrn_had_backward, double& ppos_had_forward,
+    double& ppos_had_backward, double& pneg_had_forward,
+    double& pneg_had_backward) {
   const double mTsqr_string = 2. * ppos_string * pneg_string;
   if (mTsqr_string < 0.) {
     return false;
@@ -2883,7 +3068,7 @@ double StringProcess::sample_zLund(double a, double b, double mTrn) {
 }
 
 bool StringProcess::remake_kinematics_fragments(
-    Pythia8::Event &event_fragments, std::array<ThreeVector, 3> &evec_basis,
+    Pythia8::Event& event_fragments, std::array<ThreeVector, 3>& evec_basis,
     double ppos_string, double pneg_string, double QTrx_string,
     double QTry_string, double QTrx_add_pos, double QTry_add_pos,
     double QTrx_add_neg, double QTry_add_neg) {
@@ -3179,7 +3364,7 @@ bool StringProcess::remake_kinematics_fragments(
   return true;
 }
 
-void StringProcess::assign_scaling_factor(int nquark, ParticleData &data,
+void StringProcess::assign_scaling_factor(int nquark, ParticleData& data,
                                           double suppression_factor) {
   int nbaryon = data.pdgcode().baryon_number();
   if (nbaryon == 0) {
@@ -3195,7 +3380,7 @@ void StringProcess::assign_scaling_factor(int nquark, ParticleData &data,
 }
 
 std::pair<int, int> StringProcess::find_leading(int nq1, int nq2,
-                                                ParticleList &list) {
+                                                ParticleList& list) {
   assert(list.size() >= 2);
   int end = list.size() - 1;
   int i1, i2;
@@ -3212,11 +3397,11 @@ std::pair<int, int> StringProcess::find_leading(int nq1, int nq2,
 }
 
 void StringProcess::assign_all_scaling_factors(int baryon_string,
-                                               ParticleList &outgoing_particles,
-                                               const ThreeVector &evecLong,
+                                               ParticleList& outgoing_particles,
+                                               const ThreeVector& evecLong,
                                                double suppression_factor) {
   // Set each particle's cross section scaling factor to 0 first
-  for (ParticleData &data : outgoing_particles) {
+  for (ParticleData& data : outgoing_particles) {
     data.set_cross_section_scaling_factor(0.0);
   }
   // sort outgoing particles according to the longitudinal velocity
@@ -3258,7 +3443,7 @@ void StringProcess::assign_all_scaling_factors(int baryon_string,
   }
 }
 
-int StringProcess::pdg_map_for_pythia(PdgCode &pdg) {
+int StringProcess::pdg_map_for_pythia(PdgCode& pdg) {
   PdgCode pdg_mapped(0x0);
 
   if (pdg.baryon_number() == 1) {  // baryon

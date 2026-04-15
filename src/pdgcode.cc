@@ -28,6 +28,37 @@ std::istream& operator>>(std::istream& is, PdgCode& code) {
   return is;
 }
 
+bool PdgCode::contains_quark(int signedQuark) const {
+  if (!is_hadron())
+    return false;
+
+  const int absQuark = std::abs(signedQuark);
+  if (absQuark < 1 || absQuark > 6)
+    return false;
+
+  const int pdgId = get_decimal();
+  const int absPdgId = std::abs(pdgId);
+
+  if (absPdgId == 111 || absPdgId == 113 || absPdgId == 223) {
+    return (absQuark == 1 || absQuark == 2);
+  }
+  if (absPdgId == 221 || absPdgId == 331) {
+    return (absQuark == 1 || absQuark == 2 || absQuark == 3);
+  }
+
+  const int netFlavor = net_quark_number(absQuark);
+  if (netFlavor != 0) {
+    return signedQuark > 0 ? (netFlavor > 0) : (netFlavor < 0);
+  }
+
+  if (baryon_number() != 0)
+    return false;
+
+  const int flavorDigit1 = digits_.n_q2_;
+  const int flavorDigit2 = digits_.n_q3_;
+  return (absQuark == flavorDigit1 || absQuark == flavorDigit2);
+}
+
 int PdgCode::net_quark_number(const int quark) const {
   // input sanitization: Only quark numbers 1 through 6 are allowed.
   if (quark < 1 || quark > 6) {

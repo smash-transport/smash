@@ -69,7 +69,9 @@ struct InputSections {
   /// Subsection for the string transition
   inline static const Section c_stringTransition =
       InputSections::collisionTerm + "String_Transition";
-
+  /// Subsection for the hard string transition
+  inline static const Section c_hardStringTransition =
+      InputSections::collisionTerm + "Hard_String_Transition";
   /// Section for the forced thermalization
   inline static const Section forcedThermalization{"Forced_Thermalization"};
 
@@ -418,6 +420,7 @@ struct InputSections {
  * - \ref doxypage_input_conf_ct_photons
  * - \ref doxypage_input_conf_ct_heavy_flavor
  * - \ref doxypage_input_conf_ct_spin_interactions
+ * - \ref doxypage_input_conf_ct_hard_string_transition
  */
 
 /*!\Userguide
@@ -504,6 +507,47 @@ struct InputSections {
  *\verbatim
  Collision_Term:
      Spin_Interactions: On
+ \endverbatim
+ */
+
+/*!\Userguide
+ * \page doxypage_input_conf_ct_hard_string_transition
+ *
+ * The subsection `Hard_String_Transition` of the `Collision_Term` section
+ * controls how the non-diffractive string excitation is split into soft and
+ * hard components.
+ *
+ * The transition mode is selected via the `Mode` key:
+ * - `Exponential`: use the legacy exponential splitting of the non-diffractive
+ *   cross section. The probability for a purely soft non-diffractive
+ interaction
+ *   is given by
+ *   \f[
+ *     P_{\mathrm{soft}} = \exp\!\left(-\frac{\sigma_{\mathrm{hard}}}
+ *     {\sigma_{\mathrm{ND}}}\right),
+ *   \f]
+ *   where \f$\sigma_{\mathrm{hard}}\f$ is the hard string cross section and
+ *   \f$\sigma_{\mathrm{ND}}\f$ the total non-diffractive cross section. The
+ hard
+ *   non-diffractive contribution follows from
+ *   \f$\sigma_{\mathrm{ND,hard}} = \sigma_{\mathrm{ND}} -
+ *   \sigma_{\mathrm{ND,soft}}\f$.
+ * - `Custom_Range`: use a smooth, user-defined transition from soft to hard
+ *   string excitation as a function of the collision energy.
+ *
+ * For `Custom_Range`, the transition is controlled by `Start_Energy` and
+ * `End_Energy` (in \f$\sqrt{s}\f$ measured in GeV). Below this range only soft
+ * string excitation is used, above it only hard string excitation is used, and
+ * inside the range the probability for hard string excitation increases
+ * smoothly with energy.
+ *
+ * For example:
+ *\verbatim
+ Collision_Term:
+     Hard_String_Transition:
+         Mode: Custom_Range
+         Start_Energy: 10.0
+         End_Energy: 20.0
  \endverbatim
  */
 
@@ -2679,6 +2723,78 @@ struct InputKeys {
       InputSections::collisionTerm + "Use_AQM", true, {"1.3"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_hard_string_transition
+   * \optional_key{key_CT_hard_string_transition_mode_,
+   *               Mode,string,Exponential}
+   *
+   * Select the mode used for the transition from soft to hard string
+   * excitation.
+   *
+   * - Exponential: use the legacy exponential suppression based on the hard
+   *   string cross section in the Pythia multiparton interaction (MPI)
+   *   framework.
+   * - Custom_Range: use a smooth transition from soft to hard string excitation
+   *   within a user-defined invariant energy range.
+   *
+   *   In this mode, the transition follows a sinusoidal function within the
+   *   interval defined by Start_Energy and End_Energy, ensuring a smooth and
+   *   continuous interpolation between the soft and hard regimes.
+   *
+   * For Custom_Range, the transition is controlled by Start_Energy and
+   * End_Energy.
+   */
+
+  /**
+   * \see_key{key_CT_hard_string_transition_mode_}
+   */
+  inline static const Key<HardStringTransitionMode>
+      collTerm_hard_string_transition_mode{
+          InputSections::c_hardStringTransition + "Mode",
+          HardStringTransitionMode::Exponential,
+          {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_hard_string_transition
+   * \optional_key{key_CT_hard_string_transition_start_energy_,
+   *               Start_Energy,double,10.0}
+   *
+   * Lower bound of the invariant mass range (\f$\sqrt{s}\f$ in GeV) for the
+   * transition from soft to hard string excitation.
+   *
+   * For \f$\sqrt{s}\f$ below this value, only soft string excitation is used.
+   * Above this value, the transition to hard string excitation begins.
+   *
+   * Must be greater than or equal to 10 GeV and smaller than or equal to
+   * End_Energy.
+   *
+   */
+
+  /**
+   * \see_key{key_CT_hard_string_transition_start_energy_}
+   */
+  inline static const Key<double> collTerm_hard_string_transition_start_energy{
+      InputSections::c_hardStringTransition + "Start_Energy", 10.0, {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_hard_string_transition
+   * \optional_key{key_CT_hard_string_transition_end_energy_,
+   *               End_Energy,double,200.0}
+   *
+   * Upper bound of the invariant energy range for the transition from soft to
+   * hard string excitation (\f$\sqrt{s}\f$ in GeV).
+   *
+   *
+   * Must be larger than or equal to Start_Energy
+   *
+   */
+
+  /**
+   * \see_key{key_CT_hard_string_transition_end_energy_}
+   */
+  inline static const Key<double> collTerm_hard_string_transition_end_energy{
+      InputSections::c_hardStringTransition + "End_Energy", 200.0, {"3.4"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
    * \optional_key{key_CT_PB_gaussian_cutoff_,Gaussian_Cutoff,double,2.2}
    *
@@ -3118,6 +3234,32 @@ struct InputKeys {
       InputSections::c_stringParameters + "Use_Monash_Tune",
       DefaultType::Dependent,
       {"3.0"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_unformed_xsec_suppression,Unformed_Xsec_Suppression,
+   *               double,0.7}
+   *
+   * Applies an additional suppression factor to the interaction cross sections
+   * of unformed hadrons.
+   *
+   * This parameter rescales the effective cross sections of hadrons during
+   * their formation time and can be used to tune the interaction strength of
+   * unformed hadrons in dense environments.
+   *
+   * Notes:
+   * - A value of 1.0 corresponds to no additional suppression.
+   * - Values smaller than 1.0 reduce the interaction probability of unformed
+   *   hadrons.
+   * - This parameter serves as a phenomenological tuning knob.
+   */
+  /**
+   * \see_key{key_CT_SP_unformed_xsec_suppression}
+   */
+  inline static const Key<double> collTerm_stringParam_unformedXsecSuppression{
+      InputSections::c_stringParameters + "Unformed_Xsec_Suppression",
+      0.7,
+      {"3.4"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
@@ -6100,6 +6242,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<SphereInitialCondition>>,
       std::reference_wrapper<const Key<ThermalizationAlgorithm>>,
       std::reference_wrapper<const Key<TimeStepMode>>,
+      std::reference_wrapper<const Key<HardStringTransitionMode>>,
       std::reference_wrapper<const Key<TotalCrossSectionStrategy>>>;
 
   /// List of references to all existing SMASH keys.
@@ -6190,6 +6333,9 @@ struct InputKeys {
       std::cref(collTerm_pauliBlocking_gaussianCutoff),
       std::cref(collTerm_pauliBlocking_momentumAveragingRadius),
       std::cref(collTerm_pauliBlocking_spatialAveragingRadius),
+      std::cref(collTerm_hard_string_transition_mode),
+      std::cref(collTerm_hard_string_transition_start_energy),
+      std::cref(collTerm_hard_string_transition_end_energy),
       std::cref(collTerm_stringTrans_KNOffset),
       std::cref(collTerm_stringTrans_pipiOffset),
       std::cref(collTerm_stringTrans_lower),
@@ -6217,6 +6363,7 @@ struct InputKeys {
       std::cref(collTerm_stringParam_stringZB),
       std::cref(collTerm_stringParam_stringZBLeading),
       std::cref(collTerm_stringParam_useMonashTune),
+      std::cref(collTerm_stringParam_unformedXsecSuppression),
       std::cref(collTerm_dileptons_decays),
       std::cref(collTerm_photons_twoToTwoScatterings),
       std::cref(collTerm_photons_bremsstrahlung),

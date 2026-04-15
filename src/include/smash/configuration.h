@@ -1401,6 +1401,28 @@ class Configuration {
     }
 
     /**
+     * Set hard string transition mode from configuration values.
+     *
+     * \return HardStringTransitionMode.
+     * \throw IncorrectTypeInAssignment in case a mode that is not available is
+     * provided as a configuration value.
+     */
+    operator HardStringTransitionMode() const {
+      const std::string s = operator std::string();
+
+      if (s == "Exponential") {
+        return HardStringTransitionMode::Exponential;
+      }
+      if (s == "Custom_Range") {
+        return HardStringTransitionMode::Custom_Range;
+      }
+
+      throw IncorrectTypeInAssignment("The value for key \"" +
+                                      std::string(key_) +
+                                      "\" should be "
+                                      "\"Exponential\" or \"Custom_Range\".");
+    }
+    /**
      * Set total cross section strategy from configuration values.
      *
      * \return TotalCrossSectionStrategy.

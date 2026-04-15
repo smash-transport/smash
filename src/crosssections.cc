@@ -11,6 +11,7 @@
 
 #include "smash/clebschgordan.h"
 #include "smash/constants.h"
+#include "smash/forwarddeclarations.h"
 #include "smash/logging.h"
 #include "smash/parametrizations.h"
 #include "smash/pow.h"
@@ -2570,15 +2571,33 @@ CollisionBranchList CrossSections::string_excitation(
                   sig_annihilation + nondiffractive_all - total_string_xs) <
          1.e-6);
 
-  double nondiffractive_soft = 0.;
-  double nondiffractive_hard = 0.;
-  if (nondiffractive_all > 0.) {
-    /* Hard string process is added by hard cross section in conjunction with
-     * multipartion interaction picture \iref{Sjostrand:1987su}. */
+  double nondiffractive_soft = 0.0;
+  double nondiffractive_hard = 0.0;
+
+  if (nondiffractive_all > 0.0) {
     const double hard_xsec = AQM_scaling * string_hard_cross_section();
-    nondiffractive_soft =
-        nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
-    nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
+
+    if (finder_parameters.hard_string_transition_mode ==
+        HardStringTransitionMode::Custom_Range) {
+      const double hard_transition_start =
+          finder_parameters.hard_string_transition_start_energy;
+      const double hard_transition_end =
+          finder_parameters.hard_string_transition_end_energy;
+
+      const double weight_hard =
+          interpolation_at_sqrts(hard_transition_start, hard_transition_end);
+
+      nondiffractive_hard = nondiffractive_all * weight_hard;
+      nondiffractive_soft = nondiffractive_all - nondiffractive_hard;
+
+    } else {
+      /* Hard string process is added by hard cross section
+       * in conjunction with multipartion interaction picture
+       * \iref{Sjostrand:1987su}. */
+      nondiffractive_soft =
+          nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
+      nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
+    }
   }
   logg[LCrossSections].debug("String cross sections [mb] are");
   logg[LCrossSections].debug("Single-diffractive AB->AX: ", single_diffr_AX);
@@ -2645,7 +2664,7 @@ double CrossSections::high_energy(
        * that defined in string_probability(). */
       auto [region_lower, region_upper] =
           finder_parameters.transition_high_energy.sqrts_range_NN;
-      double prob_high = probability_transit_high(region_lower, region_upper);
+      double prob_high = interpolation_at_sqrts(region_lower, region_upper);
       xs = xs_l * (1. - prob_high) + xs_h * prob_high;
     }
   }
@@ -3088,28 +3107,24 @@ double CrossSections::string_probability(
       return 0.;
     } else {
       // Rescale transition region to [-1, 1]
-      return probability_transit_high(region_lower, region_upper);
+      return interpolation_at_sqrts(region_lower, region_upper);
     }
   }
 }
 
-double CrossSections::probability_transit_high(
-    const double region_lower, const double region_upper) const {
-  if (sqrt_s_ < region_lower) {
-    return 0.;
-  }
+double CrossSections::interpolation_at_sqrts(double region_lower,
+                                             double region_upper) const {
+  if (sqrt_s_ < region_lower)
+    return 0.0;
+  if (sqrt_s_ > region_upper)
+    return 1.0;
 
-  if (sqrt_s_ > region_upper) {
-    return 1.;
-  }
-
-  double x = (sqrt_s_ - 0.5 * (region_lower + region_upper)) /
-             (region_upper - region_lower);
+  const double x = (sqrt_s_ - 0.5 * (region_lower + region_upper)) /
+                   (region_upper - region_lower);
   assert(x >= -0.5 && x <= 0.5);
   double prob = 0.5 * (std::sin(M_PI * x) + 1.0);
   assert(prob >= 0. && prob <= 1.);
 
   return prob;
 }
-
 }  // namespace smash

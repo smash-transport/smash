@@ -303,6 +303,16 @@ enum class TotalCrossSectionStrategy {
   TopDownMeasured,
 };
 
+/// Select the model used for the transition from soft to hard string
+/// excitation.
+enum class HardStringTransitionMode {
+  /// Legacy exponential splitting based on the hard string cross section
+  Exponential,
+
+  /// Smooth transition within a user-defined invariant energy range.
+  Custom_Range,
+};
+
 /**
  *  Which pseudo-resonance fills the inelastic gap in the transition to string
  * region of cross sections. \see_key{key_CT_pseudoresonance_}

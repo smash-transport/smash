@@ -863,6 +863,28 @@ class PdgCode {
   }
 
   /**
+   * Checks whether this hadron contains a quark (or antiquark) of a given
+   * flavour.
+   *
+   * The check is true if:
+   *  - the particle is a hadron, and
+   *  - the hadron contains at least one quark or antiquark of the specified
+   * flavour.
+   *
+   * For flavour-neutral mesons (e.g. π⁰, η, φ, J/ψ, ϒ), this returns true
+   * because such states contain a quark–antiquark pair of that flavour, even
+   * though the net flavour is zero.
+   *
+   * For baryons, only the net (valence) quark content is considered.
+   *
+   * \param[in] quark Signed PDG quark code.
+   *
+   * \return true if the hadron contains at least one quark (or antiquark)
+   *         of the requested flavour with the requested sign; false otherwise.
+   */
+  bool contains_quark(int quark) const;
+
+  /**
    * Returns the net number of quarks with given flavour number
    * For public use, see strangeness(), charmness(), bottomness() and
    * isospin3().
