@@ -394,7 +394,7 @@ if(BUILD_TESTING)
     # Add library for unit tests. Note that we link to smash_objlib publicly to propagate all SMASH
     # internal features to tests targets that will link against this library.
     add_library(smash_testlib STATIC $<TARGET_OBJECTS:smash_objlib>)
-    target_link_libraries(smash_testlib PUBLIC smash_objlib smash_api)
+    target_link_libraries(smash_testlib PUBLIC vir-test smash_objlib smash_api)
     set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash CXX_EXTENSIONS OFF)
 
     # Look for sanitizers supported by the compiler. Sanitizers add instrumentation code to the
@@ -434,7 +434,10 @@ if(BUILD_TESTING)
     # The static library for unit tests uses the same object files as smash_objlib but adds
     # test-specific definitions (BUILD_TESTS) and optional sanitizer instrumentation. Note that
     # smash_objlib itself is NOT modified, so main builds remain unaffected.
-    target_compile_definitions(smash_testlib PUBLIC BUILD_TESTS)
+    target_compile_definitions(smash_testlib
+                               PUBLIC "BUILD_TESTS"
+                                      "TEST_CONFIG_PATH=std::filesystem::path(\"${PROJECT_SOURCE_DIR}\")"
+    )
 
     if(USE_SANITIZER)
         target_compile_options(smash_testlib PUBLIC ${SANITIZER_FLAG})

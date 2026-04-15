@@ -1,6 +1,6 @@
 ########################################################
 #
-#    Copyright (c) 2014,2016-2018,2021-2024
+#    Copyright (c) 2014,2016-2018,2021-2024,2026
 #      SMASH Team
 #
 #    BSD 3-clause license
@@ -39,6 +39,12 @@ message(CHECK_PASS "done")
 # we do not want do so and hence we adjust the target here.
 set_property(TARGET yaml-cpp PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
                                       $<TARGET_PROPERTY:yaml-cpp,INTERFACE_INCLUDE_DIRECTORIES>)
+
+# We also want to make the vir-test library available to the rest of the project, because it
+# contains the unit-tests framework that SMASH uses. Since virtest is a header only library, we can
+# just create an interface library and attach the include directories to it.
+add_library(vir-test INTERFACE)
+target_include_directories(vir-test SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/virtest)
 
 # Install third-party libraries relying on targets only. Note that header files are attached to
 # targets for Cuba and Einhard and therefore we can refer to that. YAML library is a "vendored
