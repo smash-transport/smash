@@ -142,7 +142,8 @@ string(TIMESTAMP BUILD_DATE)
 # linked before all the other and it is meant to avoid possible issues with e.g. ROOT whose include
 # directories might contain a Pythia.h header that might not be the one of the Pythia linked to
 # SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
-find_package(Pythia 8.316 EXACT REQUIRED)
+set(Pythia_REQUIRED_VERSION "8.316") # For SMASHConfig.cmake file
+find_package(Pythia ${Pythia_REQUIRED_VERSION} EXACT REQUIRED)
 if(Pythia_FOUND)
     if(TARGET Pythia::Pythia)
         target_link_libraries(smash_api INTERFACE Pythia::Pythia)
@@ -154,7 +155,8 @@ if(Pythia_FOUND)
     endif()
 endif()
 
-find_package(GSL 2.0 REQUIRED)
+set(GSL_MINIMUM_VERSION "2.0") # For SMASHConfig.cmake file
+find_package(GSL ${GSL_MINIMUM_VERSION} REQUIRED)
 if(GSL_FOUND)
     if(TARGET GSL::gsl AND TARGET GSL::gslcblas)
         target_link_libraries(smash_api INTERFACE GSL::gsl GSL::gslcblas)
@@ -164,7 +166,8 @@ if(GSL_FOUND)
     endif()
 endif()
 
-find_package(Eigen3 3.0 REQUIRED)
+set(EIGEN3_MINIMUM_VERSION "3.0") # For SMASHConfig.cmake file
+find_package(Eigen3 ${EIGEN3_MINIMUM_VERSION} REQUIRED)
 if(EIGEN3_FOUND)
     if(TARGET Eigen3::Eigen)
         target_link_libraries(smash_api INTERFACE Eigen3::Eigen)
@@ -175,9 +178,11 @@ if(EIGEN3_FOUND)
 endif()
 
 option(TRY_USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
+set(SMASH_USE_ROOT OFF) # For SMASHConfig.cmake file
+set(ROOT_COMPONENTS Core RIO Tree) # Also for SMASHConfig.cmake file
 if(TRY_USE_ROOT)
-    find_package(ROOT CONFIG QUIET COMPONENTS Core RIO Tree)
-    set(ROOT_MINIMUM_VERSION "6.20")
+    find_package(ROOT CONFIG QUIET COMPONENTS ${ROOT_COMPONENTS})
+    set(ROOT_MINIMUM_VERSION "6.20") # Also for SMASHConfig.cmake file
     if(ROOT_FOUND)
         message(STATUS "Candidate ROOT version ${ROOT_VERSION} found, "
                        "requested ${ROOT_MINIMUM_VERSION}")
@@ -195,6 +200,7 @@ if(TRY_USE_ROOT)
         target_compile_definitions(smash_root INTERFACE SMASH_USE_ROOT)
         target_link_libraries(smash_root INTERFACE ${_root_targets} SMASH::smash)
         set_target_properties(smash_root PROPERTIES EXPORT_NAME smash_root)
+        set(SMASH_USE_ROOT ON)
         # Pull ROOT into smash_objlib to compile ROOT related translation units
         target_compile_definitions(smash_objlib PUBLIC SMASH_USE_ROOT)
         target_link_libraries(smash_objlib PUBLIC ${_root_targets})
@@ -207,9 +213,10 @@ if(TRY_USE_ROOT)
 endif()
 
 option(TRY_USE_HEPMC "Turn this off to disable HepMC3 output support in SMASH." ON)
+set(SMASH_USE_HepMC3 OFF) # For SMASHConfig.cmake file
 if(TRY_USE_HEPMC OR TRY_USE_RIVET)
     find_package(HepMC3 QUIET CONFIG) # Min version not handled here but after to better inform user
-    set(HepMC3_MINIMUM_VERSION "3.2.6")
+    set(HepMC3_MINIMUM_VERSION "3.2.6") # Also for SMASHConfig.cmake file
     if(HepMC3_FOUND)
         message(STATUS "Candidate HepMC3 version ${HepMC3_VERSION} found, "
                        "requested ${HepMC3_MINIMUM_VERSION}")
@@ -241,6 +248,7 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
         target_compile_definitions(smash_hepmc3 INTERFACE ${_hepmc_definitions})
         target_link_libraries(smash_hepmc3 INTERFACE ${_hepmc_targets} SMASH::smash)
         set_target_properties(smash_hepmc3 PROPERTIES EXPORT_NAME smash_hepmc3)
+        set(SMASH_USE_HepMC3 ON)
         # Pull HepMC3 into smash_objlib to compile HepMC3 related translation units
         target_compile_definitions(smash_objlib PUBLIC ${_hepmc_definitions})
         target_link_libraries(smash_objlib PUBLIC ${_hepmc_targets})
@@ -253,9 +261,10 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
 endif()
 
 option(TRY_USE_RIVET "Turn this off to disable Rivet output support in SMASH." ON)
+set(SMASH_USE_Rivet OFF) # For SMASHCONFIG.cmake file
 if(TRY_USE_RIVET AND HepMC3_FOUND)
     find_package(Rivet QUIET) # Min version not handled here but after to better inform user
-    set(Rivet_MINIMUM_VERSION "3.1")
+    set(Rivet_MINIMUM_VERSION "3.1") # Also for SMASHConfig.cmake file
     if(Rivet_FOUND)
         message(STATUS "Candidate Rivet version ${RIVET_VERSION} found, "
                        "requested ${Rivet_MINIMUM_VERSION}")
@@ -279,6 +288,7 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
         target_compile_definitions(smash_rivet INTERFACE SMASH_USE_RIVET)
         target_link_libraries(smash_rivet INTERFACE Rivet::Rivet smash_hepmc3 SMASH::smash)
         set_target_properties(smash_rivet PROPERTIES EXPORT_NAME smash_rivet)
+        set(SMASH_USE_Rivet ON)
         # Pull Rivet into smash_objlib to compile Rivet related translation units
         target_compile_definitions(smash_objlib PUBLIC SMASH_USE_RIVET)
         target_link_libraries(smash_objlib PUBLIC Rivet::Rivet)
@@ -501,11 +511,44 @@ if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
-install(TARGETS smash_shared LIBRARY DESTINATION "lib")
-install(FILES ${generated_headers} DESTINATION "include/smash")
+# Configure and install CMake configuration files for find_package.
+configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/SMASHConfig.cmake.in
+                              ${CMAKE_CURRENT_BINARY_DIR}/SMASHConfig.cmake
+                              INSTALL_DESTINATION share/cmake/SMASH)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SMASHConfig.cmake DESTINATION share/cmake/SMASH)
+
+# Install targets and files. Note that we do not only install the shared library target, but also
+# the API interface and the usage requirements interface, since this chain of dependencies will be
+# needed by clients using the smash libraries in a CMake proect.
+install(TARGETS smash_shared smash_api smash_project_usage_requirements
+        EXPORT SMASH-targets-core
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin)
 # Note that the absent trailing slash in the DIRECTORY argument is crucial to create an additional
 # "smash" folder at destination!
-install(DIRECTORY include/smash DESTINATION "include" PATTERN "*.h.in" EXCLUDE)
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION "include")
+install(FILES ${generated_headers} DESTINATION "include/smash")
+install(DIRECTORY include/smash DESTINATION include PATTERN "*.h.in" EXCLUDE)
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION include)
 # Copy SMASH executable to installation bin folder
 install(PROGRAMS $<TARGET_FILE_NAME:smash> DESTINATION bin)
+# If optional dependencies are found, install them into dedicated targets files in order to split
+# the installed SMASH into CMake components. This allows users in their project to e.g. use
+# find_package(SMASH COMPONENTS Core ROOT) to get only the core and ROOT support without the need to
+# link to HepMC3 and Rivet. The components names are defined in the SMASHConfig.cmake.in file.
+foreach(_dependency IN ITEMS ROOT HepMC3 Rivet)
+    string(TOLOWER ${_dependency} _dependency_lower)
+    if(SMASH_USE_${_dependency})
+        install(EXPORT SMASH-targets-${_dependency_lower}
+                FILE SMASH-targets-${_dependency_lower}.cmake
+                NAMESPACE SMASH::
+                DESTINATION share/cmake/SMASH)
+        install(TARGETS smash_${_dependency_lower}
+                EXPORT SMASH-targets-${_dependency_lower}
+                INCLUDES
+                DESTINATION include)
+        if(_dependency STREQUAL "Rivet")
+            install(FILES ${CMAKE_SOURCE_DIR}/cmake/FindRivet.cmake DESTINATION share/cmake/SMASH)
+        endif()
+    endif()
+endforeach()

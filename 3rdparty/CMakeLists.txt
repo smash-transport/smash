@@ -55,13 +55,12 @@ install(DIRECTORY yaml-cpp-0.9.0/include/yaml-cpp
         DESTINATION "include"
         FILES_MATCHING
         PATTERN "*.h")
-install(TARGETS yaml-cpp EXPORT SMASH-targets)
+install(TARGETS yaml-cpp EXPORT SMASH-targets-core)
 install(TARGETS cuhre divonne suave vegas
-        EXPORT SMASH-targets
+        EXPORT SMASH-targets-core
         FILE_SET HEADERS
         DESTINATION include/cuba)
 install(TARGETS einhard
-        EXPORT SMASH-targets
+        EXPORT SMASH-targets-core
         FILE_SET HEADERS
         DESTINATION include/einhard)
-install(EXPORT SMASH-targets NAMESPACE SMASH:: DESTINATION lib/cmake)
