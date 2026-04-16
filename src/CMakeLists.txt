@@ -19,7 +19,7 @@ include(FindPkgConfig)
 # everything that should be exposed to users of the shared library. NOTE: shared libraries need PIC
 # and this is already set for all targets through CMAKE_POSITION_INDEPENDENT_CODE
 add_library(smash_objlib OBJECT)
-add_executable(smash smash.cc $<TARGET_OBJECTS:smash_objlib>)
+add_executable(smash smash.cc)
 add_library(smash_shared SHARED $<TARGET_OBJECTS:smash_objlib>)
 add_library(smash_api INTERFACE)
 
@@ -33,7 +33,6 @@ add_library(SMASH::smash ALIAS smash_shared)
 # which should not be aware of them (dependency on external library is introduced in the Config
 # file). What has to be propagated to clients belongs to smash_api interface target.
 target_link_libraries(smash_objlib PUBLIC smash_project_build_requirements smash_api)
-target_link_libraries(smash PRIVATE smash_objlib smash_api)
 target_link_libraries(smash_api
                       INTERFACE smash_project_usage_requirements
                                 einhard
@@ -43,6 +42,7 @@ target_link_libraries(smash_api
                                 divonne
                                 vegas)
 target_link_libraries(smash_shared PRIVATE smash_objlib PUBLIC smash_api)
+target_link_libraries(smash PRIVATE smash_shared)
 
 # Disable compiler-specific extensions for all targets. This cannot be done through INTERFACE
 # libraries because properties like CXX_EXTENSIONS do not propagate through them.
@@ -198,6 +198,8 @@ if(TRY_USE_ROOT)
         # Pull ROOT into smash_objlib to compile ROOT related translation units
         target_compile_definitions(smash_objlib PUBLIC SMASH_USE_ROOT)
         target_link_libraries(smash_objlib PUBLIC ${_root_targets})
+        # Link ROOT into smash executable
+        target_link_libraries(smash PRIVATE smash_root)
     else()
         message(STATUS "Suitable ROOT not found. Support disabled. "
                        "See README for more information.")
@@ -242,6 +244,8 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
         # Pull HepMC3 into smash_objlib to compile HepMC3 related translation units
         target_compile_definitions(smash_objlib PUBLIC ${_hepmc_definitions})
         target_link_libraries(smash_objlib PUBLIC ${_hepmc_targets})
+        # Link HepMC3 into smash executable
+        target_link_libraries(smash PRIVATE smash_hepmc3)
     else()
         message(STATUS "Suitable HepMC3 not found. Support disabled. "
                        "See README for more information.")
@@ -278,6 +282,8 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
         # Pull Rivet into smash_objlib to compile Rivet related translation units
         target_compile_definitions(smash_objlib PUBLIC SMASH_USE_RIVET)
         target_link_libraries(smash_objlib PUBLIC Rivet::Rivet)
+        # Link Rivet into smash executable
+        target_link_libraries(smash PRIVATE smash_rivet) # HepMC3 targets already linked in
     else()
         message(STATUS "Suitable Rivet not found. Support disabled. "
                        "See README for more information.")
