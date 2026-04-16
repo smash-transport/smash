@@ -238,11 +238,9 @@ endif()
 # Finally mimic an external project using SMASH as a library, verifying that few executables linking
 # to smash library can be built and run without crashing.
 add_test(NAME usage_of_SMASH_as_library
-         COMMAND bash run_examples_for_testing.bash "${PROJECT_SOURCE_DIR}"
+         COMMAND bash run_examples_for_testing.bash "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}"
                  "${Pythia_CONFIG_EXECUTABLE}"
          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/examples/using_SMASH_as_library)
-set_tests_properties(usage_of_SMASH_as_library PROPERTIES ENVIRONMENT
-                                                          SMASH_BUILD_DIR=${PROJECT_BINARY_DIR})
 
 # =================================================================================================
 
