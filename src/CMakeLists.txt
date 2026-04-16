@@ -23,6 +23,10 @@ add_executable(smash smash.cc $<TARGET_OBJECTS:smash_objlib>)
 add_library(smash_shared SHARED $<TARGET_OBJECTS:smash_objlib>)
 add_library(smash_api INTERFACE)
 
+# Alias for the shared library to unify build and install trees syntax. If e.g. SMASH is used via
+# add_subdirectory in another project, the alias allows to link to SMASH always using SMASH::smash.
+add_library(SMASH::smash ALIAS smash_shared)
+
 # Both smash executable and shared library are linked privately to the object library because the
 # object is only an implementation detail and we do not want to expose it to clients, but also to
 # avoid that the dependency on the external libraries is propagated to users of the shared library,
