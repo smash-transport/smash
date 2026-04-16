@@ -145,8 +145,8 @@ string(TIMESTAMP BUILD_DATE)
 find_package(Pythia 8.316 EXACT REQUIRED)
 if(Pythia_FOUND)
     if(TARGET Pythia::Pythia)
-        target_link_libraries(smash_objlib PUBLIC Pythia::Pythia)
-        target_compile_definitions(smash_objlib PUBLIC "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+        target_link_libraries(smash_api INTERFACE Pythia::Pythia)
+        target_compile_definitions(smash_api INTERFACE "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
                                                        "PYTHIA_FOUND")
     else()
         message(FATAL_ERROR "Pythia library found, but its target is somehow missing.\n"
@@ -157,7 +157,7 @@ endif()
 find_package(GSL 2.0 REQUIRED)
 if(GSL_FOUND)
     if(TARGET GSL::gsl AND TARGET GSL::gslcblas)
-        target_link_libraries(smash_objlib PUBLIC GSL::gsl GSL::gslcblas)
+        target_link_libraries(smash_api INTERFACE GSL::gsl GSL::gslcblas)
     else()
         message(FATAL_ERROR " \n" " GSL library found, but its targets are somehow missing.\n"
                             " Ensure to be using the official CMake module to find it.\n")
@@ -167,7 +167,7 @@ endif()
 find_package(Eigen3 3.0 REQUIRED)
 if(EIGEN3_FOUND)
     if(TARGET Eigen3::Eigen)
-        target_link_libraries(smash_objlib PUBLIC Eigen3::Eigen)
+        target_link_libraries(smash_api INTERFACE Eigen3::Eigen)
     else()
         message(FATAL_ERROR " \n" " Eigen3 library found, but its target is somehow missing.\n"
                             " Ensure to be using the provided CMake module to find it.\n")
