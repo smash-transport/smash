@@ -33,8 +33,15 @@ add_library(SMASH::smash ALIAS smash_shared)
 # which should not be aware of them (dependency on external library is introduced in the Config
 # file). What has to be propagated to clients belongs to smash_api interface target.
 target_link_libraries(smash_objlib PUBLIC smash_project_build_requirements smash_api)
-target_link_libraries(smash_api INTERFACE smash_project_usage_requirements)
 target_link_libraries(smash PRIVATE smash_objlib smash_api)
+target_link_libraries(smash_api
+                      INTERFACE smash_project_usage_requirements
+                                einhard
+                                yaml-cpp
+                                cuhre
+                                suave
+                                divonne
+                                vegas)
 target_link_libraries(smash_shared PRIVATE smash_objlib PUBLIC smash_api)
 
 # Disable compiler-specific extensions for all targets. This cannot be done through INTERFACE
@@ -45,24 +52,25 @@ set_target_properties(smash_objlib smash smash_shared PROPERTIES CXX_EXTENSIONS 
 # not be used for binaries in the install tree" (CMake documentation), we request here to set the
 # INSTALL_RPATH in the library to ensure that projects linking to SMASH finds at run time libraries
 # like Pythia, which are likely to be in not standard places.
-set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
-                                              INSTALL_RPATH_USE_LINK_PATH TRUE)
+set_target_properties(smash_shared
+                      PROPERTIES OUTPUT_NAME smash
+                                 EXPORT_NAME smash
+                                 INSTALL_RPATH "${ORIGIN}"
+                                 INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-# Set up include paths for SMASH and its clients using the smash_api interface target.
-target_include_directories(smash_api
-                           INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                                     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-                                     $<INSTALL_INTERFACE:include>)
+# Set up compilation include paths for given target. Note that we need to set both BUILD_INTERFACE
+# and INSTALL_INTERFACE to be sure that the include directories are correctly set both when using
+# the target from the build tree and from the install tree.
+function(smash_set_target_include_directories target scope)
+    target_include_directories(${target}
+                               ${scope}
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+                               $<INSTALL_INTERFACE:include>)
+endfunction()
 
-# Prepare list variables to collect libraries, compiler definitions for internal usage in SMASH,
-# compiler definitions for users of SMASH, internal compile options and so on
-target_link_libraries(smash_objlib
-                      PUBLIC einhard
-                             yaml-cpp
-                             cuhre
-                             suave
-                             divonne
-                             vegas)
+# Set up compilation include paths for the API target
+smash_set_target_include_directories(smash_api INTERFACE)
 
 # Enable warnings for supported compilers only (we know the compilers support the flag, do not test)
 if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
