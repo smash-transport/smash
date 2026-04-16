@@ -53,8 +53,6 @@ RUN <<EOF
     vim
 EOF
 
-# Set cpu architecture flag for compilation
-
 ARG C_CXX_ARCH_FLAG="-march=${TARGET_ARCHITECTURE}"
 
 # Set LD_LIBRARY_PATH environment variable to comply with Docker suggestion to always define
@@ -72,22 +70,59 @@ WORKDIR /SMASH
 RUN mkdir /MNT
 
 # Get and build public SMASH
-ARG SMASH_VERSION="main"
+
+ARG SMASH_TAG="latest"
 ENV PYTHIA8=/SMASH/pythia_install/
 
-RUN <<EOF
-  set -eux
+# Select between cloning SMASH publicly or using local development sources
+
+ARG USE_LOCAL_SOURCE=false
+
+# syntax=docker/dockerfile:1
+
+ARG SMASH_TAG=latest
+ARG USE_LOCAL_SOURCE=false
+
+ENV PYTHIA8=/SMASH/pythia_install/
+# syntax=docker/dockerfile:1
+
+ENV PYTHIA8=/SMASH/pythia_install/
+
+RUN --mount=from=local_smash,target=/__local_smash <<'EOF'
+  set -euxo pipefail
+  mkdir -p /SMASH
   cd /SMASH
 
-  git clone https://github.com/smash-transport/smash.git
-  cd smash
-  git checkout "${SMASH_VERSION}"
+  if [[ "${USE_LOCAL_SOURCE}" == "true" ]]; then
+    echo "Using local SMASH development sources..."
+    cp -a /__local_smash /SMASH/smash
+  else
+    echo "Cloning public SMASH repository..."
+    git clone https://github.com/smash-transport/smash.git smash
+    cd smash
 
-  PYTHIA_VERSION=$(grep 'Pythia' src/CMakeLists.txt | grep -Eo '[1-9]?[0-9]\.[0-9]{3}' | head -n1)
-  PYTHIA_VERSION_NODOT=${PYTHIA_VERSION/./}
+    if [[ "${SMASH_TAG}" == "latest" ]]; then
+      latest_tag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
+      git switch --detach "${latest_tag}"
+    else
+      git checkout "${SMASH_TAG}"
+    fi
+  fi
+
+  cd /SMASH/smash
+
+  find_pythia_strings=($(grep 'find_package(Pythia' src/CMakeLists.txt | grep -Eo '[1-9]?[0-9]\.[0-9]{3}'))
+
+  if [[ ${#find_pythia_strings[@]} -ne 1 ]]; then
+    echo "Error: Exactly one Pythia version expected from src/CMakeLists.txt, found: ${#find_pythia_strings[@]}" >&2
+    exit 1
+  fi
+
+  PYTHIA_VERSION="${find_pythia_strings[0]}"
+  PYTHIA_VERSION_NODOT="${PYTHIA_VERSION/./}"
 
   if [[ -z "${PYTHIA_VERSION}" ]]; then
-    echo "Error: could not detect Pythia version from src/CMakeLists.txt"
+    echo "Error: could not detect Pythia version from src/CMakeLists.txt" >&2
     exit 1
   fi
 
@@ -95,42 +130,47 @@ RUN <<EOF
   echo "Using tarball version: ${PYTHIA_VERSION_NODOT}"
 
   cd /SMASH
-  wget https://pythia.org/download/pythia83/pythia${PYTHIA_VERSION_NODOT}.tgz
-  tar xf pythia${PYTHIA_VERSION_NODOT}.tgz
-  rm pythia${PYTHIA_VERSION_NODOT}.tgz
+  wget "https://pythia.org/download/pythia83/pythia${PYTHIA_VERSION_NODOT}.tgz"
+  tar xf "pythia${PYTHIA_VERSION_NODOT}.tgz"
+  rm "pythia${PYTHIA_VERSION_NODOT}.tgz"
 
-  cd /SMASH/pythia${PYTHIA_VERSION_NODOT}
-  ./configure --cxx-common="${C_CXX_ARCH_FLAG} -O3 -std=c++17 -fPIC -pthread" --prefix=${PYTHIA8}
-  make -j$(nproc)
+  cd "/SMASH/pythia${PYTHIA_VERSION_NODOT}"
+  ./configure --cxx-common="${C_CXX_ARCH_FLAG} -O3 -std=c++17 -fPIC -pthread" --prefix="${PYTHIA8}"
+  make -j"$(nproc)"
   make install
-  echo ${PYTHIA8}/lib >> /etc/ld.so.conf
+
+  echo "${PYTHIA8}/lib" > /etc/ld.so.conf.d/pythia8.conf
   ldconfig
 
   mkdir -p /SMASH/smash/build
   mkdir -p /SMASH/smash_bin
   cd /SMASH/smash/build
 
-  cmake -DPythia_CONFIG_EXECUTABLE=/SMASH/pythia${PYTHIA_VERSION_NODOT}/bin/pythia8-config \
-        -DSMASH_ARCH_FLAG="${C_CXX_ARCH_FLAG}" ..
-  make smash -j$(nproc)
+  cmake \
+    -DPythia_CONFIG_EXECUTABLE="/SMASH/pythia${PYTHIA_VERSION_NODOT}/bin/pythia8-config" \
+    -DSMASH_ARCH_FLAG="${C_CXX_ARCH_FLAG}" \
+    ..
+
+  make smash -j"$(nproc)"
 
   if [[ -f /SMASH/smash/build/smash ]]; then
     cp /SMASH/smash/build/smash /SMASH/smash_bin/
     cp /SMASH/smash/build/config.yaml /SMASH/smash_bin/
-    rm -r /SMASH/smash/build
+    rm -rf /SMASH/smash/build
   else
-    echo "SMASH executable not found! Something went wrong compiling SMASH!"
+    echo "SMASH executable not found! Something went wrong compiling SMASH!" >&2
     exit 1
   fi
 EOF
+
 ENV PYTHIA8DATA=${PYTHIA8}/share/Pythia8/xmldoc
 ENV PYTHIA_LIBRARY=${PYTHIA8}/lib
 ENV PYTHIA_INCLUDE=${PYTHIA8}/include
 ENV LD_LIBRARY_PATH=${PYTHIA_LIBRARY}:${LD_LIBRARY_PATH}
 ENV PATH=${PYTHIA8}/bin:/SMASH/smash_bin:${PATH}
-ENV PATH=/SMASH/smash_bin:${PATH}
 
-# Set up shell prompts when using the container image under Docker or under
+
+
 # Singularity (CUSTOM_ENV file automatically sourced by Singularity).
 
 RUN <<'EOF'
