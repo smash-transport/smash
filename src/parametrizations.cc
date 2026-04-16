@@ -781,7 +781,7 @@ double KaonNucleonRatios::get_ratio(const ParticleType& a,
   return ratios_.at(key);
 }
 
-/*thread_local (see #3075)*/ KaonNucleonRatios kaon_nucleon_ratios;
+/*thread_local (see commit 897d0b8)*/ KaonNucleonRatios kaon_nucleon_ratios;
 
 double kminusp_kbar0n(double mandelstam_s) {
   constexpr double a0 = 100;   // mb GeV^2

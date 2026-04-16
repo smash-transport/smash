@@ -16,7 +16,7 @@
 
 namespace smash {
 static constexpr int LGrandcanThermalizer = LogArea::GrandcanThermalizer::id;
-/*thread_local (see #3075)*/ random::Engine random::engine;
+/*thread_local (see commit 897d0b8)*/ random::Engine random::engine;
 
 int64_t random::generate_63bit_seed() {
   std::random_device rd;
