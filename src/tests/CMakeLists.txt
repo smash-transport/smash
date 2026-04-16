@@ -194,6 +194,7 @@ smash_add_run_test(crosssection_dump smash smash -s 2112,2212)
 smash_add_run_test(resonance_spectral_function_dump smash smash -r 113)
 # If sanitizer is enabled, repeat few runs using it
 if(USE_SANITIZER)
+    add_dependencies(tests smash_sanitizer)
     smash_add_run_test(sanitizer_box smash_sanitizer smash_sanitizer
                        -e 5.0
                        -m Box
