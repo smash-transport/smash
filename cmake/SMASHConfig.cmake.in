@@ -2,8 +2,12 @@
 
 include(CMakeFindDependencyMacro)
 
-# Set some SMASH setup variable to keep track of how SMASH was installed
-# NOTE: Keep variable name as it is in variable name to be able to use functions later
+# Set some SMASH setup variable to keep track of how SMASH was installed. These
+# variables will propagate to clients through their find_package(SMASH) calls
+# and in this spirit we add here also the information about installed input files.
+# NOTE: Keep dependencies names as they are in variable names to be able to use
+#       functions later.
+set(SMASH_INPUT_FILES_DIR "${PACKAGE_PREFIX_DIR}/share/input_files")
 set(Pythia_CONFIG_EXECUTABLE "@Pythia_CONFIG_EXECUTABLE@")
 set(SMASH_Pythia_REQUIRED_VERSION "@Pythia_REQUIRED_VERSION@")
 set(SMASH_GSL_MIN_VERSION "@GSL_MINIMUM_VERSION@")
