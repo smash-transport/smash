@@ -2,11 +2,10 @@
 
 include(CMakeFindDependencyMacro)
 
-# Set some SMASH setup variable to keep track of how SMASH was installed. These
-# variables will propagate to clients through their find_package(SMASH) calls
-# and in this spirit we add here also the information about installed input files.
-# NOTE: Keep dependencies names as they are in variable names to be able to use
-#       functions later.
+# Set some SMASH setup variable to keep track of how SMASH was installed. These variables will
+# propagate to clients through their find_package(SMASH) calls and in this spirit we add here also
+# the information about installed input files. Keep dependencies names as they are in variable names
+# to be able to use functions later.
 set(SMASH_INPUT_FILES_DIR "${PACKAGE_PREFIX_DIR}/share/input_files")
 set(Pythia_CONFIG_EXECUTABLE "@Pythia_CONFIG_EXECUTABLE@")
 set(SMASH_Pythia_REQUIRED_VERSION "@Pythia_REQUIRED_VERSION@")
@@ -29,13 +28,12 @@ function(_fail_if_any_variable_is_unset)
     endforeach()
 endfunction()
 set(_variables_to_be_set
-        SMASH_Pythia_REQUIRED_VERSION
-        SMASH_GSL_MIN_VERSION
-        SMASH_Eigen3_MIN_VERSION
-        SMASH_USE_ROOT
-        SMASH_USE_HepMC3
-        SMASH_Rivet_MIN_VERSION
-)
+    SMASH_Pythia_REQUIRED_VERSION
+    SMASH_GSL_MIN_VERSION
+    SMASH_Eigen3_MIN_VERSION
+    SMASH_USE_ROOT
+    SMASH_USE_HepMC3
+    SMASH_Rivet_MIN_VERSION)
 _fail_if_any_variable_is_unset(${_variables_to_be_set})
 if(SMASH_USE_ROOT)
     _fail_if_any_variable_is_unset(SMASH_ROOT_MIN_VERSION SMASH_ROOT_COMPONENTS)
@@ -46,13 +44,13 @@ endif()
 if(SMASH_USE_Rivet)
     _fail_if_any_variable_is_unset(SMASH_USE_Rivet)
     if(NOT SMASH_USE_HepMC3)
-        message(FATAL_ERROR " \n"
-                            " SMASH installation error: SMASH_USE_Rivet set to ON but \n"
+        message(FATAL_ERROR " \n" " SMASH installation error: SMASH_USE_Rivet set to ON but \n"
                             " SMASH_USE_HepMC3 is set to OFF. This should not happen.\n")
     endif()
 endif()
 
-# ---------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
+# ~~~
 # This is what SMASH is supposed to provide and how the components are handled in this file:
 #
 #    Component    Targets-file                  Provides
@@ -73,9 +71,11 @@ endif()
 #  https://cmake.org/cmake/help/latest/command/find_package.html#package-file-interface-variables
 # find_package uses by client code will set:
 #  - <PackageName>_FIND_COMPONENTS   -> List of specified components (required and optional)
-#  - <PackageName>_FIND_REQUIRED_<c> -> True if component <c> is required, false if component <c> is optional
-# and this is what should be used here to determine how SMASH was looked for.
-# ---------------------------------------------------------------------------------------------------------------------
+#  - <PackageName>_FIND_REQUIRED_<c> -> True if component <c> is required, false if component <c>
+#                                       is optional and this is what should be used here to
+#                                       determine how SMASH was looked for.
+# ~~~
+# -------------------------------------------------------------------------------------------------
 
 # We start collecting available components to then handle requested components
 set(SMASH_AVAILABLE_COMPONENTS Core)
@@ -94,9 +94,9 @@ if(NOT SMASH_FIND_COMPONENTS)
     set(SMASH_FIND_COMPONENTS Core)
 endif()
 
-# Rivet depends on HepMC3, so if Rivet is requested we need to make sure that HepMC3 is also requested.
-# We do not want to force users to explicitly request HepMC3 if they want to use Rivet, since this is
-# an implementation detail that they should not care about.
+# Rivet depends on HepMC3, so if Rivet is requested we need to make sure that HepMC3 is also
+# requested. We do not want to force users to explicitly request HepMC3 if they want to use Rivet,
+# since this is an implementation detail that they should not care about.
 if(Rivet IN_LIST SMASH_FIND_COMPONENTS AND NOT HepMC3 IN_LIST SMASH_FIND_COMPONENTS)
     list(APPEND SMASH_FIND_COMPONENTS HepMC3)
 endif()
@@ -105,18 +105,18 @@ endif()
 foreach(comp IN LISTS SMASH_FIND_COMPONENTS)
     if(NOT comp IN_LIST SMASH_AVAILABLE_COMPONENTS)
         if(SMASH_FIND_REQUIRED_${comp})
-            message(FATAL_ERROR " \n"
-                                " SMASH component ${comp} requested but not available in this installation.\n"
-                                " Available components: ${SMASH_AVAILABLE_COMPONENTS}\n")
+            message(FATAL_ERROR " \n" " SMASH component ${comp} requested but not available\n"
+                                " in this installation. Available components:\n"
+                                "   ${SMASH_AVAILABLE_COMPONENTS}\n")
         else()
             message(STATUS "SMASH component ${comp} requested but not available, skipping it.")
         endif()
     endif()
 endforeach()
 
-# ---------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
 # Find dependencies and load components as requested
-# ---------------------------------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
 
 # Change temporarily CMAKE_MODULE_PATH to be sure the shipped module are found
 set(_smash_old_module_path "${CMAKE_MODULE_PATH}")
@@ -142,13 +142,11 @@ foreach(_dependence IN ITEMS ROOT HepMC3 Rivet)
         if(_dependence STREQUAL "ROOT")
             set(_dependence_components_option COMPONENTS ${SMASH_ROOT_COMPONENTS})
         endif()
-        find_dependency(${_dependence} ${SMASH_${_dependence}_MIN_VERSION}
-                                       ${_dependence_required}
-                                       ${_dependence_components_option})
+        find_dependency(${_dependence} ${SMASH_${_dependence}_MIN_VERSION} ${_dependence_required}
+                        ${_dependence_components_option})
         include("${CMAKE_CURRENT_LIST_DIR}/SMASH-targets-${_dependence_lower}.cmake")
     endif()
 endforeach()
 
 # Restore previous value of CMAKE_MODULE_PATH
 set(CMAKE_MODULE_PATH "${_smash_old_module_path}")
-

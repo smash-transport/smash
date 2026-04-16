@@ -131,6 +131,7 @@ function look_for_files_to_format()
         FILES_TO_FORMAT=(
             "${base_dir}"/**/CMakeLists.txt
             "${base_dir}"/**/*.cmake
+            "${base_dir}"/**/*.cmake.in
         )
         for index in "${!FILES_TO_FORMAT[@]}"; do
             if [[ ${FILES_TO_FORMAT[index]} =~ ^${base_dir}/3rdparty/(Cuba[^/]*/|einhard/|CMakeLists.txt$) ]]; then
