@@ -1,3 +1,12 @@
+########################################################
+#
+#    Copyright (c) 2026
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+########################################################
+
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)

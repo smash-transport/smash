@@ -77,13 +77,13 @@ where the `-L` option can be repeated:
 
 > With multiple `-L`, run tests where each regular expression matches at least one label.
 
-### Unit and integration tests
+### Unit, integration and run tests
 
-To run the various unit tests, use the following:
+To run the various tests, use the following:
 ```
     make test
 ```
-Another more standard way to do this is to use the CMake test runner:
+Another more standard and **encouraged** way to do this is to use the CMake test runner:
 ```
     ctest
 ```

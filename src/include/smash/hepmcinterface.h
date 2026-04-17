@@ -1,7 +1,7 @@
 /*
  *
  *    Copyright (c) 2021 Christian Holm Christensen
- *    Copyright (c) 2021-2024
+ *    Copyright (c) 2021-2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
