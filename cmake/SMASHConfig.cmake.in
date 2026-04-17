@@ -29,29 +29,31 @@ set(SMASH_USE_Rivet @SMASH_USE_Rivet@)
 set(SMASH_Rivet_MIN_VERSION "@Rivet_MINIMUM_VERSION@")
 
 # Make sure configuration of this file properly worked for clients
-function(_fail_if_any_variable_is_unset)
+function(_fail_if_any_variable_is_unset_or_empty)
     foreach(_variable IN ITEMS ${ARGN})
-        if(NOT ${_variable})
-            message(FATAL_ERROR "SMASH installation error: ${_variable} variable is not set.")
+        if(NOT DEFINED ${_variable} OR "${${_variable}}" STREQUAL "")
+            message(FATAL_ERROR "SMASH installation error: "
+                                "${_variable} variable is not set or empty.")
         endif()
     endforeach()
 endfunction()
 set(_variables_to_be_set
+    SMASH_INPUT_FILES_DIR
     SMASH_Pythia_REQUIRED_VERSION
     SMASH_GSL_MIN_VERSION
     SMASH_Eigen3_MIN_VERSION
     SMASH_USE_ROOT
     SMASH_USE_HepMC3
-    SMASH_Rivet_MIN_VERSION)
-_fail_if_any_variable_is_unset(${_variables_to_be_set})
+    SMASH_USE_Rivet)
+_fail_if_any_variable_is_unset_or_empty(${_variables_to_be_set})
 if(SMASH_USE_ROOT)
-    _fail_if_any_variable_is_unset(SMASH_ROOT_MIN_VERSION SMASH_ROOT_COMPONENTS)
+    _fail_if_any_variable_is_unset_or_empty(SMASH_ROOT_MIN_VERSION SMASH_ROOT_COMPONENTS)
 endif()
 if(SMASH_USE_HepMC3)
-    _fail_if_any_variable_is_unset(SMASH_HepMC3_MIN_VERSION)
+    _fail_if_any_variable_is_unset_or_empty(SMASH_HepMC3_MIN_VERSION)
 endif()
 if(SMASH_USE_Rivet)
-    _fail_if_any_variable_is_unset(SMASH_USE_Rivet)
+    _fail_if_any_variable_is_unset_or_empty(SMASH_Rivet_MIN_VERSION)
     if(NOT SMASH_USE_HepMC3)
         message(FATAL_ERROR " \n" " SMASH installation error: SMASH_USE_Rivet set to ON but \n"
                             " SMASH_USE_HepMC3 is set to OFF. This should not happen.\n")
