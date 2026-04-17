@@ -23,7 +23,6 @@
 #include "HepMC3/GenParticle.h"
 #include "HepMC3/GenVertex.h"
 
-#include "action.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"
