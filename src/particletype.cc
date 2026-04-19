@@ -646,13 +646,14 @@ double ParticleType::sample_spectral_function(double energy) const {
     } while (acceptance < random::uniform(0., sf_ratio_max));
     if (unlikely(acceptance - sf_ratio_max > really_small)) {
       logg[LResonances].warn(
-          "Warning: maximum is being increased in sample_spectral_function: ",
+          "Warning: maximum increased in sample_spectral_function: ",
           sf_ratio_max, " to ", acceptance, " for ", name(),
           ". Sampled mass is ", m, " GeV with ", energy,
-          " GeV available./n This might happen rarely at"
+          " GeV available.\n This might happen rarely at"
           " the edges of the spectral function.");
       // increase fudge factor
       sf_ratio_max *= acceptance / sf_ratio_max;
+      max_ratio_spectral_to_breit_wigner_ = sf_ratio_max;
     } else {
       break;  // maximum ok, exit loop
     }

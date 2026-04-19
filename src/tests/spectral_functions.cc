@@ -18,6 +18,21 @@
 
 using namespace smash;
 
+static double spectral_function_const_width(const ParticleType &type,
+                                            double m) {
+  /*
+   * The spectral function is a relativistic Breit-Wigner function. This variant
+   * is using a constant width (evaluated at the pole mass, it previously was in
+   * the source code but became obsolete, but moved here to ensure correct
+   * behaviors.
+   */
+  const double resonance_width = type.width_at_pole();
+  if (resonance_width < ParticleType::width_cutoff) {
+    return 0.;
+  }
+  return breit_wigner(m, type.mass(), resonance_width);
+}
+
 TEST(spectral_functions) {
   smash::Test::create_actual_particletypes();
   smash::Test::create_actual_decaymodes();
@@ -45,7 +60,7 @@ TEST(spectral_functions) {
              (t * t);
     });
     const auto result_const = integrate(0., 1., [&](double t) {
-      return type.spectral_function_const_width((1 - t) / t) / (t * t);
+      return spectral_function_const_width(type, (1 - t) / t) / (t * t);
     });
     const auto result = integrate(0., 1., [&](double t) {
       return type.spectral_function(type.min_mass_kinematic() + (1 - t) / t) /

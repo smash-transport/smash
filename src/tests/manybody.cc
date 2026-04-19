@@ -11,6 +11,7 @@
 
 #include <fstream>
 
+#include "histogram.h"
 #include "setup.h"
 #include "smash/particletype.h"
 
@@ -37,11 +38,11 @@ TEST(init_particle_types) {
       "0.3 0  D D D\n");
   DecayModes::load_decaymodes(decays_input);
   ParticleType::check_consistency();
- }
+}
 
 TEST(phasespace_manybody) {
-  constexpr double sqrts = 5;
-  constexpr int samples = 1000;
+  // The test only passes if there is enough energy for the phase space
+  constexpr double sqrts = 10;
 
   const ParticleType &A = ParticleType::find(0x50661);
   const ParticleType &B = ParticleType::find(0x10661);
@@ -49,19 +50,33 @@ TEST(phasespace_manybody) {
   ParticleTypePtrList types = {&A, &B, &C};
   std::vector<FourVector> sampled_momenta(types.size());
 
+  const int N_sample = 100000;
+  const double dm_hist = 0.05;
+  Histogram1d hist_A(dm_hist);
+  Histogram1d hist_B(dm_hist);
+  Histogram1d hist_C(dm_hist);
 
-  Action::sample_manybody_phasespace_impl(sqrts, types, sampled_momenta);
-  // Remove the comment for printout
-  /*
-  std::ofstream out("manybody_histogram.dat");
-  for (int i = 0; i < samples; ++i) {
+  std::ostringstream buffer;
+  for (int i = 0; i < N_sample; ++i) {
     Action::sample_manybody_phasespace_impl(sqrts, types, sampled_momenta);
     for (const auto &p : sampled_momenta) {
-      out << p.abs() << " ";
+      buffer << p.abs() << " ";
     }
-    out << "\n";
+    buffer << "\n";
+
+    hist_A.add(sampled_momenta[0].abs());
+    hist_B.add(sampled_momenta[1].abs());
+    hist_C.add(sampled_momenta[2].abs());
   }
 
+  hist_A.test([&](double m) { return A.spectral_function(m); });
+  hist_B.test([&](double m) { return B.spectral_function(m); });
+  hist_C.test([&](double m) { return C.spectral_function(m); });
+
+  // Uncomment for printout to file
+  /*
+  std::ofstream out("manybody_histogram.dat");
+  out << buffer.str();
   std::ofstream analytic("manybody_analytic.dat");
   for (double m = 0; m < 6; m += 0.02) {
     analytic << m
