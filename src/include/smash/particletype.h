@@ -449,20 +449,9 @@ class ParticleType {
    */
   double sample_resonance_mass(const double mass_stable,
                                const double cms_energy, int L = 0) const;
-
-  /**
-   * Resonance mass sampling for 2-particle final state with two resonances.
-   *
-   * \param[in] t2 Type of the second resonance
-   *               (the first resonance is given by 'this').
-   * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
-   * \param[in] L relative angular momentum of the final-state particles
-   *
-   * \return The masses of the resonance particles.
-   */
-  std::pair<double, double> sample_resonance_masses(const ParticleType &t2,
-                                                    const double cms_energy,
-                                                    int L = 0) const;
+  std::pair<double, double> sample_resonance_masses_2(const ParticleType &t2,
+                                                      const double cms_energy,
+                                                      int L = 0) const;
 
   /**
    * Prints out width and spectral function versus mass to the
@@ -699,7 +688,7 @@ class ParticleType {
 
   /**
    * Maximum ratio between full spectral function and the mass-independent
-   * Breit-Wigner. This is used for rejection sampling.
+   * Breit-Wigner. This is used for sampling the resonance mass.
    */
   mutable std::optional<double> max_ratio_spectral_ = std::nullopt;
 
@@ -832,6 +821,20 @@ inline ParticleTypePtr ParticleType::get_antiparticle() const {
 ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a,
                                              const ParticleTypePtr type_b);
 
+/**
+ * Resonance mass sampling for 2-particle final state with two resonances.
+ *
+ * \param[in] t1 Type of the first resonance
+ * \param[in] t2 Type of the second resonance.
+ * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
+ * \param[in] L relative angular momentum of the final-state particles
+ *
+ * \return The masses of the resonance particles.
+ */
+std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
+                                                      const ParticleType &t2,
+                                                      const double cms_energy,
+                                                      int L = 0);
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_PARTICLETYPE_H_

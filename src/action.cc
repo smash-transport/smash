@@ -275,7 +275,7 @@ std::pair<double, double> Action::sample_masses(
     masses.second = t_b.sample_resonance_mass(t_a.mass(), kinetic_energy_cm);
   } else if (!t_a.is_stable() && !t_b.is_stable()) {
     // two resonances in final state
-    masses = t_a.sample_resonance_masses(t_b, kinetic_energy_cm);
+    masses = sample_two_resonance_masses(t_a, t_b, kinetic_energy_cm);
   }
   return masses;
 }
@@ -314,12 +314,25 @@ void Action::sample_2body_phasespace() {
   sample_angles(masses, cm_kin_energy);
 }
 
+/*
+ * This function performs Metropolis–Hastings sampling of the many body phase
+ * space, starting from an initial guess in sampled_momenta that is assumed
+ * appropriate.
+ *
+ * The algorithm works by repeatedly picking a random pair of particles,
+ * resampling their masses from the spectral functions, and adjusting their
+ * momenta accordingly in the CM frame of the pair, which conserves energy and
+ * momentum.
+ *
+ * The function is for now used as a fallback for the rejection algorithm in
+ * sample_manybody_phasespace_impl and takes its initial guess from there, so it
+ * is written as a static function, and not a separate method of Action.
+ */
 static void sample_manybody_phasespace_MCMC(
     const ParticleTypePtrList &types,
     std::vector<FourVector> &sampled_momenta) {
-  constexpr int burn_in = 1000;
-  // Initialize sample with pole masses and equal kinetic energies
-  // in the center-of-momentum frame
+  constexpr int burn_in = 200;
+  // sampled_momenta already contains an initial guess
   const int n = types.size();
   std::vector<double> m(n);
   for (int i = 0; i < n; i++) {
@@ -335,7 +348,7 @@ static void sample_manybody_phasespace_MCMC(
       } while (idx2 == idx1);
     } while (types[idx1]->is_stable() && types[idx2]->is_stable());
 
-    // Energy of the pair in the CM frame
+    // Energy of the pair and CM frame velocity
     const FourVector p_sum = sampled_momenta[idx1] + sampled_momenta[idx2];
     const ThreeVector beta = p_sum.velocity();
     const double sqrts_12 = p_sum.abs();
@@ -347,13 +360,7 @@ static void sample_manybody_phasespace_MCMC(
     const double pcm = pCM(sqrts_12, m1, m2);
     Angles angle;
     angle.distribute_isotropically();
-    auto p1 =
-        FourVector(std::sqrt(m1 * m1 + pcm * pcm), pcm * angle.threevec())
-            .lorentz_boost(-beta);
-    auto p2 =
-        FourVector(std::sqrt(m2 * m2 + pcm * pcm), -pcm * angle.threevec())
-            .lorentz_boost(-beta);
-    // Metropolis–Hastings acceptance
+    // Metropolis-Hastings acceptance
     double acc = 1.0;
     if (!types[idx1]->is_stable()) {
       acc *= types[idx1]->ratio_spectral(m1) /
@@ -366,8 +373,12 @@ static void sample_manybody_phasespace_MCMC(
 
     if (random::canonical() < acc) {
       // accept
-      sampled_momenta[idx1] = p1;
-      sampled_momenta[idx2] = p2;
+      sampled_momenta[idx1] =
+          FourVector(std::sqrt(m1 * m1 + pcm * pcm), pcm * angle.threevec())
+              .lorentz_boost(-beta);
+      sampled_momenta[idx2] =
+          FourVector(std::sqrt(m2 * m2 + pcm * pcm), -pcm * angle.threevec())
+              .lorentz_boost(-beta);
     }
   }
 }
@@ -398,7 +409,6 @@ void Action::sample_manybody_phasespace_impl(
   // Maximum estimate is rough and can be wrong. We multiply it by additional
   // factor to be on the safer side, and increase it if needed.
   double safety_factor = 1.1 + (n - 2) * 0.2;
-  constexpr double multiplier = 1.2;
   int rejection_counter = 0;
   constexpr int rejection_limit = 200;
   double available_energy =
@@ -406,8 +416,10 @@ void Action::sample_manybody_phasespace_impl(
                               [](double sum, const ParticleTypePtr &type) {
                                 return sum + type->min_mass_spectral();
                               });
-  double r01, w;
+  double r01, w = 1;
   do {
+    // This loop increases the maximum if the safety_factor is too small
+    safety_factor *= std::sqrt(w);
     do {
       // Mass sampling from spectral functions
       double weight_sqr_max = safety_factor * safety_factor;
@@ -463,7 +475,6 @@ void Action::sample_manybody_phasespace_impl(
       logg[LAction].debug()
           << "sample_manybody_phasespace_impl: alarm, weight > 1, w^2 = " << w
           << ". Increasing safety factor." << std::endl;
-      safety_factor *= multiplier;
     }
   } while (w > 1);
 
@@ -509,14 +520,14 @@ void Action::sample_manybody_phasespace_impl(
   logg[LAction].debug() << "Total 4-momentum = " << ptot_all << ", should be ("
                         << sqrts << ", 0, 0, 0)" << std::endl;
   if (rejection_counter >= rejection_limit) {
-    logg[LAction].debug() << "using MCMC fallback for manybody phase space of "
-                          << std::accumulate(types.begin(), types.end(),
-                                             std::string(),
-                                             [](const std::string &a,
-                                                const ParticleTypePtr &b) {
-                                               return a + b->name();
-                                             })
-                          << " with energy " << sqrts << " GeV." << std::endl;
+    logg[LAction].warn() << "using MCMC fallback for manybody phase space of "
+                         << std::accumulate(types.begin(), types.end(),
+                                            std::string(),
+                                            [](const std::string &a,
+                                               const ParticleTypePtr &b) {
+                                              return a + b->name();
+                                            })
+                         << " with energy " << sqrts << " GeV." << std::endl;
     sample_manybody_phasespace_MCMC(types, sampled_momenta);
   }
 }

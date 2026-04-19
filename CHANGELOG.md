@@ -19,13 +19,12 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
-* Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams.  
-  This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
-
-* `CrossSections::probability_transit_high` has been replaced by  
-  `CrossSections::interpolation_at_sqrts`.
-  
 ### Added
+* Processes with more than two outgoing particles (e.g. Dalitz decays and multiparticle reactions) can now produce resonances, with masses sampled from the appropriate spectral function.
+* Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams.
+  This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
+* `CrossSections::probability_transit_high` has been replaced by
+  `CrossSections::interpolation_at_sqrts`.
 * New key `Ignore_Unformed` in `Output: Thermodynamics` to exclude unformed (and preformed) particles from the density
 evaluation. This is useful e.g. in afterburner calculations.
 

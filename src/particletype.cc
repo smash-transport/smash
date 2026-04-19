@@ -602,6 +602,10 @@ double ParticleType::ratio_spectral(double m) const {
 }
 
 void ParticleType::calculate_max_ratio_spectral() const {
+  if (is_stable()) {
+    max_ratio_spectral_ = 1.0;
+    return;
+  }
   std::cout << "Calculating max ratio of spectral functions for " << name()
             << std::endl;
   constexpr double step_size = 0.05;
@@ -665,7 +669,6 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
 
   // largest possible cm momentum (from smallest mass)
   const double pcm_max = pCM(cms_energy, mass_stable, min_mass);
-  const double blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   /* The maximum of the spectral-function ratio 'usually' happens at the
    * largest mass. However, this is not always the case, therefore we need
    * and additional fudge factor (determined automatically). Additionally,
@@ -675,41 +678,31 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
       1.01 * std::max(max_ratio_spectral(), ratio_spectral(max_mass));
 
   double mass_res, val;
-  // outer loop: repeat if maximum is too small
+  const double max = sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   do {
-    const double q_max = sf_ratio_max * max_factor1_;
-    const double max = blw_max * q_max;  // maximum value for rejection sampling
-    // inner loop: rejection sampling
-    do {
-      // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-      mass_res = sample_spectral_function_simple(max_mass);
-      // determine cm momentum for this case
-      const double pcm = pCM(cms_energy, mass_stable, mass_res);
-      const double blw = pcm * blatt_weisskopf_sqr(pcm, L);
-      // determine ratio of full to simple spectral function
-      const double q = ratio_spectral(mass_res);
-      val = q * blw;
-    } while (val < random::uniform(0., max));
+    // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
+    mass_res = sample_spectral_function_simple(max_mass);
+    // determine cm momentum for this case
+    const double pcm = pCM(cms_energy, mass_stable, mass_res);
+    val = ratio_spectral(mass_res) * pcm * blatt_weisskopf_sqr(pcm, L);
+  } while (val < random::uniform(0., max));
 
-    // check that we are using the proper maximum value
-    if (val > max) {
-      logg[LResonances].debug(
-          "maximum is being increased in sample_resonance_mass: ", max_factor1_,
-          " ", val / max, " ", pdgcode(), " ", mass_stable, " ", cms_energy,
-          " ", mass_res);
-      max_factor1_ *= val / max;
-    } else {
-      break;  // maximum ok, exit loop
-    }
-  } while (true);
-
+  // check that we are using the proper maximum value
+  if (val > max) {
+    logg[LResonances].warn(
+        "maximum shoul be increased in sample_resonance_mass: ", sf_ratio_max,
+        " ", val / max, " ", pdgcode(), " ", mass_stable, " ", cms_energy, " ",
+        mass_res);
+  }
   return mass_res;
 }
 
 /* Resonance mass sampling for 2-particle final state with two resonances. */
-std::pair<double, double> ParticleType::sample_resonance_masses(
-    const ParticleType &t2, const double cms_energy, int L) const {
-  const ParticleType &t1 = *this;
+std::pair<double, double> sample_two_resonance_masses(
+    const std::pair<ParticleType, ParticleType> types, const double cms_energy,
+    int L) {
+  const ParticleType &t1 = types.first;
+  const ParticleType &t2 = types.second;
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */
   const double max_mass_1 =
@@ -719,38 +712,31 @@ std::pair<double, double> ParticleType::sample_resonance_masses(
   // largest possible cm momentum (from smallest mass)
   const double pcm_max =
       pCM(cms_energy, t1.min_mass_spectral(), t2.min_mass_spectral());
-  const double blw_max = pcm_max * blatt_weisskopf_sqr(pcm_max, L);
+  const double sf_ratio_max =
+      1.01 * std::max(t1.max_ratio_spectral(), t1.ratio_spectral(max_mass_1)) *
+      std::max(t2.max_ratio_spectral(), t2.ratio_spectral(max_mass_2));
+  const double max = sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
 
   double mass_1, mass_2, val;
-  // outer loop: repeat if maximum is too small
+  // inner loop: rejection sampling
   do {
-    // maximum value for rejection sampling (determined automatically)
-    const double max = blw_max * t1.max_factor2_;
-    // inner loop: rejection sampling
-    do {
-      // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-      mass_1 = t1.sample_spectral_function_simple(max_mass_1);
-      mass_2 = t2.sample_spectral_function_simple(max_mass_2);
-      // determine cm momentum for this case
-      const double pcm = pCM(cms_energy, mass_1, mass_2);
-      const double blw = pcm * blatt_weisskopf_sqr(pcm, L);
-      // determine ratios of full to simple spectral function
-      const double q1 = t1.ratio_spectral(mass_1);
-      const double q2 = t2.ratio_spectral(mass_2);
-      val = q1 * q2 * blw;
-    } while (val < random::uniform(0., max));
+    // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
+    mass_1 = t1.sample_spectral_function_simple(max_mass_1);
+    mass_2 = t2.sample_spectral_function_simple(max_mass_2);
+    // determine cm momentum for this case
+    const double pcm = pCM(cms_energy, mass_1, mass_2);
+    const double sf_ratio =
+        t1.ratio_spectral(mass_1) * t2.ratio_spectral(mass_2);
+    // determine ratios of full to simple spectral function
+    val = sf_ratio * pcm * blatt_weisskopf_sqr(pcm, L);
+  } while (val < random::uniform(0., max));
 
-    if (val > max) {
-      logg[LResonances].debug(
-          "maximum is being increased in sample_resonance_masses: ",
-          t1.max_factor2_, " ", val / max, " ", t1.pdgcode(), " ", t2.pdgcode(),
-          " ", cms_energy, " ", mass_1, " ", mass_2);
-      t1.max_factor2_ *= val / max;
-    } else {
-      break;  // maximum ok, exit loop
-    }
-  } while (true);
-
+  if (val > max) {
+    logg[LResonances].warn(
+        "maximum is being increased in sample_resonance_masses: ", val / max,
+        " ", t1.pdgcode(), " ", t2.pdgcode(), " ", cms_energy, " ", mass_1, " ",
+        mass_2);
+  }
   return {mass_1, mass_2};
 }
 
