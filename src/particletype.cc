@@ -597,28 +597,31 @@ double ParticleType::spectral_function_no_norm(double m) const {
   return breit_wigner(m, mass(), resonance_width);
 }
 
-double ParticleType::ratio_spectral(double m) const {
+double ParticleType::ratio_spectral_to_breit_wigner(double m) const {
   return spectral_function(m) / spectral_function_simple(m);
 }
 
-void ParticleType::calculate_max_ratio_spectral() const {
+void ParticleType::calculate_max_ratio_spectral_to_breit_wigner() const {
   if (is_stable()) {
-    max_ratio_spectral_ = 1.0;
+    max_ratio_spectral_to_breit_wigner_ = 1.0;
     return;
   }
-  std::cout << "Calculating max ratio of spectral functions for " << name()
-            << std::endl;
-  constexpr double step_size = 0.05;
+  /*
+   * These values are arbitrary but sufficed at the time of writing. Since
+   * the performance cost of making this more precise is (probably) not large,
+   * the resolution can in principle be increased without significant impact.
+   */
+  constexpr double step_size = 0.02;
   constexpr double mass_limit = 10.0;
-  double max_ratio = ratio_spectral(mass_limit);
+  double max_ratio = ratio_spectral_to_breit_wigner(mass_limit);
   for (double m = mass_limit; m > mass_ - width_; m -= step_size) {
-    double current_value = ratio_spectral(m);
+    double current_value = ratio_spectral_to_breit_wigner(m);
     if (current_value > max_ratio) {
       max_ratio = current_value;
     }
   }
-  max_ratio_spectral_ = std::max(1.0, max_ratio);
-};
+  max_ratio_spectral_to_breit_wigner_ = std::max(1.0, 1.01 * max_ratio);
+}
 
 double ParticleType::spectral_function_simple(double m) const {
   return breit_wigner_nonrel(m, mass(), width_at_pole());
@@ -634,19 +637,20 @@ double ParticleType::sample_spectral_function(double energy) const {
     return mass();
   }
   double m, acceptance = 0;
-  double sf_ratio_max = 1.01 * std::max(max_ratio_spectral(),
-                                        spectral_function(energy) /
-                                            spectral_function_simple(energy));
+  double sf_ratio_max = std::max(max_ratio_spectral_to_breit_wigner(),
+                                 ratio_spectral_to_breit_wigner(energy));
   while (true) {
     do {
       m = sample_spectral_function_simple(energy);
-      acceptance = spectral_function(m) / spectral_function_simple(m);
+      acceptance = ratio_spectral_to_breit_wigner(m);
     } while (acceptance < random::uniform(0., sf_ratio_max));
-    if (acceptance - sf_ratio_max > really_small) [[unlikely]] {
-      std::cout
-          << "Warning: maximum is being increased in sample_spectral_function: "
-          << acceptance / sf_ratio_max << " " << sf_ratio_max << " "
-          << pdgcode() << " " << energy << " " << m << std::endl;
+    if (unlikely(acceptance - sf_ratio_max > really_small)) {
+      logg[LResonances].warn(
+          "Warning: maximum is being increased in sample_spectral_function: ",
+          sf_ratio_max, " to ", acceptance, " for ", name(),
+          ". Sampled mass is ", m, " GeV with ", energy,
+          " GeV available./n This might happen rarely at"
+          " the edges of the spectral function.");
       // increase fudge factor
       sf_ratio_max *= acceptance / sf_ratio_max;
     } else {
@@ -675,7 +679,8 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
    * a heuristic knowledge is used that usually such mass exist that
    * spectral_function(m) > spectral_function_simple(m). */
   const double sf_ratio_max =
-      1.01 * std::max(max_ratio_spectral(), ratio_spectral(max_mass));
+      std::max(max_ratio_spectral_to_breit_wigner(),
+               ratio_spectral_to_breit_wigner(max_mass));
 
   double mass_res, val;
   const double max = sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
@@ -684,7 +689,8 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
     mass_res = sample_spectral_function_simple(max_mass);
     // determine cm momentum for this case
     const double pcm = pCM(cms_energy, mass_stable, mass_res);
-    val = ratio_spectral(mass_res) * pcm * blatt_weisskopf_sqr(pcm, L);
+    val = ratio_spectral_to_breit_wigner(mass_res) * pcm *
+          blatt_weisskopf_sqr(pcm, L);
   } while (val < random::uniform(0., max));
 
   // check that we are using the proper maximum value
@@ -698,11 +704,10 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
 }
 
 /* Resonance mass sampling for 2-particle final state with two resonances. */
-std::pair<double, double> sample_two_resonance_masses(
-    const std::pair<ParticleType, ParticleType> types, const double cms_energy,
-    int L) {
-  const ParticleType &t1 = types.first;
-  const ParticleType &t2 = types.second;
+std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
+                                                      const ParticleType &t2,
+                                                      const double cms_energy,
+                                                      int L) {
   /* Sample resonance mass from the distribution
    * used for calculating the cross section. */
   const double max_mass_1 =
@@ -713,8 +718,10 @@ std::pair<double, double> sample_two_resonance_masses(
   const double pcm_max =
       pCM(cms_energy, t1.min_mass_spectral(), t2.min_mass_spectral());
   const double sf_ratio_max =
-      1.01 * std::max(t1.max_ratio_spectral(), t1.ratio_spectral(max_mass_1)) *
-      std::max(t2.max_ratio_spectral(), t2.ratio_spectral(max_mass_2));
+      std::max(t1.max_ratio_spectral_to_breit_wigner(),
+               t1.ratio_spectral_to_breit_wigner(max_mass_1)) *
+      std::max(t2.max_ratio_spectral_to_breit_wigner(),
+               t2.ratio_spectral_to_breit_wigner(max_mass_2));
   const double max = sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
 
   double mass_1, mass_2, val;
@@ -725,8 +732,8 @@ std::pair<double, double> sample_two_resonance_masses(
     mass_2 = t2.sample_spectral_function_simple(max_mass_2);
     // determine cm momentum for this case
     const double pcm = pCM(cms_energy, mass_1, mass_2);
-    const double sf_ratio =
-        t1.ratio_spectral(mass_1) * t2.ratio_spectral(mass_2);
+    const double sf_ratio = t1.ratio_spectral_to_breit_wigner(mass_1) *
+                            t2.ratio_spectral_to_breit_wigner(mass_2);
     // determine ratios of full to simple spectral function
     val = sf_ratio * pcm * blatt_weisskopf_sqr(pcm, L);
   } while (val < random::uniform(0., max));

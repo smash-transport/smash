@@ -331,15 +331,11 @@ void Action::sample_2body_phasespace() {
 static void sample_manybody_phasespace_MCMC(
     const ParticleTypePtrList &types,
     std::vector<FourVector> &sampled_momenta) {
-  constexpr int burn_in = 200;
+  constexpr int monte_carlo_iterations = 200;
   // sampled_momenta already contains an initial guess
   const int n = types.size();
-  std::vector<double> m(n);
-  for (int i = 0; i < n; i++) {
-    m[i] = sampled_momenta[i].abs();
-  }
   int idx1, idx2;
-  for (int i = 0; i < burn_in; i++) {
+  for (int i = 0; i < monte_carlo_iterations; i++) {
     // Pick random pair of particles and resample their masses
     do {
       idx1 = random::uniform_int(0, n - 1);
@@ -358,26 +354,32 @@ static void sample_manybody_phasespace_MCMC(
       m2 = types[idx2]->sample_spectral_function(sqrts_12);
     } while (sqrts_12 < m1 + m2);
     const double pcm = pCM(sqrts_12, m1, m2);
-    Angles angle;
-    angle.distribute_isotropically();
-    // Metropolis-Hastings acceptance
+    Angles phitheta;
+    phitheta.distribute_isotropically();
+    /*
+     * Metropolis-Hastings acceptance. Generally we want the ratio to increase
+     * to accept a sample, since the simple Breit Wigner is biased towards lower
+     * masses.
+     */
     double acc = 1.0;
     if (!types[idx1]->is_stable()) {
-      acc *= types[idx1]->ratio_spectral(m1) /
-             types[idx1]->ratio_spectral(sampled_momenta[idx1].abs());
+      acc *= types[idx1]->ratio_spectral_to_breit_wigner(m1) /
+             types[idx1]->ratio_spectral_to_breit_wigner(
+                 sampled_momenta[idx1].abs());
     }
     if (!types[idx2]->is_stable()) {
-      acc *= types[idx2]->ratio_spectral(m2) /
-             types[idx2]->ratio_spectral(sampled_momenta[idx2].abs());
+      acc *= types[idx2]->ratio_spectral_to_breit_wigner(m2) /
+             types[idx2]->ratio_spectral_to_breit_wigner(
+                 sampled_momenta[idx2].abs());
     }
 
     if (random::canonical() < acc) {
-      // accept
+      // Accept and impose momentum conservation with back-to-back particles
       sampled_momenta[idx1] =
-          FourVector(std::sqrt(m1 * m1 + pcm * pcm), pcm * angle.threevec())
+          FourVector(std::sqrt(m1 * m1 + pcm * pcm), pcm * phitheta.threevec())
               .lorentz_boost(-beta);
       sampled_momenta[idx2] =
-          FourVector(std::sqrt(m2 * m2 + pcm * pcm), -pcm * angle.threevec())
+          FourVector(std::sqrt(m2 * m2 + pcm * pcm), -pcm * phitheta.threevec())
               .lorentz_boost(-beta);
     }
   }
@@ -431,8 +433,8 @@ void Action::sample_manybody_phasespace_impl(
         } else {
           m.push_back(type->sample_spectral_function_simple(available_energy));
           const double max_ratio =
-              std::max(type->max_ratio_spectral(),
-                       type->ratio_spectral(available_energy));
+              std::max(type->max_ratio_spectral_to_breit_wigner(),
+                       type->ratio_spectral_to_breit_wigner(available_energy));
           weight_sqr_max *= max_ratio * max_ratio;
         }
       }
@@ -461,7 +463,9 @@ void Action::sample_manybody_phasespace_impl(
       double weight_sqr = 1;
       for (size_t i = 0; i < n; i++) {
         const double ratio =
-            types[i]->is_stable() ? 1 : types[i]->ratio_spectral(m[i]);
+            types[i]->is_stable()
+                ? 1
+                : types[i]->ratio_spectral_to_breit_wigner(m[i]);
         weight_sqr *= ratio * ratio;
       }
       for (size_t i = 1; i < n; i++) {
@@ -474,9 +478,9 @@ void Action::sample_manybody_phasespace_impl(
     if (w > 1) {
       logg[LAction].debug()
           << "sample_manybody_phasespace_impl: alarm, weight > 1, w^2 = " << w
-          << ". Increasing safety factor." << std::endl;
+          << ". Increasing safety factor.\n";
     }
-  } while (w > 1);
+  } while (w > 1 && rejection_counter < rejection_limit);
 
   // Boost particles to the right frame
   std::vector<ThreeVector> beta(n);
@@ -504,8 +508,7 @@ void Action::sample_manybody_phasespace_impl(
       ptot += sampled_momenta[j];
     }
     logg[LAction].debug() << "Total momentum of 0.." << i + 1 << " = "
-                          << ptot.threevec() << " and should be (0, 0, 0). "
-                          << std::endl;
+                          << ptot.threevec() << " and should be (0, 0, 0).\n";
 
     // Boost the first i+1 particles to the next CM frame
     for (size_t j = 0; j <= i + 1; j++) {
@@ -518,7 +521,7 @@ void Action::sample_manybody_phasespace_impl(
     ptot_all += sampled_momenta[j];
   }
   logg[LAction].debug() << "Total 4-momentum = " << ptot_all << ", should be ("
-                        << sqrts << ", 0, 0, 0)" << std::endl;
+                        << sqrts << ", 0, 0, 0)\n";
   if (rejection_counter >= rejection_limit) {
     logg[LAction].warn() << "using MCMC fallback for manybody phase space of "
                          << std::accumulate(types.begin(), types.end(),
@@ -527,7 +530,7 @@ void Action::sample_manybody_phasespace_impl(
                                                const ParticleTypePtr &b) {
                                               return a + b->name();
                                             })
-                         << " with energy " << sqrts << " GeV." << std::endl;
+                         << " with energy " << sqrts << " GeV.\n";
     sample_manybody_phasespace_MCMC(types, sampled_momenta);
   }
 }

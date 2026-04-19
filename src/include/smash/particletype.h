@@ -421,7 +421,7 @@ class ParticleType {
    * \param[in] m Mass of the resonance where the ratio is to be evaluated.
    * \return ratio between spectral functions
    */
-  double ratio_spectral(double m) const;
+  double ratio_spectral_to_breit_wigner(double m) const;
 
   /**
    * Getter used in the resonance mass sampling functions.
@@ -430,12 +430,12 @@ class ParticleType {
    *
    * \return maximum ratio between full spectral function and simple
    */
-  double max_ratio_spectral() const {
-    if (!max_ratio_spectral_.has_value()) {
-      calculate_max_ratio_spectral();
+  double max_ratio_spectral_to_breit_wigner() const {
+    if (!max_ratio_spectral_to_breit_wigner_.has_value()) {
+      calculate_max_ratio_spectral_to_breit_wigner();
     }
-    return max_ratio_spectral_.value();
-  };
+    return max_ratio_spectral_to_breit_wigner_.value();
+  }
 
   /**
    * Resonance mass sampling for 2-particle final state with one resonance
@@ -449,9 +449,6 @@ class ParticleType {
    */
   double sample_resonance_mass(const double mass_stable,
                                const double cms_energy, int L = 0) const;
-  std::pair<double, double> sample_resonance_masses_2(const ParticleType &t2,
-                                                      const double cms_energy,
-                                                      int L = 0) const;
 
   /**
    * Prints out width and spectral function versus mass to the
@@ -690,7 +687,8 @@ class ParticleType {
    * Maximum ratio between full spectral function and the mass-independent
    * Breit-Wigner. This is used for sampling the resonance mass.
    */
-  mutable std::optional<double> max_ratio_spectral_ = std::nullopt;
+  mutable std::optional<double> max_ratio_spectral_to_breit_wigner_ =
+      std::nullopt;
 
   /**
    * Calculates the maximum ratio between full spectral function and simple one.
@@ -703,7 +701,7 @@ class ParticleType {
    * The actual value is the maximum between the ratio at the last found peak,
    * the ratio at the mass limit, and 1 as a fallback.
    */
-  void calculate_max_ratio_spectral() const;
+  void calculate_max_ratio_spectral_to_breit_wigner() const;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.
