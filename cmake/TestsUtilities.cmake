@@ -26,6 +26,13 @@ function(smash_add_functional_test name)
                      --source "${PROJECT_SOURCE_DIR}" --binary "${PROJECT_BINARY_DIR}")
     set_tests_properties(functional_${name} PROPERTIES FIXTURES_REQUIRED fixture_compile_smash
                                                        LABELS "functional;physics")
+    add_custom_target(run_functional_${name}
+                      COMMAND ${Python3_EXECUTABLE}
+                              "${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py" --source
+                              "${PROJECT_SOURCE_DIR}" --binary "${PROJECT_BINARY_DIR}"
+                      DEPENDS smash
+                      COMMENT "Executing functional test ${name}"
+                      VERBATIM)
 endfunction()
 
 # The following function add a physics "test" to run e.g. smash with certain arguments, choosing an
