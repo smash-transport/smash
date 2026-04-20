@@ -134,7 +134,10 @@ endfunction()
 # The following function sets up a Python virtual environment which is needed for functional tests
 function(_smash_setup_python_venv out_success out_python_exec out_venv_path)
     message(STATUS "Looking for Python3")
-    find_package(Python3 3.3...<3.12 QUIET COMPONENTS Interpreter Development)
+    # Note that we require at least Python 3.8 since Pandas 2.0 is one of out requirements and it
+    # requires it. We require something before 3.12, because it contains setuptools>=82 and with it
+    # pkg_resources has been removed and this causes problems installing Panda v2.x.
+    find_package(Python3 3.8...<3.12 QUIET COMPONENTS Interpreter Development)
     if(NOT Python3_FOUND)
         message(ATTENTION "Python3 not found. Functional tests disabled.")
         set(${out_success} OFF PARENT_SCOPE)
