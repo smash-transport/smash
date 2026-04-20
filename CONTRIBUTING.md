@@ -73,15 +73,24 @@ This allows the user to selectively run all tests in a whole category as
 ```
 ctest -L <label>
 ```
-In order to ask `ctest` to run tests matching either one or another label, you
+where `-L` option provides the following functionality:
+
+> Run tests with labels matching regular expression.
+> With multiple `-L`, run tests where each regular expression matches at least one label.
+
+Therefore, to ask `ctest` to run tests matching either one or another label, you
 need to use a regular expression like
 ```
 ctest -L '(unit|integration)'
 ```
-without forgetting to quote it to avoid shell interference.
-If the `-L` option is repeated, this will impose further requirements on categories:
-
-> With multiple `-L`, run tests where each regular expression matches at least one label.
+without forgetting to quote it to avoid shell interference. This runs all tests
+having either `unit` _or_ `integration` as label. In contrast, to combine labels
+in the sense of a logical _and_, it is needed to specify multiple `-L` options.
+For example,
+```
+ctest -L code -L unit
+```
+will select all tests labelled as `code` that are also labelled as `unit`.
 
 Note that not all tests have a dedicated executable. However, in general, there is
 a target for each test. This has the same name of the test with `run_` as prefix.
