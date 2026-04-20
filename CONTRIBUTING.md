@@ -71,24 +71,38 @@ Tests are labelled in a way that CTest is aware of the following tests categorie
 
 This allows the user to selectively run all tests in a whole category as
 ```
-ctest -j4 -L <label>
+ctest -L <label>
 ```
-where the `-L` option can be repeated:
+In order to ask `ctest` to run tests matching either one or another label, you
+need to use a regular expression like
+```
+ctest -L '(unit|integration)'
+```
+without forgetting to quote it to avoid shell interference.
+If the `-L` option is repeated, this will impose further requirements on categories:
 
 > With multiple `-L`, run tests where each regular expression matches at least one label.
 
-### Unit, integration and run tests
+Note that not all tests have a dedicated executable. However, in general, there is
+a target for each test. This has the same name of the test with `run_` as prefix.
+Hence you can use `make` to "build" it, i.e. to let the test run. For instance, the
+`action` unit test can either be run launching its executable or via `make run_action`.
+However, the `smash_run` run test can only explicitly run as `make run_smash_run` or
+using `ctest` (see following section).
+
+### Unit, integration, and run tests
 
 To run the various tests, use the following:
 ```
     make test
 ```
-Another more standard and **encouraged** way to do this is to use the CMake test runner:
+Another more standard and **encouraged** way to do this is to use the CMake test runner
 ```
     ctest
 ```
-This has the advantage that it can also be used for running tests in parallel on
-a multicore machine, e.g. via
+which has a nice UI which you can explore by running `ctest --help`.
+For instance, this has the advantage that it can also be used for running tests
+in parallel on a multicore machine, e.g. via
 ```
     ctest -j4
 ```

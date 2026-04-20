@@ -12,15 +12,15 @@ Refer to the [INSTALL](../../INSTALL.md) file for more information about how to 
 
 With the modern CMake setup, SMASH installs CMake package configuration files and exposes components that can be requested by client projects.
 
-## Locating SMASH installation in your CMake project
+## Locating the SMASH installation in your CMake project
 
-To set up your project, you need CMake to locate SMASH installation in order to then import and use the CMake targets offered by SMASH.
+To set up your project, you need CMake to locate the SMASH installation to then import and use the CMake targets offered by SMASH.
 You can have a look to how this is done in the _CMakeLists.txt_ example file in this folder and get inspired.
-However, it should be as simple as running
+However, it should be as simple as adding
 ```cmake
 find_package(SMASH [<version>] [REQUIRED] [COMPONENTS <components>...])
 ```
-where the offered components are `Core`, `ROOT`, `HepMC3` and `Rivet`.
+to your CMakeLists file where the offered components are `Core`, `ROOT`, `HepMC3` and `Rivet`.
 Each of those offers a target that gets imported if SMASH is correctly found.
 
 ### What if CMake complains about being unable to find SMASH?
@@ -28,8 +28,8 @@ Each of those offers a target that gets imported if SMASH is correctly found.
 First of all CMake will provide a descriptive hint.
 Read it carefully and follow the advice given.
 Most of the time, it happens because you might have installed SMASH in a non-standard location.
-In such a case you need to help CMake locating SMASH, e.g. using `CMAKE_PREFIX_PATH` environment variable or `-DCMAKE_PREFIX_PATH` command line option to `cmake`.
-For any `Package` CMake is also considering as a hint the `Package_DIR` folder, so you could specify `SMASH_DIR` environment variable or pass `-DSMASH_DIR` to `cmake`.
+In such a case you need to help CMake locating SMASH, e.g. using the `CMAKE_PREFIX_PATH` environment variable or the `-DCMAKE_PREFIX_PATH` command line option to `cmake`.
+For any `Package` CMake is also considering as a hint the `Package_DIR` folder, so you could specify the `SMASH_DIR` environment variable or pass `-DSMASH_DIR` to `cmake`.
 
 ### The imported targets
 
@@ -47,7 +47,7 @@ Any of these can be used to e.g. link your executable via
 ```cmake
 target_link_libraries(my_executable PRIVATE SMASH::smash)
 ```
-It is important to remark that any of the non-core target are an extension of the core one.
+It is important to remark that all the non-core targets are an extensions of the core one.
 Therefore, if you need ROOT functionalities in addition to the core SMASH library you can simply link as
 ```cmake
 target_link_libraries(my_executable PRIVATE SMASH::smash_root)
@@ -67,7 +67,7 @@ Note that even though _SMASHConfig.cmake_ offers further targets, these are not 
   ```
 
 * `Pythia_CONFIG_EXECUTABLE` provides the path to the Pythia configuration executable used to install SMASH.
-  Since SMASH installation is also installing CMake modules to locate dependencies that are not CMake-friendly (exactly like Pythia), it needs to keep track about how SMASH was able to locate them in first place.
+  Since the SMASH installation is also installing CMake modules to locate dependencies that are not CMake-friendly (exactly like Pythia), it needs to keep track about how SMASH was able to locate them in first place.
   Therefore, some look-up variables are kept with the great advantage that **your project won't need to bother about this aspect**.
   The same applies to GSL, Eigen3 (mandatory dependencies) and ROOT, HepMC3 and Rivet (optional dependencies): They will be located exactly in the same way as they have been by SMASH.
   Finally, third-party libraries frozen inside SMASH (YAML, Cuba and Einhard) can be also be used in your project and linking to SMASH targets will correctly link them.
@@ -81,7 +81,7 @@ Use e.g.
 find_package(SMASH 3.4 EXACT REQUIRED)
 ```
 to exclusively request version `SMASH-3.4` in your project (dropping `EXACT` would request _at least_ version `3.4`).
-At the moment specifying a version will make CMake accept any version larger of or equal to that specified.
+At the moment, specifying a version will make CMake accept any version larger than or equal to that specified.
 Said differently, any SMASH version after the requested one will be considered compatible and hence accepted by CMake.
 
 
