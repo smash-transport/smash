@@ -957,8 +957,8 @@ double CrossSections::formation(const ParticleType& type_resonance,
   const int sym_factor =
       (type_particle_a.pdgcode() == type_particle_b.pdgcode()) ? 2 : 1;
   return spinfactor * sym_factor * 2. * M_PI * M_PI / cm_momentum_sqr *
-         type_resonance.spectral_function(sqrt_s_) * partial_width * hbarc *
-         hbarc / fm2_mb;
+         type_resonance.full_spectral_function(sqrt_s_) * partial_width *
+         hbarc * hbarc / fm2_mb;
 }
 
 CollisionBranchList CrossSections::two_to_two(

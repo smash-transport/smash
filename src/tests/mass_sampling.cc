@@ -85,7 +85,7 @@ TEST(omega_decay) {
   printf("testing ρ⁰ distribution ...\n");
   hist_neutral.test([&](double m) {
     double pcm = pCM(srts, mass_stable, m);
-    return type_rho_zero.spectral_function(m) * pcm *
+    return type_rho_zero.full_spectral_function(m) * pcm *
            blatt_weisskopf_sqr(pcm, 1);
   }
                     //,"masses_rho_neutral.dat"
@@ -94,7 +94,7 @@ TEST(omega_decay) {
   printf("testing ρ⁺ distribution ...\n");
   hist_charged.test([&](double m) {
     double pcm = pCM(srts, mass_stable, m);
-    return type_rho_plus.spectral_function(m) * pcm *
+    return type_rho_plus.full_spectral_function(m) * pcm *
            blatt_weisskopf_sqr(pcm, 1);
   }
                     //,"masses_rho_charged.dat"

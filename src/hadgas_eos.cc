@@ -260,7 +260,7 @@ double HadronGasEos::scaled_partial_density(const ParticleType &ptype,
           const double tanu = std::tan(u);
           const double m = m0 + 0.5 * w0 * tanu;
           const double jacobian = 0.5 * w0 * (1.0 + tanu * tanu);
-          return ptype.spectral_function(m) * jacobian *
+          return ptype.full_spectral_function(m) * jacobian *
                  scaled_partial_density_auxiliary(m * beta, mu_over_T);
         });
     return result;
@@ -403,9 +403,10 @@ double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
     const double w0 = ptype.width_at_pole();
     const double mth = ptype.min_mass_spectral();
     const double m0 = ptype.mass();
-    double max_ratio =
-        m0 * m0 * std::exp(-beta * m0) * gsl_sf_bessel_Kn_scaled(2, m0 * beta) *
-        ptype.spectral_function(m0) / ptype.spectral_function_simple(m0);
+    double max_ratio = m0 * m0 * std::exp(-beta * m0) *
+                       gsl_sf_bessel_Kn_scaled(2, m0 * beta) *
+                       ptype.full_spectral_function(m0) /
+                       ptype.breit_wigner_spectral_function(m0);
     // Heuristic adaptive maximum search to find max_ratio
     constexpr int npoints = 31;
     double m_lower = mth, m_upper = max_mass, m_where_max = m0;
@@ -416,8 +417,8 @@ double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
         m = m_lower + dm * i;
         const double thermal_factor =
             m * m * std::exp(-beta * m) * gsl_sf_bessel_Kn_scaled(2, m * beta);
-        q = ptype.spectral_function(m) * thermal_factor /
-            ptype.spectral_function_simple(m);
+        q = ptype.full_spectral_function(m) * thermal_factor /
+            ptype.breit_wigner_spectral_function(m);
         if (q > max_ratio) {
           max_ratio = q;
           m_where_max = m;
@@ -435,8 +436,8 @@ double HadronGasEos::sample_mass_thermal(const ParticleType &ptype,
         m = random::cauchy(m0, 0.5 * w0, mth, max_mass);
         const double thermal_factor =
             m * m * std::exp(-beta * m) * gsl_sf_bessel_Kn_scaled(2, m * beta);
-        q = ptype.spectral_function(m) * thermal_factor /
-            ptype.spectral_function_simple(m);
+        q = ptype.full_spectral_function(m) * thermal_factor /
+            ptype.breit_wigner_spectral_function(m);
       } while (q < random::uniform(0., max_ratio));
       if (q > max_ratio) {
         logg[LResonances].warn(

@@ -69,9 +69,9 @@ TEST(phasespace_manybody) {
     hist_C.add(sampled_momenta[2].abs());
   }
 
-  hist_A.test([&](double m) { return A.spectral_function(m); });
-  hist_B.test([&](double m) { return B.spectral_function(m); });
-  hist_C.test([&](double m) { return C.spectral_function(m); });
+  hist_A.test([&](double m) { return A.full_spectral_function(m); });
+  hist_B.test([&](double m) { return B.full_spectral_function(m); });
+  hist_C.test([&](double m) { return C.full_spectral_function(m); });
 
   // Uncomment for printout to file
   /*
@@ -80,9 +80,9 @@ TEST(phasespace_manybody) {
   std::ofstream analytic("manybody_analytic.dat");
   for (double m = 0; m < 6; m += 0.02) {
     analytic << m
-             << " " << A.spectral_function(m)
-             << " " << B.spectral_function(m)
-             << " " << C.spectral_function(m) << std::endl;
+             << " " << A.full_spectral_function(m)
+             << " " << B.full_spectral_function(m)
+             << " " << C.full_spectral_function(m) << std::endl;
   }
   */
 }

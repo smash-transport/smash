@@ -374,7 +374,7 @@ class ParticleType {
    * \note The normalization factor N ensures that the spectral function is
    *       normalized to unity.
    */
-  double spectral_function(double m) const;
+  double full_spectral_function(double m) const;
 
   /**
    * Full spectral function without normalization factor.
@@ -384,7 +384,7 @@ class ParticleType {
    *              spectral function is to be evaluated.
    * \return the value of the non-normalized spectral function for this mass
    */
-  double spectral_function_no_norm(double m) const;
+  double no_norm_spectral_function(double m) const;
 
   /**
    * This one is the most simple form of the spectral function, using a
@@ -396,7 +396,7 @@ class ParticleType {
    *              spectral function is to be evaluated.
    * \return the Cauchy spectral function at mass m
    */
-  double spectral_function_simple(double m) const;
+  double breit_wigner_spectral_function(double m) const;
 
   /**
    * Sample mass from the simple spectral function (Breit-Wigner/Cauchy
@@ -405,7 +405,7 @@ class ParticleType {
    * \param[in] energy Maximum energy from which the mass should be sampled.
    * \return sampled mass
    */
-  double sample_spectral_function_simple(double energy) const;
+  double sample_breit_wigner_spectral_function(double energy) const;
 
   /**
    * Sample mass from the full spectral function.
@@ -413,15 +413,15 @@ class ParticleType {
    * \param[in] energy Maximum energy from which the mass should be sampled.
    * \return sampled mass
    */
-  double sample_spectral_function(double energy) const;
+  double sample_full_spectral_function(double energy) const;
 
   /**
-   * Caclulate the ratio between the full spectral function and simple one.
+   * Calculate the ratio between the full spectral function and simple one.
    *
    * \param[in] m Mass of the resonance where the ratio is to be evaluated.
    * \return ratio between spectral functions
    */
-  double ratio_spectral_to_breit_wigner(double m) const;
+  double ratio_spectral_full_to_breit_wigner(double m) const;
 
   /**
    * Getter used in the resonance mass sampling functions.
@@ -430,11 +430,11 @@ class ParticleType {
    *
    * \return maximum ratio between full spectral function and simple
    */
-  double max_ratio_spectral_to_breit_wigner() const {
-    if (!max_ratio_spectral_to_breit_wigner_.has_value()) {
-      calculate_max_ratio_spectral_to_breit_wigner();
+  double max_ratio_spectral_full_to_breit_wigner() const {
+    if (!max_ratio_spectral_full_to_breit_wigner_) {
+      calculate_max_ratio_spectral_full_to_breit_wigner();
     }
-    return max_ratio_spectral_to_breit_wigner_.value();
+    return *max_ratio_spectral_full_to_breit_wigner_;
   }
 
   /**
@@ -678,16 +678,11 @@ class ParticleType {
   /// Container for the isospin multiplet information
   IsoParticleType *iso_multiplet_ = nullptr;
 
-  /// Maximum factor for single-res mass sampling, cf. sample_resonance_mass.
-  mutable double max_factor1_ = 1.;
-  /// Maximum factor for double-res mass sampling, cf. sample_resonance_masses.
-  mutable double max_factor2_ = 1.;
-
   /**
    * Maximum ratio between full spectral function and the mass-independent
    * Breit-Wigner. This is used for sampling the resonance mass.
    */
-  mutable std::optional<double> max_ratio_spectral_to_breit_wigner_ =
+  mutable std::optional<double> max_ratio_spectral_full_to_breit_wigner_ =
       std::nullopt;
 
   /**
@@ -701,7 +696,7 @@ class ParticleType {
    * The actual value is the maximum between the ratio at the last found peak,
    * the ratio at the mass limit, and 1 as a fallback.
    */
-  void calculate_max_ratio_spectral_to_breit_wigner() const;
+  void calculate_max_ratio_spectral_full_to_breit_wigner() const;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.

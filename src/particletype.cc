@@ -385,13 +385,13 @@ double ParticleType::min_mass_spectral() const {
     /* Otherwise, find the lowest mass value where spectral function has a
      * non-zero value by bisection.*/
     if (!is_stable() &&
-        spectral_function(min_mass_kinematic()) < really_small) {
+        full_spectral_function(min_mass_kinematic()) < really_small) {
       // find a right bound that has non-zero spectral function for bisection
       const double m_step = 0.01;
       double right_bound_bis;
       for (unsigned int i = 0;; i++) {
         right_bound_bis = min_mass_kinematic() + m_step * i;
-        if (spectral_function(right_bound_bis) > really_small) {
+        if (full_spectral_function(right_bound_bis) > really_small) {
           break;
         }
       }
@@ -400,7 +400,7 @@ double ParticleType::min_mass_spectral() const {
       double left_bound_bis = right_bound_bis - m_step;
       while (right_bound_bis - left_bound_bis > precision) {
         const double mid = (left_bound_bis + right_bound_bis) / 2.0;
-        if (spectral_function(mid) > really_small) {
+        if (full_spectral_function(mid) > really_small) {
           right_bound_bis = mid;
         } else {
           left_bound_bis = mid;
@@ -567,7 +567,7 @@ double ParticleType::get_partial_in_width(const double m,
   return w;
 }
 
-double ParticleType::spectral_function(double m) const {
+double ParticleType::full_spectral_function(double m) const {
   if (norm_factor_ < 0.) {
     /* Initialize the normalization factor
      * by integrating over the unnormalized spectral function. */
@@ -581,13 +581,13 @@ double ParticleType::spectral_function(double m) const {
                      const double tanx = std::tan(x);
                      const double m_x = m_pole + width * tanx;
                      const double jacobian = width * (1.0 + tanx * tanx);
-                     return spectral_function_no_norm(m_x) * jacobian;
+                     return no_norm_spectral_function(m_x) * jacobian;
                    });
   }
-  return norm_factor_ * spectral_function_no_norm(m);
+  return norm_factor_ * no_norm_spectral_function(m);
 }
 
-double ParticleType::spectral_function_no_norm(double m) const {
+double ParticleType::no_norm_spectral_function(double m) const {
   /* The spectral function is a relativistic Breit-Wigner function
    * with mass-dependent width. Here: without normalization factor. */
   const double resonance_width = total_width(m);
@@ -597,13 +597,13 @@ double ParticleType::spectral_function_no_norm(double m) const {
   return breit_wigner(m, mass(), resonance_width);
 }
 
-double ParticleType::ratio_spectral_to_breit_wigner(double m) const {
-  return spectral_function(m) / spectral_function_simple(m);
+double ParticleType::ratio_spectral_full_to_breit_wigner(double m) const {
+  return full_spectral_function(m) / breit_wigner_spectral_function(m);
 }
 
-void ParticleType::calculate_max_ratio_spectral_to_breit_wigner() const {
+void ParticleType::calculate_max_ratio_spectral_full_to_breit_wigner() const {
   if (is_stable()) {
-    max_ratio_spectral_to_breit_wigner_ = 1.0;
+    max_ratio_spectral_full_to_breit_wigner_ = 1.0;
     return;
   }
   /*
@@ -613,52 +613,55 @@ void ParticleType::calculate_max_ratio_spectral_to_breit_wigner() const {
    */
   constexpr double step_size = 0.02;
   constexpr double mass_limit = 10.0;
-  double max_ratio = ratio_spectral_to_breit_wigner(mass_limit);
+  constexpr double safety_factor = 1.01;
+  double max_ratio = ratio_spectral_full_to_breit_wigner(mass_limit);
   for (double m = mass_limit; m > mass_ - width_; m -= step_size) {
-    double current_value = ratio_spectral_to_breit_wigner(m);
+    double current_value = ratio_spectral_full_to_breit_wigner(m);
     if (current_value > max_ratio) {
       max_ratio = current_value;
     }
   }
-  max_ratio_spectral_to_breit_wigner_ = std::max(1.0, 1.01 * max_ratio);
+  max_ratio_spectral_full_to_breit_wigner_ =
+      std::max(1.0, safety_factor * max_ratio);
 }
 
-double ParticleType::spectral_function_simple(double m) const {
+double ParticleType::breit_wigner_spectral_function(double m) const {
   return breit_wigner_nonrel(m, mass(), width_at_pole());
 }
 
-double ParticleType::sample_spectral_function_simple(double energy) const {
+double ParticleType::sample_breit_wigner_spectral_function(
+    double energy) const {
   return random::cauchy(mass(), width_at_pole() / 2., min_mass_spectral(),
                         energy);
 }
 
-double ParticleType::sample_spectral_function(double energy) const {
+double ParticleType::sample_full_spectral_function(double energy) const {
   if (is_stable()) {
     return mass();
   }
-  double m, acceptance = 0;
-  double sf_ratio_max = std::max(max_ratio_spectral_to_breit_wigner(),
-                                 ratio_spectral_to_breit_wigner(energy));
+  double mass, acceptance = 0;
+  double sf_ratio_max = std::max(max_ratio_spectral_full_to_breit_wigner(),
+                                 ratio_spectral_full_to_breit_wigner(energy));
   while (true) {
     do {
-      m = sample_spectral_function_simple(energy);
-      acceptance = ratio_spectral_to_breit_wigner(m);
+      mass = sample_breit_wigner_spectral_function(energy);
+      acceptance = ratio_spectral_full_to_breit_wigner(mass);
     } while (acceptance < random::uniform(0., sf_ratio_max));
     if (unlikely(acceptance - sf_ratio_max > really_small)) {
       logg[LResonances].warn(
-          "Warning: maximum increased in sample_spectral_function: ",
+          "Warning: maximum increased in sample_full_spectral_function: ",
           sf_ratio_max, " to ", acceptance, " for ", name(),
-          ". Sampled mass is ", m, " GeV with ", energy,
+          ". Sampled mass is ", mass, " GeV with ", energy,
           " GeV available.\n This might happen rarely at"
           " the edges of the spectral function.");
       // increase fudge factor
       sf_ratio_max *= acceptance / sf_ratio_max;
-      max_ratio_spectral_to_breit_wigner_ = sf_ratio_max;
+      max_ratio_spectral_full_to_breit_wigner_ = sf_ratio_max;
     } else {
-      break;  // maximum ok, exit loop
+      break;
     }
   }
-  return m;
+  return mass;
 }
 
 /* Resonance mass sampling for 2-particle final state */
@@ -678,28 +681,28 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
    * largest mass. However, this is not always the case, therefore we need
    * and additional fudge factor (determined automatically). Additionally,
    * a heuristic knowledge is used that usually such mass exist that
-   * spectral_function(m) > spectral_function_simple(m). */
+   * full_spectral_function(m) > breit_wigner_spectral_function(m). */
   const double sf_ratio_max =
-      std::max(max_ratio_spectral_to_breit_wigner(),
-               ratio_spectral_to_breit_wigner(max_mass));
+      std::max(max_ratio_spectral_full_to_breit_wigner(),
+               ratio_spectral_full_to_breit_wigner(max_mass));
 
   double mass_res, val;
   const double max = sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   do {
     // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-    mass_res = sample_spectral_function_simple(max_mass);
+    mass_res = sample_breit_wigner_spectral_function(max_mass);
     // determine cm momentum for this case
     const double pcm = pCM(cms_energy, mass_stable, mass_res);
-    val = ratio_spectral_to_breit_wigner(mass_res) * pcm *
+    val = ratio_spectral_full_to_breit_wigner(mass_res) * pcm *
           blatt_weisskopf_sqr(pcm, L);
   } while (val < random::uniform(0., max));
 
   // check that we are using the proper maximum value
   if (val > max) {
-    logg[LResonances].warn(
-        "maximum shoul be increased in sample_resonance_mass: ", sf_ratio_max,
-        " ", val / max, " ", pdgcode(), " ", mass_stable, " ", cms_energy, " ",
-        mass_res);
+    logg[LResonances].debug(
+        "Maximum acceptance should be increased in sample_resonance_mass: ",
+        sf_ratio_max, " ", val / max, " ", pdgcode(), " ", mass_stable, " ",
+        cms_energy, " ", mass_res);
   }
   return mass_res;
 }
@@ -719,31 +722,31 @@ std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
   const double pcm_max =
       pCM(cms_energy, t1.min_mass_spectral(), t2.min_mass_spectral());
   const double sf_ratio_max =
-      std::max(t1.max_ratio_spectral_to_breit_wigner(),
-               t1.ratio_spectral_to_breit_wigner(max_mass_1)) *
-      std::max(t2.max_ratio_spectral_to_breit_wigner(),
-               t2.ratio_spectral_to_breit_wigner(max_mass_2));
+      std::max(t1.max_ratio_spectral_full_to_breit_wigner(),
+               t1.ratio_spectral_full_to_breit_wigner(max_mass_1)) *
+      std::max(t2.max_ratio_spectral_full_to_breit_wigner(),
+               t2.ratio_spectral_full_to_breit_wigner(max_mass_2));
   const double max = sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
 
-  double mass_1, mass_2, val;
-  // inner loop: rejection sampling
+  double mass_1, mass_2, acceptance;
+  // Rejection sampling
   do {
     // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-    mass_1 = t1.sample_spectral_function_simple(max_mass_1);
-    mass_2 = t2.sample_spectral_function_simple(max_mass_2);
+    mass_1 = t1.sample_breit_wigner_spectral_function(max_mass_1);
+    mass_2 = t2.sample_breit_wigner_spectral_function(max_mass_2);
     // determine cm momentum for this case
     const double pcm = pCM(cms_energy, mass_1, mass_2);
-    const double sf_ratio = t1.ratio_spectral_to_breit_wigner(mass_1) *
-                            t2.ratio_spectral_to_breit_wigner(mass_2);
+    const double sf_ratio = t1.ratio_spectral_full_to_breit_wigner(mass_1) *
+                            t2.ratio_spectral_full_to_breit_wigner(mass_2);
     // determine ratios of full to simple spectral function
-    val = sf_ratio * pcm * blatt_weisskopf_sqr(pcm, L);
-  } while (val < random::uniform(0., max));
+    acceptance = sf_ratio * pcm * blatt_weisskopf_sqr(pcm, L);
+  } while (acceptance < random::uniform(0., max));
 
-  if (val > max) {
-    logg[LResonances].warn(
-        "maximum is being increased in sample_resonance_masses: ", val / max,
-        " ", t1.pdgcode(), " ", t2.pdgcode(), " ", cms_energy, " ", mass_1, " ",
-        mass_2);
+  if (acceptance > max) {
+    logg[LResonances].debug(
+        "Maximum acceptance should be increased in sample_resonance_masses: ",
+        acceptance / max, " ", t1.pdgcode(), " ", t2.pdgcode(), " ", cms_energy,
+        " ", mass_1, " ", mass_2);
   }
   return {mass_1, mass_2};
 }
@@ -778,7 +781,7 @@ void ParticleType::dump_width_and_spectral_function() const {
   std::cout << std::fixed << std::setprecision(5);
   for (unsigned int i = 0;; i++) {
     const double m = m_min + m_step * i;
-    const double w = total_width(m), sf = spectral_function(m);
+    const double w = total_width(m), sf = full_spectral_function(m);
     if (m > rightmost_pole * 2 && sf < spectral_function_threshold) {
       break;
     }
