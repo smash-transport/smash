@@ -1152,7 +1152,9 @@ Experiment<Modus>::Experiment(Configuration &config,
    *
    * The user can change output directory by a command line option, if
    * desired:
-   * \code smash -o <user_output_dir> \endcode
+   * ```console
+   * ./smash -o <user_output_dir>
+   * ```
    * SMASH, by default, will create the specified folder if not existing or will
    * use it if the specified folder exists and is empty. However, if the folder
    * exists and is not empty SMASH will abort with an error to avoid overwriting

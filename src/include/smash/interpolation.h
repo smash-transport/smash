@@ -45,7 +45,7 @@ class InterpolateLinear {
   InterpolateLinear(T x0, T y0, T x1, T y1);
 
   /**
-   * Calculate spline interpolation at x.
+   * Calculate linear interpolation at x.
    *
    *  \param x Interpolation argument.
    *  \return Interpolated value.
@@ -69,12 +69,12 @@ class InterpolateDataLinear {
    * \return The interpolation function.
    *
    * Piecewise linear interpolation is used.
-   * Values outside the given samples will use the outmost linear
-   * interpolation.
+   * Values outside the given samples will be extrapolated based on the outmost
+   * linear interpolation.
    */
   InterpolateDataLinear(const std::vector<T>& x, const std::vector<T>& y);
   /**
-   * Calculate spline interpolation at x.
+   * Calculate linear interpolation at x.
    *
    *  \param x Interpolation argument.
    *  \return Interpolated value.
@@ -241,8 +241,8 @@ T InterpolateDataLinear<T>::operator()(T x0) const {
   // Find the piecewise linear interpolation corresponding to x0.
   size_t i = find_index(x_, x0);
   if (i >= f_.size()) {
-    // We don't have a linear interpolation beyond the last point in x_.
-    // Use the last linear interpolation instead.
+    /* If x0 is beyond the last point in x_, the linear interpolation between
+     * the last two data points in x_ is taken to linearly extrapolate to x0. */
     i = f_.size() - 1;
   }
   return f_[i](x0);

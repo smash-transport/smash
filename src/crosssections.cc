@@ -100,24 +100,48 @@ static void append_list(CollisionBranchList& main_list,
 
 /**
  * Helper function:
- * Throw if elastic cross section is negative.
+ * Throw if elastic cross section between two particles is not implemented.
  *
- * \param[in] sqrts center of mass energy of incoming particles
- * \param[in] sig_el elastic cross section
  * \param[in] data_a incoming particle a
  * \param[in] data_b incoming particle b
+ * \param[in] func_name name of the function that encountered the throw
  */
-[[noreturn]] static void throw_negative_elastic_xsec(
-    const double sqrts, const double sig_el, const ParticleData& data_a,
-    const ParticleData& data_b) {
+[[noreturn]] static void throw_elastic_xsec_is_not_implemented(
+    const ParticleData& data_a, const ParticleData& data_b,
+    const std::string func_name) {
+  std::stringstream ss{};
+  const ParticleType& a = data_a.type();
+  const ParticleType& b = data_b.type();
+  ss << "Elastic cross section for scattering of " << a.name() << " and "
+     << b.name()
+     << " is not implemented in function 'CrossSections::" << func_name << "'.";
+  throw std::runtime_error(ss.str());
+}
+
+/**
+ * Helper function:
+ * Throw if cross section is negative.
+ *
+ * \param[in] sqrts center of mass energy of incoming particles
+ * \param[in] xsec cross section
+ * \param[in] data_a incoming particle a
+ * \param[in] data_b incoming particle b
+ * \param[in] func_name name of the function that encountered the throw
+ */
+[[noreturn]] static void throw_xsec_is_negative(const double sqrts,
+                                                const double xsec,
+                                                const ParticleData& data_a,
+                                                const ParticleData& data_b,
+                                                std::string func_name) {
   std::stringstream ss{};
   const ParticleType& a = data_a.type();
   const ParticleType& b = data_b.type();
   const PdgCode& pdg_a = a.pdgcode();
   const PdgCode& pdg_b = b.pdgcode();
-  ss << "Problem in CrossSections::elastic_parametrization: a=" << a.name()
-     << " b=" << b.name() << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin()
-     << " sigma=" << sig_el << " s=" << sqrts * sqrts << " sqrt(s)=" << sqrts;
+  ss << "Negative cross section encountered in function 'CrossSections::"
+     << func_name << "':\na=" << a.name() << " b=" << b.name()
+     << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin() << " sigma=" << xsec
+     << " s=" << sqrts * sqrts << " sqrt(s)=" << sqrts;
   throw std::runtime_error(ss.str());
 }
 
@@ -441,7 +465,12 @@ double CrossSections::elastic_parametrization(
     elastic_xs *= finder_parameters.AQM_scaling_factor(pdg_a) *
                   finder_parameters.AQM_scaling_factor(pdg_b);
   }
-  return elastic_xs;
+  if (elastic_xs < 0.) {
+    throw_xsec_is_negative(sqrt_s_, elastic_xs, incoming_particles_[0],
+                           incoming_particles_[1], __func__);
+  } else {
+    return elastic_xs;
+  }
 }
 
 double CrossSections::nn_el() const {
@@ -474,8 +503,8 @@ double CrossSections::nn_el() const {
   if (sig_el > 0.) {
     return sig_el;
   } else {
-    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
-                                incoming_particles_[1]);
+    throw_xsec_is_negative(sqrt_s_, sig_el, incoming_particles_[0],
+                           incoming_particles_[1], __func__);
   }
 }
 
@@ -544,16 +573,15 @@ double CrossSections::npi_el() const {
       }
       break;
     default:
-      throw std::runtime_error(
-          "only the elastic cross section for proton-pion "
-          "is implemented");
+      throw_elastic_xsec_is_not_implemented(incoming_particles_[0],
+                                            incoming_particles_[1], __func__);
   }
 
   if (sig_el > 0) {
     return sig_el;
   } else {
-    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
-                                incoming_particles_[1]);
+    throw_xsec_is_negative(sqrt_s_, sig_el, incoming_particles_[0],
+                           incoming_particles_[1], __func__);
   }
 }
 
@@ -864,16 +892,15 @@ double CrossSections::nk_el() const {
       }
       break;
     default:
-      throw std::runtime_error(
-          "elastic cross section for antinucleon-kaon "
-          "not implemented");
+      throw_elastic_xsec_is_not_implemented(incoming_particles_[0],
+                                            incoming_particles_[1], __func__);
   }
 
   if (sig_el > 0) {
     return sig_el;
   } else {
-    throw_negative_elastic_xsec(sqrt_s_, sig_el, incoming_particles_[0],
-                                incoming_particles_[1]);
+    throw_xsec_is_negative(sqrt_s_, sig_el, incoming_particles_[0],
+                           incoming_particles_[1], __func__);
   }
 }
 
@@ -924,15 +951,11 @@ double CrossSections::formation(const ParticleType& type_resonance,
   assert(type_resonance.baryon_number() ==
          type_particle_a.baryon_number() + type_particle_b.baryon_number());
 
-  // Calculate spin factor
   const double spinfactor =
       static_cast<double>(type_resonance.spin() + 1) /
       ((type_particle_a.spin() + 1) * (type_particle_b.spin() + 1));
   const int sym_factor =
       (type_particle_a.pdgcode() == type_particle_b.pdgcode()) ? 2 : 1;
-  /** Calculate resonance production cross section
-   * using the Breit-Wigner distribution as probability amplitude.
-   * See Eq. (176) in \iref{Buss:2011mx}. */
   return spinfactor * sym_factor * 2. * M_PI * M_PI / cm_momentum_sqr *
          type_resonance.spectral_function(sqrt_s_) * partial_width * hbarc *
          hbarc / fm2_mb;
@@ -1788,9 +1811,8 @@ CollisionBranchList CrossSections::deltak_xx(
 
   const double s = sqrt_s_ * sqrt_s_;
   const double pcm = cm_momentum();
-  /* The cross sections are determined from the backward reactions via
-   * detailed balance. The same isospin factors as for the backward reaction
-   * are used. */
+  /* The cross sections are determined from the backward reactions via detailed
+   * balance. The same isospin factors as for the backward reaction are used. */
   switch (pack(pdg_delta, pdg_kaon)) {
     case pack(pdg::Delta_pp, pdg::K_z):
     case pack(pdg::Delta_p, pdg::K_p): {
@@ -2293,18 +2315,19 @@ double CrossSections::xs_dpi_dprimepi(const double sqrts, const double cm_mom,
   const double s = sqrts * sqrts;
   // same matrix element for πd and πd̅
   const double tmp = sqrts - pion_mass - deuteron_mass;
-  /* Matrix element is fit to match the inelastic pi+ d -> pi+ n p cross-section
-   * from the Fig. 5 of [\iref{Arndt:1994bs}]. */
+  /**
+   * Matrix element is fit to match the inelastic pi+ d -> pi+ n p cross-section
+   * from the Fig. 5 of \iref{Arndt:1994bs}.
+   */
   const double matrix_element =
       295.5 + 2.862 / (0.00283735 + pow_int(sqrts - 2.181, 2)) +
       0.0672 / pow_int(tmp, 2) - 6.61753 / tmp;
 
   const double spin_factor =
       (produced_nucleus->spin() + 1) * (type_pi.spin() + 1);
-  /* Isospin factor is always the same, so it is included into the
-   * matrix element.
-   * Symmetry factor is always 1 here.
-   * The (hbarc)^2/16 pi factor is absorbed into matrix element. */
+  /* Isospin factor is always the same, so it is included into the matrix
+   * element. Symmetry factor is always 1 here. The (hbarc)^2/16 pi factor is
+   * absorbed into matrix element. */
   double xsection = matrix_element * spin_factor / (s * cm_mom);
   if (produced_nucleus->is_stable()) {
     xsection *= pCM_from_s(s, type_pi.mass(), produced_nucleus->mass());
@@ -2419,21 +2442,24 @@ double CrossSections::xs_dn_dprimen(const double sqrts, const double cm_mom,
   assert(tmp >= 0.0);
   if (std::signbit(type_N.baryon_number()) ==
       std::signbit(type_nucleus.baryon_number())) {
-    /** Nd → Nd', N̅d̅→ N̅d̅' and reverse:
-     * Fit to match experimental cross-section Nd -> Nnp from
-     * \cite Carlson1973. */
+    /**
+     * Nd → Nd', N̅d̅→ N̅d̅' and reverse:
+     * Fit to match experimental cross-section Nd -> Nnp from \cite Carlson1973.
+     */
     matrix_element = 79.0474 / std::pow(tmp, 0.7897) + 654.596 * tmp;
   } else {
-    /** N̅d →  N̅d', Nd̅→ Nd̅' and reverse:
+    /**
+     * N̅d →  N̅d', Nd̅→ Nd̅' and reverse:
      * Fit to roughly match experimental cross-section N̅d -> N̅ np from
-     * \iref{Bizzarri:1973sp}. */
+     * \iref{Bizzarri:1973sp}.
+     */
     matrix_element = 342.572 / std::pow(tmp, 0.6);
   }
   const double spin_factor =
       (produced_nucleus->spin() + 1) * (type_N.spin() + 1);
   /* Isospin factor is always the same, so it is included into matrix element
-   * Symmetry factor is always 1 here
-   * Absorb (hbarc)^2/16 pi factor into matrix element */
+   * Symmetry factor is always 1 here. Absorb (hbarc)^2/16 pi factor into matrix
+   * element. */
   double xsection = matrix_element * spin_factor / (s * cm_mom);
   if (produced_nucleus->is_stable()) {
     assert(!type_nucleus.is_stable());
@@ -2490,12 +2516,10 @@ CollisionBranchList CrossSections::string_excitation(
   }
 
   double mandelstam_s = sqrt_s_ * sqrt_s_;
-  /* Get mapped PDG id for evaluation of the parametrized cross sections
-   * for diffractive processes.
-   * This must be rescaled according to additive quark model
-   * in the case of exotic hadrons.
-   * Also calculate the multiplicative factor for AQM
-   * based on the quark contents. */
+  /* Get mapped PDG id for evaluation of the parametrized cross sections for
+   * diffractive processes. This must be rescaled according to additive quark
+   * model in the case of exotic hadrons. Also calculate the multiplicative
+   * factor for AQM based on the quark contents. */
   std::array<int, 2> pdgid;
   double AQM_scaling = 1.;
   for (int i = 0; i < 2; i++) {
@@ -2686,7 +2710,7 @@ double CrossSections::high_energy(
   }
 
   /* Meson-meson interaction goes through AQM from pi+p,
-   * see user guide "Use_AQM"*/
+   * see user guide "Use_AQM" */
   if (pdg_a.is_meson() && pdg_b.is_meson()) {
     /* 2/3 factor since difference of 1 meson between meson-meson
      * and baryon-meson */
@@ -2702,8 +2726,7 @@ double CrossSections::high_energy(
 
 double CrossSections::string_hard_cross_section() const {
   double cross_sec = 0.;
-  /* Hard strings can only be excited if the lower cutoff by
-   * Pythia is fulfilled */
+  // Hard strings can only be excited if the lower cutoff by Pythia is fulfilled
   if (sqrt_s_ <= minimum_sqrts_pythia_can_handle) {
     return cross_sec;
   }
@@ -2830,10 +2853,8 @@ CollisionBranchList CrossSections::bar_bar_to_nuc_nuc(
           continue;
         }
 
-        /** Cross section for 2->2 resonance absorption, obtained via detailed
-         * balance from the inverse reaction.
-         * See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
-         * There are factors for spin, isospin and symmetry involved. */
+        /* Cross section for 2->2 resonance absorption, obtained via detailed
+         * balance from the inverse reaction. */
         const double spin_factor = (nuc_a->spin() + 1) * (nuc_b->spin() + 1);
         const int sym_fac_in =
             (type_a.iso_multiplet() == type_b.iso_multiplet()) ? 2 : 1;
@@ -2863,12 +2884,9 @@ double CrossSections::nn_to_resonance_matrix_element(double sqrts,
   const double m_b = type_b.mass();
   const double msqr = 2. * (m_a * m_a + m_b * m_b);
   /* If the c.m. energy is larger than the sum of the pole masses of the
-   * outgoing particles plus three times of the sum of the widths plus 3 GeV,
-   * the collision will be neglected.
-   *
-   * This can be problematic for some final-state cross sections, but at
-   * energies that high strings are used anyway.
-   */
+   * outgoing particles plus three times the sum of the widths plus 3 GeV, the
+   * collision will be neglected. This can be problematic for some final-state
+   * cross sections, but at energies that high strings are used anyway. */
   const double w_a = type_a.width_at_pole();
   const double w_b = type_b.width_at_pole();
   const double uplmt = m_a + m_b + 3.0 * (w_a + w_b) + 3.0;
@@ -2880,8 +2898,10 @@ double CrossSections::nn_to_resonance_matrix_element(double sqrts,
        (type_b.is_Delta() && type_a.is_nucleon())) &&
       (type_a.antiparticle_sign() == type_b.antiparticle_sign())) {
     return 68. / std::pow(sqrts - 1.104, 1.951);
-    /** All other processes use a constant matrix element,
-     *  similar to \iref{Bass:1998ca}, equ. (3.35). */
+    /**
+     * All other processes use a constant matrix element, similar to
+     * \iref{Bass:1998ca}, eq. (3.35).
+     */
   } else if (((type_a.is_Nstar() && type_b.is_nucleon()) ||
               (type_b.is_Nstar() && type_a.is_nucleon())) &&
              type_a.antiparticle_sign() == type_b.antiparticle_sign()) {
@@ -2890,11 +2910,13 @@ double CrossSections::nn_to_resonance_matrix_element(double sqrts,
       return 4.5 / msqr;
     } else if (twoI == 0) {
       const double parametrization = 14. / msqr;
-      /** pn → pnη cross section is known to be larger than the corresponding
+      /**
+       * pn → pnη cross section is known to be larger than the corresponding
        * pp → ppη cross section by a factor of 6.5 [\iref{Calen:1998vh}].
        * Since the eta is mainly produced by an intermediate N*(1535) we
        * introduce an explicit isospin asymmetry for the production of N*(1535)
-       * produced in pn vs. pp similar to [\iref{Teis:1996kx}], eq. 29. */
+       * produced in pn vs. pp similar to [\iref{Teis:1996kx}], eq. (29).
+       */
       if (type_a.is_Nstar1535() || type_b.is_Nstar1535()) {
         return 6.5 * parametrization;
       } else {
@@ -2994,9 +3016,11 @@ CollisionBranchList CrossSections::find_nn_xsection_from_type(
          * Integrate over the allowed resonance mass range. */
         const double resonance_integral = integrator(*type_res_1, *type_res_2);
 
-        /** Cross section for 2->2 process with 1/2 resonance(s) in final state.
-         * Based on Eq. (46) in \iref{Weil:2013mya} and Eq. (3.29) in
-         * \iref{Bass:1998ca} */
+        /**
+         * Cross section for 2->2 process with 1/2 resonance(s) in final state.
+         * Based on eq. (46) in \iref{Weil:2013mya} and eq. (3.29) in
+         * \iref{Bass:1998ca}
+         */
         const double spin_factor =
             (type_res_1->spin() + 1) * (type_res_2->spin() + 1);
         const double xsection = isospin_factor * spin_factor * matrix_element *
