@@ -69,20 +69,20 @@ TEST(phasespace_manybody) {
     hist_C.add(sampled_momenta[2].abs());
   }
 
+  // Uncomment for printout to file
+  /*
+    std::ofstream out("manybody_histogram.dat");
+    out << buffer.str();
+    std::ofstream analytic("manybody_analytic.dat");
+    for (double m = 0; m < 6; m += 0.02) {
+      analytic << m
+               << " " << A.full_spectral_function(m)
+               << " " << B.full_spectral_function(m)
+               << " " << C.full_spectral_function(m) << std::endl;
+    }
+  */
+
   hist_A.test([&](double m) { return A.full_spectral_function(m); });
   hist_B.test([&](double m) { return B.full_spectral_function(m); });
   hist_C.test([&](double m) { return C.full_spectral_function(m); });
-
-  // Uncomment for printout to file
-  /*
-  std::ofstream out("manybody_histogram.dat");
-  out << buffer.str();
-  std::ofstream analytic("manybody_analytic.dat");
-  for (double m = 0; m < 6; m += 0.02) {
-    analytic << m
-             << " " << A.full_spectral_function(m)
-             << " " << B.full_spectral_function(m)
-             << " " << C.full_spectral_function(m) << std::endl;
-  }
-  */
 }

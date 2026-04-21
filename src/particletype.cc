@@ -648,10 +648,11 @@ double ParticleType::sample_full_spectral_function(double energy) const {
       acceptance = ratio_spectral_full_to_breit_wigner(mass);
     } while (acceptance < random::uniform(0., sf_ratio_max));
     if (unlikely(acceptance - sf_ratio_max > really_small)) {
-      logg[LResonances].warn(
-          "Warning: maximum increased in sample_full_spectral_function: ",
-          sf_ratio_max, " to ", acceptance, " for ", name(),
-          ". Sampled mass is ", mass, " GeV with ", energy,
+      logg[LResonances].debug(
+          "Warning: maximum ratio between full spectral function and Breit-",
+          "Wigner increased in sample_full_spectral_function: ", sf_ratio_max,
+          " to ", acceptance, " for ", name(), ". Sampled mass is ", mass,
+          " GeV with ", energy,
           " GeV available.\n This might happen rarely at"
           " the edges of the spectral function.");
       // increase fudge factor
@@ -686,23 +687,31 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
       std::max(max_ratio_spectral_full_to_breit_wigner(),
                ratio_spectral_full_to_breit_wigner(max_mass));
 
-  double mass_res, val;
-  const double max = sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
+  int max_trials = 10;
+  double mass_res, acceptance, fudge_factor = 1;
+  double max = sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   do {
-    // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-    mass_res = sample_breit_wigner_spectral_function(max_mass);
-    // determine cm momentum for this case
-    const double pcm = pCM(cms_energy, mass_stable, mass_res);
-    val = ratio_spectral_full_to_breit_wigner(mass_res) * pcm *
-          blatt_weisskopf_sqr(pcm, L);
-  } while (val < random::uniform(0., max));
+    max *= fudge_factor;
+    do {
+      // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
+      mass_res = sample_breit_wigner_spectral_function(max_mass);
+      // determine cm momentum for this case
+      const double pcm = pCM(cms_energy, mass_stable, mass_res);
+      acceptance = ratio_spectral_full_to_breit_wigner(mass_res) * pcm *
+                   blatt_weisskopf_sqr(pcm, L);
+    } while (acceptance < random::uniform(0., max));
+    fudge_factor *= acceptance / max;
+    --max_trials;
+  } while (acceptance > max && max_trials > 0);
 
-  // check that we are using the proper maximum value
-  if (val > max) {
-    logg[LResonances].debug(
+  if (acceptance > max && max_trials == 0) {
+    logg[LResonances].fatal(
         "Maximum acceptance should be increased in sample_resonance_mass: ",
-        sf_ratio_max, " ", val / max, " ", pdgcode(), " ", mass_stable, " ",
-        cms_energy, " ", mass_res);
+        sf_ratio_max, " ", acceptance / max, " ", pdgcode(), " ", mass_stable,
+        " ", cms_energy, " ", mass_res);
+    throw std::runtime_error(
+        "Precomputation of maximum spectral function is not working properly. "
+        "Please contact the developers.");
   }
   return mass_res;
 }
@@ -726,27 +735,37 @@ std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
                t1.ratio_spectral_full_to_breit_wigner(max_mass_1)) *
       std::max(t2.max_ratio_spectral_full_to_breit_wigner(),
                t2.ratio_spectral_full_to_breit_wigner(max_mass_2));
-  const double max = sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
 
-  double mass_1, mass_2, acceptance;
+  int max_trials = 10;
+  double mass_1, mass_2, acceptance, fudge_factor = 1;
+  double max_acceptance =
+      sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
   // Rejection sampling
   do {
-    // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
-    mass_1 = t1.sample_breit_wigner_spectral_function(max_mass_1);
-    mass_2 = t2.sample_breit_wigner_spectral_function(max_mass_2);
-    // determine cm momentum for this case
-    const double pcm = pCM(cms_energy, mass_1, mass_2);
-    const double sf_ratio = t1.ratio_spectral_full_to_breit_wigner(mass_1) *
-                            t2.ratio_spectral_full_to_breit_wigner(mass_2);
-    // determine ratios of full to simple spectral function
-    acceptance = sf_ratio * pcm * blatt_weisskopf_sqr(pcm, L);
-  } while (acceptance < random::uniform(0., max));
+    max_acceptance *= fudge_factor;
+    do {
+      // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
+      mass_1 = t1.sample_breit_wigner_spectral_function(max_mass_1);
+      mass_2 = t2.sample_breit_wigner_spectral_function(max_mass_2);
+      // determine cm momentum for this case
+      const double pcm = pCM(cms_energy, mass_1, mass_2);
+      const double sf_ratio = t1.ratio_spectral_full_to_breit_wigner(mass_1) *
+                              t2.ratio_spectral_full_to_breit_wigner(mass_2);
+      // determine ratios of full to simple spectral function
+      acceptance = sf_ratio * pcm * blatt_weisskopf_sqr(pcm, L);
+    } while (acceptance < random::uniform(0., max_acceptance));
+    fudge_factor *= acceptance / max_acceptance;
+    --max_trials;
+  } while (acceptance > max_acceptance && max_trials > 0);
 
-  if (acceptance > max) {
-    logg[LResonances].debug(
+  if (acceptance > max_acceptance && max_trials == 0) {
+    logg[LResonances].fatal(
         "Maximum acceptance should be increased in sample_resonance_masses: ",
-        acceptance / max, " ", t1.pdgcode(), " ", t2.pdgcode(), " ", cms_energy,
-        " ", mass_1, " ", mass_2);
+        acceptance / max_acceptance, " ", t1.pdgcode(), " ", t2.pdgcode(), " ",
+        cms_energy, " ", mass_1, " ", mass_2);
+    throw std::runtime_error(
+        "Precomputation of maximum spectral function is not working properly. "
+        "Please contact the developers.");
   }
   return {mass_1, mass_2};
 }
