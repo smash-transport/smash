@@ -75,18 +75,25 @@ namespace smash {
  *     tabulations folder is created next to the output directory and contains
  *     the results of integrals stored in many different files. Using this
  *     option, such a folder is not created.
- * <tr><td>`-c <%YAML string>` <td>`--config <%YAML string>`
- * <td>The string argument to `-c` contains %YAML markup to override input key
- *     values of the input file (`-i`) and/or supply additional keys. Multiple
- *     `-c` arguments are supported. Later specified values of the same key
- *     will override preceding settings. This can be a handy way to test
+ * <tr><td>`-t <dir>` <td>`--tabulations <dir>`
+ * <td>Overrides the path where tabulations are read from and written to. This
+ *     is useful in parameter scans with a complicated folder structure where
+ *     resonance properties are fixed. If the input files for particles/decay
+ *     modes or SMASH version change, the tabulations are automatically
+ *     recalculated in the specified folder. By default, the tabulations folder
+ *     is created next to the output directory.
+ * <tr><td>`-c <%YAML string>` <td>`--config <%YAMLstring>`
+ * <td>The string argument to `-c` contains %YAML markup to override
+ *     input key values of the input file (`-i`) and/or supply additional keys.
+ *     Multiple `-c` arguments are supported. Later specified values of the same
+ *     key will override preceding settings. This can be a handy way to test
  *     different scenarios from a script.
  * <tr><td>`-m <modus>` <td>`--modus <modus>`
  * <td>This is a shortcut for <tt>-c 'General: { Modus: \<modus\> }'</tt>.
- * Note that `-m` always overrides `-c`.
+ *     Note that `-m` always overrides `-c`.
  * <tr><td>`-e <time>` <td>`--endtime <time>`
  * <td>This is a shortcut for <tt>-c 'General: { End_Time: \<time\> }'</tt>.
- * Note that `-e` always overrides `-c`.
+ *     Note that `-e` always overrides `-c`.
  * <tr><td>`-l` <td>`--list-2-to-n`
  * <td>Prints the list of all possible 2 &rarr; n reactions (n > 1). Note that
  *     resonance decays and formations are NOT dumped. Every particle
@@ -200,6 +207,8 @@ void usage(const int rc, const std::string &progname) {
                "Override default decay modes from file");
   print_option("-p", "--particles", "<file>",
                "Override default particles from file");
+  print_option("-t", "--tabulations", "<dir>",
+               "Override the tabulations cache directory");
   print_option("-q", "--quiet", std::nullopt, "Suppress disclaimer printout");
   print_option("-n", "--no-cache", std::nullopt,
                "Disable caching integrals on disk");
@@ -435,6 +444,7 @@ int main(int argc, char *argv[]) {
       {"modus", required_argument, 0, 'm'},
       {"particles", required_argument, 0, 'p'},
       {"output", required_argument, 0, 'o'},
+      {"tabulations", required_argument, 0, 't'},
       {"list-2-to-n", no_argument, 0, 'l'},
       {"resonance", required_argument, 0, 'r'},
       {"cross-sections", required_argument, 0, 's'},
@@ -456,6 +466,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> extra_config;
     char *modus = nullptr, *end_time = nullptr, *pdg_string = nullptr,
          *cs_string = nullptr;
+    std::string custom_tabulations_path;
     bool list2n_activated = false;
     bool resonance_dump_activated = false;
     bool cross_section_dump_activated = false;
@@ -466,7 +477,7 @@ int main(int argc, char *argv[]) {
 
     // parse command-line arguments
     int opt;
-    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:lr:s:S:xvnq",
+    while ((opt = getopt_long(argc, argv, "c:d:e:fhi:m:p:o:t:lr:s:S:xvnq",
                               longopts, nullptr)) != -1) {
       switch (opt) {
         case 'c':
@@ -495,6 +506,9 @@ int main(int argc, char *argv[]) {
           break;
         case 'o':
           output_path = optarg;
+          break;
+        case 't':
+          custom_tabulations_path = optarg;
           break;
         case 'l':
           list2n_activated = true;
@@ -561,12 +575,20 @@ int main(int argc, char *argv[]) {
 
     // Check output path
     ensure_path_is_valid(output_path);
+    if (!cache_integrals && !custom_tabulations_path.empty()) {
+      throw std::invalid_argument(
+          "--tabulations cannot be used together with --no-cache.");
+    }
     std::string tabulations_path;
     if (cache_integrals) {
-      tabulations_path = output_path.has_parent_path()
-                             ? output_path.parent_path().string()
-                             : ".";
-      tabulations_path += "/tabulations";
+      if (!custom_tabulations_path.empty()) {
+        tabulations_path = custom_tabulations_path;
+      } else {
+        tabulations_path = output_path.has_parent_path()
+                               ? output_path.parent_path().string()
+                               : ".";
+        tabulations_path += "/tabulations";
+      }
     } else {
       tabulations_path = "";
     }
