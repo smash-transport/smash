@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2024-2025
+ *    Copyright (c) 2024-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -10,6 +10,7 @@
 #ifndef SRC_INCLUDE_SMASH_TRAITS_H_
 #define SRC_INCLUDE_SMASH_TRAITS_H_
 
+#include <bitset>
 #include <map>
 #include <set>
 #include <sstream>
