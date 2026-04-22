@@ -23,6 +23,7 @@
 #include "smash/quantumnumbers.h"
 
 namespace smash {
+
 /// Destructor
 Action::~Action() = default;
 static constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
@@ -314,113 +315,105 @@ void Action::sample_2body_phasespace() {
   sample_angles(masses, cm_kin_energy);
 }
 
-/*
- * This function performs Metropolis–Hastings sampling of the many body phase
- * space, starting from an initial guess in sampled_momenta that is assumed
- * appropriate.
- *
- * The algorithm works by repeatedly picking a random pair of particles,
- * resampling their masses from the spectral functions, and adjusting their
- * momenta accordingly in the CM frame of the pair, which conserves energy and
- * momentum. This is done for a fixed number of iterations heuristically chosen
- * (200), but no systematic analysis was done.
- *
- * The function is for now used as a fallback for the rejection algorithm in
- * sample_manybody_phasespace_impl and takes its initial guess from there, so it
- * is written as a static function, and not a separate method of Action.
- */
-static void sample_manybody_phasespace_MCMC(
-    const ParticleTypePtrList &types,
-    std::vector<FourVector> &sampled_momenta) {
-  constexpr int monte_carlo_iterations = 200;
-  // sampled_momenta already contains an initial guess
-  const int n = types.size();
-  int idx1, idx2;
-
-  assert(sampled_momenta.size() == n);
-  // It is enough to check that the energy is a positive number
-  const bool all_zero =
-      std::all_of(sampled_momenta.begin(), sampled_momenta.end(),
-                  [](const FourVector &p) { return p[0] < really_small; });
-  if (all_zero) {
-    throw std::runtime_error(
-        "All initial momenta for the MCMC algorithm manybody phase space "
-        "sampling are zero, which should not happen.");
+void Action::sample_manybody_phasespace() {
+  const size_t n = outgoing_particles_.size();
+  if (n < 3) {
+    throw std::invalid_argument(
+        "sample_manybody_phasespace: number of outgoing particles should be 3 "
+        "or more");
   }
 
-  for (int i = 0; i < monte_carlo_iterations; i++) {
-    // Pick random pair of particles and resample their masses
-    do {
-      idx1 = random::uniform_int(0, n - 1);
-      do {
-        idx2 = random::uniform_int(0, n - 1);
-      } while (idx2 == idx1);
-    } while (types[idx1]->is_stable() && types[idx2]->is_stable());
+  ParticleTypePtrList types(n);
+  for (size_t i = 0; i < n; i++) {
+    types[i] = &outgoing_particles_[i].type();
+  }
+  std::vector<FourVector> p(n);
 
-    // Energy of the pair and CM frame velocity
-    const FourVector p_sum = sampled_momenta[idx1] + sampled_momenta[idx2];
-    const ThreeVector beta = p_sum.velocity();
-    const double sqrts_12 = p_sum.abs();
-    double m1, m2;
-    do {
-      m1 = types[idx1]->sample_full_spectral_function(sqrts_12);
-      m2 = types[idx2]->sample_full_spectral_function(sqrts_12);
-    } while (sqrts_12 < m1 + m2);
-    const double pcm = pCM(sqrts_12, m1, m2);
-    Angles phitheta;
-    phitheta.distribute_isotropically();
-    /*
-     * Metropolis-Hastings acceptance. As the Breit Wigner is biased towards
-     * lower masses compared to the full spectral function, we generally want to
-     * accept more often if the ratio increases, and less if it decreases.
-     */
-    double acc = 1.0;
-    if (!types[idx1]->is_stable()) {
-      acc *= types[idx1]->ratio_spectral_full_to_breit_wigner(m1) /
-             types[idx1]->ratio_spectral_full_to_breit_wigner(
-                 sampled_momenta[idx1].abs());
-    }
-    if (!types[idx2]->is_stable()) {
-      acc *= types[idx2]->ratio_spectral_full_to_breit_wigner(m2) /
-             types[idx2]->ratio_spectral_full_to_breit_wigner(
-                 sampled_momenta[idx2].abs());
-    }
-
-    if (random::canonical() < acc) {
-      // Accept and impose momentum conservation with back-to-back particles
-      sampled_momenta[idx1] =
-          FourVector(std::sqrt(m1 * m1 + pcm * pcm), pcm * phitheta.threevec())
-              .lorentz_boost(-beta);
-      sampled_momenta[idx2] =
-          FourVector(std::sqrt(m2 * m2 + pcm * pcm), -pcm * phitheta.threevec())
-              .lorentz_boost(-beta);
-    }
+  details::sample_manybody_phasespace_impl(sqrt_s(), types, p);
+  for (size_t i = 0; i < n; i++) {
+    outgoing_particles_[i].set_4momentum(p[i]);
   }
 }
 
-void Action::sample_manybody_phasespace_impl(
-    double sqrts, const ParticleTypePtrList &types,
-    std::vector<FourVector> &sampled_momenta) {
-  /**
-   *  Using the M-method from CERN-68-15 report, paragraph 9.6
-   *  1) Generate invariant masses M12, M123, M1234, etc from
-   *      distribution dM12 x dM123 x dM1234 x ...
-   *      This is not trivial because of the integration limits.
-   *      Here the idea is to change variables to T12 = M12 - (m1 + m2),
-   *      T123 = M123 - (m1 + m2 + m3), etc. Then we need to generate
-   *      uniform T such that 0 <= T12 <= T123 <= T1234 <= ... <= sqrts - sum
-   * (m_i). For the latter there is a trick: generate values uniformly in [0,
-   * sqrts - sum (m_i)] and then sort the values. 2) accept or reject this
-   * combination of invariant masses with weight proportional to R2(sqrt,
-   * M_{n-1}, m_n) x R2(M_{n-1}, M_{n-2}, m_{n-1}) x
-   *     ... x R2(M2, m1, m2) x (prod M_i). Maximum weight is estmated
-   * heuristically, here I'm using an idea by Scott Pratt that maximum is close
-   * to T12 = T123 = T1234 = ... = (sqrts - sum (m_i)) / (n - 1)
-   */
+void Action::assign_unpolarized_spin_vector_to_outgoing_particles() {
+  for (ParticleData &p : outgoing_particles_) {
+    p.set_unpolarized_spin_vector();
+  }
+}
+
+double Action::check_conservation(const uint32_t id_process) const {
+  QuantumNumbers before(incoming_particles_);
+  QuantumNumbers after(outgoing_particles_);
+  double energy_violation = 0.;
+  if (before != after) {
+    std::stringstream particle_names;
+    for (const auto &p : incoming_particles_) {
+      particle_names << p.type().name();
+    }
+    particle_names << " vs. ";
+    for (const auto &p : outgoing_particles_) {
+      particle_names << p.type().name();
+    }
+    particle_names << "\n";
+    std::string err_msg = before.report_deviations(after);
+    /* Pythia does not conserve energy and momentum at high energy, so we just
+     * print the warning and continue. */
+    if ((is_string_soft_process(process_type_)) ||
+        (process_type_ == ProcessType::StringHard)) {
+      logg[LAction].warn() << "Conservation law violations due to Pythia\n"
+                           << particle_names.str() << err_msg;
+      energy_violation = after.momentum()[0] - before.momentum()[0];
+      return energy_violation;
+    }
+    /* We allow decay of particles stable under the strong interaction to decay
+     * at the end, so just warn about such a "weak" process violating
+     * conservation laws */
+    if (process_type_ == ProcessType::Decay &&
+        incoming_particles_[0].type().is_stable()) {
+      logg[LAction].warn()
+          << "Conservation law violations of strong interaction in weak or "
+             "e.m. decay\n"
+          << particle_names.str() << err_msg;
+      return energy_violation;
+    }
+    /* If particles are added or removed, it is not surprising that conservation
+     * laws are potentially violated. Do not warn the user but print some
+     * information for debug */
+    if (process_type_ == ProcessType::Freeforall) {
+      logg[LAction].debug()
+          << "Conservation law violation, but we want it (Freeforall Action).\n"
+          << particle_names.str() << err_msg;
+      return energy_violation;
+    }
+    logg[LAction].error() << "Conservation law violations detected\n"
+                          << particle_names.str() << err_msg;
+    if (id_process == ID_PROCESS_PHOTON) {
+      throw std::runtime_error("Conservation laws violated in photon process");
+    } else {
+      throw std::runtime_error("Conservation laws violated in process " +
+                               std::to_string(id_process));
+    }
+  }
+  return energy_violation;
+}
+
+std::ostream &operator<<(std::ostream &out, const ActionList &actions) {
+  out << "ActionList {\n";
+  for (const auto &a : actions) {
+    out << "- " << a << '\n';
+  }
+  return out << '}';
+}
+
+namespace details {
+
+void sample_manybody_phasespace_impl(double sqrts,
+                                     const ParticleTypePtrList &types,
+                                     std::vector<FourVector> &sampled_momenta) {
   const size_t n = types.size();
   assert(n > 1);
   sampled_momenta.resize(n);
-  std::vector<double> masses, masses_sum(n), Minv(n);
+  std::vector<double> masses{}, masses_sum(n), Minv(n);
   // Maximum estimate is rough and can be wrong. We multiply it by additional
   // factor to be on the safer side, and increase it if needed.
   double safety_factor = 1.1 + (n - 2) * 0.2;
@@ -556,94 +549,74 @@ void Action::sample_manybody_phasespace_impl(
   }
 }
 
-void Action::sample_manybody_phasespace() {
-  const size_t n = outgoing_particles_.size();
-  if (n < 3) {
-    throw std::invalid_argument(
-        "sample_manybody_phasespace: number of outgoing particles should be 3 "
-        "or more");
+void sample_manybody_phasespace_MCMC(const ParticleTypePtrList &types,
+                                     std::vector<FourVector> &sampled_momenta) {
+  constexpr int monte_carlo_iterations = 200;
+  // sampled_momenta already contains an initial guess
+  const int n = types.size();
+  int idx1, idx2;
+
+  assert(sampled_momenta.size() == n);
+  // It is enough to check that the energy is a positive number
+  const bool all_zero =
+      std::all_of(sampled_momenta.begin(), sampled_momenta.end(),
+                  [](const FourVector &p) { return p[0] < really_small; });
+  if (all_zero) {
+    throw std::runtime_error(
+        "All initial momenta for the MCMC algorithm manybody phase space "
+        "sampling are zero, which should not happen.");
   }
 
-  ParticleTypePtrList types(n);
-  for (size_t i = 0; i < n; i++) {
-    types[i] = &outgoing_particles_[i].type();
-  }
-  std::vector<FourVector> p(n);
+  for (int i = 0; i < monte_carlo_iterations; i++) {
+    // Pick random pair of particles and resample their masses
+    do {
+      idx1 = random::uniform_int(0, n - 1);
+      do {
+        idx2 = random::uniform_int(0, n - 1);
+      } while (idx2 == idx1);
+    } while (types[idx1]->is_stable() && types[idx2]->is_stable());
 
-  sample_manybody_phasespace_impl(sqrt_s(), types, p);
-  for (size_t i = 0; i < n; i++) {
-    outgoing_particles_[i].set_4momentum(p[i]);
+    // Energy of the pair and CM frame velocity
+    const FourVector p_sum = sampled_momenta[idx1] + sampled_momenta[idx2];
+    const ThreeVector beta = p_sum.velocity();
+    const double sqrts_12 = p_sum.abs();
+    double m1, m2;
+    do {
+      m1 = types[idx1]->sample_full_spectral_function(sqrts_12);
+      m2 = types[idx2]->sample_full_spectral_function(sqrts_12);
+    } while (sqrts_12 < m1 + m2);
+    const double pcm = pCM(sqrts_12, m1, m2);
+    Angles phitheta;
+    phitheta.distribute_isotropically();
+    /*
+     * Metropolis-Hastings acceptance. As the Breit Wigner is biased towards
+     * lower masses compared to the full spectral function, we generally want to
+     * accept more often if the ratio increases, and less if it decreases.
+     */
+    double acc = 1.0;
+    if (!types[idx1]->is_stable()) {
+      acc *= types[idx1]->ratio_spectral_full_to_breit_wigner(m1) /
+             types[idx1]->ratio_spectral_full_to_breit_wigner(
+                 sampled_momenta[idx1].abs());
+    }
+    if (!types[idx2]->is_stable()) {
+      acc *= types[idx2]->ratio_spectral_full_to_breit_wigner(m2) /
+             types[idx2]->ratio_spectral_full_to_breit_wigner(
+                 sampled_momenta[idx2].abs());
+    }
+
+    if (random::canonical() < acc) {
+      // Accept and impose momentum conservation with back-to-back particles
+      sampled_momenta[idx1] =
+          FourVector(std::sqrt(m1 * m1 + pcm * pcm), pcm * phitheta.threevec())
+              .lorentz_boost(-beta);
+      sampled_momenta[idx2] =
+          FourVector(std::sqrt(m2 * m2 + pcm * pcm), -pcm * phitheta.threevec())
+              .lorentz_boost(-beta);
+    }
   }
 }
 
-void Action::assign_unpolarized_spin_vector_to_outgoing_particles() {
-  for (ParticleData &p : outgoing_particles_) {
-    p.set_unpolarized_spin_vector();
-  }
-}
-
-double Action::check_conservation(const uint32_t id_process) const {
-  QuantumNumbers before(incoming_particles_);
-  QuantumNumbers after(outgoing_particles_);
-  double energy_violation = 0.;
-  if (before != after) {
-    std::stringstream particle_names;
-    for (const auto &p : incoming_particles_) {
-      particle_names << p.type().name();
-    }
-    particle_names << " vs. ";
-    for (const auto &p : outgoing_particles_) {
-      particle_names << p.type().name();
-    }
-    particle_names << "\n";
-    std::string err_msg = before.report_deviations(after);
-    /* Pythia does not conserve energy and momentum at high energy, so we just
-     * print the warning and continue. */
-    if ((is_string_soft_process(process_type_)) ||
-        (process_type_ == ProcessType::StringHard)) {
-      logg[LAction].warn() << "Conservation law violations due to Pythia\n"
-                           << particle_names.str() << err_msg;
-      energy_violation = after.momentum()[0] - before.momentum()[0];
-      return energy_violation;
-    }
-    /* We allow decay of particles stable under the strong interaction to decay
-     * at the end, so just warn about such a "weak" process violating
-     * conservation laws */
-    if (process_type_ == ProcessType::Decay &&
-        incoming_particles_[0].type().is_stable()) {
-      logg[LAction].warn()
-          << "Conservation law violations of strong interaction in weak or "
-             "e.m. decay\n"
-          << particle_names.str() << err_msg;
-      return energy_violation;
-    }
-    /* If particles are added or removed, it is not surprising that conservation
-     * laws are potentially violated. Do not warn the user but print some
-     * information for debug */
-    if (process_type_ == ProcessType::Freeforall) {
-      logg[LAction].debug()
-          << "Conservation law violation, but we want it (Freeforall Action).\n"
-          << particle_names.str() << err_msg;
-      return energy_violation;
-    }
-    logg[LAction].error() << "Conservation law violations detected\n"
-                          << particle_names.str() << err_msg;
-    if (id_process == ID_PROCESS_PHOTON) {
-      throw std::runtime_error("Conservation laws violated in photon process");
-    } else {
-      throw std::runtime_error("Conservation laws violated in process " +
-                               std::to_string(id_process));
-    }
-  }
-  return energy_violation;
-}
-
-std::ostream &operator<<(std::ostream &out, const ActionList &actions) {
-  out << "ActionList {\n";
-  for (const auto &a : actions) {
-    out << "- " << a << '\n';
-  }
-  return out << '}';
-}
+}  // namespace details
 
 }  // namespace smash

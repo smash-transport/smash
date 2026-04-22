@@ -58,7 +58,8 @@ TEST(phasespace_manybody) {
 
   std::ostringstream buffer;
   for (int i = 0; i < N_sample; ++i) {
-    Action::sample_manybody_phasespace_impl(sqrts, types, sampled_momenta);
+    smash::details::sample_manybody_phasespace_impl(sqrts, types,
+                                                    sampled_momenta);
     for (const auto &p : sampled_momenta) {
       buffer << p.abs() << " ";
     }

@@ -342,16 +342,6 @@ class Action {
   };
 
   /**
-   * Duplicated function (for now) that generalizes the usage to receive
-   * resonances, instead of fixed masses. Implementation of the full n-body
-   * phase-space sampling (masses, momenta, angles) in the center-of-mass frame
-   * for the final state particles. Function is static for convenient testing.
-   */
-  static void sample_manybody_phasespace_impl(
-      double sqrts, const ParticleTypePtrList &types,
-      std::vector<FourVector> &sampled_momenta);
-
-  /**
    * Assign an unpolarized spin vector to all outgoing particles.
    *
    * \attention Make sure to assign the spin vectors after the boosted
@@ -562,6 +552,72 @@ inline std::ostream &operator<<(std::ostream &out, const ActionPtr &action) {
  * Writes multiple actions to the \p out stream.
  */
 std::ostream &operator<<(std::ostream &out, const ActionList &actions);
+
+namespace details {
+/**
+ * \brief Implementation of the full n-body phase-space sampling (masses,
+ * momenta, angles) in the center-of-mass frame for the final state particles,
+ * using the M-method from CERN-68-15, paragraph 9.6.
+ *
+ * The algorithm proceeds in two stages:
+ *
+ * 1. Generate invariant masses \f$M_{12}, M_{123}, M_{1234}, \ldots\f$ from
+ *    the measure
+ *    \f[
+ *      dM_{12}\, dM_{123}\, dM_{1234}\, \cdots,
+ *    \f]
+ *    while respecting non-trivial kinematic limits.
+ *
+ *    Introduce shifted variables
+ *    \f[
+ *      T_{12} = M_{12} - (m_1 + m_2),\qquad
+ *      T_{123} = M_{123} - (m_1 + m_2 + m_3),\ \ldots
+ *    \f]
+ *    and sample uniformly under the ordering constraint
+ *    \f[
+ *      0 \le T_{12} \le T_{123} \le T_{1234} \le \cdots
+ *      \le \sqrt{s} - \sum_i m_i.
+ *    \f]
+ *    A practical trick is to draw values uniformly in
+ *    \f$[0,\,\sqrt{s} - \sum_i m_i]\f$ and sort them.
+ *
+ * 2. Accept or reject each invariant-mass configuration with weight
+ *    proportional to
+ *    \f[
+ *      R_2(\sqrt{s}, M_{n-1}, m_n)
+ *      \times R_2(M_{n-1}, M_{n-2}, m_{n-1})
+ *      \times \cdots
+ *      \times R_2(M_2, m_1, m_2)
+ *      \times \prod_i M_i.
+ *    \f]
+ *
+ * The maximum weight is estimated heuristically; following an idea by Scott
+ * Pratt, it is expected near
+ * \f[
+ *   T_{12} = T_{123} = T_{1234} = \cdots
+ *   = \frac{\sqrt{s} - \sum_i m_i}{n - 1}.
+ * \f]
+ */
+void sample_manybody_phasespace_impl(double sqrts,
+                                     const ParticleTypePtrList &types,
+                                     std::vector<FourVector> &sampled_momenta);
+
+/**
+ * \brief Metropolis–Hastings sampling of the many body phase space, starting
+ * from an initial guess in sampled_momenta that is assumed appropriate.
+ *
+ * The algorithm works by repeatedly picking a random pair of particles,
+ * resampling their masses from the spectral functions, and adjusting their
+ * momenta accordingly in the CM frame of the pair, which conserves energy and
+ * momentum. This is done for a fixed number of iterations heuristically chosen
+ * (200), but no systematic analysis was done.
+ *
+ * The function is for now used as a fallback for the rejection algorithm in
+ * sample_manybody_phasespace_impl and takes its initial guess from there.
+ */
+void sample_manybody_phasespace_MCMC(const ParticleTypePtrList &types,
+                                     std::vector<FourVector> &sampled_momenta);
+}  // namespace details
 
 }  // namespace smash
 
