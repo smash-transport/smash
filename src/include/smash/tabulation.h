@@ -142,7 +142,7 @@ inline double spec_func_integrand_1res(double resonance_mass, double sqrts,
 
   /* Integrand is the spectral function weighted by the CM momentum of the
    * final state. */
-  return type.spectral_function(resonance_mass) *
+  return type.full_spectral_function(resonance_mass) *
          pCM(sqrts, stable_mass, resonance_mass);
 }
 
@@ -172,7 +172,8 @@ inline double spec_func_integrand_2res(double sqrts, double res_mass_1,
 
   /* Integrand is the product of the spectral function weighted by the
    * CM momentum of the final state. */
-  return t1.spectral_function(res_mass_1) * t2.spectral_function(res_mass_2) *
+  return t1.full_spectral_function(res_mass_1) *
+         t2.full_spectral_function(res_mass_2) *
          pCM(sqrts, res_mass_1, res_mass_2);
 }
 

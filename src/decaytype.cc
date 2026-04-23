@@ -29,7 +29,7 @@ static double integrand_rho_Manley_1res(double sqrts, double mass,
   const double p_f = pCM(sqrts, stable_mass, mass);
 
   return p_f / sqrts * blatt_weisskopf_sqr(p_f, L) *
-         type->spectral_function(mass);
+         type->full_spectral_function(mass);
 }
 
 static double integrand_rho_Manley_2res(double sqrts, double m1, double m2,
@@ -42,8 +42,8 @@ static double integrand_rho_Manley_2res(double sqrts, double m1, double m2,
   /* center-of-mass momentum of final state particles */
   const double p_f = pCM(sqrts, m1, m2);
 
-  return p_f / sqrts * blatt_weisskopf_sqr(p_f, L) * t1->spectral_function(m1) *
-         t2->spectral_function(m2);
+  return p_f / sqrts * blatt_weisskopf_sqr(p_f, L) *
+         t1->full_spectral_function(m1) * t2->full_spectral_function(m2);
 }
 
 // TwoBodyDecay
