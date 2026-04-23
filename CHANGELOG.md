@@ -19,12 +19,6 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
-* Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams.
-  This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
-
-* `CrossSections::probability_transit_high` has been replaced by
-  `CrossSections::interpolation_at_sqrts`.
-
 ### Added
 * New key `Ignore_Unformed` in `Output: Thermodynamics` to exclude unformed (and preformed) particles from the density
 evaluation. This is useful e.g. in afterburner calculations.
@@ -36,6 +30,8 @@ evaluation. This is useful e.g. in afterburner calculations.
 * Minimum supported ROOT version is now version `6.20`.
 * Minimum supported HepMC3 version is now version `3.2.6`.
 * The `make install` target has been standardized to create an enclosing version-specific folder inside which the standard `bin`, `lib`, `include` and `share` directories are created (previously, the version specific folder was created inside the standard ones).
+* Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams. This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
+* `CrossSections::probability_transit_high` has been replaced by `CrossSections::interpolation_at_sqrts`.
 
 ### Removed
 * CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally
