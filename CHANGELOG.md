@@ -28,7 +28,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ### Added
 * New key `Ignore_Unformed` in `Output: Thermodynamics` to exclude unformed (and preformed) particles from the density
 evaluation. This is useful e.g. in afterburner calculations.
-* The path to tabulations can now be passed with the command line argument `-t to/path/tabulations`. This is useful in parameter scans with a complicated folder structure, where the resonance properties are fixed. However, if the input files for particles/decay modes or SMASH version change, the tabulations will be recalculated in the indicated folder.
+* The path to tabulations can now be passed with the command line argument `-t to/path/tabulations`. However, if the input files for particles/decay modes or SMASH version change, the tabulations will be recalculated in the indicated folder. This is useful to make several runs share the same tabulations folder, even if these are in different output directories, avoiding creating several sets of possibly identical files.
 
 ### Changed
 * ⚠️ To build SMASH tuning compilation for a different architecture than the `native` one, the `SMASH_ARCH_FLAG` CMake variable must now be used (e.g. passing `-DSMASH_ARCH_FLAG=x86-64` to CMake). Using `CMAKE_CXX_FLAGS` and `CMAKE_C_FLAGS` or setting the environment `CFLAGS` and `CXXFLAGS` variables will not have the desired effect!

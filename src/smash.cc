@@ -74,14 +74,18 @@ namespace smash {
  *     in order for future SMASH runs to save computational time, the
  *     tabulations folder is created next to the output directory and contains
  *     the results of integrals stored in many different files. Using this
- *     option, such a folder is not created.
+ *     option, such a folder is not created. Note: this option cannot be used
+ *     together with `-t`.
  * <tr><td>`-t <dir>` <td>`--tabulations <dir>`
- * <td>Overrides the path where tabulations are read from and written to. This
- *     is useful in parameter scans with a complicated folder structure where
- *     resonance properties are fixed. If the input files for particles/decay
- *     modes or SMASH version change, the tabulations are automatically
- *     recalculated in the specified folder. By default, the tabulations folder
- *     is created next to the output directory.
+ * <td>Overrides the path where tabulations are read from and written to. If the
+ *     input files for particles/decaymodes or SMASH version change, the
+ *     tabulations are automatically recalculated in the specified folder. By
+ *     default, the tabulations folder is created next to the output directory.
+ *     This is useful to make several runs share the same tabulations folder,
+ *     even if these are in different output directories &ndash; as may be the
+ *     case in parameter scans, for example &ndash; avoiding creating several
+ *     sets of possibly identical files. Note: this option cannot be used
+ *     together with `-n`.
  * <tr><td>`-c <%YAML string>` <td>`--config <%YAMLstring>`
  * <td>The string argument to `-c` contains %YAML markup to override
  *     input key values of the input file (`-i`) and/or supply additional keys.
@@ -208,7 +212,7 @@ void usage(const int rc, const std::string &progname) {
   print_option("-p", "--particles", "<file>",
                "Override default particles from file");
   print_option("-t", "--tabulations", "<dir>",
-               "Override the tabulations cache directory");
+               "Tabulations cache directory (default: ./data/tabulations)");
   print_option("-q", "--quiet", std::nullopt, "Suppress disclaimer printout");
   print_option("-n", "--no-cache", std::nullopt,
                "Disable caching integrals on disk");
