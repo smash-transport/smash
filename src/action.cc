@@ -16,12 +16,14 @@
 
 #include "smash/angles.h"
 #include "smash/constants.h"
+#include "smash/interpolation.h"
 #include "smash/logging.h"
 #include "smash/pauliblocking.h"
 #include "smash/potential_globals.h"
 #include "smash/quantumnumbers.h"
 
 namespace smash {
+
 /// Destructor
 Action::~Action() = default;
 static constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
@@ -274,7 +276,7 @@ std::pair<double, double> Action::sample_masses(
     masses.second = t_b.sample_resonance_mass(t_a.mass(), kinetic_energy_cm);
   } else if (!t_a.is_stable() && !t_b.is_stable()) {
     // two resonances in final state
-    masses = t_a.sample_resonance_masses(t_b, kinetic_energy_cm);
+    masses = sample_two_resonance_masses(t_a, t_b, kinetic_energy_cm);
   }
   return masses;
 }
@@ -313,139 +315,6 @@ void Action::sample_2body_phasespace() {
   sample_angles(masses, cm_kin_energy);
 }
 
-void Action::sample_manybody_phasespace_impl(
-    double sqrts, const std::vector<double> &m,
-    std::vector<FourVector> &sampled_momenta) {
-  /**
-   *  Using the M-method from CERN-68-15 report, paragraph 9.6
-   *  1) Generate invariant masses M12, M123, M1234, etc from
-   *      distribution dM12 x dM123 x dM1234 x ...
-   *      This is not trivial because of the integration limits.
-   *      Here the idea is to change variables to T12 = M12 - (m1 + m2),
-   *      T123 = M123 - (m1 + m2 + m3), etc. Then we need to generate
-   *      uniform T such that 0 <= T12 <= T123 <= T1234 <= ... <= sqrts - sum
-   * (m_i). For the latter there is a trick: generate values uniformly in [0,
-   * sqrts - sum (m_i)] and then sort the values. 2) accept or reject this
-   * combination of invariant masses with weight proportional to R2(sqrt,
-   * M_{n-1}, m_n) x R2(M_{n-1}, M_{n-2}, m_{n-1}) x
-   *     ... x R2(M2, m1, m2) x (prod M_i). Maximum weight is estmated
-   * heuristically, here I'm using an idea by Scott Pratt that maximum is close
-   * to T12 = T123 = T1234 = ... = (sqrts - sum (m_i)) / (n - 1)
-   */
-  const size_t n = m.size();
-  assert(n > 1);
-  sampled_momenta.resize(n);
-
-  // Arrange a convenient vector of m1, m1 + m2, m1 + m2 + m3, ...
-  std::vector<double> msum(n);
-  std::partial_sum(m.begin(), m.end(), msum.begin());
-  const double msum_all = msum[n - 1];
-  int rejection_counter = -1;
-  if (sqrts <= msum_all) {
-    logg[LAction].error()
-        << "An interaction requiring " << sqrts
-        << "GeV was attempted below the minimum energy threshold" << msum_all
-        << " GeV, but was ignored.\nThis is a known internal error which does "
-           "not significantly affect physical results, and will be fixed in a "
-           "near-future release.";
-    throw StochasticBelowEnergyThreshold("Ignoring this action.");
-  }
-
-  double w, r01;
-  std::vector<double> Minv(n);
-
-  double weight_sqr_max = 1;
-  const double Ekin_share = (sqrts - msum_all) / (n - 1);
-  for (size_t i = 1; i < n; i++) {
-    // This maximum estimate idea is due Scott Pratt: maximum should be
-    // roughly at equal kinetic energies
-    weight_sqr_max *= pCM_sqr(i * Ekin_share + msum[i],
-                              (i - 1) * Ekin_share + msum[i - 1], m[i]);
-  }
-  // Maximum estimate is rough and can be wrong. We multiply it by additional
-  // factor to be on the safer side.
-  const double safety_factor = 1.1 + (n - 2) * 0.2;
-  weight_sqr_max *= (safety_factor * safety_factor);
-  bool first_warning = true;
-
-  do {
-    // Generate invariant masses of 1, 12, 123, 1243, etc.
-    // Minv = {m1, M12, M123, ..., M123n-1, sqrts}
-    Minv[0] = 0.0;
-    Minv[n - 1] = sqrts - msum_all;
-    for (size_t i = 1; i < n - 1; i++) {
-      Minv[i] = random::uniform(0.0, sqrts - msum_all);
-    }
-    std::sort(Minv.begin(), Minv.end());
-    for (size_t i = 0; i < n; i++) {
-      Minv[i] += msum[i];
-    }
-
-    double weight_sqr = 1;
-    for (size_t i = 1; i < n; i++) {
-      weight_sqr *= pCM_sqr(Minv[i], Minv[i - 1], m[i]);
-    }
-
-    rejection_counter++;
-    r01 = random::canonical();
-    w = weight_sqr / weight_sqr_max;
-    if (w > 1.0) {
-      logg[LAction].warn()
-          << "sample_manybody_phasespace_impl: alarm, weight > 1, w^2 = " << w
-          << ". Increase safety factor." << std::endl;
-    }
-    if (rejection_counter > 20 && first_warning) {
-      logg[LAction].warn() << "sample_manybody_phasespace_impl: "
-                           << "likely hanging, way too many rejections,"
-                           << " n = " << n << ", sqrts = " << sqrts
-                           << ", msum = " << msum_all;
-      first_warning = false;
-    }
-  } while (w < r01 * r01);
-
-  // Boost particles to the right frame
-  std::vector<ThreeVector> beta(n);
-  for (size_t i = n - 1; i > 0; i--) {
-    const double pcm = pCM(Minv[i], Minv[i - 1], m[i]);
-    Angles phitheta;
-    phitheta.distribute_isotropically();
-    const ThreeVector isotropic_unitvector = phitheta.threevec();
-    sampled_momenta[i] = FourVector(std::sqrt(m[i] * m[i] + pcm * pcm),
-                                    pcm * isotropic_unitvector);
-    if (i >= 2) {
-      beta[i - 2] = pcm * isotropic_unitvector /
-                    std::sqrt(pcm * pcm + Minv[i - 1] * Minv[i - 1]);
-    }
-    if (i == 1) {
-      sampled_momenta[0] = FourVector(std::sqrt(m[0] * m[0] + pcm * pcm),
-                                      -pcm * isotropic_unitvector);
-    }
-  }
-
-  for (size_t i = 0; i < n - 2; i++) {
-    // After each boost except the last one the sum of 3-momenta should be 0
-    FourVector ptot = FourVector(0.0, 0.0, 0.0, 0.0);
-    for (size_t j = 0; j <= i + 1; j++) {
-      ptot += sampled_momenta[j];
-    }
-    logg[LAction].debug() << "Total momentum of 0.." << i + 1 << " = "
-                          << ptot.threevec() << " and should be (0, 0, 0). "
-                          << std::endl;
-
-    // Boost the first i+1 particles to the next CM frame
-    for (size_t j = 0; j <= i + 1; j++) {
-      sampled_momenta[j] = sampled_momenta[j].lorentz_boost(beta[i]);
-    }
-  }
-
-  FourVector ptot_all = FourVector(0.0, 0.0, 0.0, 0.0);
-  for (size_t j = 0; j < n; j++) {
-    ptot_all += sampled_momenta[j];
-  }
-  logg[LAction].debug() << "Total 4-momentum = " << ptot_all << ", should be ("
-                        << sqrts << ", 0, 0, 0)" << std::endl;
-}
-
 void Action::sample_manybody_phasespace() {
   const size_t n = outgoing_particles_.size();
   if (n < 3) {
@@ -453,23 +322,14 @@ void Action::sample_manybody_phasespace() {
         "sample_manybody_phasespace: number of outgoing particles should be 3 "
         "or more");
   }
-  bool all_stable = true;
-  for (size_t i = 0; i < n; i++) {
-    all_stable = all_stable && outgoing_particles_[i].type().is_stable();
-  }
-  if (!all_stable) {
-    throw std::invalid_argument(
-        "sample_manybody_phasespace: Found resonance in to be sampled outgoing "
-        "particles, but assumes stable particles.");
-  }
 
-  std::vector<double> m(n);
+  ParticleTypePtrList types(n);
   for (size_t i = 0; i < n; i++) {
-    m[i] = outgoing_particles_[i].type().mass();
+    types[i] = &outgoing_particles_[i].type();
   }
   std::vector<FourVector> p(n);
 
-  sample_manybody_phasespace_impl(sqrt_s(), m, p);
+  details::sample_manybody_phasespace_impl(sqrt_s(), types, p);
   for (size_t i = 0; i < n; i++) {
     outgoing_particles_[i].set_4momentum(p[i]);
   }
@@ -544,5 +404,219 @@ std::ostream &operator<<(std::ostream &out, const ActionList &actions) {
   }
   return out << '}';
 }
+
+namespace details {
+
+void sample_manybody_phasespace_impl(double sqrts,
+                                     const ParticleTypePtrList &types,
+                                     std::vector<FourVector> &sampled_momenta) {
+  const size_t n = types.size();
+  assert(n > 1);
+  sampled_momenta.resize(n);
+  std::vector<double> masses{}, masses_sum(n), Minv(n);
+  // Maximum estimate is rough and can be wrong. We multiply it by additional
+  // factor to be on the safer side, and increase it if needed.
+  double safety_factor = 1.1 + (n - 2) * 0.2;
+  int rejection_counter = 0;
+  constexpr int rejection_limit = 200;
+  double available_energy =
+      sqrts - std::accumulate(types.begin(), types.end(), 0.0,
+                              [](double sum, const ParticleTypePtr &type) {
+                                return sum + type->min_mass_spectral();
+                              });
+  double acceptance = 1;
+  do {
+    double random_01;
+    // This loop increases the maximum if the safety_factor is too small
+    safety_factor *= std::sqrt(acceptance);
+    do {
+      // Mass sampling from spectral functions
+      double weight_sqr_max = safety_factor * safety_factor;
+      masses.clear();
+      masses_sum.clear();
+      for (const auto &type : types) {
+        if (type->is_stable()) {
+          masses.push_back(type->mass());
+        } else {
+          masses.push_back(
+              type->sample_breit_wigner_spectral_function(available_energy));
+          const double max_ratio = std::max(
+              type->max_ratio_spectral_full_to_breit_wigner(),
+              type->ratio_spectral_full_to_breit_wigner(available_energy));
+          weight_sqr_max *= max_ratio * max_ratio;
+        }
+      }
+      // Arrange a convenient vector of m1, m1 + m2, m1 + m2 + m3, ...
+      std::partial_sum(masses.begin(), masses.end(),
+                       std::back_inserter(masses_sum));
+      const double masses_sum_all = masses_sum[n - 1];
+      const double Ekin_share = (sqrts - masses_sum_all) / (n - 1);
+      for (size_t i = 1; i < n; i++) {
+        // This maximum estimate idea is due Scott Pratt: maximum should be
+        // roughly at equal kinetic energies
+        weight_sqr_max *=
+            pCM_sqr(i * Ekin_share + masses_sum[i],
+                    (i - 1) * Ekin_share + masses_sum[i - 1], masses[i]);
+      }
+      // Generate invariant masses of 1, 12, 123, 1234, etc.
+      // Minv = {m1, M12, M123, ..., M123n-1, sqrts}
+      Minv[0] = 0.0;
+      Minv[n - 1] = sqrts - masses_sum_all;
+      for (size_t i = 1; i < n - 1; i++) {
+        Minv[i] = random::uniform(0.0, sqrts - masses_sum_all);
+      }
+      std::sort(Minv.begin(), Minv.end());
+      for (size_t i = 0; i < n; i++) {
+        Minv[i] += masses_sum[i];
+      }
+
+      double weight_sqr = 1;
+      for (size_t i = 0; i < n; i++) {
+        const double ratio =
+            types[i]->is_stable()
+                ? 1
+                : types[i]->ratio_spectral_full_to_breit_wigner(masses[i]);
+        weight_sqr *= ratio * ratio;
+      }
+      for (size_t i = 1; i < n; i++) {
+        weight_sqr *= pCM_sqr(Minv[i], Minv[i - 1], masses[i]);
+      }
+      acceptance = weight_sqr / weight_sqr_max;
+      rejection_counter++;
+      random_01 = random::canonical();
+    } while (acceptance < random_01 * random_01 &&
+             rejection_counter < rejection_limit);
+    if (acceptance > 1) {
+      logg[LAction].debug()
+          << "sample_manybody_phasespace_impl: alarm, weight > 1, w^2 = "
+          << acceptance << ". Increasing safety factor.";
+    }
+  } while (acceptance > 1 && rejection_counter < rejection_limit);
+
+  // Boost particles to the right frame
+  std::vector<ThreeVector> beta(n);
+  for (size_t i = n - 1; i > 0; i--) {
+    const double pcm = pCM(Minv[i], Minv[i - 1], masses[i]);
+    Angles phitheta;
+    phitheta.distribute_isotropically();
+    const ThreeVector isotropic_unitvector = phitheta.threevec();
+    sampled_momenta[i] =
+        FourVector(std::sqrt(masses[i] * masses[i] + pcm * pcm),
+                   pcm * isotropic_unitvector);
+    if (i >= 2) {
+      beta[i - 2] = pcm * isotropic_unitvector /
+                    std::sqrt(pcm * pcm + Minv[i - 1] * Minv[i - 1]);
+    }
+    if (i == 1) {
+      sampled_momenta[0] =
+          FourVector(std::sqrt(masses[0] * masses[0] + pcm * pcm),
+                     -pcm * isotropic_unitvector);
+    }
+  }
+
+  for (size_t i = 0; i < n - 2; i++) {
+    // After each boost except the last one the sum of 3-momenta should be 0
+    FourVector ptot = FourVector(0.0, 0.0, 0.0, 0.0);
+    for (size_t j = 0; j <= i + 1; j++) {
+      ptot += sampled_momenta[j];
+    }
+    logg[LAction].debug() << "Total momentum of 0.." << i + 1 << " = "
+                          << ptot.threevec() << " and should be (0, 0, 0).";
+
+    // Boost the first i+1 particles to the next CM frame
+    for (size_t j = 0; j <= i + 1; j++) {
+      sampled_momenta[j] = sampled_momenta[j].lorentz_boost(beta[i]);
+    }
+  }
+
+  FourVector ptot_all = FourVector(0.0, 0.0, 0.0, 0.0);
+  for (size_t j = 0; j < n; j++) {
+    ptot_all += sampled_momenta[j];
+  }
+  logg[LAction].debug() << "Total 4-momentum = " << ptot_all << ", should be ("
+                        << sqrts << ", 0, 0, 0)";
+  if (rejection_counter >= rejection_limit) {
+    logg[LAction].warn()
+        << "Failed to sample kinematically correct 4-momenta of "
+        << std::accumulate(types.begin(), types.end(), std::string{},
+                           [](const std::string &a, const ParticleTypePtr &b) {
+                             return a + b->name();
+                           })
+        << " with energy " << sqrts
+        << " GeV.\n Using MCMC fallback, which conserves energy and momentum "
+           "but may deviate slightly from the correct spectral distribution.";
+    sample_manybody_phasespace_MCMC(types, sampled_momenta);
+  }
+}
+
+void sample_manybody_phasespace_MCMC(const ParticleTypePtrList &types,
+                                     std::vector<FourVector> &sampled_momenta) {
+  constexpr int monte_carlo_iterations = 200;
+  // sampled_momenta already contains an initial guess
+  const int n = types.size();
+  int idx1, idx2;
+
+  assert(sampled_momenta.size() == n);
+  // It is enough to check that the energy is a positive number
+  const bool all_zero =
+      std::all_of(sampled_momenta.begin(), sampled_momenta.end(),
+                  [](const FourVector &p) { return p[0] < really_small; });
+  if (all_zero) {
+    throw std::runtime_error(
+        "All initial momenta for the MCMC algorithm manybody phase space "
+        "sampling are zero, which should not happen.");
+  }
+
+  for (int i = 0; i < monte_carlo_iterations; i++) {
+    // Pick random pair of particles and resample their masses
+    do {
+      idx1 = random::uniform_int(0, n - 1);
+      do {
+        idx2 = random::uniform_int(0, n - 1);
+      } while (idx2 == idx1);
+    } while (types[idx1]->is_stable() && types[idx2]->is_stable());
+
+    // Energy of the pair and CM frame velocity
+    const FourVector p_sum = sampled_momenta[idx1] + sampled_momenta[idx2];
+    const ThreeVector beta = p_sum.velocity();
+    const double sqrts_12 = p_sum.abs();
+    double m1, m2;
+    do {
+      m1 = types[idx1]->sample_full_spectral_function(sqrts_12);
+      m2 = types[idx2]->sample_full_spectral_function(sqrts_12);
+    } while (sqrts_12 < m1 + m2);
+    const double pcm = pCM(sqrts_12, m1, m2);
+    Angles phitheta;
+    phitheta.distribute_isotropically();
+    /*
+     * Metropolis-Hastings acceptance. As the Breit Wigner is biased towards
+     * lower masses compared to the full spectral function, we generally want to
+     * accept more often if the ratio increases, and less if it decreases.
+     */
+    double acc = 1.0;
+    if (!types[idx1]->is_stable()) {
+      acc *= types[idx1]->ratio_spectral_full_to_breit_wigner(m1) /
+             types[idx1]->ratio_spectral_full_to_breit_wigner(
+                 sampled_momenta[idx1].abs());
+    }
+    if (!types[idx2]->is_stable()) {
+      acc *= types[idx2]->ratio_spectral_full_to_breit_wigner(m2) /
+             types[idx2]->ratio_spectral_full_to_breit_wigner(
+                 sampled_momenta[idx2].abs());
+    }
+
+    if (random::canonical() < acc) {
+      // Accept and impose momentum conservation with back-to-back particles
+      sampled_momenta[idx1] =
+          FourVector(std::sqrt(m1 * m1 + pcm * pcm), pcm * phitheta.threevec())
+              .lorentz_boost(-beta);
+      sampled_momenta[idx2] =
+          FourVector(std::sqrt(m2 * m2 + pcm * pcm), -pcm * phitheta.threevec())
+              .lorentz_boost(-beta);
+    }
+  }
+}
+
+}  // namespace details
 
 }  // namespace smash

@@ -7,8 +7,10 @@
 #ifndef SRC_INCLUDE_SMASH_PARTICLETYPE_H_
 #define SRC_INCLUDE_SMASH_PARTICLETYPE_H_
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -372,7 +374,7 @@ class ParticleType {
    * \note The normalization factor N ensures that the spectral function is
    *       normalized to unity.
    */
-  double spectral_function(double m) const;
+  double full_spectral_function(double m) const;
 
   /**
    * Full spectral function without normalization factor.
@@ -382,14 +384,7 @@ class ParticleType {
    *              spectral function is to be evaluated.
    * \return the value of the non-normalized spectral function for this mass
    */
-  double spectral_function_no_norm(double m) const;
-
-  /**
-   * \todo unused
-   * The spectral function with a constant width (= width at pole).
-   * It is guaranteed to be normalized to 1, when integrated from 0 to inf.
-   */
-  double spectral_function_const_width(double m) const;
+  double no_norm_spectral_function(double m) const;
 
   /**
    * This one is the most simple form of the spectral function, using a
@@ -401,7 +396,46 @@ class ParticleType {
    *              spectral function is to be evaluated.
    * \return the Cauchy spectral function at mass m
    */
-  double spectral_function_simple(double m) const;
+  double breit_wigner_spectral_function(double m) const;
+
+  /**
+   * Sample mass from the simple spectral function (Breit-Wigner/Cauchy
+   * distribution).
+   *
+   * \param[in] energy Maximum energy from which the mass should be sampled.
+   * \return sampled mass
+   */
+  double sample_breit_wigner_spectral_function(double energy) const;
+
+  /**
+   * Sample mass from the full spectral function.
+   *
+   * \param[in] energy Maximum energy from which the mass should be sampled.
+   * \return sampled mass
+   */
+  double sample_full_spectral_function(double energy) const;
+
+  /**
+   * Calculate the ratio between the full spectral function and simple one.
+   *
+   * \param[in] m Mass of the resonance where the ratio is to be evaluated.
+   * \return ratio between spectral functions
+   */
+  double ratio_spectral_full_to_breit_wigner(double m) const;
+
+  /**
+   * Getter used in the resonance mass sampling functions.
+   * If the member is not yet initialized, it runs the algorithm to find the
+   * value.
+   *
+   * \return maximum ratio between full spectral function and simple
+   */
+  double max_ratio_spectral_full_to_breit_wigner() const {
+    if (!max_ratio_spectral_full_to_breit_wigner_) {
+      calculate_max_ratio_spectral_full_to_breit_wigner();
+    }
+    return *max_ratio_spectral_full_to_breit_wigner_;
+  }
 
   /**
    * Resonance mass sampling for 2-particle final state with one resonance
@@ -415,20 +449,6 @@ class ParticleType {
    */
   double sample_resonance_mass(const double mass_stable,
                                const double cms_energy, int L = 0) const;
-
-  /**
-   * Resonance mass sampling for 2-particle final state with two resonances.
-   *
-   * \param[in] t2 Type of the second resonance
-   *               (the first resonance is given by 'this').
-   * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
-   * \param[in] L relative angular momentum of the final-state particles
-   *
-   * \return The masses of the resonance particles.
-   */
-  std::pair<double, double> sample_resonance_masses(const ParticleType &t2,
-                                                    const double cms_energy,
-                                                    int L = 0) const;
 
   /**
    * Prints out width and spectral function versus mass to the
@@ -658,10 +678,25 @@ class ParticleType {
   /// Container for the isospin multiplet information
   IsoParticleType *iso_multiplet_ = nullptr;
 
-  /// Maximum factor for single-res mass sampling, cf. sample_resonance_mass.
-  mutable double max_factor1_ = 1.;
-  /// Maximum factor for double-res mass sampling, cf. sample_resonance_masses.
-  mutable double max_factor2_ = 1.;
+  /**
+   * Maximum ratio between full spectral function and the mass-independent
+   * Breit-Wigner. This is used for sampling the resonance mass.
+   */
+  mutable std::optional<double> max_ratio_spectral_full_to_breit_wigner_ =
+      std::nullopt;
+
+  /**
+   * Calculates the maximum ratio between full spectral function and simple one.
+   * Usually it will be at the right edge of a mass range, but numerically this
+   * might be a problem since at very large masses both spectral functions go to
+   * zero, so we take a fixed maximal value.
+   * For some resonances the full spectral function has peaks beyond the pole
+   * mass, which will give the largest ratio, so this algorithm scans for this
+   * case from the right, until the regular pole mass peak.
+   * The actual value is the maximum between the ratio at the last found peak,
+   * the ratio at the mass limit, and 1 as a fallback.
+   */
+  void calculate_max_ratio_spectral_full_to_breit_wigner() const;
 
   /**\ingroup logging
    * Writes all information about the particle type to the output stream.
@@ -779,6 +814,20 @@ inline ParticleTypePtr ParticleType::get_antiparticle() const {
 ParticleTypePtrList list_possible_resonances(const ParticleTypePtr type_a,
                                              const ParticleTypePtr type_b);
 
+/**
+ * Resonance mass sampling for 2-particle final state with two resonances.
+ *
+ * \param[in] t1 Type of the first resonance
+ * \param[in] t2 Type of the second resonance.
+ * \param[in] cms_energy center-of-mass energy of the 2-particle final state.
+ * \param[in] L relative angular momentum of the final-state particles
+ *
+ * \return The masses of the resonance particles.
+ */
+std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
+                                                      const ParticleType &t2,
+                                                      const double cms_energy,
+                                                      int L = 0);
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_PARTICLETYPE_H_

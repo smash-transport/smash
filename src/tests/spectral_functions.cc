@@ -18,6 +18,21 @@
 
 using namespace smash;
 
+static double spectral_function_const_width(const ParticleType &type,
+                                            double m) {
+  /*
+   * The spectral function is a relativistic Breit-Wigner function. This variant
+   * is using a constant width evaluated at the pole mass; it previously was in
+   * the source code but became obsolete, but moved here to ensure the integral
+   * of breit_wigner is correct for all particles.
+   */
+  const double resonance_width = type.width_at_pole();
+  if (resonance_width < ParticleType::width_cutoff) {
+    return 0.;
+  }
+  return breit_wigner(m, type.mass(), resonance_width);
+}
+
 TEST(spectral_functions) {
   smash::Test::create_actual_particletypes();
   smash::Test::create_actual_decaymodes();
@@ -40,15 +55,16 @@ TEST(spectral_functions) {
      * We transform the integrals using m = m_min + (1 - t)/t to make them
      * definite and to avoid numerical problems. */
     const auto result_no_norm = integrate(0., 1., [&](double t) {
-      return type.spectral_function_no_norm(type.min_mass_kinematic() +
+      return type.no_norm_spectral_function(type.min_mass_kinematic() +
                                             (1 - t) / t) /
              (t * t);
     });
     const auto result_const = integrate(0., 1., [&](double t) {
-      return type.spectral_function_const_width((1 - t) / t) / (t * t);
+      return spectral_function_const_width(type, (1 - t) / t) / (t * t);
     });
     const auto result = integrate(0., 1., [&](double t) {
-      return type.spectral_function(type.min_mass_kinematic() + (1 - t) / t) /
+      return type.full_spectral_function(type.min_mass_kinematic() +
+                                         (1 - t) / t) /
              (t * t);
     });
     if (result_no_norm.value() > 1 + warning_level) {
@@ -88,6 +104,6 @@ TEST(mass_sampling) {
   hist.test([&](double m) {
     const double pcm = pCM(sqrts, mass_stable, m);
     const double bw = blatt_weisskopf_sqr(pcm, L);
-    return res.spectral_function(m) * pcm * bw;
+    return res.full_spectral_function(m) * pcm * bw;
   });
 }
