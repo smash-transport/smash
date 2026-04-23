@@ -236,20 +236,12 @@ inline void cache_integral(
   if (!dir.empty() && std::filesystem::exists(path)) {
     std::ifstream file(path.string());
     integral = Tabulation::from_file(file, hash);
-    if (!integral.is_empty()) {
-      // Only print message if the found tabulation was valid.
-      std::cout << "Tabulation found at " << path.filename() << '\r'
-                << std::flush;
-    }
   }
   if (integral.is_empty()) {
-    if (!dir.empty()) {
-      std::cout << "Caching tabulation to " << path.filename() << '\r'
-                << std::flush;
-    } else {
-      std::cout << "Calculating integral for " << part.name_filtered_prime()
-                << res.name_filtered_prime() << '\r' << std::flush;
-    }
+    const auto particle_names =
+        part.name_filtered_prime() + res.name_filtered_prime();
+    std::cout << "Calculating integral for " << particle_names << '\r'
+              << std::flush;
     if (!unstable) {
       integral = spectral_integral_semistable(integrate, *res.get_states()[0],
                                               *part.get_states()[0], spacing);
@@ -257,10 +249,21 @@ inline void cache_integral(
       integral = spectral_integral_unstable(integrate2d, *res.get_states()[0],
                                             *part.get_states()[0], spacing2d);
     }
-    if (!dir.empty()) {
+
+    // To avoid race conditions, make sure that this is the only instance
+    // writing the tabulation to file.
+    const auto lock_name = dir / (particle_names + ".lock");
+    FileLock lock(lock_name);
+    if (!dir.empty() && lock.acquire()) {
+      std::cout << "Caching tabulation to " << path.filename() << '\r'
+                << std::flush;
       std::ofstream file(path.string());
       integral.write(file, hash);
     }
+  } else {
+    // Only print message if the found tabulation was valid.
+    std::cout << "Tabulation found at " << path.filename() << '\r'
+              << std::flush;
   }
   tabulations.emplace(std::make_pair(res.name(), integral));
   if (antires != nullptr) {
@@ -268,14 +271,17 @@ inline void cache_integral(
   }
 }
 
-void IsoParticleType::tabulate_integrals(
-    sha256::Hash hash, const std::filesystem::path &tabulations_path) {
-  // To avoid race conditions, make sure we are the only ones currently storing
-  // tabulations. Otherwise, we ignore any stored tabulations and don't store
-  // our results.
-  FileLock lock(tabulations_path / "tabulations.lock");
-  const std::filesystem::path &dir = lock.acquire() ? tabulations_path : "";
-
+void IsoParticleType::tabulate_integrals(sha256::Hash hash,
+                                         const std::filesystem::path &dir) {
+  /**
+   * We avoid race conditions by locking each tabulation file separately. This
+   * allows multiple instances of SMASH to run in parallel and tabulate the same
+   * integrals without interfering with each other. Reading them simultaneously
+   * is not a problem, and writing is protected by the lock. The only downside
+   * is that the same integral might be calculated multiple times if several
+   * instances start at the same time and find that the tabulation file does not
+   * yet exist.
+   */
   const auto nuc = IsoParticleType::try_find("N");
   const auto pion = IsoParticleType::try_find("π");
   const auto kaon = IsoParticleType::try_find("K");
