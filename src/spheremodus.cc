@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2025
+ *    Copyright (c) 2012-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -185,6 +185,10 @@ double SphereModus::initial_conditions(Particles *particles,
     logg[LSphere].info("Initial hadron gas baryon density ", nb_init);
     logg[LSphere].info("Initial hadron gas strange density ", ns_init);
     logg[LSphere].info("Initial hadron gas charge density ", nq_init);
+    if (hf_multiplier_ > really_small) {
+      logg[LSphere].info("Adding heavy flavor particles with multiplier ",
+                         hf_multiplier_);
+    }
   } else {
     for (const auto &p : init_multipl_) {
       particles->create(p.second * parameters.testparticles, p.first);
@@ -248,6 +252,9 @@ double SphereModus::initial_conditions(Particles *particles,
     data.set_4position(
         FourVector(start_time_, pos_phitheta.threevec() * position_radial));
     data.set_formation_time(start_time_);
+    if (data.type().pdgcode().is_heavy_flavor()) {
+      data.set_perturbative_weight(1.0 / hf_multiplier_);
+    }
   }
 
   /* Boost in radial direction with an underlying velocity field of the form
