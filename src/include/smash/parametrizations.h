@@ -597,7 +597,8 @@ class KaonNucleonRatios {
                    const ParticleType& c, const ParticleType& d) const;
 };
 
-extern /*thread_local (see #3075)*/ KaonNucleonRatios kaon_nucleon_ratios;
+extern /*thread_local (see commit 897d0b8)*/ KaonNucleonRatios
+    kaon_nucleon_ratios;
 
 /**
  * K- p <-> Kbar0 n cross section parametrization.

@@ -144,7 +144,7 @@ class ClebschGordan {
      *    of the sum involve bit-shifts, these are combined together.
      *
      * \note
-     * A couple of remarks a worth:
+     * A couple of remarks worth noting:
      * - Using \c std::bitset would probably make the code easier to read, but
      *   it has been benchmarked to be some % slower at low energies.
      * - Yet another possibility would be to use mathematics/physics to come up
