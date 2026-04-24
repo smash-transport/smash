@@ -17,8 +17,8 @@
 
 #include "actionfinderfactory.h"
 #include "actions.h"
-#include "bremsstrahlungaction.h"
 #include "bremsstrahlungactiondilepton.h"
+#include "bremsstrahlungactionphoton.h"
 #include "chrono.h"
 #include "decayactionsfinder.h"
 #include "decayactionsfinderdilepton.h"
@@ -615,7 +615,7 @@ class Experiment : public ExperimentBase {
   const bool photons_switch_;
 
   /// This indicates whether bremsstrahlung is switched on.
-  const bool bremsstrahlung_switch_;
+  const bool photons_bremsstrahlung_switch_;
 
   /**
    * This indicates whether the experiment will be used as initial condition for
@@ -938,7 +938,7 @@ Experiment<Modus>::Experiment(Configuration &config,
           config.take(InputKeys::collTerm_dileptons_bremsstrahlung)),
       photons_switch_(
           config.take(InputKeys::collTerm_photons_twoToTwoScatterings)),
-      bremsstrahlung_switch_(
+      photons_bremsstrahlung_switch_(
           config.take(InputKeys::collTerm_photons_bremsstrahlung)),
       IC_switch_(config.has_section(InputSections::o_initialConditions) &&
                  modus_.is_IC_for_hybrid()),
@@ -1035,7 +1035,7 @@ Experiment<Modus>::Experiment(Configuration &config,
   if (dileptons_switch_) {
     dilepton_finder_ = std::make_unique<DecayActionsFinderDilepton>();
   }
-  if (photons_switch_ || bremsstrahlung_switch_) {
+  if (photons_switch_ || photons_bremsstrahlung_switch_) {
     n_fractional_photons_ =
         config.take(InputKeys::collTerm_photons_fractionalPhotons);
   }
@@ -2439,14 +2439,14 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     photon_act.perform_photons(outputs_);
   }
 
-  if (bremsstrahlung_switch_ &&
-      BremsstrahlungAction::is_bremsstrahlung_reaction(
+  if (photons_bremsstrahlung_switch_ &&
+      BremsstrahlungActionPhoton::is_photon_brems_reaction(
           action.incoming_particles())) {
     /* Time in the action constructor is relative to
      * current time of incoming */
     constexpr double action_time = 0.;
 
-    BremsstrahlungAction brems_act(
+    BremsstrahlungActionPhoton photon_brems_act(
         action.incoming_particles(), action_time, n_fractional_photons_,
         action.get_total_weight(), parameters_.spin_interaction_type);
 
@@ -2461,12 +2461,12 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
      * is taken.
      */
 
-    brems_act.add_dummy_hadronic_process(action.get_total_weight());
+    photon_brems_act.add_dummy_hadronic_process(action.get_total_weight());
 
     // Now add the actual bremsstrahlung reaction channel.
-    brems_act.add_single_process();
+    photon_brems_act.add_single_process();
 
-    brems_act.perform_bremsstrahlung(outputs_);
+    photon_brems_act.perform_bremsstrahlung(outputs_);
   }
 
   if (dileptons_bremsstrahlung_switch_ &&

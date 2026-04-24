@@ -62,7 +62,7 @@ enum class ProcessType {
   /// \see_process_type{21}
   FluidizationNoRemoval = 21,
   /// \see_process_type{9}
-  Bremsstrahlung = 9,
+  BremsstrahlungPhoton = 9,
   /// \see_process_type{16}
   BremsstrahlungDilepton = 16,
   /// \see_process_type{10}
@@ -113,7 +113,7 @@ inline bool is_valid_process_type(int v) {
     case ProcessType::Thermalization:
     case ProcessType::Fluidization:
     case ProcessType::FluidizationNoRemoval:
-    case ProcessType::Bremsstrahlung:
+    case ProcessType::BremsstrahlungPhoton:
     case ProcessType::BremsstrahlungDilepton:
     case ProcessType::MultiParticleThreeMesonsToOne:
     case ProcessType::MultiParticleThreeToTwo:

@@ -332,7 +332,7 @@ target_sources(smash_objlib
                PRIVATE action.cc
                        boxmodus.cc
                        binaryoutput.cc
-                       bremsstrahlungaction.cc
+                       bremsstrahlungactionphoton.cc
                        bremsstrahlungactiondilepton.cc
                        chemicalpotential.cc
                        clebschgordan.cc

@@ -61,7 +61,7 @@ BremsstrahlungActionDilepton::dilepton_brems_reaction_type(
 }
 
 // ── Dummy hadronic process ───────────────────────────────────────────────
-// Same pattern as BremsstrahlungAction::add_dummy_hadronic_process():
+// Same pattern as BremsstrahlungActionPhoton::add_dummy_hadronic_process():
 // The hadronic scatteraction (n+p elastic) is registered as a dummy to
 // satisfy the ScatterAction machinery, while the actual dilepton emission
 // is handled otherwise and does not rely on this machinery.
@@ -225,7 +225,7 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   // Note: xsec_scaling_factor() not applied here by intention:
   // BremsstrahlungActionDilepton solely covers elementary pn collisions,
   // for which the scaling factor would always be equal to 1.
-  // This differs from the treatment in BremsstrahlungAction (photons).
+  // This differs from the treatment in BremsstrahlungActionPhoton (photons).
   weight_ = W_M * W_q * W_Omega / hadronic_cross_section_;
 
   // Set positions and boost to computational frame

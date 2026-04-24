@@ -8007,8 +8007,7 @@ General:
  * \f$ \theta \f$ range, \f$ \frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}k}\f$
  * and \f$ \frac{\mathrm{d}\sigma_\gamma}{\mathrm{d} \theta}\f$ are considered
  * separately. Consequently, the weighting factor in the case of
- bremsstrahlung
- * photons is redefined as:
+ * bremsstrahlung photons is redefined as:
  * \f[
  * W = \frac{
  *       \sqrt{\frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}k} \ \Delta k \
