@@ -15,6 +15,18 @@
 
 using namespace smash;
 
+static InterpolateDataLinear<double> set_up_interpolate_data_linear_sorted() {
+  const std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  const std::vector<double> y = {1, 2, 0, 0, 0, 0, 0, 8, 9};
+  return InterpolateDataLinear<double>(x, y);;
+}
+
+static InterpolateDataSpline set_up_interpolate_data_spline_sorted() {
+  const std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+  const std::vector<double> y = x;
+  return InterpolateDataSpline(x, y);
+}
+
 TEST(interpolate_linear) {
   const auto f = InterpolateLinear<double>(0, 0, 1, 2);
   COMPARE(f(0), 0);
@@ -47,32 +59,23 @@ TEST(find_index) {
 }
 
 TEST(interpolate_data_linear) {
-  std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-  std::vector<double> y = {1, 2, 0, 0, 0, 0, 0, 8, 9};
-  const InterpolateDataLinear<double> f(x, y);
-  x.clear();
-  y.clear();
+  const InterpolateDataLinear<double> f =
+      set_up_interpolate_data_linear_sorted();
   COMPARE(f(1.5), 1.5);
   COMPARE(f(5), 0.0);
 }
 
 TEST_CATCH(interpolate_data_linear_value_out_of_lower_bound,
            std::out_of_range) {
-  std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-  std::vector<double> y = {1, 2, 0, 0, 0, 0, 0, 8, 9};
-  const InterpolateDataLinear<double> f(x, y);
-  x.clear();
-  y.clear();
+  const InterpolateDataLinear<double> f =
+      set_up_interpolate_data_linear_sorted();
   f(0);
 }
 
 TEST_CATCH(interpolate_data_linear_value_out_of_upper_bound,
            std::out_of_range) {
-  std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-  std::vector<double> y = {1, 2, 0, 0, 0, 0, 0, 8, 9};
-  const InterpolateDataLinear<double> f(x, y);
-  x.clear();
-  y.clear();
+  const InterpolateDataLinear<double> f =
+      set_up_interpolate_data_linear_sorted();
   f(10);
 }
 
@@ -87,31 +90,19 @@ TEST(interpolate_data_linear_unsorted) {
 }
 
 TEST(interpolate_data_spline) {
-  std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-  std::vector<double> y = x;
-  const InterpolateDataSpline f(x, y);
-  x.clear();
-  y.clear();
+  const InterpolateDataSpline f = set_up_interpolate_data_spline_sorted();
   COMPARE(f(1.5), 1.5);
 }
 
 TEST_CATCH(interpolate_data_spline_value_out_of_lower_bound,
            std::out_of_range) {
-  std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-  std::vector<double> y = x;
-  const InterpolateDataSpline f(x, y);
-  x.clear();
-  y.clear();
+  const InterpolateDataSpline f = set_up_interpolate_data_spline_sorted();
   f(0);
 }
 
 TEST_CATCH(interpolate_data_spline_value_out_of_upper_bound,
            std::out_of_range) {
-  std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-  std::vector<double> y = x;
-  const InterpolateDataSpline f(x, y);
-  x.clear();
-  y.clear();
+  const InterpolateDataSpline f = set_up_interpolate_data_spline_sorted();
   f(10);
 }
 
