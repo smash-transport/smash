@@ -34,7 +34,7 @@ if(NOT UNIX AND NOT APPLE OR CMAKE_SIZEOF_VOID_P LESS 8)
                             " Using SMASH on your ${AUX_MSG} is not officially supported.\n"
                             " Please, contact the SMASH development team (see README) if you would\n"
                             " like to collaborate with us to get the code run on your system.\n"
-                            " At your own risk you can pass -DFORCE_USE_ANY_SYSTEM =TRUE to\n"
+                            " At your own risk you can pass -DFORCE_USE_ANY_SYSTEM=TRUE to\n"
                             " cmake in order to setup and compile SMASH on your system.\n"
                             " Alternatively you can use the provided Docker containers (see README).\n"
         )

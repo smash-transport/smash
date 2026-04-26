@@ -1283,10 +1283,10 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   - There are many different programs that can open a VTK file, although
    *     their functionality varies.
    *   - This output can be for example visualized with
-   *     <a href="http://paraview.org/">Paraview</a>. Alternatives are e.g.
+   *     <a href="http://paraview.org/">ParaView</a>. Alternatives are, e.g.,
    *     <a href=https://docs.enthought.com/mayavi/mayavi/data.html>Mayavi</a>
-   *     or <a
-   *     href=https://reference.wolfram.com/language/ref/format/VTK.html>Mathematica</a>.
+   *     or <a href=https://reference.wolfram.com/language/ref/format/VTK.html>
+   *     Mathematica</a>.
    *   - Visit \ref doxypage_output_vtk for further information
    * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
    *   Tree ROOT format see \ref doxypage_output_hepmc for details

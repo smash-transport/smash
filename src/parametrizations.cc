@@ -527,7 +527,7 @@ double kminusp_total(double mandelstam_s) {
   if (kminusp_total_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(KMINUSP_TOT_PLAB, KMINUSP_TOT_SIG);
-    // Parametrization data is pre-smoothed
+    // Parametrization data KMINUSP_TOT_PLAB, KMINUSP_TOT_SIG is pre-smoothed
     dedup_y = smooth(dedup_x, dedup_y, 0.01, 5);
     kminusp_total_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(dedup_x, dedup_y);
