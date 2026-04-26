@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2018,2020,2022,2024
+ *    Copyright (c) 2015-2018,2020,2022,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -47,8 +47,8 @@ class InterpolateLinear {
   /**
    * Calculate linear interpolation at x.
    *
-   *  \param x Interpolation argument.
-   *  \return Interpolated value.
+   * \param x Interpolation argument.
+   * \return Interpolated value.
    */
   T operator()(T x) const;
 };
@@ -63,21 +63,22 @@ class InterpolateDataLinear {
  public:
   /**
    * Interpolate function f given discrete samples f(x_i) = y_i.
+   * Piecewise linear interpolation is used.
    *
    * \param x x-values.
    * \param y y-values.
    * \return The interpolation function.
-   *
-   * Piecewise linear interpolation is used.
-   * Values outside the given samples will be extrapolated based on the outmost
-   * linear interpolation.
    */
   InterpolateDataLinear(const std::vector<T>& x, const std::vector<T>& y);
+
   /**
    * Calculate linear interpolation at x.
    *
-   *  \param x Interpolation argument.
-   *  \return Interpolated value.
+   * \param x Interpolation argument.
+   * \return Interpolated value.
+   *
+   * \throw std::out_of_range if values outside of the boundaries of the
+   *                          underlying data are tried to be accessed.
    */
   T operator()(T x) const;
 
@@ -172,19 +173,19 @@ std::vector<T> apply_permutation(const std::vector<T>& v,
 /**
  * Check whether two components have the same value in a sorted vector x.
  *
- * Throws an exception if duplicates are encountered.
- *
  * \tparam T Type of values to be checked for duplicates.
  * \param x Vector to be checked for duplicates.
- * \param error_position String used in the error message, indicating where
- *                       the error originated.
+ * \param error_position String used in the error message, indicating where the
+ *                       error originated.
+ *
+ * \throw std::runtime_error if duplicates are encountered.
  */
 template <typename T>
 void check_duplicates(const std::vector<T>& x,
                       const std::string& error_position) {
   auto it = std::adjacent_find(x.begin(), x.end());
   if (it != x.end()) {
-    std::stringstream error_msg;
+    std::stringstream error_msg{};
     error_msg << error_position << ": Each x value must be unique. \"" << *it
               << "\" was found twice.";
     throw std::runtime_error(error_msg.str());
@@ -238,13 +239,15 @@ size_t find_index(const std::vector<T>& v, T x) {
 
 template <typename T>
 T InterpolateDataLinear<T>::operator()(T x0) const {
+  if (x0 < x_.front() || x0 > x_.back()) {
+    std::stringstream error_msg{};
+    error_msg << "InterpolateDataLinear only accepts x values within the range "
+          "of the underlying data.\n"
+       << "x value " << x0 << " is out of bounds.";
+    throw std::out_of_range(error_msg.str());
+  }
   // Find the piecewise linear interpolation corresponding to x0.
   size_t i = find_index(x_, x0);
-  if (i >= f_.size()) {
-    /* If x0 is beyond the last point in x_, the linear interpolation between
-     * the last two data points in x_ is taken to linearly extrapolate to x0. */
-    i = f_.size() - 1;
-  }
   return f_[i](x0);
 }
 
@@ -253,14 +256,11 @@ class InterpolateDataSpline {
  public:
   /**
    * Interpolate function f given discrete samples f(x_i) = y_i.
+   * Cubic spline interpolation is used.
    *
    * \param x x-values.
    * \param y y-values.
    * \return The interpolation function.
-   *
-   * Cubic spline interpolation is used.
-   * Values outside the given samples will use the outmost sample
-   * as a constant extrapolation.
    */
   InterpolateDataSpline(const std::vector<double>& x,
                         const std::vector<double>& y);
@@ -271,19 +271,22 @@ class InterpolateDataSpline {
   /**
    * Calculate spline interpolation at x.
    *
-   *  \param x Interpolation argument.
-   *  \return Interpolated value.
+   * \param x Interpolation argument.
+   * \return Interpolated value.
+   *
+   * \throw std::out_of_range if values outside of the boundaries of the
+   *                          underlying data are tried to be accessed.
    */
   double operator()(double x) const;
 
  private:
-  /// First x value.
+  /// First x value of underlying data.
   double first_x_;
-  /// Last x value.
+  /// Last x value of underlying data.
   double last_x_;
-  /// First y value.
+  /// First y value of underlying data.
   double first_y_;
-  /// Last y value.
+  /// Last y value of underlying data.
   double last_y_;
   /// GSL iterator for interpolation lookups.
   gsl_interp_accel* acc_;

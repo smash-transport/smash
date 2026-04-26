@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015-2018,2020
+ *    Copyright (c) 2015-2018,2020,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -43,12 +43,12 @@ InterpolateDataSpline::~InterpolateDataSpline() {
 }
 
 double InterpolateDataSpline::operator()(double xi) const {
-  // constant extrapolation
-  if (xi < first_x_) {
-    return first_y_;
-  }
-  if (xi > last_x_) {
-    return last_y_;
+  if (xi < first_x_ || xi > last_x_) {
+    std::stringstream error_msg{};
+    error_msg << "InterpolateDataSpline only accepts x values within the range "
+          "of the underlying data.\n"
+       << "x value " << xi << " is out of bounds.";
+    throw std::out_of_range(error_msg.str());
   }
   // cubic spline interpolation
   return gsl_spline_eval(spline_, xi, acc_);
