@@ -123,6 +123,10 @@ T InterpolateLinear<T>::operator()(T x) const {
  * \param[in] f7 Value at the upper left back corner of the cube
  * \param[in] f8 Value at the upper right back corner of the cube
  *
+ * - x-direction: lower left front to lower right front corner (f1 to f2)
+ * - y-direction: lower left front to upper left front corner (f1 to f3)
+ * - z-direction: lower left front to lower left back corner (f1 to f5)
+ *
  * \return Interpolated value
  */
 template <typename T>

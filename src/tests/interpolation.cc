@@ -89,6 +89,40 @@ TEST(interpolate_data_linear_unsorted) {
   COMPARE(f(5), 0.0);
 }
 
+TEST(trilinear_interpolation) {
+  const double ax = 0.2;
+  const double ay = 0.3;
+  const double az = 0.4;
+  // Same constant value at every corner
+  FUZZY_COMPARE(
+      interpolate_trilinear(ax, ay, az, 1., 1., 1., 1., 1., 1., 1., 1.), 1.);
+  // Linear increase in x-direction
+  FUZZY_COMPARE(
+      interpolate_trilinear(ax, 0., 0., 0., 1., 0., 0., 0., 0., 0., 0.), ax);
+  // Linear increase in y-direction
+  FUZZY_COMPARE(
+      interpolate_trilinear(0., ay, 0., 0., 0., 1., 0., 0., 0., 0., 0.), ay);
+  // Linear increase in z-direction
+  FUZZY_COMPARE(
+      interpolate_trilinear(0., 0., az, 0., 0., 0., 0., 1., 0., 0., 0.), az);
+  // Linear increase in x- and y-direction
+  FUZZY_COMPARE(
+      interpolate_trilinear(ax, ay, 0., 0., 1., 1., 2., 0., 0., 0., 0.),
+      ax + ay);
+  // Linear increase in x- and z-direction
+  FUZZY_COMPARE(
+      interpolate_trilinear(ax, 0., az, 0., 1., 0., 0., 1., 2., 0., 0.),
+      ax + az);
+  // Linear increase in y- and z-direction
+  FUZZY_COMPARE(
+      interpolate_trilinear(0., ay, az, 0., 0., 1., 0., 1., 0., 2., 0.),
+      ay + az);
+  // Cube with linear increase in every direction
+  FUZZY_COMPARE(
+      interpolate_trilinear(ax, ay, az, 0., 1., 1., 2., 1., 2., 2., 3.),
+      ax + ay + az);
+}
+
 TEST(interpolate_data_spline) {
   const InterpolateDataSpline f = set_up_interpolate_data_spline_sorted();
   COMPARE(f(1.5), 1.5);
