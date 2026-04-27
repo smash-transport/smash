@@ -124,7 +124,7 @@ the folder.
 ### Functional tests
 
 The functional tests require Python to create a virtual environment where modules
-can be imported. At the moment a Python version between `3.3` (included) and `3.12`
+can be imported. At the moment a Python version between `3.8` (included) and `3.12`
 (excluded) is required. They are disabled by default, but can be enabled before
 building the project with
 ```
