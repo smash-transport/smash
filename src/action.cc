@@ -556,7 +556,7 @@ void sample_manybody_phasespace_MCMC(const ParticleTypePtrList &types,
   const int n = types.size();
   int idx1, idx2;
 
-  assert(sampled_momenta.size() == n);
+  assert(sampled_momenta.size() == static_cast<size_t>(n));
   // It is enough to check that the energy is a positive number
   const bool all_zero =
       std::all_of(sampled_momenta.begin(), sampled_momenta.end(),
