@@ -409,6 +409,16 @@ class CrossSections {
   std::optional<double> Dpi_elastic() const;
 
   /**
+   * Determine the inelastic cross section for a D meson-pion (Dpi) collision.
+   *
+   * \return Inlastic cross section for Dpi
+   *
+   * \throw std::runtime_error if incoming particles are not D meson+pion.
+   * \throw std::runtime_error if positive cross section cannot be specified.
+   */
+  double Dpi_inelastic_xsec() const;
+
+  /**
    * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.
    * These scatterings are suppressed at high energies when strings are
    * turned on with probabilities, so they need to be added back manually.

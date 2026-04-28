@@ -358,6 +358,17 @@ double CrossSections::parametrized_total(
         default:
           throw std::runtime_error("wrong isospin in ππ scattering");
       }
+    } else if ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
+               (pdg_b.is_Dmeson() && pdg_a.is_pion())) {
+      std::optional<double> elastic_xs = Dpi_elastic();
+      double inelastic_xs = Dpi_inelastic_xsec();
+      if (elastic_xs.has_value()) {
+        total_xs = elastic_xs.value() + inelastic_xs;
+      } else {
+        total_xs = (2. / 3.) * piminusp_high_energy(sqrt_s_ * sqrt_s_) *
+                   finder_parameters.AQM_scaling_factor(pdg_a) *
+                   finder_parameters.AQM_scaling_factor(pdg_b);
+      }
     } else {
       // M*+M* goes to AQM high energy π⁻p
       total_xs = (2. / 3.) * piminusp_high_energy(sqrt_s_ * sqrt_s_) *
@@ -2574,6 +2585,58 @@ CollisionBranchList CrossSections::dn_xx(
                                sqrt_s_, " GeV, xs[mb] = ", xsection);
   }
   return process_list;
+}
+
+double CrossSections::Dpi_inelastic_xsec() const {
+  const ParticleType& a = incoming_particles_[0].type();
+  const ParticleType& b = incoming_particles_[1].type();
+  const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
+  const ParticleType& type_pion = a.pdgcode().is_Dmeson() ? b : a;
+
+  const auto pdg_D = type_D.pdgcode().code();
+  const auto pdg_pion = type_pion.pdgcode().code();
+  assert(pdg_pion != pdg_D);
+
+  double sig_inel = -1.;
+  switch (pack(pdg_D, pdg_pion)) {
+    case pack(pdg::D_z, pdg::pi_p):
+    case pack(pdg::Dbar_z, pdg::pi_m): {  // Same xsec for charge conjugation.
+      sig_inel = Dzeropiplus_Dpluspizero(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::pi_z):
+    case pack(pdg::Dbar_z, pdg::pi_z): {  // Same xsec for charge conjugation.
+      sig_inel = Dzeropizero_Dpluspiminus(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, pdg::pi_m):
+    case pack(pdg::D_m, pdg::pi_p): {  // Same xsec for charge conjugation.
+      sig_inel = Dpluspiminus_Dzeropizero(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, pdg::pi_z):
+    case pack(pdg::D_m, pdg::pi_z): {  // Same xsec for charge conjugation.
+      sig_inel = Dpluspizero_Dzeropiplus(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::pi_m):
+    case pack(pdg::Dbar_z, pdg::pi_p):
+    case pack(pdg::D_p, pdg::pi_p):
+    case pack(pdg::D_m, pdg::pi_m): {
+      // These combinations can only scatter elastically.
+      return 0.;
+    }
+    default:
+      throw_xsec_is_not_implemented(incoming_particles_[0],
+                                    incoming_particles_[1], __func__);
+  }
+
+  if (sig_inel < 0.) {
+    throw_xsec_is_negative(sqrt_s_, sig_inel, incoming_particles_[0],
+                           incoming_particles_[1], __func__);
+  } else {
+    return sig_inel;
+  }
 }
 
 CollisionBranchList CrossSections::Dpi_xx(
