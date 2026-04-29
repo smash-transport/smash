@@ -268,8 +268,8 @@ inline ExperimentParameters default_parameters(
       false,  // do weak decays
       true,   // decay initial particles
       DileptonBremsPionFormFactor::Off,  // no form factor
-      SpinInteractionType::Off,      // no spin interactions
-      std::nullopt                   // use monash tune, not known
+      SpinInteractionType::Off,          // no spin interactions
+      std::nullopt                       // use monash tune, not known
   };
 }
 
