@@ -25,13 +25,14 @@ static constexpr int LScatterAction = LogArea::ScatterAction::id;
 /** The implementation of the BremsstrahlungActionDilepton class as a special
  * ScatterAction that produces a dilepton pair through bremsstrahlung.
  * Currently, the only implemented process is the n+p dilepton bremsstrahlung.
- * The final state particles are not further propagated, only written to the 
+ * The final state particles are not further propagated, only written to the
  * dilepton output.
  */
 
 BremsstrahlungActionDilepton::BremsstrahlungActionDilepton(
     const ParticleList &in, const double time,
-    const double hadronic_cross_section_input, DileptonBremsPionFormFactor ff_type)
+    const double hadronic_cross_section_input,
+    DileptonBremsPionFormFactor ff_type)
     : ScatterAction(in[0], in[1], time),
       reac_(dilepton_brems_reaction_type(in)),
       hadronic_cross_section_(hadronic_cross_section_input),
@@ -118,7 +119,7 @@ void BremsstrahlungActionDilepton::generate_final_state() {
         << " entries. It should however have 1.";
     throw std::runtime_error("");
   }
-  
+
   auto *proc = collision_processes_dilepton_bremsstrahlung_[0].get();
 
   outgoing_particles_ = proc->particle_list();
@@ -208,6 +209,9 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   // This differs from the treatment in BremsstrahlungActionPhoton (photons).
   weight_ = W_M * W_q * W_Omega / hadronic_cross_section_;
 
+  weight_ *= incoming_particles_[0].xsec_scaling_factor() *
+             incoming_particles_[1].xsec_scaling_factor();
+
   // Set positions and boost to computational frame
   for (auto &new_particle : outgoing_particles_) {
     new_particle.set_formation_time(time_of_execution_);
@@ -296,10 +300,11 @@ double BremsstrahlungActionDilepton::pion_em_form_factor_sq(
       // In case no form factor should be applied.
       return 1.0;
     default:
-      throw std::runtime_error("Problem in "
-             "BremsstrahlungActionDilepton::pion_em_form_factor_sq().\n"
-             "Form factor type not recognized. Check the "
-             "DileptonBremsPionFormFactor enum.");
+      throw std::runtime_error(
+          "Problem in "
+          "BremsstrahlungActionDilepton::pion_em_form_factor_sq().\n"
+          "Form factor type not recognized. Check the "
+          "DileptonBremsPionFormFactor enum.");
   }
 }
 

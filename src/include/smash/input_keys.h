@@ -3920,9 +3920,10 @@ struct InputKeys {
    * \see_key{key_CT_dileptons_pion_form_factor_}
    */
   inline static const Key<DileptonBremsPionFormFactor>
-      collTerm_dileptons_pion_form_factor{InputSections::c_dileptons + "Pion_Form_Factor",
-                                     DileptonBremsPionFormFactor::Off,
-                                     {"3.4"}};
+      collTerm_dileptons_pion_form_factor{
+          InputSections::c_dileptons + "Pion_Form_Factor",
+          DileptonBremsPionFormFactor::Off,
+          {"3.4"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
