@@ -171,7 +171,7 @@ struct ExperimentParameters {
   /**
    * Setting the specific form factor for dilepton bremsstrahlung (optional).
    */
-  DileptonBremsFormFactor dilepton_brems_form_factor_type;
+  DileptonBremsPionFormFactor dilepton_brems_pion_form_factor_type;
 
   /**
    * Whether to include spin interactions.

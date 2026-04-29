@@ -108,10 +108,6 @@ constexpr double fine_structure = 7.2973525698e-3;
 /// Elementary electric charge in natural units, approximately 0.3
 const double elementary_charge = std::sqrt(fine_structure * 4 * M_PI);
 
-/// Lambda² constant for FF2 parametrization of pion electromagnetic form factor
-/// (Shyam & Mosel 2010) in GeV².
-constexpr double lambda_sq_FF2 = 1.9;
-
 /**
  * The maximum value of the random seed used in PYTHIA.
  */

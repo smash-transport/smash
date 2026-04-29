@@ -12,7 +12,6 @@
 #include <complex>
 #include <string>
 
-#include "constants.h"
 #include "macros.h"
 #include "pdgcode.h"
 #include "pdgcode_constants.h"
@@ -151,7 +150,7 @@ inline double form_factor_delta([[maybe_unused]] double m) { return 3.12; }
  * for the internal pion propagator in p n -> p n e⁺ e⁻ bremsstrahlung.
  *
  * FF1: pure vector-meson dominance, direct ρ⁰ coupling
- * FF2: mixed direct-quark + ρ⁰ coupling (Shyam & Mosel 2010, FF2)
+ * FF2: mixed direct-quark + ρ⁰ coupling (\iref{Shyam:2010vr}, FF2)
  *
  * \param M_sq  Invariant dilepton mass squared M² [GeV²]
  * \param m_rho ρ⁰ pole mass [GeV]
@@ -167,6 +166,8 @@ inline double pion_em_form_factor_sqr_FF1(double M_sq, double m_rho,
 
 inline double pion_em_form_factor_sqr_FF2(double M_sq, double m_rho,
                                           double Gamma_rho) {
+  /// Lambda² constant (\iref{Shyam:2010vr}, FF2) in GeV².
+  constexpr double lambda_sq_FF2 = 1.9;
   const double m_rho_sq = m_rho * m_rho;
   const double Gamma_safe = std::max(Gamma_rho, really_small);
   const std::complex<double> denom(m_rho_sq - M_sq, -m_rho * Gamma_safe);

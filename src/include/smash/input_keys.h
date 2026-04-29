@@ -3896,9 +3896,9 @@ struct InputKeys {
    * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_bremsstrahlung_,Bremsstrahlung,bool,false}
    *
-   * Whether or not to enable dilepton production from NN bremsstrahlung.
+   * Whether or not to enable dilepton production from np bremsstrahlung.
    * The approach follows the meson-exchange approximation depicted in
-   * Shyam,Mosel (2010).
+   * \iref{Shyam:2010vr}.
    */
   /**
    * \see_key{key_CT_dileptons_bremsstrahlung_}
@@ -3908,19 +3908,20 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
-   * \optional_key{key_CT_dileptons_form_factor_,Form_Factor,string,"Off"}
+   * \optional_key{key_CT_dileptons_pion_form_factor_,Pion_Form_Factor,string,
+   * "Off"}
    *
    * - `"Off"` &rarr; Implicitly using a factor of 1.
    * - `"FF1"` &rarr; Photon couples to pion direclty via \f$\rho_0\f$ meson.
-   * - `"FF2"` &rarr; Photon couples 50% directly to intrinsic quark structure
-   * of pion and 50% indirectly via \f$\rho_0\f$ meson.
+   * - `"FF2"` &rarr; Photon couples 40% directly to intrinsic quark structure
+   * of pion and 60% indirectly via \f$\rho_0\f$ meson.
    */
   /**
-   * \see_key{key_CT_dileptons_form_factor_}
+   * \see_key{key_CT_dileptons_pion_form_factor_}
    */
-  inline static const Key<DileptonBremsFormFactor>
-      collTerm_dileptons_form_factor{InputSections::c_dileptons + "Form_Factor",
-                                     DileptonBremsFormFactor::Off,
+  inline static const Key<DileptonBremsPionFormFactor>
+      collTerm_dileptons_pion_form_factor{InputSections::c_dileptons + "Pion_Form_Factor",
+                                     DileptonBremsPionFormFactor::Off,
                                      {"3.4"}};
 
   /*!\Userguide
@@ -7701,7 +7702,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<FermiMotion>>,
-      std::reference_wrapper<const Key<DileptonBremsFormFactor>>,
+      std::reference_wrapper<const Key<DileptonBremsPionFormFactor>>,
       std::reference_wrapper<const Key<FieldDerivativesMode>>,
       std::reference_wrapper<const Key<FluidizableProcessesBitSet>>,
       std::reference_wrapper<const Key<FluidizationType>>,
@@ -7898,7 +7899,7 @@ General:
      Dileptons:
          Decays: True
          Bremsstrahlung: True
-         Form Factor Type: "FF1"
+         Pion_Form_Factor: "FF1"
  \endverbatim
  *
  * <hr>

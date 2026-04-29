@@ -2479,7 +2479,7 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     // factor.
     BremsstrahlungActionDilepton dilepton_brems_act(
         action.incoming_particles(), action_time, action.get_total_weight(),
-        parameters_.dilepton_brems_form_factor_type);
+        parameters_.dilepton_brems_pion_form_factor_type);
 
     // Add a dummy process to the dilepton bremsstrahlung action. The
     // only important thing is that its cross section is equal to the cross

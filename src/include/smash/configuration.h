@@ -1088,20 +1088,20 @@ class Configuration {
     /**
      * Set form factor from configuration values.
      *
-     * \return Dilepton form factor type.
+     * \return Dilepton pion form factor type.
      * \throw IncorrectTypeInAssignment in case a form factor value that is
      * not available is provided as a configuration value.
      */
-    operator DileptonBremsFormFactor() const {
+    operator DileptonBremsPionFormFactor() const {
       const std::string s = operator std::string();
       if (s == "FF1") {
-        return DileptonBremsFormFactor::FF1;
+        return DileptonBremsPionFormFactor::FF1;
       }
       if (s == "FF2") {
-        return DileptonBremsFormFactor::FF2;
+        return DileptonBremsPionFormFactor::FF2;
       }
       if (s == "Off") {
-        return DileptonBremsFormFactor::Off;
+        return DileptonBremsPionFormFactor::Off;
       }
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) +

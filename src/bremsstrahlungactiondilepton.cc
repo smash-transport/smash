@@ -9,7 +9,6 @@
 
 #include "smash/bremsstrahlungactiondilepton.h"  // corresponding main header
 
-#include "smash/constants.h"    // for the lambda² value in the form factors
 #include "smash/formfactors.h"  // for the form factors
 #include "smash/outputinterface.h"
 #include "smash/parametrizations.h"
@@ -24,21 +23,20 @@ namespace smash {
 static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
 /** The implementation of the BremsstrahlungActionDilepton class as a special
- * ScatterAction that produces a dilepton pair through bremsstrahlung. The final
- * state particles are not further propagated, only written to the dilepton
- * output.
+ * ScatterAction that produces a dilepton pair through bremsstrahlung.
+ * Currently, the only implemented process is the n+p dilepton bremsstrahlung.
+ * The final state particles are not further propagated, only written to the 
+ * dilepton output.
  */
 
-// ── Constructor ─────────────────────────────────────────────────────────────
 BremsstrahlungActionDilepton::BremsstrahlungActionDilepton(
     const ParticleList &in, const double time,
-    const double hadronic_cross_section_input, DileptonBremsFormFactor ff_type)
+    const double hadronic_cross_section_input, DileptonBremsPionFormFactor ff_type)
     : ScatterAction(in[0], in[1], time),
       reac_(dilepton_brems_reaction_type(in)),
       hadronic_cross_section_(hadronic_cross_section_input),
       form_factor_type_(ff_type) {}
 
-// ── Reaction type ───────────────────────────────────────────────────────────
 BremsstrahlungActionDilepton::ReactionType
 BremsstrahlungActionDilepton::dilepton_brems_reaction_type(
     const ParticleList &in) {
@@ -60,11 +58,6 @@ BremsstrahlungActionDilepton::dilepton_brems_reaction_type(
   }
 }
 
-// ── Dummy hadronic process ───────────────────────────────────────────────
-// Same pattern as BremsstrahlungActionPhoton::add_dummy_hadronic_process():
-// The hadronic scatteraction (n+p elastic) is registered as a dummy to
-// satisfy the ScatterAction machinery, while the actual dilepton emission
-// is handled otherwise and does not rely on this machinery.
 void BremsstrahlungActionDilepton::add_dummy_hadronic_process(
     double reaction_cross_section) {
   CollisionBranchPtr dummy_process = std::make_unique<CollisionBranch>(
@@ -101,7 +94,6 @@ void BremsstrahlungActionDilepton::add_dummy_hadronic_process(
                                  cross_section_dilepton_bremsstrahlung_);
 }
 
-// ── Perform dilepton bremsstrahlung ────────────────────────────────────────
 void BremsstrahlungActionDilepton::perform_dilepton_bremsstrahlung(
     const OutputsList &outputs) {
   // Only one photon is created per event.
@@ -115,7 +107,6 @@ void BremsstrahlungActionDilepton::perform_dilepton_bremsstrahlung(
   }
 }
 
-// ── Main: generate_final_state ───────────────────────────────────────────
 void BremsstrahlungActionDilepton::generate_final_state() {
   // Sanity check: exactly one process branch expected
   if (collision_processes_dilepton_bremsstrahlung_.size() != 1) {
@@ -127,7 +118,7 @@ void BremsstrahlungActionDilepton::generate_final_state() {
         << " entries. It should however have 1.";
     throw std::runtime_error("");
   }
-  // Get the process branch and define the outgoing particles from it.
+  
   auto *proc = collision_processes_dilepton_bremsstrahlung_[0].get();
 
   outgoing_particles_ = proc->particle_list();
@@ -139,9 +130,6 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   const double m_n = outgoing_particles_[1].type().mass();  // neutron
   const double m_e = outgoing_particles_[2].type().mass();  // electron mass
 
-  // ── Step 1: Sample invariant mass M of dilepton pair ─────────────────────
-  // M runs from the kinematic threshold 2m_e up to the maximum value
-  // allowed by 3-body kinematics: M_max = sqrt(s) - m_p - m_n.
   double delta_M;
   const double M_min = 2.0 * m_e;
   const double M_max = sqrt_s() - m_p - m_n;
@@ -156,7 +144,6 @@ void BremsstrahlungActionDilepton::generate_final_state() {
     delta_M = M_max - M_min;
   }
 
-  // ── Step 2: Sample dilepton 3-momentum q ────────────────────────
   // After fixing M, the momentum q depends on the CM energy sqrt_s.
   // There is no lower limit beside being positive, but the upper limit is given
   // by the kinematics of the 3-body final state.
@@ -174,12 +161,9 @@ void BremsstrahlungActionDilepton::generate_final_state() {
     return;
   }
 
-  // ── Step 3: Sample polar and azimuthal angles of dilepton in pn-CM frame
-  // Uniform in [0, pi]; azimuthal angle phi uniform in [0, 2pi].
   theta_ = random::uniform(0.0, M_PI);
   const double phi = random::uniform(0.0, twopi);
 
-  // ── Step 4: Construct dilepton 4-momentum in pn-CM frame ──────────────
   // The virtual photon carries 4-momentum p_ll with:
   // |p_ll| = q, E_ll = sqrt(q²+M²), direction (theta, phi)
   const double E_ll = std::sqrt(q_ * q_ + M_ * M_);
@@ -191,11 +175,9 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   const FourVector total_momentum =
       incoming_particles_[0].momentum() + incoming_particles_[1].momentum();
   // Calculate the recoil for the (pn)' subsystem to check whether there is
-  // enough energy to create the outgoing pn pair. This is introduced compared
-  // to the photon case to ensure that the reaction is physically possible.
+  // enough energy to create the outgoing pn pair.
   const FourVector p_recoil = total_momentum - p_ll;
 
-  // ── Step 5: "Decay" of subsystems into e⁺e⁻ ───────────────────────────
   // If the invariant mass of (pn)' is smaller than the rest masses of p and n,
   // the sampling check fails and the function returns false, as the action is
   // energetically not possible. Hence, set the weight to 0 and return.
@@ -214,9 +196,7 @@ void BremsstrahlungActionDilepton::generate_final_state() {
     return;
   }
 
-  // ── Step 6: Compute weight ───────────────────────────────────────────
   // Integrand is dsigma/(dM dq dtheta dphi) evaluated at the sampled point.
-  // Sample phi uniformly in [0, 2pi] and theta uniformly in [0,pi]
   const double dsigma_dM_dq_dOmega = diff_xs_pn_dilepton(M_, q_, sqrt_s());
   const double W_M = dsigma_dM_dq_dOmega * delta_M;
   const double W_q = delta_q;
@@ -237,10 +217,6 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   }
 }
 
-// ── In step 5: "Decay" of subsystem ──────────────────────────────────
-// This function assumes a 2-body decay of a parent particle into
-// two daughters. Function type is bool as it returns false if the decay
-// is not kinematically possible, true otherwise.
 bool BremsstrahlungActionDilepton::sample_2body_isotropic(
     const FourVector &p_parent, ParticleData &daughter1,
     ParticleData &daughter2) {
@@ -264,21 +240,11 @@ bool BremsstrahlungActionDilepton::sample_2body_isotropic(
   daughter1.boost_momentum(-beta);
   daughter2.boost_momentum(-beta);
 
-  // If the function has not returned false until here, the decay is
-  // kinematically possible and the function can return true.
   return true;
 }
 
-// ── Differential cross section: SPA + PEFF ────────────────────────────────
-//
 double BremsstrahlungActionDilepton::diff_xs_pn_dilepton(
     const double M, const double q, const double sqrts) const {
-  // M: invariant mass of dilepton pair
-  // q: 3-momentum of dilepton in pn-CM frame
-  // E = sqrt(q²+M²): dilepton energy in pn-CM frame
-  // s: Mandelstam-s of pn collision
-  // m_p: proton mass
-  // m_n: neutron mass
   const double s = sqrts * sqrts;
   const double m_p = outgoing_particles_[0].type().mass();  // proton
   const double m_n = outgoing_particles_[1].type().mass();  // neutron
@@ -309,45 +275,36 @@ double BremsstrahlungActionDilepton::diff_xs_pn_dilepton(
   return diff_xs;
 }
 
-// ── Helper function R_2(s) ─────────────────────────────────────────────
 double BremsstrahlungActionDilepton::R_2_helper(const double s) const {
   const double m_p = outgoing_particles_[0].type().mass();  // proton
   const double m_n = outgoing_particles_[1].type().mass();  // neutron
   const double m_pn = m_p + m_n;
-  if (s <= (m_pn * m_pn)) {
-    return 0.0;
-  } else {
-    return std::sqrt(1.0 - (m_pn * m_pn) / s);
-  }
+  return (s < (m_pn * m_pn)) ? 0.0 : std::sqrt(1.0 - (m_pn * m_pn) / s);
 }
 
-// ── Form factor ───────────────────────────────────────────────────────
 double BremsstrahlungActionDilepton::pion_em_form_factor_sq(
     const double M_sq) const {
   const double m_rho = ParticleType::find(pdg::rho_z).mass();
   const double Gamma = gamma_rho(M_sq);
 
   switch (form_factor_type_) {
-    case DileptonBremsFormFactor::FF1:
+    case DileptonBremsPionFormFactor::FF1:
       return pion_em_form_factor_sqr_FF1(M_sq, m_rho, Gamma);
-    case DileptonBremsFormFactor::FF2:
+    case DileptonBremsPionFormFactor::FF2:
       return pion_em_form_factor_sqr_FF2(M_sq, m_rho, Gamma);
-    case DileptonBremsFormFactor::Off:
+    case DileptonBremsPionFormFactor::Off:
       // In case no form factor should be applied.
       return 1.0;
     default:
-      logg[LScatterAction].fatal()
-          << "Problem in "
+      throw std::runtime_error("Problem in "
              "BremsstrahlungActionDilepton::pion_em_form_factor_sq().\n"
              "Form factor type not recognized. Check the "
-             "DileptonBremsFormFactor enum.";
-      throw std::runtime_error("");
+             "DileptonBremsPionFormFactor enum.");
   }
 }
 
-// ── Energy-dependent Gamma_rho ────────────────────────────────────────
 double BremsstrahlungActionDilepton::gamma_rho(double M_sq) const {
-  // The energy-dependent width as provided in Brown et.al (1986).
+  // The energy-dependent width as provided in \iref{Brown:1985gu}.
   const double m_rho = ParticleType::find(pdg::rho_z).mass();
   const double m_rho_sq = ParticleType::find(pdg::rho_z).mass_sqr();
   const double m_pi_sq = ParticleType::find(pdg::pi_z).mass_sqr();

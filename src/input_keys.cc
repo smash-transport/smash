@@ -152,7 +152,7 @@ const std::vector<InputKeys::key_references_variant>& InputKeys::all_keys() {
       std::cref(collTerm_stringParam_pythiaSettings),
       std::cref(collTerm_dileptons_decays),
       std::cref(collTerm_dileptons_bremsstrahlung),
-      std::cref(collTerm_dileptons_form_factor),
+      std::cref(collTerm_dileptons_pion_form_factor),
       std::cref(collTerm_photons_twoToTwoScatterings),
       std::cref(collTerm_photons_bremsstrahlung),
       std::cref(collTerm_photons_fractionalPhotons),
