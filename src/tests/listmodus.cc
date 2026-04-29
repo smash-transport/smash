@@ -598,7 +598,7 @@ TEST(try_create_particle_with_spin_func) {
       true,  // force decays at the end
       false,
       true,
-      DileptonBremsFormFactor::Off,
+      DileptonBremsPionFormFactor::Off,
       SpinInteractionType::On,
       std::nullopt};
 

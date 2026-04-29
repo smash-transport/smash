@@ -12,6 +12,7 @@
 #include <complex>
 #include <string>
 
+#include "constants.h"
 #include "macros.h"
 #include "pdgcode.h"
 #include "pdgcode_constants.h"
