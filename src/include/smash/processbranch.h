@@ -82,9 +82,15 @@ enum class ProcessType {
   /// \see_process_type{45}
   StringSoftNonDiffractive = 45,
   /// \see_process_type{46}
-  StringHard = 46,
-  /// \see_process_type{47}
-  FailedString = 47,
+  StringHardNonDiffractive = 46,
+  /// \see_process_type{48}
+  StringHardSingleDiffractiveAX = 48,
+  /// \see_process_type{49}
+  StringHardSingleDiffractiveXB = 49,
+  /// \see_process_type{50}
+  StringHardDoubleDiffractive = 50,
+  /// \see_process_type{51}
+  FailedString = 51,
   /// \see_process_type{90}
   Freeforall = 90
 };
@@ -115,7 +121,10 @@ inline bool is_valid_process_type(int v) {
     case ProcessType::StringSoftDoubleDiffractive:
     case ProcessType::StringSoftAnnihilation:
     case ProcessType::StringSoftNonDiffractive:
-    case ProcessType::StringHard:
+    case ProcessType::StringHardNonDiffractive:
+    case ProcessType::StringHardSingleDiffractiveAX:
+    case ProcessType::StringHardSingleDiffractiveXB:
+    case ProcessType::StringHardDoubleDiffractive:
     case ProcessType::FailedString:
     case ProcessType::Freeforall:
       return true;
@@ -127,6 +136,18 @@ inline bool is_valid_process_type(int v) {
  * \param[in] p The process type
  */
 bool is_string_soft_process(ProcessType p);
+
+/**
+ * Check if a given process type is a hard string excitation
+ * \param[in] p The process type
+ */
+bool is_string_hard_process(ProcessType p);
+
+/**
+ * Check if a given process type is a string excitation
+ * \param[in] p The process type
+ */
+bool is_string_process(ProcessType p);
 
 /**
  * \ingroup logging

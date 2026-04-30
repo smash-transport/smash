@@ -21,6 +21,7 @@
 #include "constants.h"
 #include "logging.h"
 #include "particledata.h"
+#include "smash/processbranch.h"
 
 namespace smash {
 static constexpr int LPythia = LogArea::Pythia::id;
@@ -606,7 +607,7 @@ class StringProcess {
    * is based on PYTHIA 8 with partonic showers and interactions.
    * \return whether the process is successfully implemented.
    */
-  bool next_NDiffHard();
+  bool next_Hard(ProcessType type);
   /**
    * Baryon-antibaryon annihilation process
    * Based on what UrQMD \iref{Bass:1998ca}, \iref{Bleicher:1999xi} does,

@@ -15,6 +15,7 @@
 
 #include "smash/kinematics.h"
 #include "smash/pow.h"
+#include "smash/processbranch.h"
 #include "smash/random.h"
 
 namespace smash {
@@ -676,7 +677,7 @@ void StringProcess::tag_leading_hadron(Pythia8::Event& event,
 }
 
 // hard non-diffractive
-bool StringProcess::next_NDiffHard() {
+bool StringProcess::next_Hard(ProcessType type) {
   NpartFinal_ = 0;
   final_state_.clear();
 
@@ -719,6 +720,9 @@ bool StringProcess::next_NDiffHard() {
   if (hard_map_.count(idAB) == 0) {
     hard_map_[idAB] = std::make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
     hard_map_[idAB]->readString("SoftQCD:nonDiffractive = on");
+    hard_map_[idAB]->readString("SoftQCD:singleDiffractiveXB = on");
+    hard_map_[idAB]->readString("SoftQCD:singleDiffractiveAX = on");
+    hard_map_[idAB]->readString("SoftQCD:doubleDiffractive = on");
     hard_map_[idAB]->readString("MultipartonInteractions:pTmin = 1.5");
     hard_map_[idAB]->readString("HadronLevel:all = off");
 
@@ -752,7 +756,38 @@ bool StringProcess::next_NDiffHard() {
   logg[LPythia].debug("Pythia hard event created");
   // we update the collision energy in the CM frame
   hard_map_[idAB]->setKinematics(sqrtsAB_);
-  bool final_state_success = hard_map_[idAB]->next();
+
+  bool final_state_success = false;
+  /* Hard-process codes follow the Pythia convention:
+   * https://www.pythia.org/latest-manual/QCDSoftProcesses.html
+   *
+   * Note: Pythia effectively classifies processes by the last digit
+   * of the code (e.g. 101 -> 1, 102 -> 2, ...).
+   *
+   * The terminology "soft" vs "hard" is somewhat misleading:
+   * Pythia's SoftQCD corresponds to a semi-perturbative (semi-hard)
+   * model valid down to low pT, while HardQCD represents purely
+   * perturbative processes and is not applicable over the full pT range.
+   */
+
+  switch (type) {
+    case ProcessType::StringHardNonDiffractive:
+      final_state_success = hard_map_[idAB]->next(1);
+      break;
+    case ProcessType::StringHardDoubleDiffractive:
+      final_state_success = hard_map_[idAB]->next(5);
+      break;
+    case ProcessType::StringHardSingleDiffractiveAX:
+      final_state_success = hard_map_[idAB]->next(4);
+      break;
+    case ProcessType::StringHardSingleDiffractiveXB:
+      final_state_success = hard_map_[idAB]->next(3);
+    default:
+      logg[LPythia].error("Unknown string process required.");
+      final_state_success = false;
+      break;
+  }
+
   logg[LPythia].debug("Pythia final state computed, success = ",
                       final_state_success);
   if (!final_state_success) {
@@ -885,6 +920,7 @@ bool StringProcess::next_NDiffHard() {
       for (int i = 0; i < event_hadron.size(); i++) {
         if (event_hadron[i].isFinal()) {
           int pythia_id = event_hadron[i].id();
+          const int pythia_status = event_hadron[i].status();
           logg[LPythia].debug("PDG ID from Pythia: ", pythia_id);
           /* K_short and K_long need to be converted to K0
            * since SMASH only knows K0 */
@@ -908,8 +944,12 @@ bool StringProcess::next_NDiffHard() {
                                                    new_intermediate_particles);
 
             auto& p = new_intermediate_particles.back();
-            p.set_cross_section_scaling_factor(0.0);
-
+            // Outgoing elastically scattered//
+            if (pythia_status == 14) {
+              p.set_cross_section_scaling_factor(1.0);
+            } else {
+              p.set_cross_section_scaling_factor(0.0);
+            }
             if (is_open_string && has_leading_partons && found_ptype) {
               if (is_leading_from_quark(event_hadron[i])) {
                 p.set_cross_section_scaling_factor(0.5 * additional_xsec_supp_);

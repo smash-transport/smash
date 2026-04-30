@@ -514,7 +514,7 @@ struct InputSections {
  * \page doxypage_input_conf_ct_hard_string_transition
  *
  * The subsection `Hard_String_Transition` of the `Collision_Term` section
- * controls how the non-diffractive string excitation is split into soft and
+ * controls how the string excitations are split into soft and
  * hard components.
  *
  * The transition mode is selected via the `Mode` key:
@@ -533,7 +533,8 @@ struct InputSections {
  *   \f$\sigma_{\mathrm{ND,hard}} = \sigma_{\mathrm{ND}} -
  *   \sigma_{\mathrm{ND,soft}}\f$.
  * - `Custom_Range`: use a smooth, user-defined transition from soft to hard
- *   string excitation as a function of the collision energy.
+ *   string excitation as a function of the collision energy. Furthermore,
+ *   this enables Pythia to do hard diffraction.
  *
  * For `Custom_Range`, the transition is controlled by `Start_Energy` and
  * `End_Energy` (in \f$\sqrt{s}\f$ measured in GeV). Below this range only soft

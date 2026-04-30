@@ -22,7 +22,16 @@ bool is_string_soft_process(ProcessType p) {
          p == ProcessType::StringSoftAnnihilation ||
          p == ProcessType::StringSoftNonDiffractive;
 }
+bool is_string_hard_process(ProcessType p) {
+  return p == ProcessType::StringHardSingleDiffractiveAX ||
+         p == ProcessType::StringHardSingleDiffractiveXB ||
+         p == ProcessType::StringHardDoubleDiffractive ||
+         p == ProcessType::StringHardNonDiffractive;
+}
 
+bool is_string_process(ProcessType type) {
+  return is_string_soft_process(type) || is_string_hard_process(type);
+}
 ParticleList ProcessBranch::particle_list() const {
   ParticleList l;
   l.reserve(particle_number());
@@ -63,8 +72,13 @@ std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
     os << "BBbar";
   } else if (ptype == ProcessType::StringSoftNonDiffractive) {
     os << "non-diff";
-  } else if (ptype == ProcessType::StringHard) {
-    os << "hard";
+  } else if (ptype == ProcessType::StringHardNonDiffractive) {
+    os << "hard non-diff";
+  } else if (ptype == ProcessType::StringHardSingleDiffractiveXB ||
+             ptype == ProcessType::StringHardSingleDiffractiveAX) {
+    os << "hard 1-diff";
+  } else if (ptype == ProcessType::StringHardDoubleDiffractive) {
+    os << "hard double-diff";
   } else if (ptype == ProcessType::TwoToOne || ptype == ProcessType::TwoToTwo ||
              ptype == ProcessType::TwoToThree ||
              ptype == ProcessType::TwoToFour ||
@@ -119,7 +133,10 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
     case ProcessType::StringSoftNonDiffractive:
       os << "Soft String Excitation";
       break;
-    case ProcessType::StringHard:
+    case ProcessType::StringHardNonDiffractive:
+    case ProcessType::StringHardSingleDiffractiveAX:
+    case ProcessType::StringHardSingleDiffractiveXB:
+    case ProcessType::StringHardDoubleDiffractive:
       os << "Hard String via Pythia";
       break;
     case ProcessType::Decay:
