@@ -183,8 +183,8 @@ class StringProcess {
    * \param[in]     pd     Particle data table used for quark/diquark
    * identification.
    */
-  void tag_leading_hadron(Pythia8::Event &event,
-                          const Pythia8::ParticleData &pd);
+  void tag_leading_hadron(Pythia8::Event& event,
+                          const Pythia8::ParticleData& pd);
 
   /**
    * Compute flags identifying beam valence partons (quarks or diquarks)
@@ -204,7 +204,7 @@ class StringProcess {
    * \param[in,out] pythia Pythia instance containing the event to inspect.
    * \return Per-particle flags for beam valence (leading) partons.
    */
-  std::vector<bool> compute_beam_valence_flags(Pythia8::Pythia &pythia);
+  std::vector<bool> compute_beam_valence_flags(Pythia8::Pythia& pythia);
 
   /**
    * Custom Pythia status codes used to mark leading/valence
@@ -239,7 +239,7 @@ class StringProcess {
    * \param[in] end  String endpoint particle (quark or diquark).
    * \return Integer status code corresponding to the appropriate LeadingStatus.
    */
-  inline int leading_hadron_status_from_endpoint(const Pythia8::Particle &end) {
+  inline int leading_hadron_status_from_endpoint(const Pythia8::Particle& end) {
     return static_cast<int>(end.isDiquark()
                                 ? LeadingStatus::FROM_LEADING_DIQUARK
                                 : LeadingStatus::FROM_LEADING_QUARK);
@@ -251,7 +251,7 @@ class StringProcess {
    * \param[in] p  Pythia particle.
    * \return True if p has statusAbs() equal to LeadingStatus::LEADING_PARTON.
    */
-  inline bool is_leading_parton(const Pythia8::Particle &p) {
+  inline bool is_leading_parton(const Pythia8::Particle& p) {
     return p.statusAbs() == static_cast<int>(LeadingStatus::LEADING_PARTON);
   }
 
@@ -262,7 +262,7 @@ class StringProcess {
    * \return True if p has statusAbs() equal to
    * LeadingStatus::FROM_LEADING_QUARK.
    */
-  inline bool is_leading_from_quark(const Pythia8::Particle &p) {
+  inline bool is_leading_from_quark(const Pythia8::Particle& p) {
     return p.statusAbs() == static_cast<int>(LeadingStatus::FROM_LEADING_QUARK);
   }
 
@@ -273,7 +273,7 @@ class StringProcess {
    * \return True if p has statusAbs() equal to
    * LeadingStatus::FROM_LEADING_DIQUARK.
    */
-  inline bool is_leading_from_diquark(const Pythia8::Particle &p) {
+  inline bool is_leading_from_diquark(const Pythia8::Particle& p) {
     return p.statusAbs() ==
            static_cast<int>(LeadingStatus::FROM_LEADING_DIQUARK);
   }
@@ -286,7 +286,7 @@ class StringProcess {
    * \param[in] p  Pythia particle.
    * \return True if p is tagged as leading-from-quark or leading-from-diquark.
    */
-  inline bool is_leading(const Pythia8::Particle &p) {
+  inline bool is_leading(const Pythia8::Particle& p) {
     return is_leading_from_quark(p) || is_leading_from_diquark(p);
   }
 
@@ -328,67 +328,17 @@ class StringProcess {
  public:
   // clang-format off
 
-  /**
-   * Constructor, initializes pythia. Should only be called once.
-   * \param[in] string_tension value of #kappa_tension_string_ [GeV/fm]
-   * \param[in] time_formation value of #time_formation_const_ [fm]
-   * \param[in] gluon_beta value of #pow_fgluon_beta_
-   * \param[in] gluon_pmin value of #pmin_gluon_lightcone_
-   * \param[in] quark_alpha value of #pow_fquark_alpha_
-   * \param[in] quark_beta value of #pow_fquark_beta_
-   * \param[in] strange_supp strangeness suppression factor
-   *        (StringFlav:probStoUD) in fragmentation
-   * \param[in] diquark_supp diquark suppression factor
-   *        (StringFlav:probQQtoQ) in fragmentation
-   * \param[in] sigma_perp value of #sigma_qperp_ [GeV]
-   * \param[in] stringz_a_leading Parameter a in Lund fragmentation function
-   *            for leading baryons.
-   * \param[in] stringz_b_leading Parameter b in Lund fragmentation function
-   *            for leading baryons.
-   * \param[in] stringz_a parameter (StringZ:aLund)
-   *        for the fragmentation function
-   * \param[in] stringz_b parameter (StringZ:bLund)
-   *        for the fragmentation function [GeV^-2]
-   * \param[in] string_sigma_T transverse momentum spread (StringPT:sigma)
-   *        in fragmentation [GeV]
-   * \param[in] factor_t_form to be multiplied to soft string formation times
-   * \param[in] mass_dependent_formation_times Whether the formation times of
-   *            string fragments should depend on their mass.
-   * \param[in] prob_proton_to_d_uu Probability of a nucleon to be split into
-   *            the quark it contains once and a diquark another flavour.
-   * \param[in] separate_fragment_baryon whether to use a separate
-   *            fragmentation function for leading baryons in non-diffractive
-   *            string processes.
-   * \param[in] popcorn_rate parameter (StringFlav:popcornRate)
-   *        to determine the production rate of popcorn mesons from
-   *        the diquark end of a string.
-   * \param[in] use_monash_tune whether to use the monash tune for all string
-   *            processes. This is recommended if one runs smash at LHC
-   *            energies
-   * \param[in] additional_xsec_supp factor to supress the unformed hadrons 
-   *            cross-sections.   
-   * \see StringProcess::common_setup_pythia(Pythia8::Pythia *,
-   *                     double, double, double, double, double)
-   * \see pythia8302/share/Pythia8/xmldoc/FlavourSelection.xml
-   * \see pythia8302/share/Pythia8/xmldoc/Fragmentation.xml
-   * \see pythia8302/share/Pythia8/xmldoc/MasterSwitches.xml
-   * \see pythia8302/share/Pythia8/xmldoc/MultipartonInteractions.xml
-   */
-  StringProcess(double string_tension, double time_formation,
-                double gluon_beta, double gluon_pmin,
-                double quark_alpha, double quark_beta,
-                double strange_supp, double diquark_supp,
-                double sigma_perp, double stringz_a_leading,
-                double stringz_b_leading, double stringz_a,
-                double stringz_b,  double string_sigma_T,
-                double factor_t_form,
-                bool mass_dependent_formation_times,
-                double prob_proton_to_d_uu,
-                bool separate_fragment_baryon, double popcorn_rate,
-                bool use_monash_tune,
-                double additional_xsec_supp);
+    /**
+     * Constructor, initializes PYTHIA. Should only be called once.
+     *
+     * All parameters are taken from \p config via Configuration::take.
+     *
+     * \param[in,out] config SMASH configuration object (keys are consumed)
+     */
 
-  /**
+
+    explicit StringProcess(Configuration &config);  /**
+   
    * Common setup of PYTHIA objects for soft and hard string routines
    * \param[out] pythia_in pointer to the PYTHIA object
    * \param[in] strange_supp strangeness suppression factor

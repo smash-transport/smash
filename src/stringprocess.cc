@@ -13,6 +13,8 @@
 #include <cmath>
 #include <limits>
 
+#include "smash/configuration.h"
+#include "smash/input_keys.h"
 #include "smash/kinematics.h"
 #include "smash/pow.h"
 #include "smash/processbranch.h"
@@ -20,44 +22,51 @@
 
 namespace smash {
 static constexpr int LOutput = LogArea::Output::id;
-
-StringProcess::StringProcess(
-    double string_tension, double time_formation, double gluon_beta,
-    double gluon_pmin, double quark_alpha, double quark_beta,
-    double strange_supp, double diquark_supp, double sigma_perp,
-    double stringz_a_leading, double stringz_b_leading, double stringz_a,
-    double stringz_b, double string_sigma_T, double factor_t_form,
-    bool mass_dependent_formation_times, double prob_proton_to_d_uu,
-    bool separate_fragment_baryon, double popcorn_rate, bool use_monash_tune,
-    double additional_xsec_supp)
-    : pmin_gluon_lightcone_(gluon_pmin),
-      pow_fgluon_beta_(gluon_beta),
-      pow_fquark_alpha_(quark_alpha),
-      pow_fquark_beta_(quark_beta),
-      sigma_qperp_(sigma_perp),
-      stringz_a_leading_(stringz_a_leading),
-      stringz_b_leading_(stringz_b_leading),
-      stringz_a_produce_(stringz_a),
-      stringz_b_produce_(stringz_b),
-      strange_supp_(strange_supp),
-      diquark_supp_(diquark_supp),
-      popcorn_rate_(popcorn_rate),
-      string_sigma_T_(string_sigma_T),
-      kappa_tension_string_(string_tension),
-      time_formation_const_(time_formation),
-      soft_t_form_(factor_t_form),
-      time_collision_(0.),
-      mass_dependent_formation_times_(mass_dependent_formation_times),
-      prob_proton_to_d_uu_(prob_proton_to_d_uu),
-      separate_fragment_baryon_(separate_fragment_baryon),
-      use_monash_tune_(use_monash_tune),
-      additional_xsec_supp_(additional_xsec_supp) {
+StringProcess::StringProcess(Configuration& config)
+    : pmin_gluon_lightcone_(
+          config.take(InputKeys::collTerm_stringParam_gluonPMin)),
+      pow_fgluon_beta_(config.take(InputKeys::collTerm_stringParam_gluonBeta)),
+      pow_fquark_alpha_(
+          config.take(InputKeys::collTerm_stringParam_quarkAlpha)),
+      pow_fquark_beta_(config.take(InputKeys::collTerm_stringParam_quarkBeta)),
+      sigma_qperp_(config.take(InputKeys::collTerm_stringParam_sigmaPerp)),
+      stringz_a_leading_(
+          config.take(InputKeys::collTerm_stringParam_stringZALeading)),
+      stringz_b_leading_(
+          config.take(InputKeys::collTerm_stringParam_stringZBLeading)),
+      stringz_a_produce_(config.take(InputKeys::collTerm_stringParam_stringZA)),
+      stringz_b_produce_(config.take(InputKeys::collTerm_stringParam_stringZB)),
+      strange_supp_(
+          config.take(InputKeys::collTerm_stringParam_strangeSuppression)),
+      diquark_supp_(
+          config.take(InputKeys::collTerm_stringParam_diquarkSuppression)),
+      popcorn_rate_(config.take(InputKeys::collTerm_stringParam_popcornRate)),
+      string_sigma_T_(
+          config.take(InputKeys::collTerm_stringParam_stringSigmaT)),
+      kappa_tension_string_(
+          config.take(InputKeys::collTerm_stringParam_stringTension)),
+      time_formation_const_(
+          config.take(InputKeys::collTerm_stringParam_formationTime)),
+      soft_t_form_(config.take(InputKeys::collTerm_stringParam_formTimeFactor)),
+      mass_dependent_formation_times_(config.take(
+          InputKeys::collTerm_stringParam_mDependentFormationTimes)),
+      prob_proton_to_d_uu_(
+          config.take(InputKeys::collTerm_stringParam_probabilityPToDUU)),
+      separate_fragment_baryon_(
+          config.take(InputKeys::collTerm_stringParam_separateFragmentBaryon)),
+      use_monash_tune_(
+          config.take(InputKeys::collTerm_stringParam_useMonashTune, false)),
+      additional_xsec_supp_(config.take(
+          InputKeys::collTerm_stringParam_unformedXsecSuppression)) {
   // setup and initialize pythia for fragmentation
   pythia_hadron_ = std::make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
   pythia_hadron_->readString("ProcessLevel:all = off");
-  common_setup_pythia(pythia_hadron_.get(), strange_supp, diquark_supp,
-                      popcorn_rate, stringz_a, stringz_b, string_sigma_T);
+  std::cout << time_formation_const_ << ", " << soft_t_form_ << ", "
+            << mass_dependent_formation_times_ << std::endl;
+  common_setup_pythia(pythia_hadron_.get(), strange_supp_, diquark_supp_,
+                      popcorn_rate_, stringz_a_produce_, stringz_b_produce_,
+                      string_sigma_T_);
 
   /* initialize PYTHIA */
   pythia_hadron_->init();
@@ -88,7 +97,6 @@ StringProcess::StringProcess(
 
   final_state_.clear();
 }
-
 void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
                                         double strange_supp,
                                         double diquark_supp,
@@ -782,6 +790,7 @@ bool StringProcess::next_Hard(ProcessType type) {
       break;
     case ProcessType::StringHardSingleDiffractiveXB:
       final_state_success = hard_map_[idAB]->next(3);
+      break;
     default:
       logg[LPythia].error("Unknown string process required.");
       final_state_success = false;

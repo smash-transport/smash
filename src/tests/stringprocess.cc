@@ -42,17 +42,10 @@ void test_distribution(int n_test, double dx, Chi get_chi,
 
 using namespace smash;
 
-static std::unique_ptr<StringProcess> dummy_string_process() {
-  auto sp = std::make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1.,
-                                            .0, .0, .5, .0, .21, .0, .0, true,
-                                            1. / 3., true, 0., false, 0.7);
-
-  return sp;
-}
-
 TEST(common_setup) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   // Pythia object to work with
   Pythia8::Pythia pythia_interface{PYTHIA_XML_DIR, false};
   sp->common_setup_pythia(&pythia_interface, 1.0, 1.0, .3, .5, .7, .9);
@@ -85,7 +78,8 @@ TEST(common_setup) {
 
 TEST(append_final) {
   // Create StringProcess to work with
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
 
   // ParticleData object to calculate final state for
   ParticleData a{ParticleType::find(0x211)};
@@ -119,7 +113,8 @@ TEST(append_final) {
 }
 
 TEST(initialization) {
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   ParticleData a{ParticleType::find(0x2212)};
   a.set_4momentum(1., 0., 0., 1.);
 
@@ -159,7 +154,8 @@ TEST(initialization) {
 
 TEST(rearrange_ex) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   // Array for total quark numbers
   std::array<int, 5> tot_quark = {0, 0, 0, 0, 0};
   // Arrays with the excess constituents
@@ -191,7 +187,8 @@ TEST(rearrange_ex) {
 
 TEST(find_excess) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   // PDG codes for proton and neutron
   PdgCode actual = pdg::p;
   PdgCode mapped = pdg::n;
@@ -221,7 +218,8 @@ TEST(find_excess) {
 
 TEST(restore_constituents) {
   // Create StringProcess to work with member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   // create Pythia class object to simulate p-p collision
   Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
   pythia.readString("Print:quiet = on");
@@ -275,7 +273,8 @@ TEST(restore_constituents) {
 
 TEST(replace_const) {
   // Create StringProcess to work with member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   // Create particle entry for an electron
   Pythia8::ParticleDataEntry entry1(11, "e", "e+");
   // Create Pythia Particle, an electron in this case
@@ -346,7 +345,8 @@ TEST(find_total_number_constituent) {
   intermediate.init("intermediate partons", &pythia_hadron->particleData);
 
   // String process to be able to call the member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
 
   // Arrays for quark and antiquark content
   std::array<int, 5> nquark;
@@ -373,7 +373,8 @@ TEST(string_zlund) {
 }
 
 TEST(string_incoming_lightcone_momenta) {
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
 
   ParticleData a{ParticleType::find(0x2212)};
   a.set_4momentum(0.938, 0., 0., 1.);
@@ -402,7 +403,8 @@ TEST(string_lightcone_final_two) {
   double b = .0;
   double c = .0;
   double d = .0;
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
 
   // returns false because mTsqr_string < 0.
   VERIFY(sp->make_lightcone_final_two(false, -1., 1., .0, .0, a, b, c, d) ==

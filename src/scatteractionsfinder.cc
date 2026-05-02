@@ -34,7 +34,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       isotropic_(config.take(InputKeys::collTerm_isotropic)),
       box_length_(parameters.box_length),
       string_formation_time_(
-          config.take(InputKeys::collTerm_stringParam_formationTime)) {
+          config.read(InputKeys::collTerm_stringParam_formationTime)) {
   if (is_constant_elastic_isotropic()) {
     logg[LFindScatter].info(
         "Constant elastic isotropic cross-section mode:", " using ",
@@ -99,29 +99,7 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 
   if (finder_parameters_.strings_switch) {
-    string_process_interface_ = std::make_unique<StringProcess>(
-        config.take(InputKeys::collTerm_stringParam_stringTension),
-        string_formation_time_,
-        config.take(InputKeys::collTerm_stringParam_gluonBeta),
-        config.take(InputKeys::collTerm_stringParam_gluonPMin),
-        config.take(InputKeys::collTerm_stringParam_quarkAlpha),
-        config.take(InputKeys::collTerm_stringParam_quarkBeta),
-        config.take(InputKeys::collTerm_stringParam_strangeSuppression),
-        config.take(InputKeys::collTerm_stringParam_diquarkSuppression),
-        config.take(InputKeys::collTerm_stringParam_sigmaPerp),
-        config.take(InputKeys::collTerm_stringParam_stringZALeading),
-        config.take(InputKeys::collTerm_stringParam_stringZBLeading),
-        config.take(InputKeys::collTerm_stringParam_stringZA),
-        config.take(InputKeys::collTerm_stringParam_stringZB),
-        config.take(InputKeys::collTerm_stringParam_stringSigmaT),
-        config.take(InputKeys::collTerm_stringParam_formTimeFactor),
-        config.take(InputKeys::collTerm_stringParam_mDependentFormationTimes),
-        config.take(InputKeys::collTerm_stringParam_probabilityPToDUU),
-        config.take(InputKeys::collTerm_stringParam_separateFragmentBaryon),
-        config.take(InputKeys::collTerm_stringParam_popcornRate),
-        config.take(InputKeys::collTerm_stringParam_useMonashTune,
-                    parameters.use_monash_tune_default.value()),
-        config.take(InputKeys::collTerm_stringParam_unformedXsecSuppression));
+    string_process_interface_ = std::make_unique<StringProcess>(config);
   }
 }
 
