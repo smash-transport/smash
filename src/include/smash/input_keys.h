@@ -1768,7 +1768,7 @@ struct InputKeys {
    * <hr>
    * <h3> Setting the default for all logging areas </h3>
    *
-   * \optional_key_no_line{key_log_default_,default,string,ALL}
+   * \optional_key_no_line{key_log_default_,default,string,ALL,\any_valid}
    *
    * It determines the default logging level for all areas. This is annotated by
    * \key ${default} in each of the following keys.
@@ -1777,7 +1777,10 @@ struct InputKeys {
    * \see_key{key_log_default_}
    */
   inline static const Key<einhard::LogLevel> log_default{
-      InputSections::logging + "default", einhard::ALL, {"0.50"}};
+      InputSections::logging + "default",
+      einhard::ALL,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1785,7 +1788,7 @@ struct InputKeys {
    * <h3> Most user-relevant logging areas </h3>
    *
    * \optional_key_no_line{key_log_box_,Box,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages specific to the box modus implementation belong to this area.
    */
@@ -1793,12 +1796,15 @@ struct InputKeys {
    * \see_key{key_log_box_}
    */
   inline static const Key<einhard::LogLevel> log_box{
-      InputSections::logging + "Box", DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Box",
+      DefaultType::Dependent,
+      {"0.30"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_collider_,Collider,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages specific to the collider modus implementation belong to this area.
    */
@@ -1806,12 +1812,15 @@ struct InputKeys {
    * \see_key{key_log_collider_}
    */
   inline static const Key<einhard::LogLevel> log_collider{
-      InputSections::logging + "Collider", DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Collider",
+      DefaultType::Dependent,
+      {"0.30"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_configuration_,%Configuration,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about the input configuration file belong to this area.
    */
@@ -1821,12 +1830,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_yamlConfiguration{
       InputSections::logging + "Configuration",
       DefaultType::Dependent,
-      {"3.0"}};
+      {"3.0"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_experiment_,%Experiment,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages mostly coming from the `Experiment` class belong to this area.
    */
@@ -1834,12 +1844,15 @@ struct InputKeys {
    * \see_key{key_log_experiment_}
    */
   inline static const Key<einhard::LogLevel> log_experiment{
-      InputSections::logging + "Experiment", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Experiment",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about the gran-canonical thermalization belong to this area.
    */
@@ -1849,12 +1862,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_grandcanThermalizer{
       InputSections::logging + "GrandcanThermalizer",
       DefaultType::Dependent,
-      {"1.2"}};
+      {"1.2"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_initial_conditions_,InitialConditions,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about initial conditions belong to this area.
    */
@@ -1864,12 +1878,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_initialConditions{
       InputSections::logging + "InitialConditions",
       DefaultType::Dependent,
-      {"1.8"}};
+      {"1.8"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_list_,List,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages specific to the list modus implementation belong to this area.
    */
@@ -1877,12 +1892,15 @@ struct InputKeys {
    * \see_key{key_log_list_}
    */
   inline static const Key<einhard::LogLevel> log_list{
-      InputSections::logging + "List", DefaultType::Dependent, {"0.60"}};
+      InputSections::logging + "List",
+      DefaultType::Dependent,
+      {"0.60"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_main_,Main,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from top-level of the application belong to this area.
    */
@@ -1890,12 +1908,15 @@ struct InputKeys {
    * \see_key{key_log_main_}
    */
   inline static const Key<einhard::LogLevel> log_main{
-      InputSections::logging + "Main", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Main",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_output_,Output,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages output functionality belong to this area.
    */
@@ -1903,12 +1924,15 @@ struct InputKeys {
    * \see_key{key_log_output_}
    */
   inline static const Key<einhard::LogLevel> log_output{
-      InputSections::logging + "Output", DefaultType::Dependent, {"0.60"}};
+      InputSections::logging + "Output",
+      DefaultType::Dependent,
+      {"0.60"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_potentials_,Potentials,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages regarding the potentials belong to this area.
    */
@@ -1916,12 +1940,15 @@ struct InputKeys {
    * \see_key{key_log_potentials_}
    */
   inline static const Key<einhard::LogLevel> log_potentials{
-      InputSections::logging + "Potentials", DefaultType::Dependent, {"3.1"}};
+      InputSections::logging + "Potentials",
+      DefaultType::Dependent,
+      {"3.1"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_rootsolver_,RootSolver,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages specific to the root finding belong to this area.
    */
@@ -1929,12 +1956,15 @@ struct InputKeys {
    * \see_key{key_log_rootsolver_}
    */
   inline static const Key<einhard::LogLevel> log_rootsolver{
-      InputSections::logging + "RootSolver", DefaultType::Dependent, {"3.1"}};
+      InputSections::logging + "RootSolver",
+      DefaultType::Dependent,
+      {"3.1"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_sphere_,Sphere,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages specific to the sphere modus implementation belong to this area.
    */
@@ -1942,7 +1972,10 @@ struct InputKeys {
    * \see_key{key_log_sphere_}
    */
   inline static const Key<einhard::LogLevel> log_sphere{
-      InputSections::logging + "Sphere", DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Sphere",
+      DefaultType::Dependent,
+      {"0.30"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1950,7 +1983,7 @@ struct InputKeys {
    * <h3> Most technical logging areas (in alphabetical order) </h3>
    *
    * \optional_key_no_line{key_log_action_,%Action,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages mostly coming from the `Action` class belong to this area.
    */
@@ -1958,12 +1991,15 @@ struct InputKeys {
    * \see_key{key_log_action_}
    */
   inline static const Key<einhard::LogLevel> log_action{
-      InputSections::logging + "Action", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Action",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_clock_,%Clock,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from clock implementation belong to this area.
    */
@@ -1971,12 +2007,15 @@ struct InputKeys {
    * \see_key{key_log_clock_}
    */
   inline static const Key<einhard::LogLevel> log_clock{
-      InputSections::logging + "Clock", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Clock",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_cross_sections_,%CrossSections,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about cross sections belong to this area.
    */
@@ -1986,12 +2025,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_crossSections{
       InputSections::logging + "CrossSections",
       DefaultType::Dependent,
-      {"1.3"}};
+      {"1.3"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_decay_modes_,%DecayModes,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages coming from decay tools belong to this area.
    */
@@ -1999,12 +2039,15 @@ struct InputKeys {
    * \see_key{key_log_decay_modes_}
    */
   inline static const Key<einhard::LogLevel> log_decayModes{
-      InputSections::logging + "DecayModes", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "DecayModes",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_density_,Density,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from density calculations belong to this area.
    */
@@ -2012,12 +2055,15 @@ struct InputKeys {
    * \see_key{key_log_density_}
    */
   inline static const Key<einhard::LogLevel> log_density{
-      InputSections::logging + "Density", DefaultType::Dependent, {"0.60"}};
+      InputSections::logging + "Density",
+      DefaultType::Dependent,
+      {"0.60"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_distributions_,Distributions,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about quantity distributions belong to this area.
    */
@@ -2027,12 +2073,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_distributions{
       InputSections::logging + "Distributions",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_find_scatter_,FindScatter,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages coming from search tools for scattering belong to this area.
    */
@@ -2040,11 +2087,15 @@ struct InputKeys {
    * \see_key{key_log_find_scatter_}
    */
   inline static const Key<einhard::LogLevel> log_findScatter{
-      InputSections::logging + "FindScatter", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "FindScatter",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_fpe_,Fpe,string,$\{\ref key_log_default_ "default"\}}
+   * \optional_key{key_log_fpe_,Fpe,string,$\{\ref key_log_default_
+   * "default"\},\any_valid}
    *
    * Messages about floating point exceptions belong to this area.
    */
@@ -2052,12 +2103,15 @@ struct InputKeys {
    * \see_key{key_log_fpe_}
    */
   inline static const Key<einhard::LogLevel> log_fpe{
-      InputSections::logging + "Fpe", DefaultType::Dependent, {"0.80"}};
+      InputSections::logging + "Fpe",
+      DefaultType::Dependent,
+      {"0.80"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_grid_,%Grid,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from the grid implementation belong to this area.
    */
@@ -2065,12 +2119,15 @@ struct InputKeys {
    * \see_key{key_log_grid_}
    */
   inline static const Key<einhard::LogLevel> log_grid{
-      InputSections::logging + "Grid", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Grid",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_hyper_surface_crossing_,HyperSurfaceCrossing,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about hypersurface crossing belong to this area.
    */
@@ -2080,12 +2137,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_hyperSurfaceCrossing{
       InputSections::logging + "HyperSurfaceCrossing",
       DefaultType::Dependent,
-      {"1.7"}};
+      {"1.7"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_input_parser_,InputParser,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages coming from input parsing tools belong to this area.
    */
@@ -2093,12 +2151,15 @@ struct InputKeys {
    * \see_key{key_log_input_parser_}
    */
   inline static const Key<einhard::LogLevel> log_inputParser{
-      InputSections::logging + "InputParser", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "InputParser",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_lattice_,Lattice,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from the lattice implementation belong to this area.
    */
@@ -2106,12 +2167,15 @@ struct InputKeys {
    * \see_key{key_log_lattice_}
    */
   inline static const Key<einhard::LogLevel> log_lattice{
-      InputSections::logging + "Lattice", DefaultType::Dependent, {"0.80"}};
+      InputSections::logging + "Lattice",
+      DefaultType::Dependent,
+      {"0.80"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_nucleus_,%Nucleus,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from the nucleus implementation belong to this area.
    */
@@ -2119,12 +2183,15 @@ struct InputKeys {
    * \see_key{key_log_nucleus_}
    */
   inline static const Key<einhard::LogLevel> log_nucleus{
-      InputSections::logging + "Nucleus", DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Nucleus",
+      DefaultType::Dependent,
+      {"0.30"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_particle_type_,%ParticleType,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages coming from particle types implementation belong to this area.
    */
@@ -2134,12 +2201,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_particleType{
       InputSections::logging + "ParticleType",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_pauli_blocking_,PauliBlocking,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about Pauli blocking belong to this area.
    */
@@ -2149,12 +2217,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_pauliBlocking{
       InputSections::logging + "PauliBlocking",
       DefaultType::Dependent,
-      {"0.7.1"}};
+      {"0.7.1"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_propagation_,Propagation,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about particles propagation belong to this area.
    */
@@ -2164,12 +2233,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_propagation{
       InputSections::logging + "Propagation",
       DefaultType::Dependent,
-      {"0.7.1"}};
+      {"0.7.1"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_pythia_,Pythia,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from Pythia usage in SMASH belong to this area.
    */
@@ -2177,12 +2247,15 @@ struct InputKeys {
    * \see_key{key_log_pythia_}
    */
   inline static const Key<einhard::LogLevel> log_pythia{
-      InputSections::logging + "Pythia", DefaultType::Dependent, {"1.0"}};
+      InputSections::logging + "Pythia",
+      DefaultType::Dependent,
+      {"1.0"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_resonances_,Resonances,string,$\{\ref
-   *key_log_default_ "default"\}}
+   *key_log_default_ "default"\},\any_valid}
    *
    ** Messages coming from resonances aspects belong to this area.
    */
@@ -2190,12 +2263,15 @@ struct InputKeys {
    * \see_key{key_log_resonances_}
    */
   inline static const Key<einhard::LogLevel> log_resonances{
-      InputSections::logging + "Resonances", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Resonances",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_scatter_action_,%ScatterAction,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about scattering events belong to this area.
    */
@@ -2205,12 +2281,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_scatterAction{
       InputSections::logging + "ScatterAction",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_scatter_action_multi_,%ScatterActionMulti,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about scattering events with multiple particles belong to this
    * area.
@@ -2221,11 +2298,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_scatterActionMulti{
       InputSections::logging + "ScatterActionMulti",
       DefaultType::Dependent,
-      {"2.0"}};
+      {"2.0"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_tmn_,Tmn,string,$\{\ref key_log_default_ "default"\}}
+   * \optional_key{key_log_tmn_,Tmn,string,$\{\ref key_log_default_
+   * "default"\},\any_valid}
    *
    * Messages about the energy momentum tensor belong to this area.
    */
@@ -2233,7 +2312,10 @@ struct InputKeys {
    * \see_key{key_log_tmn_}
    */
   inline static const Key<einhard::LogLevel> log_tmn{
-      InputSections::logging + "Tmn", DefaultType::Dependent, {"0.80"}};
+      InputSections::logging + "Tmn",
+      DefaultType::Dependent,
+      {"0.80"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys

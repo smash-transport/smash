@@ -210,6 +210,50 @@ TEST(validators_general) {
   VERIFY(InputKeys::gen_useGrid.validate(true));
 }
 
+TEST(validate_logging) {
+  VERIFY(InputKeys::log_default.validate(einhard::ALL));
+  VERIFY(InputKeys::log_default.validate(einhard::TRACE));
+  VERIFY(InputKeys::log_default.validate(einhard::DEBUG));
+  VERIFY(InputKeys::log_default.validate(einhard::INFO));
+  VERIFY(InputKeys::log_default.validate(einhard::WARN));
+  VERIFY(InputKeys::log_default.validate(einhard::ERROR));
+  VERIFY(InputKeys::log_default.validate(einhard::FATAL));
+  VERIFY(InputKeys::log_default.validate(einhard::OFF));
+  VERIFY(InputKeys::log_box.validate(einhard::ALL));
+  VERIFY(InputKeys::log_collider.validate(einhard::DEBUG));
+  VERIFY(InputKeys::log_yamlConfiguration.validate(einhard::ALL));
+  VERIFY(InputKeys::log_experiment.validate(einhard::INFO));
+  VERIFY(InputKeys::log_grandcanThermalizer.validate(einhard::ALL));
+  VERIFY(InputKeys::log_initialConditions.validate(einhard::DEBUG));
+  VERIFY(InputKeys::log_list.validate(einhard::INFO));
+  VERIFY(InputKeys::log_main.validate(einhard::WARN));
+  VERIFY(InputKeys::log_output.validate(einhard::DEBUG));
+  VERIFY(InputKeys::log_potentials.validate(einhard::TRACE));
+  VERIFY(InputKeys::log_rootsolver.validate(einhard::INFO));
+  VERIFY(InputKeys::log_sphere.validate(einhard::ALL));
+  VERIFY(InputKeys::log_action.validate(einhard::DEBUG));
+  VERIFY(InputKeys::log_clock.validate(einhard::INFO));
+  VERIFY(InputKeys::log_crossSections.validate(einhard::ALL));
+  VERIFY(InputKeys::log_decayModes.validate(einhard::WARN));
+  VERIFY(InputKeys::log_density.validate(einhard::DEBUG));
+  VERIFY(InputKeys::log_distributions.validate(einhard::TRACE));
+  VERIFY(InputKeys::log_findScatter.validate(einhard::ALL));
+  VERIFY(InputKeys::log_fpe.validate(einhard::FATAL));
+  VERIFY(InputKeys::log_grid.validate(einhard::DEBUG));
+  VERIFY(InputKeys::log_hyperSurfaceCrossing.validate(einhard::INFO));
+  VERIFY(InputKeys::log_inputParser.validate(einhard::ALL));
+  VERIFY(InputKeys::log_lattice.validate(einhard::DEBUG));
+  VERIFY(InputKeys::log_nucleus.validate(einhard::WARN));
+  VERIFY(InputKeys::log_particleType.validate(einhard::ALL));
+  VERIFY(InputKeys::log_pauliBlocking.validate(einhard::INFO));
+  VERIFY(InputKeys::log_propagation.validate(einhard::TRACE));
+  VERIFY(InputKeys::log_pythia.validate(einhard::DEBUG));
+  VERIFY(InputKeys::log_resonances.validate(einhard::ALL));
+  VERIFY(InputKeys::log_scatterAction.validate(einhard::INFO));
+  VERIFY(InputKeys::log_scatterActionMulti.validate(einhard::DEBUG));
+  VERIFY(InputKeys::log_tmn.validate(einhard::TRACE));
+}
+
 #if 0
 
 /* The following code is useful to print all keys in the database for debug
