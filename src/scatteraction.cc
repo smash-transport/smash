@@ -121,6 +121,7 @@ void ScatterAction::generate_final_state() {
     // Boost to the computational frame
     new_particle.boost_momentum(
         -total_momentum_of_outgoing_particles().velocity());
+
     /* Set positions of the outgoing particles */
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
@@ -703,38 +704,9 @@ void ScatterAction::string_excitation() {
     const int ntry_max = 10000;
     while (!success && ntry < ntry_max) {
       ntry++;
-      switch (process_type_) {
-        case ProcessType::StringSoftSingleDiffractiveAX:
-          /* single diffractive to A+X */
-          success = string_process_->next_SDiff(true);
-          break;
-        case ProcessType::StringSoftSingleDiffractiveXB:
-          /* single diffractive to X+B */
-          success = string_process_->next_SDiff(false);
-          break;
-        case ProcessType::StringSoftDoubleDiffractive:
-          /* double diffractive */
-          success = string_process_->next_DDiff();
-          break;
-        case ProcessType::StringSoftNonDiffractive:
-          /* soft non-diffractive */
-          success = string_process_->next_NDiffSoft();
-          break;
-        case ProcessType::StringSoftAnnihilation:
-          /* soft BBbar 2 mesonic annihilation */
-          success = string_process_->next_BBbarAnn();
-          break;
-        case ProcessType::StringHardNonDiffractive:
-        case ProcessType::StringHardDoubleDiffractive:
-        case ProcessType::StringHardSingleDiffractiveAX:
-        case ProcessType::StringHardSingleDiffractiveXB:
-          success = string_process_->next_Hard(process_type_);
-          break;
-        default:
-          logg[LPythia].error("Unknown string process required.");
-          success = false;
-      }
+      success = string_process_->next(process_type_);
     }
+
     if (ntry == ntry_max) {
       /* If pythia fails to form a string, it is usually because the energy
        * is not large enough. In this case, annihilation is then enforced. If
@@ -758,11 +730,7 @@ void ScatterAction::string_excitation() {
       int ntry_new = 0;
       while (!success_newtry && ntry_new < ntry_max) {
         ntry_new++;
-        if (is_BBbar_Pair) {
-          success_newtry = string_process_->next_BBbarAnn();
-        } else {
-          success_newtry = string_process_->next_DDiff();
-        }
+        success_newtry = string_process_->next(process_type_);
       }
 
       if (success_newtry) {
@@ -786,7 +754,6 @@ void ScatterAction::string_excitation() {
     }
   }
 }
-
 static void boost_spin_vectors_after_elastic_scattering(
     ParticleData &outgoing_particle_a, ParticleData &outgoing_particle_b) {
   // Boost spin vectors

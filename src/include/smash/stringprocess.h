@@ -26,6 +26,150 @@
 namespace smash {
 static constexpr int LPythia = LogArea::Pythia::id;
 
+class FlatStringZ : public Pythia8::StringZ {
+ public:
+  double zFrag(int, int, double) override {
+    return rndmPtr->flat();  // use Pythia RNG
+  }
+
+  // Compute f_rel(z) = f(z)/f(zMax), so that f_rel(zMax)=1.
+  double fRelAtZ(double z, double zMaxLocal) const {
+    if (z <= 0.0 || z >= 1.0)
+      return 0.0;
+
+    const double lnF = aShape * std::log((1.0 - z) / (1.0 - zMaxLocal)) +
+                       bShape * (1.0 / zMaxLocal - 1.0 / z) +
+                       cShape * std::log(zMaxLocal / z);
+
+    // Guard (same spirit as Pythia)
+    if (lnF > EXPMAX)
+      return std::exp(EXPMAX);
+    if (lnF < -EXPMAX)
+      return std::exp(-EXPMAX);
+    return std::exp(lnF);
+  }
+
+  // Acceptance probability when proposing z ~ Uniform(0,1).
+  // This is valid because fRelAtZ(z) <= 1 (peak normalized to 1).
+  double acceptProb(int idOld, int idNew, double mT2, double z) {
+    if (z <= 0.0 || z >= 1.0)
+      return 0.0;
+
+    // Must set the shape params for this fragmentation context:
+    initFlav(idOld, idNew);
+    initShape(mT2);
+
+    const double zMaxLocal = zLundMax(aShape, bShape, cShape);
+    double p = fRelAtZ(z, zMaxLocal);
+
+    // Numerical safety: clamp into [0,1]
+    if (p < 0.0)
+      p = 0.0;
+    if (p > 1.0)
+      p = 1.0;
+    return p;
+  }
+  double zMax(int idOld, int idNew, double mT2) {
+    initFlav(idOld, idNew);
+    initShape(mT2);
+    return zLundMax(aShape, bShape, cShape);
+  }
+};
+class FlatZFragmentation : public Pythia8::LundFragmentation {
+ public:
+  bool init(Pythia8::StringFlav *flavSelPtrIn = nullptr,
+            Pythia8::StringPT *pTSelPtrIn = nullptr,
+            [[maybe_unused]] Pythia8::StringZ *z = nullptr,
+            Pythia8::FragModPtr fragModPtrIn = nullptr) override {
+    return Pythia8::LundFragmentation::init(flavSelPtrIn, pTSelPtrIn, &flatZ_,
+                                            fragModPtrIn);
+  }
+
+  bool init_flavZ(Pythia8::Pythia *pythia_ptr) {
+    flatZ_.initInfoPtr(const_cast<Pythia8::Info &>(pythia_ptr->info));
+    return flatZ_.init();  // baseline init (reads settings, sets flags, etc.)
+  }
+
+  double acceptProb(int idOld, int idNew, double mT2, double z) {
+    return flatZ_.acceptProb(idOld, idNew, mT2, z);
+  }
+
+ private:
+  FlatStringZ flatZ_;
+};
+
+class ModifyHadronizationHook : public Pythia8::UserHooks {
+ public:
+  bool DO_DYNAMIC_TENSION = false;
+  bool canVetoFragmentation() override { return true; }
+  bool doVetoFragmentation(Pythia8::Particle had,
+                           const Pythia8::StringEnd *sEnd) override;
+
+  // UserHooks API
+  bool canChangeFragPar() override;
+
+  bool doChangeFragPar(Pythia8::StringFlav *flavPtr, Pythia8::StringZ *zPtr,
+                       Pythia8::StringPT *pTPtr, int idEnd, double m2Had,
+                       std::vector<int> iParton,
+                       const Pythia8::StringEnd *sEnd) override;
+
+  // Configuration
+  void set_kappa(double new_kappa);
+  bool init_rope_pars(Pythia8::Info &info);
+
+  Pythia8::ParticleData *pd;
+  void setFragPtr(FlatZFragmentation *in_fragPtr) { fragPtr = in_fragPtr; }
+
+ private:
+  double kappa_ = 1.0;
+  FlatZFragmentation *fragPtr = nullptr;
+  bool captured_ = false;
+  double sigma0_ = 0.0;
+  Pythia8::RopeFragPars rp_;
+};
+
+class MyFragHooks : public Pythia8::UserHooks {
+ public:
+  MyFragHooks(Pythia8::Pythia *pythia_hadron) : pythia_hadron_(pythia_hadron) {}
+
+  //--------------------------------------------------------------------------
+  // Setters
+  //--------------------------------------------------------------------------
+
+  void setSpecialStatus(int status) { specialStatus_ = std::abs(status); }
+
+  void setRemnantParameters(double a, double b) {
+    aRemnLike_ = a;
+    bRemnLike_ = b;
+  }
+
+  void setDefaultParameters(double a, double b) {
+    aDefault_ = a;
+    bDefault_ = b;
+  }
+
+  //--------------------------------------------------------------------------
+  // UserHooks interface
+  //--------------------------------------------------------------------------
+
+  bool canChangeFragPar() override { return true; }
+
+  bool doChangeFragPar(Pythia8::StringFlav *flavSelPtr,
+                       Pythia8::StringZ *zSelPtr, Pythia8::StringPT *pTSelPtr,
+                       int idEnd, double m2Had, std::vector<int> iParton,
+                       const Pythia8::StringEnd *nowEnd) override;
+
+ private:
+  Pythia8::Pythia *pythia_hadron_ = nullptr;
+
+  int specialStatus_ = 93;
+
+  double aDefault_ = 0.68;
+  double bDefault_ = 0.98;
+
+  double aRemnLike_ = 0.2;
+  double bRemnLike_ = 0.5;
+};
 /**
  * \brief String excitation processes used in SMASH
  *
@@ -46,13 +190,17 @@ static constexpr int LPythia = LogArea::Pythia::id;
 class StringProcess {
  private:
   // The following 4 variables are in the center of mass frame
-  /// forward lightcone momentum p^{+} of incoming particle A in CM-frame [GeV]
+  /// forward lightcone momentum p^{+} of incoming particle A in CM-frame
+  /// [GeV]
   double PPosA_;
-  /// forward lightcone momentum p^{+} of incoming particle B in CM-frame [GeV]
+  /// forward lightcone momentum p^{+} of incoming particle B in CM-frame
+  /// [GeV]
   double PPosB_;
-  /// backward lightcone momentum p^{-} of incoming particle A in CM-frame [GeV]
+  /// backward lightcone momentum p^{-} of incoming particle A in CM-frame
+  /// [GeV]
   double PNegA_;
-  /// backward lightcone momentum p^{-} of incoming particle B in CM-frame [GeV]
+  /// backward lightcone momentum p^{-} of incoming particle B in CM-frame
+  /// [GeV]
   double PNegB_;
   /// mass of incoming particle A [GeV]
   double massA_;
@@ -183,8 +331,8 @@ class StringProcess {
    * \param[in]     pd     Particle data table used for quark/diquark
    * identification.
    */
-  void tag_leading_hadron(Pythia8::Event& event,
-                          const Pythia8::ParticleData& pd);
+  void tag_leading_hadron(Pythia8::Event &event,
+                          const Pythia8::ParticleData &pd);
 
   /**
    * Compute flags identifying beam valence partons (quarks or diquarks)
@@ -204,7 +352,7 @@ class StringProcess {
    * \param[in,out] pythia Pythia instance containing the event to inspect.
    * \return Per-particle flags for beam valence (leading) partons.
    */
-  std::vector<bool> compute_beam_valence_flags(Pythia8::Pythia& pythia);
+  std::vector<bool> compute_beam_valence_flags(Pythia8::Pythia &pythia);
 
   /**
    * Custom Pythia status codes used to mark leading/valence
@@ -223,7 +371,8 @@ class StringProcess {
   enum class LeadingStatus : int {
     /// Status code assigned to leading (valence) partons in the event record.
     LEADING_PARTON = 202,
-    /// Status code assigned to hadrons traced back to a leading quark endpoint.
+    /// Status code assigned to hadrons traced back to a leading quark
+    /// endpoint.
     FROM_LEADING_QUARK = 203,
     /// Status code assigned to hadrons traced back to a leading diquark
     /// endpoint.
@@ -237,9 +386,10 @@ class StringProcess {
    * FROM_LEADING_QUARK.
    *
    * \param[in] end  String endpoint particle (quark or diquark).
-   * \return Integer status code corresponding to the appropriate LeadingStatus.
+   * \return Integer status code corresponding to the appropriate
+   * LeadingStatus.
    */
-  inline int leading_hadron_status_from_endpoint(const Pythia8::Particle& end) {
+  inline int leading_hadron_status_from_endpoint(const Pythia8::Particle &end) {
     return static_cast<int>(end.isDiquark()
                                 ? LeadingStatus::FROM_LEADING_DIQUARK
                                 : LeadingStatus::FROM_LEADING_QUARK);
@@ -251,7 +401,7 @@ class StringProcess {
    * \param[in] p  Pythia particle.
    * \return True if p has statusAbs() equal to LeadingStatus::LEADING_PARTON.
    */
-  inline bool is_leading_parton(const Pythia8::Particle& p) {
+  inline bool is_leading_parton(const Pythia8::Particle &p) {
     return p.statusAbs() == static_cast<int>(LeadingStatus::LEADING_PARTON);
   }
 
@@ -262,7 +412,7 @@ class StringProcess {
    * \return True if p has statusAbs() equal to
    * LeadingStatus::FROM_LEADING_QUARK.
    */
-  inline bool is_leading_from_quark(const Pythia8::Particle& p) {
+  inline bool is_leading_from_quark(const Pythia8::Particle &p) {
     return p.statusAbs() == static_cast<int>(LeadingStatus::FROM_LEADING_QUARK);
   }
 
@@ -273,20 +423,23 @@ class StringProcess {
    * \return True if p has statusAbs() equal to
    * LeadingStatus::FROM_LEADING_DIQUARK.
    */
-  inline bool is_leading_from_diquark(const Pythia8::Particle& p) {
+  inline bool is_leading_from_diquark(const Pythia8::Particle &p) {
     return p.statusAbs() ==
            static_cast<int>(LeadingStatus::FROM_LEADING_DIQUARK);
   }
 
   /**
-   * Check whether a particle is tagged as originating from a leading endpoint.
+   * Check whether a particle is tagged as originating from a leading
+   * endpoint.
    *
-   * This is the union of is_leading_from_quark() and is_leading_from_diquark().
+   * This is the union of is_leading_from_quark() and
+   * is_leading_from_diquark().
    *
    * \param[in] p  Pythia particle.
-   * \return True if p is tagged as leading-from-quark or leading-from-diquark.
+   * \return True if p is tagged as leading-from-quark or
+   * leading-from-diquark.
    */
-  inline bool is_leading(const Pythia8::Particle& p) {
+  inline bool is_leading(const Pythia8::Particle &p) {
     return is_leading_from_quark(p) || is_leading_from_diquark(p);
   }
 
@@ -380,6 +533,29 @@ class StringProcess {
 
   // clang-format on
 
+  static FourVector make_smash_4vec(const Pythia8::Vec4 &p) {
+    return FourVector(p.e(), p.px(), p.py(), p.pz());
+  }
+
+  static Pythia8::Vec4 make_pythia_4vec(const FourVector &p) {
+    return Pythia8::Vec4(p.x1(), p.x2(), p.x3(), p.x0());
+  }
+
+  bool next(ProcessType type);
+
+  Pythia8::RotBstMatrix toCM_;
+  bool string_above_threshold(const Pythia8::Event &event);
+  double estimate_string_threshold(int p_left, int p_right);
+  void set_color_by_type(Pythia8::Particle &p, int color);
+  bool hadronize();
+  std::shared_ptr<ModifyHadronizationHook> mod_hook_ptr = nullptr;
+  std::shared_ptr<FlatZFragmentation> flat_z_frag_ptr = nullptr;
+  std::shared_ptr<MyFragHooks> frag_hook = nullptr;
+  /// Append a single string (2 endpoints) as its own Pythia8::Event
+  bool append_string(const Pythia8::Vec4 &p_str, const std::array<int, 2> &ends,
+                     int color_tag, bool flip = false);
+
+  std::vector<Pythia8::Event> string_parton_events_;
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->
    * different final states \iref{Schuler:1993wr}.
