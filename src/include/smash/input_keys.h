@@ -6320,7 +6320,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
    * \required_key_no_line{key_forced_therm_cell_number_,Cell_Number,list of 3
-   * ints}
+   * ints,\f$x_i > 0\f$}
    *
    * Number of cells in each direction (x,y,z).
    */
@@ -6328,24 +6328,37 @@ struct InputKeys {
    * \see_key{key_forced_therm_cell_number_}
    */
   inline static const Key<std::array<int, 3>> forcedThermalization_cellNumber{
-      InputSections::forcedThermalization + "Cell_Number", {"1.1"}};
+      InputSections::forcedThermalization + "Cell_Number",
+      {"1.1"},
+      [](const std::array<int, 3> &value) noexcept {
+        if (std::abs(value[0] * value[1] * value[2]) > 30'000'000) {
+          logg[LogArea::Configuration::id].warn(
+              "Number of total cells for forced thermalization is very large, "
+              "which may lead to long runtime. Make sure this is intended.");
+        }
+        return (value[0] > 0 && value[1] > 0 && value[2] > 0);
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \required_key{key_forced_therm_critical_edens_,Critical_Edens,double}
+   * \required_key_no_line{key_forced_therm_critical_edens_,Critical_Edens,
+   * double,\f$x \in (0\, 2]\f$}
    *
    * Critical energy density \unit{in GeV/fm³} above which forced thermalization
-   * is applied.
+   * is applied (see \iref{Oliinychenko:2016vkg} for more information on the
+   * constraint).
    */
   /**
    * \see_key{key_forced_therm_critical_edens_}
    */
   inline static const Key<double> forcedThermalization_criticalEDensity{
-      InputSections::forcedThermalization + "Critical_Edens", {"1.1"}};
+      InputSections::forcedThermalization + "Critical_Edens",
+      {"1.1"},
+      [](const double &value) noexcept { return value > 0 && value <= 2; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \required_key{key_forced_therm_start_time_,Start_Time,double}
+   * \required_key_no_line{key_forced_therm_start_time_,Start_Time,double,\none}
    *
    * Time \unit{in fm} after which forced thermalization may be applied, if
    * the energy density is sufficiently high.
@@ -6354,19 +6367,32 @@ struct InputKeys {
    * \see_key{key_forced_therm_start_time_}
    */
   inline static const Key<double> forcedThermalization_startTime{
-      InputSections::forcedThermalization + "Start_Time", {"1.1"}};
+      InputSections::forcedThermalization + "Start_Time",
+      {"1.1"},
+      [](const double &value) noexcept {
+        if (value < 0 || value > 50) {
+          logg[LogArea::Configuration::id].warn(
+              "Start time for forced thermalization outside [0,50] is "
+              "suspicious. Make sure this is intended.");
+        }
+        return true;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \required_key{key_forced_therm_timestep_,Timestep,double}
+   * \required_key_no_line{key_forced_therm_timestep_,Timestep,
+   * double,\f$x \in (0\,4]\f$}
    *
-   * Timestep of thermalization \unit{in fm}.
+   * Timestep of thermalization \unit{in fm} (see \iref{Oliinychenko:2016vkg}
+   * for more information on the constraint).
    */
   /**
    * \see_key{key_forced_therm_timestep_}
    */
   inline static const Key<double> forcedThermalization_timestep{
-      InputSections::forcedThermalization + "Timestep", {"1.1"}};
+      InputSections::forcedThermalization + "Timestep",
+      {"1.1"},
+      [](const double &value) noexcept { return value > 0 && value <= 4; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -6377,7 +6403,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
    * \optional_key_no_line{key_forced_therm_algorithm_,Algorithm,string,"biased
-   * BF"}
+   * BF",\any_valid}
    *
    * Algorithm applied to enforce thermalization, see
    * \iref{Oliinychenko:2016vkg} for more details.
@@ -6392,12 +6418,13 @@ struct InputKeys {
       forcedThermalization_algorithm{
           InputSections::forcedThermalization + "Algorithm",
           ThermalizationAlgorithm::BiasedBF,
-          {"1.1"}};
+          {"1.1"},
+          detail::get_default_validator<ThermalizationAlgorithm>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \required_key{key_forced_therm_lattice_sizes_,Lattice_Sizes,list of 3
-   * doubles}
+   * \required_key_no_line{key_forced_therm_lattice_sizes_,Lattice_Sizes,list of
+   * 3 doubles,\f$x_i > 0\f$}
    *
    * The lattice is placed such that the center is [0.0,0.0,0.0].
    * If one wants to have a central cell with center at [0.0,0.0,0.0] then
@@ -6413,11 +6440,22 @@ struct InputKeys {
    */
   inline static const Key<std::array<double, 3>>
       forcedThermalization_latticeSizes{
-          InputSections::forcedThermalization + "Lattice_Sizes", {"1.1"}};
+          InputSections::forcedThermalization + "Lattice_Sizes",
+          {"1.1"},
+          [](const std::array<double, 3> &value) noexcept {
+            const double max = 200.0;
+            if (value[0] > max || value[1] > max || value[2] > max) {
+              logg[LogArea::Configuration::id].warn(
+                  "Lattice size(s) for forced thermalization larger than " +
+                  std::to_string(max) +
+                  " fm may lead to long runtime. Make sure this is intended.");
+            }
+            return (value[0] > 0 && value[1] > 0 && value[2] > 0);
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \optional_key{key_forced_therm_microcanonical_,Microcanonical,bool,false}
+   * \optional_key{key_forced_therm_microcanonical_,Microcanonical,bool,false,\none}
    *
    * Enforce energy conservation or not as part of sampling algorithm. Relevant
    * for biased and unbiased Becattini-Ferroni (BF) algorithms. If this option
@@ -6435,7 +6473,10 @@ struct InputKeys {
    * \see_key{key_forced_therm_microcanonical_}
    */
   inline static const Key<bool> forcedThermalization_microcanonical{
-      InputSections::forcedThermalization + "Microcanonical", false, {"1.7"}};
+      InputSections::forcedThermalization + "Microcanonical",
+      false,
+      {"1.7"},
+      detail::get_default_validator<bool>()};
 
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<

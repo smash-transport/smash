@@ -261,6 +261,29 @@ TEST(validators_version) {
   VERIFY(InputKeys::version.validate("any string"));
 }
 
+TEST(validators_forced_thermalization) {
+  VERIFY(InputKeys::forcedThermalization_cellNumber.validate({300, 300, 300}));
+  VERIFY(!InputKeys::forcedThermalization_cellNumber.validate({0, 1, 1}));
+  VERIFY(!InputKeys::forcedThermalization_cellNumber.validate({1, 0, 1}));
+  VERIFY(!InputKeys::forcedThermalization_cellNumber.validate({1, 1, 0}));
+  VERIFY(!InputKeys::forcedThermalization_cellNumber.validate({-1, 1, 1}));
+  VERIFY(InputKeys::forcedThermalization_criticalEDensity.validate(2.0));
+  VERIFY(!InputKeys::forcedThermalization_criticalEDensity.validate(0.0));
+  VERIFY(!InputKeys::forcedThermalization_criticalEDensity.validate(2.5));
+  VERIFY(InputKeys::forcedThermalization_startTime.validate(0.1));
+  VERIFY(InputKeys::forcedThermalization_timestep.validate(4.0));
+  VERIFY(!InputKeys::forcedThermalization_timestep.validate(0.0));
+  VERIFY(!InputKeys::forcedThermalization_timestep.validate(4.1));
+  VERIFY(InputKeys::forcedThermalization_algorithm.validate(
+      ThermalizationAlgorithm::BiasedBF));
+  const auto& lattice_sizes = InputKeys::forcedThermalization_latticeSizes;
+  VERIFY(lattice_sizes.validate({1.0, 1.0, 1.0}));
+  VERIFY(!lattice_sizes.validate({0.0, 1.0, 1.0}));
+  VERIFY(!lattice_sizes.validate({1.0, 0.0, 1.0}));
+  VERIFY(!lattice_sizes.validate({1.0, 1.0, 0.0}));
+  VERIFY(InputKeys::forcedThermalization_microcanonical.validate(false));
+}
+
 #if 0
 
 /* The following code is useful to print all keys in the database for debug
