@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022,2024-2025
+ *    Copyright (c) 2022,2024-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -149,76 +149,96 @@ TEST(validators_particles_and_decaymodes) {
 }
 
 TEST(validators_general) {
-  VERIFY(InputKeys::gen_endTime.validate(0.5));
-  VERIFY(!InputKeys::gen_endTime.validate(0));
-  VERIFY(!InputKeys::gen_endTime.validate(-6.6));
-  VERIFY(InputKeys::gen_nevents.validate(20));
-  VERIFY(!InputKeys::gen_nevents.validate(0));
-  VERIFY(!InputKeys::gen_nevents.validate(-5));
-  VERIFY(InputKeys::gen_randomseed.validate(0));
-  VERIFY(InputKeys::gen_randomseed.validate(1234567890123456789LL));
-  VERIFY(InputKeys::gen_randomseed.validate(-1));
-  VERIFY(InputKeys::gen_minNonEmptyEnsembles_maximumEnsembles.validate(100));
-  VERIFY(!InputKeys::gen_minNonEmptyEnsembles_maximumEnsembles.validate(0));
-  VERIFY(!InputKeys::gen_minNonEmptyEnsembles_maximumEnsembles.validate(-1));
-  VERIFY(InputKeys::gen_minNonEmptyEnsembles_number.validate(1));
-  VERIFY(!InputKeys::gen_minNonEmptyEnsembles_number.validate(0));
-  VERIFY(!InputKeys::gen_minNonEmptyEnsembles_number.validate(-1));
-  VERIFY(InputKeys::gen_deltaTime.validate(1.0));
-  VERIFY(!InputKeys::gen_deltaTime.validate(0.0));
-  VERIFY(!InputKeys::gen_deltaTime.validate(-1.0));
-  VERIFY(InputKeys::gen_smearingDiscreteWeight.validate(0.15));
-  VERIFY(InputKeys::gen_smearingDiscreteWeight.validate(0.99));
-  VERIFY(!InputKeys::gen_smearingDiscreteWeight.validate(1.0 / 7.0));
-  VERIFY(!InputKeys::gen_smearingDiscreteWeight.validate(1.0));
-  VERIFY(!InputKeys::gen_smearingDiscreteWeight.validate(1.1));
-  VERIFY(InputKeys::gen_ensembles.validate(1));
-  VERIFY(InputKeys::gen_ensembles.validate(10));
-  VERIFY(!InputKeys::gen_ensembles.validate(0));
-  VERIFY(!InputKeys::gen_ensembles.validate(-1));
-  VERIFY(InputKeys::gen_expansionRate.validate(-10.));
-  VERIFY(InputKeys::gen_expansionRate.validate(0.));
-  VERIFY(InputKeys::gen_expansionRate.validate(10.));
-  VERIFY(InputKeys::gen_modus.validate("Box"));
-  VERIFY(InputKeys::gen_modus.validate("Collider"));
-  VERIFY(InputKeys::gen_modus.validate("List"));
-  VERIFY(InputKeys::gen_modus.validate("ListBox"));
-  VERIFY(InputKeys::gen_modus.validate("Sphere"));
-  VERIFY(!InputKeys::gen_modus.validate("Invalid"));
-  VERIFY(InputKeys::gen_derivativesMode.validate(DerivativesMode::Off));
-  VERIFY(InputKeys::gen_fieldDerivativesMode.validate(
-      FieldDerivativesMode::ChainRule));
-  VERIFY(InputKeys::gen_smearingGaussCutoffInSigma.validate(3.0));
-  VERIFY(InputKeys::gen_smearingGaussCutoffInSigma.validate(6.5));
-  VERIFY(InputKeys::gen_smearingGaussCutoffInSigma.validate(10.0));
-  VERIFY(!InputKeys::gen_smearingGaussCutoffInSigma.validate(2.9));
-  VERIFY(!InputKeys::gen_smearingGaussCutoffInSigma.validate(10.1));
-  VERIFY(InputKeys::gen_smearingGaussianSigma.validate(2.99));
-  VERIFY(!InputKeys::gen_smearingGaussianSigma.validate(0.1));
-  VERIFY(!InputKeys::gen_smearingGaussianSigma.validate(3.0));
-  VERIFY(InputKeys::gen_metricType.validate(ExpansionMode::NoExpansion));
-  VERIFY(InputKeys::gen_restFrameDensityDerivativeMode.validate(
-      RestFrameDensityDerivativesMode::On));
-  VERIFY(InputKeys::gen_smearingMode.validate(SmearingMode::Discrete));
-  VERIFY(InputKeys::gen_testparticles.validate(42));
-  VERIFY(!InputKeys::gen_testparticles.validate(0));
-  VERIFY(!InputKeys::gen_testparticles.validate(-1));
-  VERIFY(InputKeys::gen_timeStepMode.validate(TimeStepMode::Fixed));
-  VERIFY(InputKeys::gen_smearingTriangularRange.validate(2.345));
-  VERIFY(!InputKeys::gen_smearingTriangularRange.validate(0.0));
-  VERIFY(!InputKeys::gen_smearingTriangularRange.validate(-3.14));
-  VERIFY(InputKeys::gen_useGrid.validate(true));
+  const auto& end_time = InputKeys::gen_endTime;
+  VERIFY(end_time.validate(0.5));
+  VERIFY(!end_time.validate(0));
+  VERIFY(!end_time.validate(-6.6));
+  const auto& nevents = InputKeys::gen_nevents;
+  VERIFY(nevents.validate(20));
+  VERIFY(!nevents.validate(0));
+  VERIFY(!nevents.validate(-5));
+  const auto& randomseed = InputKeys::gen_randomseed;
+  VERIFY(randomseed.validate(0));
+  VERIFY(randomseed.validate(1234567890123456789LL));
+  VERIFY(randomseed.validate(-1));
+  const auto& max_ens = InputKeys::gen_minNonEmptyEnsembles_maximumEnsembles;
+  VERIFY(max_ens.validate(100));
+  VERIFY(!max_ens.validate(0));
+  VERIFY(!max_ens.validate(-1));
+  const auto& number = InputKeys::gen_minNonEmptyEnsembles_number;
+  VERIFY(number.validate(1));
+  VERIFY(!number.validate(0));
+  VERIFY(!number.validate(-1));
+  const auto& delta_time = InputKeys::gen_deltaTime;
+  VERIFY(delta_time.validate(1.0));
+  VERIFY(!delta_time.validate(0.0));
+  VERIFY(!delta_time.validate(-1.0));
+  const auto& smearing_discrete_weight = InputKeys::gen_smearingDiscreteWeight;
+  VERIFY(smearing_discrete_weight.validate(0.15));
+  VERIFY(smearing_discrete_weight.validate(0.99));
+  VERIFY(!smearing_discrete_weight.validate(1.0 / 7.0));
+  VERIFY(!smearing_discrete_weight.validate(1.0));
+  VERIFY(!smearing_discrete_weight.validate(1.1));
+  const auto& ensembles = InputKeys::gen_ensembles;
+  VERIFY(ensembles.validate(1));
+  VERIFY(ensembles.validate(10));
+  VERIFY(!ensembles.validate(0));
+  VERIFY(!ensembles.validate(-1));
+  const auto& expansion_rate = InputKeys::gen_expansionRate;
+  VERIFY(expansion_rate.validate(-10.));
+  VERIFY(expansion_rate.validate(0.));
+  VERIFY(expansion_rate.validate(10.));
+  const auto& modus = InputKeys::gen_modus;
+  VERIFY(modus.validate("Box"));
+  VERIFY(modus.validate("Collider"));
+  VERIFY(modus.validate("List"));
+  VERIFY(modus.validate("ListBox"));
+  VERIFY(modus.validate("Sphere"));
+  VERIFY(!modus.validate("Invalid"));
+  const auto& derivatives_mode = InputKeys::gen_derivativesMode;
+  VERIFY(derivatives_mode.validate(DerivativesMode::Off));
+  const auto& field_derivatives_mode = InputKeys::gen_fieldDerivativesMode;
+  VERIFY(field_derivatives_mode.validate(FieldDerivativesMode::ChainRule));
+  const auto& smearing_cutoff = InputKeys::gen_smearingGaussCutoffInSigma;
+  VERIFY(smearing_cutoff.validate(3.0));
+  VERIFY(smearing_cutoff.validate(6.5));
+  VERIFY(smearing_cutoff.validate(10.0));
+  VERIFY(!smearing_cutoff.validate(2.9));
+  VERIFY(!smearing_cutoff.validate(10.1));
+  const auto& smearing_sigma = InputKeys::gen_smearingGaussianSigma;
+  VERIFY(smearing_sigma.validate(2.99));
+  VERIFY(!smearing_sigma.validate(0.1));
+  VERIFY(!smearing_sigma.validate(3.0));
+  const auto& metric_type = InputKeys::gen_metricType;
+  VERIFY(metric_type.validate(ExpansionMode::NoExpansion));
+  const auto& derivative_mode = InputKeys::gen_restFrameDensityDerivativeMode;
+  VERIFY(derivative_mode.validate(RestFrameDensityDerivativesMode::On));
+  const auto& smearing_mode = InputKeys::gen_smearingMode;
+  VERIFY(smearing_mode.validate(SmearingMode::Discrete));
+  const auto& test_particles = InputKeys::gen_testparticles;
+  VERIFY(test_particles.validate(42));
+  VERIFY(!test_particles.validate(0));
+  VERIFY(!test_particles.validate(-1));
+  const auto& time_step_mode = InputKeys::gen_timeStepMode;
+  VERIFY(time_step_mode.validate(TimeStepMode::Fixed));
+  const auto& smearing_range = InputKeys::gen_smearingTriangularRange;
+  VERIFY(smearing_range.validate(2.345));
+  VERIFY(!smearing_range.validate(0.0));
+  VERIFY(!smearing_range.validate(-3.14));
+  const auto& use_grid = InputKeys::gen_useGrid;
+  VERIFY(use_grid.validate(true));
 }
 
 TEST(validate_logging) {
-  VERIFY(InputKeys::log_default.validate(einhard::ALL));
-  VERIFY(InputKeys::log_default.validate(einhard::TRACE));
-  VERIFY(InputKeys::log_default.validate(einhard::DEBUG));
-  VERIFY(InputKeys::log_default.validate(einhard::INFO));
-  VERIFY(InputKeys::log_default.validate(einhard::WARN));
-  VERIFY(InputKeys::log_default.validate(einhard::ERROR));
-  VERIFY(InputKeys::log_default.validate(einhard::FATAL));
-  VERIFY(InputKeys::log_default.validate(einhard::OFF));
+  const auto& log_default = InputKeys::log_default;
+  VERIFY(log_default.validate(einhard::ALL));
+  VERIFY(log_default.validate(einhard::TRACE));
+  VERIFY(log_default.validate(einhard::DEBUG));
+  VERIFY(log_default.validate(einhard::INFO));
+  VERIFY(log_default.validate(einhard::WARN));
+  VERIFY(log_default.validate(einhard::ERROR));
+  VERIFY(log_default.validate(einhard::FATAL));
+  VERIFY(log_default.validate(einhard::OFF));
   VERIFY(InputKeys::log_box.validate(einhard::ALL));
   VERIFY(InputKeys::log_collider.validate(einhard::DEBUG));
   VERIFY(InputKeys::log_yamlConfiguration.validate(einhard::ALL));
@@ -255,33 +275,39 @@ TEST(validate_logging) {
 }
 
 TEST(validators_version) {
-  VERIFY(InputKeys::version.validate("1.0"));
-  VERIFY(InputKeys::version.validate("3.0"));
-  VERIFY(InputKeys::version.validate(""));
-  VERIFY(InputKeys::version.validate("any string"));
+  const auto& version = InputKeys::version;
+  VERIFY(version.validate("1.0"));
+  VERIFY(version.validate("3.0"));
+  VERIFY(version.validate(""));
+  VERIFY(version.validate("any string"));
 }
 
 TEST(validators_forced_thermalization) {
-  VERIFY(InputKeys::forcedThermalization_cellNumber.validate({300, 300, 300}));
-  VERIFY(!InputKeys::forcedThermalization_cellNumber.validate({0, 1, 1}));
-  VERIFY(!InputKeys::forcedThermalization_cellNumber.validate({1, 0, 1}));
-  VERIFY(!InputKeys::forcedThermalization_cellNumber.validate({1, 1, 0}));
-  VERIFY(!InputKeys::forcedThermalization_cellNumber.validate({-1, 1, 1}));
-  VERIFY(InputKeys::forcedThermalization_criticalEDensity.validate(2.0));
-  VERIFY(!InputKeys::forcedThermalization_criticalEDensity.validate(0.0));
-  VERIFY(!InputKeys::forcedThermalization_criticalEDensity.validate(2.5));
-  VERIFY(InputKeys::forcedThermalization_startTime.validate(0.1));
-  VERIFY(InputKeys::forcedThermalization_timestep.validate(4.0));
-  VERIFY(!InputKeys::forcedThermalization_timestep.validate(0.0));
-  VERIFY(!InputKeys::forcedThermalization_timestep.validate(4.1));
-  VERIFY(InputKeys::forcedThermalization_algorithm.validate(
-      ThermalizationAlgorithm::BiasedBF));
+  const auto& cell_number = InputKeys::forcedThermalization_cellNumber;
+  VERIFY(cell_number.validate({300, 300, 300}));
+  VERIFY(!cell_number.validate({0, 1, 1}));
+  VERIFY(!cell_number.validate({1, 0, 1}));
+  VERIFY(!cell_number.validate({1, 1, 0}));
+  VERIFY(!cell_number.validate({-1, 1, 1}));
+  const auto& critical_edens = InputKeys::forcedThermalization_criticalEDensity;
+  VERIFY(critical_edens.validate(2.0));
+  VERIFY(!critical_edens.validate(0.0));
+  VERIFY(!critical_edens.validate(2.5));
+  const auto& start_time = InputKeys::forcedThermalization_startTime;
+  VERIFY(start_time.validate(0.1));
+  const auto& time_step = InputKeys::forcedThermalization_timestep;
+  VERIFY(time_step.validate(4.0));
+  VERIFY(!time_step.validate(0.0));
+  VERIFY(!time_step.validate(4.1));
+  const auto& algorithm = InputKeys::forcedThermalization_algorithm;
+  VERIFY(algorithm.validate(ThermalizationAlgorithm::BiasedBF));
   const auto& lattice_sizes = InputKeys::forcedThermalization_latticeSizes;
   VERIFY(lattice_sizes.validate({1.0, 1.0, 1.0}));
   VERIFY(!lattice_sizes.validate({0.0, 1.0, 1.0}));
   VERIFY(!lattice_sizes.validate({1.0, 0.0, 1.0}));
   VERIFY(!lattice_sizes.validate({1.0, 1.0, 0.0}));
-  VERIFY(InputKeys::forcedThermalization_microcanonical.validate(false));
+  const auto& microcanonical = InputKeys::forcedThermalization_microcanonical;
+  VERIFY(microcanonical.validate(false));
 }
 
 #if 0
