@@ -2325,8 +2325,10 @@ struct InputKeys {
   /**
    * \removed_key{key_version_,3.2}
    */
-  inline static const Key<std::string> version{{"Version"},
-                                               {"1.0", "3.0", "3.2"}};
+  inline static const Key<std::string> version{
+      {"Version"},
+      {"1.0", "3.0", "3.2"},
+      detail::get_default_validator<std::string>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_heavy_flavor

@@ -254,6 +254,13 @@ TEST(validate_logging) {
   VERIFY(InputKeys::log_tmn.validate(einhard::TRACE));
 }
 
+TEST(validators_version) {
+  VERIFY(InputKeys::version.validate("1.0"));
+  VERIFY(InputKeys::version.validate("3.0"));
+  VERIFY(InputKeys::version.validate(""));
+  VERIFY(InputKeys::version.validate("any string"));
+}
+
 #if 0
 
 /* The following code is useful to print all keys in the database for debug
