@@ -130,7 +130,7 @@ string(TIMESTAMP BUILD_DATE)
 # linked before all the other and it is meant to avoid possible issues with e.g. ROOT whose include
 # directories might contain a Pythia.h header that might not be the one of the Pythia linked to
 # SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
-find_package(Pythia 8.317 EXACT REQUIRED)
+find_package(Pythia 8.316 EXACT REQUIRED)
 if(Pythia_FOUND)
     if(NOT TARGET Pythia::Pythia)
         message(FATAL_ERROR "Pythia library found, but its target is somehow missing.\n"

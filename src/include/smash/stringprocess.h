@@ -26,150 +26,119 @@
 namespace smash {
 static constexpr int LPythia = LogArea::Pythia::id;
 
-class FlatStringZ : public Pythia8::StringZ {
+/**
+ * \brief Custom PYTHIA fragmentation hook used by SMASH.
+ *
+ * This class provides a SMASH-specific implementation of the
+ * Pythia8::UserHooks interface to dynamically modify string
+ * fragmentation parameters during hadronization.
+ *
+ * The hook is currently used to apply separate Lund fragmentation
+ * parameters for leading baryons originating from valence diquark
+ * string endpoints. In particular, the parameters
+ * StringZ:aLund and StringZ:bLund may be changed on a
+ * hadron-by-hadron basis during fragmentation.
+ *
+ * The identification of leading baryons relies on custom status
+ * codes assigned to string endpoint partons in the Pythia event
+ * record before fragmentation.
+ *
+ * This infrastructure is intended to be extensible and may later
+ * be used for:
+ * - rope fragmentation,
+ * - density-dependent string fragmentation,
+ * - modified strangeness production,
+ * - medium-dependent fragmentation functions,
+ * - color-rope or junction-based effects.
+ *
+ * \see Pythia8::UserHooks
+ * \see Pythia8::StringZ
+ */
+class SmashFragHook : public Pythia8::UserHooks {
  public:
-  double zFrag(int, int, double) override {
-    return rndmPtr->flat();  // use Pythia RNG
-  }
+  /**
+   * Construct fragmentation hook with fragmentation parameters.
+   *
+   * \param[in,out] pythia_hadron Pointer to the PYTHIA hadronization instance.
+   * \param[in] special_status Custom status code identifying leading
+   *            partons in the event record.
+   * \param[in] a_default Default value of StringZ:aLund used for ordinary
+   *            string fragmentation.
+   * \param[in] b_default Default value of StringZ:bLund used for ordinary
+   *            string fragmentation.
+   * \param[in] a_leading Value of StringZ:aLund used for leading baryons.
+   * \param[in] b_leading Value of StringZ:bLund used for leading baryons.
+   */
+  SmashFragHook(Pythia8::Pythia *pythia_hadron, int special_status,
+                double a_default, double b_default, double a_leading,
+                double b_leading)
+      : pythia_hadron_(pythia_hadron),
+        specialStatus_(std::abs(special_status)),
+        a_default_(a_default),
+        b_default_(b_default),
+        a_leading_(a_leading),
+        b_leading_(b_leading) {}
 
-  // Compute f_rel(z) = f(z)/f(zMax), so that f_rel(zMax)=1.
-  double fRelAtZ(double z, double zMaxLocal) const {
-    if (z <= 0.0 || z >= 1.0)
-      return 0.0;
-
-    const double lnF = aShape * std::log((1.0 - z) / (1.0 - zMaxLocal)) +
-                       bShape * (1.0 / zMaxLocal - 1.0 / z) +
-                       cShape * std::log(zMaxLocal / z);
-
-    // Guard (same spirit as Pythia)
-    if (lnF > EXPMAX)
-      return std::exp(EXPMAX);
-    if (lnF < -EXPMAX)
-      return std::exp(-EXPMAX);
-    return std::exp(lnF);
-  }
-
-  // Acceptance probability when proposing z ~ Uniform(0,1).
-  // This is valid because fRelAtZ(z) <= 1 (peak normalized to 1).
-  double acceptProb(int idOld, int idNew, double mT2, double z) {
-    if (z <= 0.0 || z >= 1.0)
-      return 0.0;
-
-    // Must set the shape params for this fragmentation context:
-    initFlav(idOld, idNew);
-    initShape(mT2);
-
-    const double zMaxLocal = zLundMax(aShape, bShape, cShape);
-    double p = fRelAtZ(z, zMaxLocal);
-
-    // Numerical safety: clamp into [0,1]
-    if (p < 0.0)
-      p = 0.0;
-    if (p > 1.0)
-      p = 1.0;
-    return p;
-  }
-  double zMax(int idOld, int idNew, double mT2) {
-    initFlav(idOld, idNew);
-    initShape(mT2);
-    return zLundMax(aShape, bShape, cShape);
-  }
-};
-class FlatZFragmentation : public Pythia8::LundFragmentation {
- public:
-  bool init(Pythia8::StringFlav *flavSelPtrIn = nullptr,
-            Pythia8::StringPT *pTSelPtrIn = nullptr,
-            [[maybe_unused]] Pythia8::StringZ *z = nullptr,
-            Pythia8::FragModPtr fragModPtrIn = nullptr) override {
-    return Pythia8::LundFragmentation::init(flavSelPtrIn, pTSelPtrIn, &flatZ_,
-                                            fragModPtrIn);
-  }
-
-  bool init_flavZ(Pythia8::Pythia *pythia_ptr) {
-    flatZ_.initInfoPtr(const_cast<Pythia8::Info &>(pythia_ptr->info));
-    return flatZ_.init();  // baseline init (reads settings, sets flags, etc.)
-  }
-
-  double acceptProb(int idOld, int idNew, double mT2, double z) {
-    return flatZ_.acceptProb(idOld, idNew, mT2, z);
-  }
-
- private:
-  FlatStringZ flatZ_;
-};
-
-class ModifyHadronizationHook : public Pythia8::UserHooks {
- public:
-  bool DO_DYNAMIC_TENSION = false;
-  bool canVetoFragmentation() override { return true; }
-  bool doVetoFragmentation(Pythia8::Particle had,
-                           const Pythia8::StringEnd *sEnd) override;
-
-  // UserHooks API
-  bool canChangeFragPar() override;
-
-  bool doChangeFragPar(Pythia8::StringFlav *flavPtr, Pythia8::StringZ *zPtr,
-                       Pythia8::StringPT *pTPtr, int idEnd, double m2Had,
-                       std::vector<int> iParton,
-                       const Pythia8::StringEnd *sEnd) override;
-
-  // Configuration
-  void set_kappa(double new_kappa);
-  bool init_rope_pars(Pythia8::Info &info);
-
-  Pythia8::ParticleData *pd;
-  void setFragPtr(FlatZFragmentation *in_fragPtr) { fragPtr = in_fragPtr; }
-
- private:
-  double kappa_ = 1.0;
-  FlatZFragmentation *fragPtr = nullptr;
-  bool captured_ = false;
-  double sigma0_ = 0.0;
-  Pythia8::RopeFragPars rp_;
-};
-
-class MyFragHooks : public Pythia8::UserHooks {
- public:
-  MyFragHooks(Pythia8::Pythia *pythia_hadron) : pythia_hadron_(pythia_hadron) {}
-
-  //--------------------------------------------------------------------------
-  // Setters
-  //--------------------------------------------------------------------------
-
-  void setSpecialStatus(int status) { specialStatus_ = std::abs(status); }
-
-  void setRemnantParameters(double a, double b) {
-    aRemnLike_ = a;
-    bRemnLike_ = b;
-  }
-
-  void setDefaultParameters(double a, double b) {
-    aDefault_ = a;
-    bDefault_ = b;
-  }
-
-  //--------------------------------------------------------------------------
-  // UserHooks interface
-  //--------------------------------------------------------------------------
-
+  /**
+   * Inform PYTHIA that fragmentation parameters may be modified dynamically.
+   *
+   * \return Always true.
+   */
   bool canChangeFragPar() override { return true; }
 
-  bool doChangeFragPar(Pythia8::StringFlav *flavSelPtr,
-                       Pythia8::StringZ *zSelPtr, Pythia8::StringPT *pTSelPtr,
-                       int idEnd, double m2Had, std::vector<int> iParton,
+  /**
+   * Dynamically modify fragmentation parameters during string fragmentation.
+   *
+   * This hook is called internally by PYTHIA during hadron production from
+   * strings. If the currently fragmenting endpoint corresponds to a leading
+   * diquark remnant and no hadron has yet been produced from that endpoint,
+   * separate Lund fragmentation parameters are applied.
+   *
+   * Otherwise the default fragmentation parameters are restored.
+   *
+   * The function updates:
+   * - StringZ:aLund
+   * - StringZ:bLund
+   *
+   * and reinitializes the Pythia8::StringZ object accordingly.
+   *
+   * \param[in] flavSelPtr Pointer to flavor-selection object.
+   * \param[in,out] zSelPtr Pointer to Lund z-fragmentation object.
+   * \param[in] pTSelPtr Pointer to transverse-momentum selection object.
+   * \param[in] idEnd Endpoint flavor identifier.
+   * \param[in] m2Had Squared hadron mass.
+   * \param[in] iParton Indices of partons belonging to the current string.
+   * \param[in] nowEnd Information about the currently fragmenting string end.
+   *
+   * \return Always true.
+   */
+  bool doChangeFragPar([[maybe_unused]] Pythia8::StringFlav *flavSelPtr,
+                       Pythia8::StringZ *zSelPtr,
+                       [[maybe_unused]] Pythia8::StringPT *pTSelPtr,
+                       [[maybe_unused]] int idEnd,
+                       [[maybe_unused]] double m2Had, std::vector<int> iParton,
                        const Pythia8::StringEnd *nowEnd) override;
 
  private:
+  /// Pointer to the PYTHIA hadronization instance.
   Pythia8::Pythia *pythia_hadron_ = nullptr;
 
-  int specialStatus_ = 93;
+  /// Status code identifying leading partons in the event record.
+  int specialStatus_;
 
-  double aDefault_ = 0.68;
-  double bDefault_ = 0.98;
+  /// Default StringZ:aLund parameter.
+  double a_default_;
 
-  double aRemnLike_ = 0.2;
-  double bRemnLike_ = 0.5;
+  /// Default StringZ:bLund parameter.
+  double b_default_;
+
+  /// StringZ:aLund parameter used for leading baryons.
+  double a_leading_;
+
+  /// StringZ:bLund parameter used for leading baryons.
+  double b_leading_;
 };
+
 /**
  * \brief String excitation processes used in SMASH
  *
@@ -478,6 +447,21 @@ class StringProcess {
    */
   Pythia8::Event event_intermediate_;
 
+  /**
+   * Append a single two-endpoint string as an independent PYTHIA event.
+   *
+   * \param[in] p_str Four-momentum of the string.
+   * \param[in] ends PDG ids of the two string endpoints.
+   * \param[in] color_tag Color tag used to connect the string endpoints.
+   * \param[in] flip Whether to reverse the order of the string endpoints.
+   * \return Whether the string was successfully appended.
+   */
+  bool append_string(const Pythia8::Vec4 &p_str, const std::array<int, 2> &ends,
+                     int color_tag, bool flip = false);
+
+  /// PYTHIA event records containing string partons to be hadronized.
+  std::vector<Pythia8::Event> string_parton_events_;
+
  public:
   // clang-format off
 
@@ -490,8 +474,9 @@ class StringProcess {
      */
 
 
-    explicit StringProcess(Configuration &config);  /**
-   
+    explicit StringProcess(Configuration &config);  
+
+  /** 
    * Common setup of PYTHIA objects for soft and hard string routines
    * \param[out] pythia_in pointer to the PYTHIA object
    * \param[in] strange_supp strangeness suppression factor
@@ -533,29 +518,76 @@ class StringProcess {
 
   // clang-format on
 
+  /**
+   * Convert a PYTHIA four-vector into a SMASH four-vector.
+   *
+   * \param[in] p PYTHIA four-vector.
+   * \return Corresponding SMASH four-vector.
+   */
   static FourVector make_smash_4vec(const Pythia8::Vec4 &p) {
     return FourVector(p.e(), p.px(), p.py(), p.pz());
   }
 
+  /**
+   * Convert a SMASH four-vector into a PYTHIA four-vector.
+   *
+   * \param[in] p SMASH four-vector.
+   * \return Corresponding PYTHIA four-vector.
+   */
   static Pythia8::Vec4 make_pythia_4vec(const FourVector &p) {
     return Pythia8::Vec4(p.x1(), p.x2(), p.x3(), p.x0());
   }
 
+  /**
+   * Generate the next string process for a given process type.
+   *
+   * \param[in] type Type of string process to generate.
+   * \return Whether the process was successfully generated.
+   */
   bool next(ProcessType type);
 
-  Pythia8::RotBstMatrix toCM_;
-  bool string_above_threshold(const Pythia8::Event &event);
-  double estimate_string_threshold(int p_left, int p_right);
-  void set_color_by_type(Pythia8::Particle &p, int color);
-  bool hadronize();
-  std::shared_ptr<ModifyHadronizationHook> mod_hook_ptr = nullptr;
-  std::shared_ptr<FlatZFragmentation> flat_z_frag_ptr = nullptr;
-  std::shared_ptr<MyFragHooks> frag_hook = nullptr;
-  /// Append a single string (2 endpoints) as its own Pythia8::Event
-  bool append_string(const Pythia8::Vec4 &p_str, const std::array<int, 2> &ends,
-                     int color_tag, bool flip = false);
+  /// Rotation/boost matrix to transform particles to the center-of-mass frame.
+  Pythia8::RotBstMatrix to_cm_;
 
-  std::vector<Pythia8::Event> string_parton_events_;
+  /**
+   * Check whether all strings in a PYTHIA event are above fragmentation
+   * threshold.
+   *
+   * \param[in] event PYTHIA event record containing the string partons.
+   * \return True if all strings are above threshold.
+   */
+  bool string_above_threshold(const Pythia8::Event &event);
+
+  /**
+   * Estimate the minimum invariant mass required for a string to fragment.
+   *
+   * \param[in] p_left Index of the left string endpoint in the PYTHIA event.
+   * \param[in] p_right Index of the right string endpoint in the PYTHIA event.
+   * \return Estimated string threshold mass [GeV].
+   */
+  double estimate_string_threshold(int p_left, int p_right);
+
+  /**
+   * Set the color or anticolor index of a particle according to its type.
+   *
+   * Quarks receive a color index, antiquarks receive an anticolor index, and
+   * diquarks are treated according to their PYTHIA color-flow convention.
+   *
+   * \param[out] p Particle whose color information is modified.
+   * \param[in] color Color tag to assign.
+   */
+  void set_color_by_type(Pythia8::Particle &p, int color);
+
+  /**
+   * Hadronize all currently stored string parton events.
+   *
+   * \return Whether hadronization was successful.
+   */
+  bool hadronize();
+
+  /// Fragmentation hook used to modify PYTHIA fragmentation parameters.
+  std::shared_ptr<SmashFragHook> frag_hook = nullptr;
+
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->
    * different final states \iref{Schuler:1993wr}.
@@ -1130,223 +1162,8 @@ class StringProcess {
     return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
   }
 
-  /**
-   * compute the four-momentum properly oriented in the lab frame.
-   * While PYTHIA assumes that the collision axis is in z-direction,
-   * this is not necessarly the case in SMASH.
-   * \param[in] particle particle object from PYTHIA event generation
-   *            where z-axis is set to be the collision axis
-   * \param[in] evec_basis three basis vectors in the lab frame
-   *            evec_basis[0] is unit vector in the collision axis and
-   *            other two span the transverse plane
-   * \return four-momentum of particle in the lab frame
-   */
-  static FourVector reorient(Pythia8::Particle &particle,
-                             std::array<ThreeVector, 3> &evec_basis) {
-    ThreeVector three_momentum = evec_basis[0] * particle.pz() +
-                                 evec_basis[1] * particle.px() +
-                                 evec_basis[2] * particle.py();
-    return FourVector(particle.e(), three_momentum);
-  }
-
-  /**
-   * perform string fragmentation to determine species and momenta of hadrons
-   * by exploiting PYTHIA 8.3 \iref{Andersson:1983ia}, \iref{Sjostrand:2014zea},
-   * \iref{Bierlich:2022pfr}.
-   * \param[in] idq1 PDG id of quark or anti-diquark (carrying color index).
-   * \param[in] idq2 PDG id of diquark or anti-quark (carrying anti-color index).
-   * \param[in] mString the string mass. [GeV]
-   * \param[out] evecLong unit 3-vector specifying the direction of diquark or
-   *                      anti-diquark.
-   * \param[in] flip_string_ends is whether or not we randomly switch string ends.
-   * \param[in] separate_fragment_baryon is whether fragment leading baryon
-   *            (or anti-baryon) with separate fragmentation function.
-   * \param[out] intermediate_particles list of fragmented particles
-   * \return number of hadrons fragmented out of string.
-   *
-   * \throw std::runtime_error
-   *        if string mass is lower than threshold set by PYTHIA
-   */
-  int fragment_string(int idq1, int idq2, double mString,
-                      ThreeVector &evecLong, bool flip_string_ends,
-                      bool separate_fragment_baryon,
-                      ParticleList &intermediate_particles);
-
-  /**
-   * Fragment one hadron from a given string configuration if the string mass
-   * is above threshold (given by the consituent masses).
-   * Otherwise the entire string breaks down into (final) two hadrons.
-   * \param[in] from_forward whether a hadron is fragmented from the forward end
-   *            of the string
-   * \param[in] separate_fragment_baryon whether a separate fragmentation function
-   *            is used for the leading baryon from the diquark end of string.
-   * \param[in] evec_basis three orthonormal basis vectors of which
-   *            evec_basis[0] is in the longitudinal direction while
-   *            evec_basis[1] and evec_basis[2] span the transverse plane.
-   * \param[out] ppos_string lightcone momentum p^+ of the string.
-   *             This will be changed according to that of the remaining string.
-   * \param[out] pneg_string lightcone momentum p^- of the string.
-   *             This will be changed according to that of the remaining string.
-   * \param[out] QTrx_string_pos transverse momentum px carried by
-   *             the forward end of the string.
-   *             This will be changed according to that of the remaining string.
-   * \param[out] QTrx_string_neg transverse momentum px carried by
-   *             the backward end of the string.
-   *             This will be changed according to that of the remaining string.
-   * \param[out] QTry_string_pos transverse momentum py carried by
-   *             the forward end of the string.
-   *             This will be changed according to that of the remaining string.
-   * \param[out] QTry_string_neg transverse momentum py carried by
-   *             the backward end of the string.
-   *             This will be changed according to that of the remaining string.
-   * \param[out] flav_string_pos constituent flavor at the forward end of the string.
-   *             This will be changed according to that of the remaining string.
-   * \param[out] flav_string_neg constituent flavor at the backward end of the string.
-   *             This will be changed according to that of the remaining string.
-   * \param[out] pdgid_frag PDG id of fragmented hadron(s)
-   * \param[out] momentum_frag four-momenta of fragmented hadrons(s)
-   * \return number of fragmented hadron(s). It can be 1 or 2 depending on
-   *         the string mass. If it fails to fragment, returns 0.
-   */
-  int fragment_off_hadron(bool from_forward,
-                          bool separate_fragment_baryon,
-                          std::array<ThreeVector, 3> &evec_basis,
-                          double &ppos_string, double &pneg_string,
-                          double &QTrx_string_pos, double &QTrx_string_neg,
-                          double &QTry_string_pos, double &QTry_string_neg,
-                          Pythia8::FlavContainer &flav_string_pos,
-                          Pythia8::FlavContainer &flav_string_neg,
-                          std::vector<int> &pdgid_frag,
-                          std::vector<FourVector> &momentum_frag);
-
-  /**
-   * Determines hadron type from valence quark constituents.
-   * First, try with PYTHIA routine.
-   * If it does not work, select a resonance with the same quantum numbers.
-   * The probability to pick each resonance in this case is proportional to
-   * spin degeneracy / mass, which is inspired by UrQMD.
-   * \param[in] idq1 PDG id of a valence quark constituent.
-   * \param[in] idq2 PDG id of another valence quark constituent.
-   * \return PDG id of selected hadronic species.
-   */
-  int get_hadrontype_from_quark(int idq1, int idq2);
-
-  /**
-   * \param[in] idq1 id of the valence quark (anti-diquark)
-   * \param[in] idq2 id of the valence anti-quark (diquark)
-   * \param[in] mass mass of the resonance.
-   * \return PDG id of resonance with the closest mass.
-   *         If the mass is below the threshold or the input PDG id is invalid,
-   *         0 is returned.
-   */
-  int get_resonance_from_quark(int idq1, int idq2, double mass);
-
-  /**
-   * Determines lightcone momenta of two final hadrons fragmented from a string
-   * in the same way as StringFragmentation::finalTwo in StringFragmentation.cc
-   * of PYTHIA 8.
-   * \param[in] separate_fragment_hadron whether a separate fragmentation function
-   *            is used for the forward hadron
-   * \param[in] ppos_string lightcone momentum p^+ of the string
-   * \param[in] pneg_string ligntcone momentum p^- of the string
-   * \param[in] mTrn_had_forward transverse mass of the forward hadron
-   * \param[in] mTrn_had_backward transverse mass of the backward hadron
-   * \param[out] ppos_had_forward lightcone momentum p^+ of the forward hadron
-   * \param[out] ppos_had_backward lightcone momentum p^+ of the backward hadron
-   * \param[out] pneg_had_forward lightcone momentum p^- of the forward hadron
-   * \param[out] pneg_had_backward lightcone momentum p^- of the backward hadron
-   * \return if the lightcone momenta are properly determined such that
-   *         energy and momentum are conserved.
-   */
-  bool make_lightcone_final_two(
-      bool separate_fragment_hadron,
-      double ppos_string, double pneg_string,
-      double mTrn_had_forward, double mTrn_had_backward,
-      double &ppos_had_forward, double &ppos_had_backward,
-      double &pneg_had_forward, double &pneg_had_backward);
-
-  /**
-   * Sample lightcone momentum fraction according to
-   * the LUND fragmentation function.
-   * \f$ f(z) = \frac{1}{z} (1 - z)^a \exp{ \left(- \frac{b m_T^2}{z} \right) } \f$
-   * \param[in] a parameter for the fragmentation function
-   * \param[in] b parameter for the fragmentation function
-   * \param[in] mTrn transverse mass of the fragmented hadron
-   * \return sampled lightcone momentum fraction
-   */
-  static double sample_zLund(double a, double b, double mTrn);
-
-  /**
-   * \param[out] event_fragments event record which contains information of particles
-   * \param[in] evec_basis three orthonormal basis vectors of which
-   *            evec_basis[0] is in the longitudinal direction while
-   *            evec_basis[1] and evec_basis[2] span the transverse plane.
-   * \param[in] ppos_string lightcone momentum p^+ of the string
-   * \param[in] pneg_string ligntcone momentum p^- of the string
-   * \param[in] QTrx_string transverse momentum px of the string
-   * \param[in] QTry_string transverse momentum py of the string
-   * \param[in] QTrx_add_pos transverse momentum px to be added
-   *            to the most forward hadron
-   * \param[in] QTry_add_pos transverse momentum py to be added
-   *            to the most forward hadron
-   * \param[in] QTrx_add_neg transverse momentum px to be added
-   *            to the most backward hadron
-   * \param[in] QTry_add_neg transverse momentum py to be added
-   *            to the most backward hadron
-   */
-  bool remake_kinematics_fragments(
-      Pythia8::Event &event_fragments, std::array<ThreeVector, 3> &evec_basis,
-      double ppos_string, double pneg_string,
-      double QTrx_string, double QTry_string,
-      double QTrx_add_pos, double QTry_add_pos,
-      double QTrx_add_neg, double QTry_add_neg);
-
-  /**
-   * Shift the momentum rapidity of all particles in a given event record.
-   * y to factor_yrapid * y + diff_yrapid
-   * \param[out] event event record which contains information of particles
-   * \param[in] evec_basis three orthonormal basis vectors of which
-   *            evec_basis[0] is in the longitudinal direction while
-   *            evec_basis[1] and evec_basis[2] span the transverse plane.
-   * \param[in] factor_yrapid factor multiplied to the old rapidity
-   * \param[in] diff_yrapid rapidity difference added to the old one
-   */
-  void shift_rapidity_event(
-      Pythia8::Event &event, std::array<ThreeVector, 3> &evec_basis,
-      double factor_yrapid, double diff_yrapid) {
-    Pythia8::Vec4 pvec_string_now = Pythia8::Vec4(0., 0., 0., 0.);
-    // loop over all particles in the record
-    for (int ipyth = 1; ipyth < event.size(); ipyth++) {
-      if (!event[ipyth].isFinal()) {
-        continue;
-      }
-
-      FourVector p_frag = FourVector(
-          event[ipyth].e(), event[ipyth].px(),
-          event[ipyth].py(), event[ipyth].pz());
-      const double E_frag = p_frag.x0();
-      const double pl_frag = p_frag.threevec() * evec_basis[0];
-      const double ppos_frag = (E_frag + pl_frag) * M_SQRT1_2;
-      const double pneg_frag = (E_frag - pl_frag) * M_SQRT1_2;
-      const double mTrn_frag = std::sqrt(2. * ppos_frag * pneg_frag);
-      // evaluate the old momentum rapidity
-      const double y_frag = 0.5 * std::log(ppos_frag / pneg_frag);
-
-      // obtain the new momentum rapidity
-      const double y_new_frag = factor_yrapid * y_frag + diff_yrapid;
-      // compute the new four momentum
-      const double E_new_frag = mTrn_frag * std::cosh(y_new_frag);
-      const double pl_new_frag = mTrn_frag * std::sinh(y_new_frag);
-      ThreeVector mom_new_frag =
-          p_frag.threevec() + (pl_new_frag - pl_frag) * evec_basis[0];
-      Pythia8::Vec4 pvec_new_frag = set_Vec4(E_new_frag, mom_new_frag);
-      event[ipyth].p(pvec_new_frag);
-      pvec_string_now += pvec_new_frag;
-    }
-    event[0].p(pvec_string_now);
-    event[0].m(pvec_string_now.mCalc());
-  }
-
+  
+ 
   /**
    * Assign a cross section scaling factor to all outgoing particles.
    *
