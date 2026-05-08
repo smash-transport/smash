@@ -14,8 +14,6 @@
 #include <limits>
 #include <string>
 
-#include <Pythia8/Event.h>
-
 #include "smash/configuration.h"
 #include "smash/input_keys.h"
 #include "smash/kinematics.h"
@@ -468,15 +466,15 @@ bool StringProcess::hadronize() {
             particle.id());
         return false;  // you can implement rerun logic later if needed
       }
-      if (is_leading_from_quark(particle)) {
+      if (is_leading_from_diquark(particle)) {
         intermediate_particles.back().set_cross_section_scaling_factor(
             2.0 / 3.0 * additional_xsec_supp_);
+
       } else if (is_leading_from_quark(particle)) {
         intermediate_particles.back().set_cross_section_scaling_factor(
             0.5 * additional_xsec_supp_);
-      }
 
-      else {
+      } else {
         intermediate_particles.back().set_cross_section_scaling_factor(0.0);
       }
     }
@@ -795,20 +793,12 @@ bool StringProcess::next_NDiffSoft() {
   if (bar_a == 1 ||                  // baryon-*
       (bar_a == 0 && bar_b == 1) ||  // meson-baryon
       (bar_a == 0 && bar_b == 0)) {  // meson-meson
-
-    // string A = B1 + A2
     endsA = {idqA2, idqB1};
-    // string B = A1 + B2
     endsB = {idqB2, idqA1};
-
   } else if ((bar_a == 0 && bar_b == -1) ||  // meson-antibaryon
              (bar_a == -1)) {                // antibaryon-*
-
-    // string A = A1 + B2
     endsA = {idqB2, idqA1};
-    // string B = B1 + A2
     endsB = {idqA2, idqB1};
-
   } else {
     std::stringstream ss;
     ss << "StringProcess::next_NDiffSoft: baryonA = " << bar_a
@@ -834,8 +824,6 @@ bool StringProcess::next_NDiffSoft() {
   const double dPPos = -xfracA * PPosA_ - QPos;
   const double dPNeg = xfracB * PNegB_ - QNeg;
 
-  // pz = (p+ - p-)/sqrt(2),  E = (p+ + p-)/sqrt(2)
-
   // string from hadron A side (with +qT)
   const double pzA = ((PPosA_ + dPPos) - (PNegA_ + dPNeg)) * M_SQRT1_2;
   const double EA = ((PPosA_ + dPPos) + (PNegA_ + dPNeg)) * M_SQRT1_2;
@@ -845,7 +833,7 @@ bool StringProcess::next_NDiffSoft() {
   const double pzB = ((PPosB_ - dPPos) - (PNegB_ - dPNeg)) * M_SQRT1_2;
   const double EB = ((PPosB_ - dPPos) + (PNegB_ - dPNeg)) * M_SQRT1_2;
   Pythia8::Vec4 p_strB(-qx, -qy, pzB, EB);
-  if (!append_string(p_strA, endsA, 101, true) or
+  if (!append_string(p_strA, endsA, 101, true) ||
       !append_string(p_strB, endsB, 102, false))
     return false;
 

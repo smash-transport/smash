@@ -462,21 +462,69 @@ class StringProcess {
   /// PYTHIA event records containing string partons to be hadronized.
   std::vector<Pythia8::Event> string_parton_events_;
 
+  /**
+   * Single-diffractive process
+   * is based on single pomeron exchange described in \iref{Ingelman:1984ns}.
+   * \param[in] is_AB_to_AX specifies which hadron to excite into a string.
+   *            true : A + B -> A + X,
+   *            false : A + B -> X + B
+   * \return whether the process is successfully implemented.
+   */
+  bool next_SDiff(bool is_AB_to_AX);
+  /**
+   * Double-diffractive process ( A + B -> X + X )
+   * is similar to the single-diffractive process,
+   * but lightcone momenta of gluons are sampled
+   * in the same was as the UrQMD model \iref{Bass:1998ca},
+   * \iref{Bleicher:1999xi}.
+   * String masses are computed after pomeron exchange
+   * aquiring transverse momentum transfer.
+   * \return whether the process is successfully implemented.
+   */
+  bool next_DDiff();
+  /**
+   * Soft Non-diffractive process
+   * is modelled in accordance with dual-topological approach
+   * \iref{Capella:1978ig}.
+   * This involves a parton exchange in conjunction with momentum transfer.
+   * Probability distribution function of the lightcone momentum fraction
+   * carried by quark is based on the UrQMD model
+   * \iref{Bass:1998ca}, \iref{Bleicher:1999xi}.
+   * \return whether the process is successfully implemented.
+   *
+   * \throw std::runtime_error
+   *        if incoming particles are neither mesonic nor baryonic
+   */
+  bool next_NDiffSoft();
+  /**
+   * Hard Non-diffractive process
+   * is based on PYTHIA 8 with partonic showers and interactions.
+   * \return whether the process is successfully implemented.
+   */
+  bool next_Hard(ProcessType type);
+  /**
+   * Baryon-antibaryon annihilation process
+   * Based on what UrQMD \iref{Bass:1998ca}, \iref{Bleicher:1999xi} does,
+   * it create two mesonic strings after annihilating one quark-antiquark pair.
+   * Each string has mass equal to half of sqrts.
+   * \return whether the process is successfully implemented.
+   *
+   * \throw std::invalid_argument
+   *        if incoming particles are not baryon-antibaryon pair
+   */
+  bool next_BBbarAnn();
+
  public:
-  // clang-format off
+  /**
+   * Constructor, initializes PYTHIA. Should only be called once.
+   *
+   * All parameters are taken from \p config via Configuration::take.
+   *
+   * \param[in,out] config SMASH configuration object (keys are consumed)
+   */
+  explicit StringProcess(Configuration &config);
 
-    /**
-     * Constructor, initializes PYTHIA. Should only be called once.
-     *
-     * All parameters are taken from \p config via Configuration::take.
-     *
-     * \param[in,out] config SMASH configuration object (keys are consumed)
-     */
-
-
-    explicit StringProcess(Configuration &config);  
-
-  /** 
+  /**
    * Common setup of PYTHIA objects for soft and hard string routines
    * \param[out] pythia_in pointer to the PYTHIA object
    * \param[in] strange_supp strangeness suppression factor
@@ -508,15 +556,12 @@ class StringProcess {
    * \see smash::maximum_rndm_seed_in_pythia
    */
   void init_pythia_hadron_rndm() {
-    const int seed_new =
-        random::uniform_int(1, maximum_rndm_seed_in_pythia);
+    const int seed_new = random::uniform_int(1, maximum_rndm_seed_in_pythia);
 
     pythia_hadron_->rndm.init(seed_new);
     logg[LPythia].debug("pythia_hadron_ : rndm is initialized with seed ",
                         seed_new);
   }
-
-  // clang-format on
 
   /**
    * Convert a PYTHIA four-vector into a SMASH four-vector.
@@ -669,8 +714,6 @@ class StringProcess {
     kappa_tension_string_ = kappa_string;
   }
 
-  // clang-format off
-
   /**
    * initialization
    * feed intial particles, time of collision and gamma factor of the center of
@@ -695,88 +738,7 @@ class StringProcess {
    * as that of the three-momentum of particle A.
    */
   void compute_incoming_lightcone_momenta();
-  /**
-   * Determine string masses and directions in which strings are stretched
-   * \param[in] quarks pdg ids of string ends
-   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame [GeV]
-   * \param[out] m_str masses of strings [GeV]
-   * \param[out] evec_str are directions in which strings are stretched.
-   * \return whether masses are above the threshold
-   */
-  bool set_mass_and_direction_2strings(
-      const std::array<std::array<int, 2>, 2> &quarks,
-      const std::array<FourVector, 2> &pstr_com,
-      std::array<double, 2> &m_str,
-      std::array<ThreeVector, 2> &evec_str);
-  /**
-   * Prepare kinematics of two strings, fragment them and append to final_state
-   * \param[in] quarks pdg ids of string ends
-   * \param[in] pstr_com 4-momenta of strings in the C.o.m. frame [GeV]
-   * \param[in] m_str masses of strings [GeV]
-   * \param[out] evec_str are directions in which strings are stretched.
-   * \param[in] flip_string_ends is whether or not we randomly switch string ends.
-   * \param[in] separate_fragment_baryon is whether to fragment leading baryons
-   *            (or anti-baryons) with a separate fragmentation function.
-   * \return whether fragmentations and final state creation was successful
-   */
-  bool make_final_state_2strings(
-      const std::array<std::array<int, 2>, 2> &quarks,
-      const std::array<FourVector, 2> &pstr_com,
-      const std::array<double, 2> &m_str,
-      const std::array<ThreeVector, 2> &evec_str,
-      bool flip_string_ends, bool separate_fragment_baryon);
 
-  /**
-   * Single-diffractive process
-   * is based on single pomeron exchange described in \iref{Ingelman:1984ns}.
-   * \param[in] is_AB_to_AX specifies which hadron to excite into a string.
-   *            true : A + B -> A + X,
-   *            false : A + B -> X + B
-   * \return whether the process is successfully implemented.
-   */
-  bool next_SDiff(bool is_AB_to_AX);
-  /**
-   * Double-diffractive process ( A + B -> X + X )
-   * is similar to the single-diffractive process,
-   * but lightcone momenta of gluons are sampled
-   * in the same was as the UrQMD model \iref{Bass:1998ca},
-   * \iref{Bleicher:1999xi}.
-   * String masses are computed after pomeron exchange
-   * aquiring transverse momentum transfer.
-   * \return whether the process is successfully implemented.
-   */
-  bool next_DDiff();
-  /**
-   * Soft Non-diffractive process
-   * is modelled in accordance with dual-topological approach
-   * \iref{Capella:1978ig}.
-   * This involves a parton exchange in conjunction with momentum transfer.
-   * Probability distribution function of the lightcone momentum fraction
-   * carried by quark is based on the UrQMD model
-   * \iref{Bass:1998ca}, \iref{Bleicher:1999xi}.
-   * \return whether the process is successfully implemented.
-   *
-   * \throw std::runtime_error
-   *        if incoming particles are neither mesonic nor baryonic
-   */
-  bool next_NDiffSoft();
-  /**
-   * Hard Non-diffractive process
-   * is based on PYTHIA 8 with partonic showers and interactions.
-   * \return whether the process is successfully implemented.
-   */
-  bool next_Hard(ProcessType type);
-  /**
-   * Baryon-antibaryon annihilation process
-   * Based on what UrQMD \iref{Bass:1998ca}, \iref{Bleicher:1999xi} does,
-   * it create two mesonic strings after annihilating one quark-antiquark pair.
-   * Each string has mass equal to half of sqrts.
-   * \return whether the process is successfully implemented.
-   *
-   * \throw std::invalid_argument
-   *        if incoming particles are not baryon-antibaryon pair
-   */
-  bool next_BBbarAnn();
   /**
    * Compare the valence quark contents of the actual and mapped hadrons and
    * evaluate how many more constituents the actual hadron has compared to the
@@ -861,9 +823,9 @@ class StringProcess {
    *         to split into desired quark-antiquark pair.
    *         Otherwise, it gives true.
    */
-  bool splitting_gluon_qqbar(Pythia8::Event &event_intermediate,
-      std::array<int, 5> &nquark_total, std::array<int, 5> &nantiq_total,
-      bool sign_constituent,
+  bool splitting_gluon_qqbar(
+      Pythia8::Event &event_intermediate, std::array<int, 5> &nquark_total,
+      std::array<int, 5> &nantiq_total, bool sign_constituent,
       std::array<std::array<int, 5>, 2> &excess_constituent);
 
   /**
@@ -1041,8 +1003,7 @@ class StringProcess {
    *         which is used to access the specific particle entry
    *         in the event record.
    */
-  int get_index_forward(bool find_forward, int np_end,
-                        Pythia8::Event &event) {
+  int get_index_forward(bool find_forward, int np_end, Pythia8::Event &event) {
     int iforward = 1;
     for (int ip = 2; ip < event.size() - np_end; ip++) {
       const double y_quark_current = event[ip].y();
@@ -1071,14 +1032,14 @@ class StringProcess {
    * Compute the formation time and fill the arrays with final-state particles
    * as described in \iref{Andersson:1983ia}.
    *
-   * \param[out] intermediate_particles List of fragmented particles to be appended.
-   * \param[in] uString Velocity four-vector of the string.
-   * \param[in] evecLong Unit 3-vector along which the string is stretched.
-   * \param[in] additional_xsec_supp Additional multiplicative factor applied to
-   *            the cross section scaling (e.g. coherence or medium effects).
-   * \param[in] find_and_scale_leading If true, leading hadrons originating from
-   *            valence quark or diquark endpoints are identified and their cross
-   *            sections are rescaled according to the leading-hadron prescription.
+   * \param[out] intermediate_particles List of fragmented particles to be
+   * appended. \param[in] uString Velocity four-vector of the string. \param[in]
+   * evecLong Unit 3-vector along which the string is stretched. \param[in]
+   * additional_xsec_supp Additional multiplicative factor applied to the cross
+   * section scaling (e.g. coherence or medium effects). \param[in]
+   * find_and_scale_leading If true, leading hadrons originating from valence
+   * quark or diquark endpoints are identified and their cross sections are
+   * rescaled according to the leading-hadron prescription.
    *
    * \return Number of hadrons fragmented from the string.
    *
@@ -1086,11 +1047,10 @@ class StringProcess {
    * \throw std::invalid_argument If the string is neither mesonic nor baryonic.
    */
   int append_final_state(ParticleList &intermediate_particles,
-                         const FourVector &uString,
-                         const ThreeVector &evecLong,
+                         const FourVector &uString, const ThreeVector &evecLong,
                          double additional_xsec_supp = 1.0,
                          bool find_and_scale_leading = true);
-    /**
+  /**
    * append new particle from PYTHIA to a specific particle list
    * \param[in] pdgid PDG id of particle
    * \param[in] momentum four-momentum of particle
@@ -1162,8 +1122,6 @@ class StringProcess {
     return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
   }
 
-  
- 
   /**
    * Assign a cross section scaling factor to all outgoing particles.
    *
@@ -1180,7 +1138,7 @@ class StringProcess {
    *            multiplied with scaling factor
    */
   static void assign_all_scaling_factors(int baryon_string,
-                                         ParticleList& outgoing_particles,
+                                         ParticleList &outgoing_particles,
                                          const ThreeVector &evecLong,
                                          double suppression_factor);
 
@@ -1198,7 +1156,7 @@ class StringProcess {
    * \param[in] list list of string fragments
    * \return indices of the leading hadrons in \p list
    */
-  static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList& list);
+  static std::pair<int, int> find_leading(int nq1, int nq2, ParticleList &list);
 
   /**
    * Assign a cross section scaling factor to the given particle.
@@ -1212,7 +1170,7 @@ class StringProcess {
    * \param[out] data particle to assign a scaling factor to
    * \param[in] suppression_factor coherence factor to decrease scaling factor
    */
-  static void assign_scaling_factor(int nquark, ParticleData& data,
+  static void assign_scaling_factor(int nquark, ParticleData &data,
                                     double suppression_factor);
 
   /**
@@ -1234,86 +1192,83 @@ class StringProcess {
    */
   static int pdg_map_for_pythia(PdgCode &pdg);
 
-
   /**
    * \return forward lightcone momentum incoming particle A in CM-frame [GeV]
    * \see PPosA_
    */
-  double getPPosA() { return PPosA_;}
+  double getPPosA() { return PPosA_; }
 
   /**
    * \return backward lightcone momentum incoming particle Af in CM-frame [GeV]
    * \see PNegA_
    */
-  double getPNegA() { return PNegA_;}
+  double getPNegA() { return PNegA_; }
 
   /**
    * \return forward lightcone momentum incoming particle B in CM-frame [GeV]
    * \see PPosB_
    */
-  double getPPosB() { return PPosB_;}
+  double getPPosB() { return PPosB_; }
 
   /**
    * \return backward lightcone momentum incoming particle B in CM-frame [GeV]
    * \see PNegB_
    */
-  double getPnegB() { return PNegB_;}
+  double getPnegB() { return PNegB_; }
 
   /**
    * \return mass of incoming particle A [GeV]
    * \see massA_
    */
-  double get_massA() { return massA_;}
+  double get_massA() { return massA_; }
 
   /**
    * \return mass of incoming particle B [GeV]
    * \see massB_
    */
-  double get_massB() { return massB_;}
+  double get_massB() { return massB_; }
 
   /**
    * \return sqrt of mandelstam s [GeV]
    * \see sqrtsAB_
    */
-  double get_sqrts() { return sqrtsAB_;}
+  double get_sqrts() { return sqrtsAB_; }
 
   /**
    * \return array with PDG Codes of incoming particles
    * \see PDGcodes_
    */
-  std::array<PdgCode, 2> get_PDGs() { return PDGcodes_;}
+  std::array<PdgCode, 2> get_PDGs() { return PDGcodes_; }
 
   /**
    * \return momenta of incoming particles in lab frame [GeV]
    * \see plab_
    */
-  std::array<FourVector, 2> get_plab() { return plab_;}
+  std::array<FourVector, 2> get_plab() { return plab_; }
 
   /**
    * \return momenta of incoming particles in center of mass frame [GeV]
    * \see pcom_
    */
-  std::array<FourVector, 2> get_pcom() { return pcom_;}
+  std::array<FourVector, 2> get_pcom() { return pcom_; }
 
   /**
    * \return velocity four vector of the COM in the lab frame
    * \see ucomAB_
    */
-  FourVector get_ucom() { return ucomAB_;}
+  FourVector get_ucom() { return ucomAB_; }
 
   /**
    * \return velocity three vector of the COM in the lab frame
    * \see vcomAB_
    */
-  ThreeVector get_vcom() { return vcomAB_;}
+  ThreeVector get_vcom() { return vcomAB_; }
 
   /**
    * \return collision time
    * \see time_collision_
    */
-  double get_tcoll() { return time_collision_;}
-
-  // clang-format on
+  double get_tcoll() { return time_collision_; }
 };
 
 }  // namespace smash
