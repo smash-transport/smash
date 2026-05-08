@@ -268,6 +268,21 @@ std::vector<std::string> to_string(const MultiParticleReactionsBitSet &s);
  */
 std::vector<std::string> to_string(const FluidizableProcessesBitSet &s);
 
+/**
+ * Converts a PythiaFragmentationModel enum value to its string representation.
+ *
+ * This function is primarily intended for logging, debugging, and writing
+ * configuration output in a human-readable format.
+ *
+ * \param s The PythiaFragmentationModel enum value.
+ * \return A string corresponding to the selected fragmentation model.
+ *
+ * Possible return values:
+ * - "Default"
+ * - "Thermal"
+ */
+std::string to_string(const PythiaFragmentationModel &s);
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_STRINGIFY_H_

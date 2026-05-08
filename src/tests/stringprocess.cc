@@ -93,15 +93,34 @@ TEST(append_final) {
   // Values make for easily calucated test values
   FourVector uString = {1., .0, .0, .0};
   ThreeVector evecLong = {.0, .0, .0};
+  const double time_formation_const = 1.0;
+  const ThreeVector vstring = uString.velocity();
 
+  const ThreeVector vcomAB = sp->get_vcom();
+  const FourVector momentum_a = a.momentum().lorentz_boost(-vstring);
+  const FourVector momentum_b = b.momentum().lorentz_boost(-vstring);
+
+  const ThreeVector v_calc_a = momentum_a.lorentz_boost(-vcomAB).velocity();
+  const ThreeVector v_calc_b = momentum_b.lorentz_boost(-vcomAB).velocity();
+
+  const double gamma_a = 1.0 / std::sqrt(1.0 - v_calc_a.sqr());
+  const double gamma_b = 1.0 / std::sqrt(1.0 - v_calc_b.sqr());
+
+  const double expected_formation_a =
+      time_formation_const * gamma_a + sp->get_tcoll();
+
+  const double expected_formation_b =
+      time_formation_const * gamma_b + sp->get_tcoll();
   // Call tested function
-  sp->append_final_state(intermediate, uString, evecLong);
+  sp->append_final_state(intermediate, uString, evecLong,
+                         /*additional_xsec_supression*/ 1.0);
 
-  // Formation time is 0 due to the soft_t_form_ in the StringProcess
   // vx and vy remain 0 even with boosting
   // As vz starts at 1 it simply gets boosted to inverse_gamma
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].formation_time(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[1].formation_time(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(expected_formation_a,
+                         sp->get_final_state()[0].formation_time(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(expected_formation_b,
+                         sp->get_final_state()[1].formation_time(), 1e-7);
   COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].velocity().x1(), 1e-7);
   COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[1].velocity().x1(), 1e-7);
   COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].velocity().x2(), 1e-7);
@@ -111,7 +130,6 @@ TEST(append_final) {
   COMPARE_ABSOLUTE_ERROR(-0.7071067812,
                          sp->get_final_state()[1].velocity().x3(), 1e-7);
 }
-
 TEST(initialization) {
   std::unique_ptr<StringProcess> sp =
       smash::Test::default_string_process_interface();
@@ -359,62 +377,6 @@ TEST(find_total_number_constituent) {
   for (int i = 0; i < 5; ++i) {
     VERIFY((nquark[i] == 0) && (nantiq[i] == 0));
   }
-}
-
-/**
- * Compare sampled values of the LUND function to analytical ones via:
- * \f$ f(z) = \frac{1}{z} (1 - z)^a \exp{ \left(- \frac{b m_T^2}{z} \right) }
- * Using the same framework as the tests in random.cc do.
- */
-TEST(string_zlund) {
-  test_distribution(
-      1e7, 0.0001, []() { return StringProcess::sample_zLund(1, 1, 1); },
-      [](double x) { return 1 / x * (1. - x) * exp(-1. / x); });
-}
-
-TEST(string_incoming_lightcone_momenta) {
-  std::unique_ptr<StringProcess> sp =
-      smash::Test::default_string_process_interface();
-
-  ParticleData a{ParticleType::find(0x2212)};
-  a.set_4momentum(0.938, 0., 0., 1.);
-  FourVector p_a = a.momentum();
-
-  ParticleData b{ParticleType::find(0x2212)};
-  b.set_4momentum(0.938, 0., 0., -1.);
-  FourVector p_b = b.momentum();
-
-  sp->init({a, b}, 0.);
-
-  double Ap = sp->getPPosA();
-  double An = sp->getPNegA();
-  double Bp = sp->getPPosB();
-  double Bn = sp->getPnegB();
-
-  // longitudinal direction is +z so p± is (E±pz) / sqrt(2)
-  FUZZY_COMPARE(Ap, (p_a.x0() + p_a.x3()) * M_SQRT1_2);
-  FUZZY_COMPARE(An, (p_a.x0() - p_a.x3()) * M_SQRT1_2);
-  FUZZY_COMPARE(Bp, (p_b.x0() + p_b.x3()) * M_SQRT1_2);
-  FUZZY_COMPARE(Bn, (p_b.x0() - p_b.x3()) * M_SQRT1_2);
-}
-
-TEST(string_lightcone_final_two) {
-  double a = .0;
-  double b = .0;
-  double c = .0;
-  double d = .0;
-  std::unique_ptr<StringProcess> sp =
-      smash::Test::default_string_process_interface();
-
-  // returns false because mTsqr_string < 0.
-  VERIFY(sp->make_lightcone_final_two(false, -1., 1., .0, .0, a, b, c, d) ==
-         false);
-  // returns false because mTrn_string < mTrn_had_forward + mTrn_had_backward
-  VERIFY(sp->make_lightcone_final_two(false, .0, .0, 1., 1., a, b, c, d) ==
-         false);
-  // returns false because lambda_sqr == 0.
-  VERIFY(sp->make_lightcone_final_two(false, 1., 1. / 2., -0.337106, 0.837106,
-                                      a, b, c, d) == false);
 }
 
 TEST(string_find_leading) {

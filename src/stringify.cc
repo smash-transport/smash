@@ -358,4 +358,13 @@ std::vector<std::string> to_string(const FluidizableProcessesBitSet &s) {
   return result;
 }
 
+std::string to_string(const PythiaFragmentationModel &model) {
+  switch (model) {
+    case PythiaFragmentationModel::Default:
+      return "Default";
+    case PythiaFragmentationModel::Thermal:
+      return "Thermal";
+  }
+}
+
 }  // namespace smash

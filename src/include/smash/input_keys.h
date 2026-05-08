@@ -3263,6 +3263,171 @@ struct InputKeys {
       {"3.4"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_fragmentation_model,Fragmentation_Model,
+   *               PythiaFragmentationModel,Default}
+   *
+   * Selects which Pythia fragmentation model is used for string hadronization.
+   *
+   * Currently, the following models are available:
+   * - Default: The standard Pythia string fragmentation model.
+   * - Thermal: A thermal fragmentation model
+   *   (https://www.pythia.org/latest-manual/ThermalFragmentation.html).
+   *
+   * This parameter controls how strings are converted into hadrons and can
+   * influence particle spectra and yields, in particular for soft physics and
+   * strangeness production.
+   *
+   * Notes:
+   * - The default model corresponds to the standard Lund string fragmentation.
+   * - The thermal model may be useful for studying alternative hadronization
+   *   scenarios in dense systems.
+   */
+  /**
+   * \see_key{key_CT_SP_fragmentation_model}
+   */
+  inline static const Key<PythiaFragmentationModel>
+      collTerm_stringParam_fragmentationModel{
+          InputSections::c_stringParameters + "Fragmentation_Model",
+          PythiaFragmentationModel::Default,
+          {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_thermal_temperature,Thermal_Temperature,
+   *               double,0.21}
+   *
+   * Sets the temperature used by Pythia's thermal string fragmentation model.
+   *
+   * This value is passed to Pythia as `StringPT:temperature` and controls the
+   * transverse-momentum distribution in the thermal fragmentation model.
+   *
+   * Notes:
+   * - Only relevant if `Fragmentation_Model` is set to `Thermal`.
+   * - The value is given in GeV.
+   * - Pythia default: 0.21.
+   */
+  /**
+   * \see_key{key_CT_SP_thermal_temperature}
+   */
+  inline static const Key<double> collTerm_stringParam_thermalTemperature{
+      InputSections::c_stringParameters + "Thermal_Temperature", 0.21, {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_thermal_temp_prefactor,Thermal_Temp_Prefactor,
+   *               double,1.21}
+   *
+   * Sets the temperature prefactor for strange quarks and diquarks in Pythia's
+   * thermal string fragmentation model.
+   *
+   * This value is passed to Pythia as `StringPT:tempPreFactor`.
+   *
+   * Notes:
+   * - Only relevant if `Fragmentation_Model` is set to `Thermal`.
+   * - Pythia default: 1.21.
+   */
+  /**
+   * \see_key{key_CT_SP_thermal_temp_prefactor}
+   */
+  inline static const Key<double> collTerm_stringParam_thermalTempPrefactor{
+      InputSections::c_stringParameters + "Thermal_Temp_Prefactor",
+      1.21,
+      {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_thermal_baryon_to_meson_ratio,
+   *               Thermal_Baryon_To_Meson_Ratio,double,0.357}
+   *
+   * Sets the relative baryon-to-meson production rate in Pythia's thermal
+   * string fragmentation model.
+   *
+   * This value is passed to Pythia as `StringFlav:BtoMratio`.
+   *
+   * Notes:
+   * - Only relevant if `Fragmentation_Model` is set to `Thermal`.
+   * - Pythia default: 0.357.
+   */
+  /**
+   * \see_key{key_CT_SP_thermal_baryon_to_meson_ratio}
+   */
+  inline static const Key<double>
+      collTerm_stringParam_thermalBaryonToMesonRatio{
+          InputSections::c_stringParameters + "Thermal_Baryon_To_Meson_Ratio",
+          0.357,
+          {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_thermal_strange_suppression,
+   *               Thermal_Strange_Suppression,double,0.5}
+   *
+   * Sets the additional strange-quark suppression factor in Pythia's thermal
+   * string fragmentation model.
+   *
+   * This value is passed to Pythia as `StringFlav:StrangeSuppression`.
+   *
+   * Notes:
+   * - Only relevant if `Fragmentation_Model` is set to `Thermal`.
+   * - For hadrons with more than one strange quark, Pythia applies this factor
+   *   multiple times.
+   * - Pythia default: 0.5.
+   */
+  /**
+   * \see_key{key_CT_SP_thermal_strange_suppression}
+   */
+  inline static const Key<double>
+      collTerm_stringParam_thermalStrangeSuppression{
+          InputSections::c_stringParameters + "Thermal_Strange_Suppression",
+          0.5,
+          {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_thermal_n_quark,Thermal_N_Quark,int,3}
+   *
+   * Selects which newly produced quark flavours may be included in hadrons in
+   * Pythia's thermal string fragmentation model.
+   *
+   * This value is passed to Pythia as `StringFlav:nQuark`.
+   *
+   * Notes:
+   * - Only relevant if `Fragmentation_Model` is set to `Thermal`.
+   * - The default value 3 allows newly produced u, d, and s quarks.
+   * - Pythia default: 3.
+   */
+  /**
+   * \see_key{key_CT_SP_thermal_n_quark}
+   */
+  inline static const Key<int> collTerm_stringParam_thermalNQuark{
+      InputSections::c_stringParameters + "Thermal_N_Quark", 3, {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_thermal_meson_nonet_l1,
+   *               Thermal_Meson_Nonet_L1,bool,false}
+   *
+   * Controls whether L=1 meson nonets are included in Pythia's thermal string
+   * fragmentation model.
+   *
+   * This value is passed to Pythia as `StringFlav:mesonNonetL1`.
+   *
+   * Notes:
+   * - Only relevant if `Fragmentation_Model` is set to `Thermal`.
+   * - Enabling this option increases the set of hadrons considered during
+   *   flavour selection.
+   * - Pythia default: off.
+   */
+  /**
+   * \see_key{key_CT_SP_thermal_meson_nonet_l1}
+   */
+  inline static const Key<bool> collTerm_stringParam_thermalMesonNonetL1{
+      InputSections::c_stringParameters + "Thermal_Meson_Nonet_L1",
+      false,
+      {"3.4"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_decays_,Decays,bool,false}
    *
@@ -6244,7 +6409,8 @@ struct InputKeys {
       std::reference_wrapper<const Key<ThermalizationAlgorithm>>,
       std::reference_wrapper<const Key<TimeStepMode>>,
       std::reference_wrapper<const Key<HardStringTransitionMode>>,
-      std::reference_wrapper<const Key<TotalCrossSectionStrategy>>>;
+      std::reference_wrapper<const Key<TotalCrossSectionStrategy>>,
+      std::reference_wrapper<const Key<PythiaFragmentationModel>>>;
 
   /// List of references to all existing SMASH keys.
   inline static const std::vector<key_references_variant> list = {
@@ -6365,6 +6531,20 @@ struct InputKeys {
       std::cref(collTerm_stringParam_stringZBLeading),
       std::cref(collTerm_stringParam_useMonashTune),
       std::cref(collTerm_stringParam_unformedXsecSuppression),
+      std::cref(collTerm_stringParam_fragmentationModel),
+      std::cref(collTerm_stringParam_thermalTemperature),
+      std::cref(collTerm_stringParam_thermalTempPrefactor),
+      std::cref(collTerm_stringParam_thermalBaryonToMesonRatio),
+      std::cref(collTerm_stringParam_thermalStrangeSuppression),
+      std::cref(collTerm_stringParam_thermalNQuark),
+      std::cref(collTerm_stringParam_thermalMesonNonetL1),
+      std::cref(collTerm_stringParam_fragmentationModel),
+      std::cref(collTerm_stringParam_thermalTemperature),
+      std::cref(collTerm_stringParam_thermalTempPrefactor),
+      std::cref(collTerm_stringParam_thermalBaryonToMesonRatio),
+      std::cref(collTerm_stringParam_thermalStrangeSuppression),
+      std::cref(collTerm_stringParam_thermalNQuark),
+      std::cref(collTerm_stringParam_thermalMesonNonetL1),
       std::cref(collTerm_dileptons_decays),
       std::cref(collTerm_photons_twoToTwoScatterings),
       std::cref(collTerm_photons_bremsstrahlung),

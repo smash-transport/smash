@@ -120,6 +120,51 @@ StringProcess::StringProcess(Configuration& config)
     pythia_hadron_->addUserHooksPtr(frag_hook);
   }
 
+  if (config.take(InputKeys::collTerm_stringParam_fragmentationModel) ==
+      PythiaFragmentationModel::Thermal) {
+    pythia_hadron_->readString("Fragmentation:model = 1");
+
+    pythia_hadron_->readString(
+        "StringPT:temperature = " +
+        std::to_string(
+            config.take(InputKeys::collTerm_stringParam_thermalTemperature)));
+
+    pythia_hadron_->readString(
+        "StringPT:tempPreFactor = " +
+        std::to_string(
+            config.take(InputKeys::collTerm_stringParam_thermalTempPrefactor)));
+
+    pythia_hadron_->readString(
+        "StringFlav:BtoMratio = " +
+        std::to_string(config.take(
+            InputKeys::collTerm_stringParam_thermalBaryonToMesonRatio)));
+
+    pythia_hadron_->readString(
+        "StringFlav:StrangeSuppression = " +
+        std::to_string(config.take(
+            InputKeys::collTerm_stringParam_thermalStrangeSuppression)));
+
+    pythia_hadron_->readString(
+        "StringFlav:nQuark = " +
+        std::to_string(
+            config.take(InputKeys::collTerm_stringParam_thermalNQuark)));
+
+    pythia_hadron_->readString(
+        std::string("StringFlav:mesonNonetL1 = ") +
+        (config.take(InputKeys::collTerm_stringParam_thermalMesonNonetL1)
+             ? "on"
+             : "off"));
+
+    logg[LPythia].warn(
+        "Using Pythia thermal fragmentation model. Please cite: "
+        "https://inspirehep.net/literature/1495274\n"
+        "This option is experimental and not validated in SMASH. "
+        "It uses a separate, internally defined fragmentation parameter set "
+        "(independent of standard Lund tuning)\n"
+        "and may significantly alter hadronization (yields, spectra, "
+        "strangeness).\n"
+        "Do not use for physics conclusions without careful validation.");
+  }
   pythia_hadron_->init();
 
   /*
@@ -159,6 +204,7 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
 
   /* choose minimum transverse momentum scale
    * involved in partonic interactions */
+  pythia_in->readString("MultipartonInteractions:pTmin = 1.5");
   // transverse momentum spread in string fragmentation
   // Global Lund fragmentation
   pythia_in->readString("StringZ:aLund = " + std::to_string(stringz_a));
@@ -283,20 +329,18 @@ void StringProcess::init(const ParticleList& incoming, double tcoll) {
   massA_ = incoming[0].effective_mass();
   massB_ = incoming[1].effective_mass();
 
-  const FourVector pA_lab_smash = incoming[0].momentum();
-  const FourVector pB_lab_smash = incoming[1].momentum();
+  plab_[0] = incoming[0].momentum();
+  plab_[1] = incoming[1].momentum();
 
-  // keep your existing CM bookkeeping in SMASH types
-  sqrtsAB_ = (pA_lab_smash + pB_lab_smash).abs();
-  ucomAB_ = (pA_lab_smash + pB_lab_smash) / sqrtsAB_;
+  sqrtsAB_ = (plab_[0] + plab_[1]).abs();
+  ucomAB_ = (plab_[0] + plab_[1]) / sqrtsAB_;
   vcomAB_ = ucomAB_.velocity();
 
-  // --- Cached LAB -> CM boost using Pythia ---
-  const Pythia8::Vec4 pA_lab = make_pythia_4vec(pA_lab_smash);
-  const Pythia8::Vec4 pB_lab = make_pythia_4vec(pB_lab_smash);
+  const Pythia8::Vec4 pA_lab = make_pythia_4vec(plab_[0]);
+  const Pythia8::Vec4 pB_lab = make_pythia_4vec(plab_[1]);
 
   to_cm_.reset();
-  to_cm_.toCMframe(pA_lab, pB_lab);  // LAB -> CM (rest frame of total momentum)
+  to_cm_.toCMframe(pA_lab, pB_lab);
 
   const Pythia8::Vec4 pA_cm = to_cm_ * pA_lab;
   const Pythia8::Vec4 pB_cm = to_cm_ * pB_lab;
