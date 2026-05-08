@@ -418,7 +418,10 @@ void StringProcess::init(const ParticleList& incoming, double tcoll) {
 
   pcom_[0] = make_smash_4vec(pA_cm);
   pcom_[1] = make_smash_4vec(pB_cm);
+  ThreeVector evec_polar(pA_cm.px(), pA_cm.py(), pA_cm.pz());
+  evec_polar /= std::sqrt(evec_polar.sqr());
 
+  make_orthonormal_basis(evec_polar, evecBasisAB_);
   compute_incoming_lightcone_momenta();
 
   time_collision_ = tcoll;
@@ -583,15 +586,8 @@ bool StringProcess::append_string(const Pythia8::Vec4& p_str,
   const double ny = beam_axis_rest.py() / norm;
   const double nz = beam_axis_rest.pz() / norm;
 
-  // ------------------------------------------------------------------
-  // Old SMASH convention:
-  // ends[0] goes opposite the string axis,
-  // ends[1] goes along the string axis.
-  // ------------------------------------------------------------------
-
-  const Pythia8::Vec4 p1_rest(-nx * p_cm, -ny * p_cm, -nz * p_cm, E1);
-  const Pythia8::Vec4 p2_rest(nx * p_cm, ny * p_cm, nz * p_cm, E2);
-
+  const Pythia8::Vec4 p1_rest(nx * p_cm, ny * p_cm, nz * p_cm, E1);
+  const Pythia8::Vec4 p2_rest(-nx * p_cm, -ny * p_cm, -nz * p_cm, E2);
   // Boost endpoints from string rest frame back to AB CM.
   Pythia8::RotBstMatrix to_cm;
   to_cm.bst(p_str);
@@ -719,6 +715,12 @@ bool StringProcess::next_DDiff() {
   const double pz2 = ((PPosB_ - QPos) - (PNegB_ - QNeg)) * M_SQRT1_2;
   const double E2 = ((PPosB_ - QPos) + (PNegB_ - QNeg)) * M_SQRT1_2;
   Pythia8::Vec4 p_str2(-QTrx, -QTry, pz2, E2);
+  if (random::uniform_int(0, 1) == 0) {
+    std::swap(quarks[0][0], quarks[0][1]);
+  }
+  if (random::uniform_int(0, 1) == 0) {
+    std::swap(quarks[1][0], quarks[1][1]);
+  }
   const bool added = append_string(p_str1, quarks[0], 101, true) &&
                      append_string(p_str2, quarks[1], 102, false);
 
@@ -843,7 +845,6 @@ bool StringProcess::next_NDiffSoft() {
 
     // string A = B1 + A2
     endsA = {idqA2, idqB1};
-    std::cout << endsA[0] << std::endl;
     // string B = A1 + B2
     endsB = {idqB2, idqA1};
 
@@ -891,7 +892,6 @@ bool StringProcess::next_NDiffSoft() {
   const double pzB = ((PPosB_ - dPPos) - (PNegB_ - dPNeg)) * M_SQRT1_2;
   const double EB = ((PPosB_ - dPPos) + (PNegB_ - dPNeg)) * M_SQRT1_2;
   Pythia8::Vec4 p_strB(-qx, -qy, pzB, EB);
-
   if (!append_string(p_strA, endsA, 101, true) or
       !append_string(p_strB, endsB, 102, false))
     return false;

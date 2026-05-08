@@ -119,9 +119,10 @@ void ScatterAction::generate_final_state() {
                   [](const ParticleData &p) { return p.is_core(); });
   for (ParticleData &new_particle : outgoing_particles_) {
     // Boost to the computational frame
-    new_particle.boost_momentum(
-        -total_momentum_of_outgoing_particles().velocity());
-
+    if (!(is_string_process(process_type_))) {
+      new_particle.boost_momentum(
+          -total_momentum_of_outgoing_particles().velocity());
+    }
     /* Set positions of the outgoing particles */
     if (proc->get_type() != ProcessType::Elastic) {
       new_particle.set_4position(middle_point);
