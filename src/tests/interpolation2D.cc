@@ -29,9 +29,9 @@ static auto set_up_x_y_z_values() {
 }
 
 TEST_CATCH(fail_N_points, std::runtime_error) {
-  std::vector<double> x = {1, 2, 3, 4, 5};
-  std::vector<double> y = {1, 2, 0};
-  std::vector<double> z = {1, 2, 0, 0, 0, 0, 0, 8, 9, 1, 2, 3, 4, 5, 2};
+  const std::vector<double> x = {1, 2, 3, 4, 5};
+  const std::vector<double> y = {0, 1, 2};
+  const std::vector<double> z = {1, 2, 0, 0, 0, 0, 0, 8, 9, 1, 2, 3, 4, 5, 2};
 
   /* Try creating 2D interpolation with too few points, which is expected
    * to raise an exception */
@@ -39,12 +39,34 @@ TEST_CATCH(fail_N_points, std::runtime_error) {
 }
 
 TEST_CATCH(fail_dimensions, std::runtime_error) {
-  std::vector<double> x = {1, 2, 3, 4, 5};
-  std::vector<double> y = {1, 2, 0};
-  std::vector<double> z = {1, 2, 0, 0, 0, 8, 9, 1, 2, 3, 4, 5, 0};
+  const std::vector<double> x = {1, 2, 3, 4, 5};
+  const std::vector<double> y = {0, 1, 2};
+  const std::vector<double> z = {1, 2, 0, 0, 0, 8, 9, 1, 2, 3, 4, 5, 0};
 
   /* Try creating 2D interpolation with not-fitting dimensions, which is
    * expected to raise an exception */
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
+}
+
+TEST_CATCH(x_vector_not_sorted, std::runtime_error) {
+  const std::vector<double> x = {2, 1, 4, 3, 5};
+  const std::vector<double> y = {0, 1, 2, 3};
+  const std::vector<double> z = {1, 3, 0, 5, 0, 7, 3, 8, 9, 1,
+                                 2, 5, 4, 5, 6, 1, 4, 7, 9, 2};
+
+  /* Try creating 2D interpolation with unsorted x vector, which is expected to
+   * to raise an exception */
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
+}
+
+TEST_CATCH(y_vector_not_sorted, std::runtime_error) {
+  const std::vector<double> x = {1, 2, 3, 4, 5};
+  const std::vector<double> y = {1, 2, 0, 3};
+  const std::vector<double> z = {1, 3, 0, 5, 0, 7, 3, 8, 9, 1,
+                                 2, 5, 4, 5, 6, 1, 4, 7, 9, 2};
+
+  /* Try creating 2D interpolation with unsorted y vector, which is expected to
+   * to raise an exception */
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 }
 

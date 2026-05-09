@@ -7,6 +7,7 @@
 
 #include "smash/interpolation2D.h"
 
+#include <algorithm>
 #include <initializer_list>
 #include <iostream>
 #include <sstream>
@@ -31,6 +32,13 @@ InterpolateData2DSpline::InterpolateData2DSpline(
     throw std::runtime_error(
         "Need at least 4 data points in each dimension for bicubic spline "
         "interpolation.");
+  }
+
+  if (!std::is_sorted(x.begin(), x.end()) ||
+      !std::is_sorted(y.begin(), y.end())) {
+    throw std::runtime_error(
+        "x and y values must be strictly increasing, i.e. the vectors have to "
+        "be sorted by size of their values. This is required by GSL.");
   }
 
   // Assign lower and upper bounds for constant extrapolation
