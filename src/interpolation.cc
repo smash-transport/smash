@@ -11,8 +11,10 @@
 
 namespace smash {
 
-InterpolateDataSpline::InterpolateDataSpline(const std::vector<double>& x,
-                                             const std::vector<double>& y) {
+InterpolateDataSpline::InterpolateDataSpline(
+    const std::vector<double>& x, const std::vector<double>& y,
+    const ExtrapolationType extrapolation_type) {
+  extrapolation_type_ = extrapolation_type;
   const auto N = x.size();
   if (y.size() != N) {
     throw std::runtime_error(
@@ -44,11 +46,16 @@ InterpolateDataSpline::~InterpolateDataSpline() {
 
 double InterpolateDataSpline::operator()(double xi) const {
   if (xi < first_x_ || xi > last_x_) {
-    std::stringstream error_msg{};
-    error_msg << "InterpolateDataSpline only accepts x values within the range "
-          "of the underlying data.\n"
-       << "x value " << xi << " is out of bounds.";
-    throw std::out_of_range(error_msg.str());
+    if (extrapolation_type_ == ExtrapolationType::None) {
+      std::stringstream error_msg{};
+      error_msg
+          << "InterpolateDataSpline only accepts x values within the "
+             "range of the underlying data when extrapolation is not specified."
+          << "\nx value " << xi << " is out of bounds.";
+      throw std::out_of_range(error_msg.str());
+    } else if (extrapolation_type_ == ExtrapolationType::Constant_value) {
+      return (xi < first_x_) ? first_y_ : last_y_;
+    }
   }
   // cubic spline interpolation
   return gsl_spline_eval(spline_, xi, acc_);

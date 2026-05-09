@@ -23,6 +23,8 @@
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 
+#include "smash/forwarddeclarations.h"
+
 namespace smash {
 
 /**
@@ -69,9 +71,19 @@ class InterpolateDataLinear {
    *
    * \param x x-values.
    * \param y y-values.
+   * \param extrapolation_type Type of extrapolation for requested x_i values
+   *                           that are out of bounds. Extrapolation is by
+   *                           default disabled. See ExtrapolationType for all
+   *                           possible values.
+   *
    * \return The interpolation function.
+   * \throw std::out_of_range if values outside of the boundaries of the
+   *                          underlying data are tried to be accessed and
+   *                          extrapolation is disabled.
    */
-  InterpolateDataLinear(const std::vector<T>& x, const std::vector<T>& y);
+  InterpolateDataLinear(
+      const std::vector<T>& x, const std::vector<T>& y,
+      const ExtrapolationType extrapolation_type = ExtrapolationType::None);
 
   /**
    * Calculate linear interpolation at x.
@@ -80,7 +92,8 @@ class InterpolateDataLinear {
    * \return Interpolated value.
    *
    * \throw std::out_of_range if values outside of the boundaries of the
-   *                          underlying data are tried to be accessed.
+   *                          underlying data are tried to be accessed and
+   *                          extrapolation is disabled.
    */
   T operator()(T x) const;
 
@@ -89,6 +102,8 @@ class InterpolateDataLinear {
   std::vector<T> x_;
   /// Piecewise linear interpolation using f(x_i)
   std::vector<InterpolateLinear<T>> f_;
+  /// Extrapolation type
+  ExtrapolationType extrapolation_type_;
 };
 
 template <typename T>
@@ -199,8 +214,10 @@ void check_duplicates(const std::vector<T>& x,
 }
 
 template <typename T>
-InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
-                                                const std::vector<T>& y) {
+InterpolateDataLinear<T>::InterpolateDataLinear(
+    const std::vector<T>& x, const std::vector<T>& y,
+    const ExtrapolationType extrapolation_type) {
+  extrapolation_type_ = extrapolation_type;
   assert(x.size() == y.size());
   const size_t n = x.size();
   const auto p = generate_sort_permutation(
@@ -245,12 +262,19 @@ size_t find_index(const std::vector<T>& v, T x) {
 
 template <typename T>
 T InterpolateDataLinear<T>::operator()(T x0) const {
-  if (x0 < x_.front() || x0 > x_.back()) {
-    std::stringstream error_msg{};
-    error_msg << "InterpolateDataLinear only accepts x values within the range "
-          "of the underlying data.\n"
-       << "x value " << x0 << " is out of bounds.";
-    throw std::out_of_range(error_msg.str());
+  double first_x = x_.front();
+  double last_x = x_.back();
+  if (x0 < first_x || x0 > last_x) {
+    if (extrapolation_type_ == ExtrapolationType::None) {
+      std::stringstream error_msg{};
+      error_msg
+          << "InterpolateDataLinear only accepts x values within the "
+             "range of the underlying data when extrapolation is not specified."
+          << "\nx value " << x0 << " is out of bounds.";
+      throw std::out_of_range(error_msg.str());
+    } else if (extrapolation_type_ == ExtrapolationType::Constant_value) {
+      return (x0 < first_x) ? f_.front()(first_x) : f_.back()(last_x);
+    }
   }
   // Find the piecewise linear interpolation corresponding to x0.
   size_t i = find_index(x_, x0);
@@ -266,10 +290,21 @@ class InterpolateDataSpline {
    *
    * \param x x-values.
    * \param y y-values.
+   * \param extrapolation_type Type of extrapolation for requested x_i values
+   *                           that are out of bounds. Extrapolation is by
+   *                           default disabled. See ExtrapolationType for all
+   *                           possible values.
+   *
    * \return The interpolation function.
+   * \throw std::runtime_error if vectors x and y have different length.
+   * \throw std::runtime_error if less than 3 data points are provided.
+   * \throw std::out_of_range if values outside of the boundaries of the
+   *                          underlying data are tried to be accessed and
+   *                          extrapolation is disabled.
    */
-  InterpolateDataSpline(const std::vector<double>& x,
-                        const std::vector<double>& y);
+  InterpolateDataSpline(
+      const std::vector<double>& x, const std::vector<double>& y,
+      const ExtrapolationType extrapolation_type = ExtrapolationType::None);
 
   /// Destructor
   ~InterpolateDataSpline();
@@ -281,11 +316,14 @@ class InterpolateDataSpline {
    * \return Interpolated value.
    *
    * \throw std::out_of_range if values outside of the boundaries of the
-   *                          underlying data are tried to be accessed.
+   *                          underlying data are tried to be accessed and
+   *                          extrapolation is disabled.
    */
   double operator()(double x) const;
 
  private:
+  /// Extrapolation type.
+  ExtrapolationType extrapolation_type_;
   /// First x value of underlying data.
   double first_x_;
   /// Last x value of underlying data.

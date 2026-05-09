@@ -54,6 +54,14 @@ struct Nucleoncorr;
 
 /// @endcond
 
+/// The extrapolation type for interpolations.
+enum class ExtrapolationType {
+  /// Data will not be extrapolated.
+  None,
+  /// Extrapolate using a constant based on the outermost values.
+  Constant_value,
+};
+
 /// The calculation frame
 enum class CalculationFrame {
   CenterOfVelocity,

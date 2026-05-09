@@ -15,16 +15,18 @@
 
 using namespace smash;
 
-static InterpolateDataLinear<double> set_up_interpolate_data_linear_sorted() {
+static InterpolateDataLinear<double> set_up_interpolate_data_linear_sorted(
+    ExtrapolationType extrapolation_type) {
   const std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
   const std::vector<double> y = {1, 2, 0, 0, 0, 0, 0, 8, 9};
-  return InterpolateDataLinear<double>(x, y);;
+  return InterpolateDataLinear<double>(x, y, extrapolation_type);
 }
 
-static InterpolateDataSpline set_up_interpolate_data_spline_sorted() {
+static InterpolateDataSpline set_up_interpolate_data_spline_sorted(
+    ExtrapolationType extrapolation_type) {
   const std::vector<double> x = {1, 2, 3, 4, 5, 6, 7, 8, 9};
   const std::vector<double> y = x;
-  return InterpolateDataSpline(x, y);
+  return InterpolateDataSpline(x, y, extrapolation_type);
 }
 
 TEST(interpolate_linear) {
@@ -60,7 +62,7 @@ TEST(find_index) {
 
 TEST(interpolate_data_linear) {
   const InterpolateDataLinear<double> f =
-      set_up_interpolate_data_linear_sorted();
+      set_up_interpolate_data_linear_sorted(ExtrapolationType::None);
   COMPARE(f(1.5), 1.5);
   COMPARE(f(5), 0.0);
 }
@@ -68,14 +70,14 @@ TEST(interpolate_data_linear) {
 TEST_CATCH(interpolate_data_linear_value_out_of_lower_bound,
            std::out_of_range) {
   const InterpolateDataLinear<double> f =
-      set_up_interpolate_data_linear_sorted();
+      set_up_interpolate_data_linear_sorted(ExtrapolationType::None);
   f(0);
 }
 
 TEST_CATCH(interpolate_data_linear_value_out_of_upper_bound,
            std::out_of_range) {
   const InterpolateDataLinear<double> f =
-      set_up_interpolate_data_linear_sorted();
+      set_up_interpolate_data_linear_sorted(ExtrapolationType::None);
   f(10);
 }
 
@@ -87,6 +89,14 @@ TEST(interpolate_data_linear_unsorted) {
   y.clear();
   COMPARE(f(1.5), 1.5);
   COMPARE(f(5), 0.0);
+}
+
+TEST(interpolate_data_linear_with_constant_extrapolation) {
+  const InterpolateDataLinear<double> f =
+      set_up_interpolate_data_linear_sorted(ExtrapolationType::Constant_value);
+  COMPARE(f(1.5), 1.5);
+  COMPARE(f(0), 1.);
+  COMPARE(f(10), 9.);
 }
 
 TEST(trilinear_interpolation) {
@@ -124,19 +134,22 @@ TEST(trilinear_interpolation) {
 }
 
 TEST(interpolate_data_spline) {
-  const InterpolateDataSpline f = set_up_interpolate_data_spline_sorted();
+  const InterpolateDataSpline f =
+      set_up_interpolate_data_spline_sorted(ExtrapolationType::None);
   COMPARE(f(1.5), 1.5);
 }
 
 TEST_CATCH(interpolate_data_spline_value_out_of_lower_bound,
            std::out_of_range) {
-  const InterpolateDataSpline f = set_up_interpolate_data_spline_sorted();
+  const InterpolateDataSpline f =
+      set_up_interpolate_data_spline_sorted(ExtrapolationType::None);
   f(0);
 }
 
 TEST_CATCH(interpolate_data_spline_value_out_of_upper_bound,
            std::out_of_range) {
-  const InterpolateDataSpline f = set_up_interpolate_data_spline_sorted();
+  const InterpolateDataSpline f =
+      set_up_interpolate_data_spline_sorted(ExtrapolationType::None);
   f(10);
 }
 
@@ -147,4 +160,12 @@ TEST(interpolate_data_spline_unsorted) {
   x.clear();
   y.clear();
   COMPARE(f(1.5), 1.5);
+}
+
+TEST(interpolate_data_spline_with_constant_extrapolation) {
+  const InterpolateDataSpline f =
+      set_up_interpolate_data_spline_sorted(ExtrapolationType::Constant_value);
+  COMPARE(f(1.5), 1.5);
+  COMPARE(f(0), 1.);
+  COMPARE(f(10), 9.);
 }
