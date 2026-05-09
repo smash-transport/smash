@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2020,2022
+ *    Copyright (c) 2020,2022,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,6 +14,8 @@
 
 #include "gsl/gsl_spline2d.h"
 
+#include "smash/forwarddeclarations.h"
+
 namespace smash {
 
 /// Represent a bicubic spline interpolation.
@@ -21,19 +23,26 @@ class InterpolateData2DSpline {
  public:
   /**
    * Interpolate function f given discrete samples f(x_i, y_i) = z_i.
+   * A bicubic spline interpolation is used.
    *
    * \param x x-values.
    * \param y y-values.
    * \param z z-values
-   * \return The interpolation function.
+   * \param extrapolation_type Type of extrapolation for requested x_i and y_i
+   *                           values that are out of bounds. Extrapolation is
+   *                           by default disabled. See ExtrapolationType for
+   *                           all possible values.
    *
-   * A bicubic spline interpolation is used.
-   * Values outside the given samples will use the outmost sample
-   * as a constant extrapolation.
+   * \return The interpolation function.
+   * \throw std::out_of_range if values outside of the boundaries of the
+   *                          underlying data are tried to be accessed and
+   *                          extrapolation is disabled.
+   *
    */
-  InterpolateData2DSpline(const std::vector<double>& x,
-                          const std::vector<double>& y,
-                          const std::vector<double>& z);
+  InterpolateData2DSpline(
+      const std::vector<double>& x, const std::vector<double>& y,
+      const std::vector<double>& z,
+      const ExtrapolationType extrapolation_type = ExtrapolationType::None);
 
   /// Destructor
   ~InterpolateData2DSpline();
@@ -41,20 +50,26 @@ class InterpolateData2DSpline {
   /**
    * Calculate bicubic interpolation for given x and y.
    *
-   *  \param xi Interpolation argument in first dimension.
-   *  \param yi Interpolation argument in second dimension.
-   *  \return Interpolated value.
+   * \param xi Interpolation argument in first dimension.
+   * \param yi Interpolation argument in second dimension.
+   *
+   * \return Interpolated value.
+   * \throw std::out_of_range if values outside of the boundaries of the
+   *                          underlying data are tried to be accessed and
+   *                          extrapolation is disabled.
    */
   double operator()(double xi, double yi) const;
 
  private:
-  /// First x value.
+  /// Extrapolation type.
+  ExtrapolationType extrapolation_type_;
+  /// First x value of underlying data.
   double first_x_;
-  /// Last x value.
+  /// Last x value of underlying data.
   double last_x_;
-  /// First y value.
+  /// First y value of underlying data.
   double first_y_;
-  /// Last y value.
+  /// Last y value of underlying data.
   double last_y_;
 
   /// GSL iterator for interpolation lookups in x direction.

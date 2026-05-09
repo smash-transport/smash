@@ -100,7 +100,8 @@ TEST_CATCH(y_value_out_of_upper_bound, std::out_of_range) {
 TEST(extrapolate_constant) {
   // check constant extrapolation if x or y values are out of bounds
   const auto [x, y, z] = set_up_x_y_z_values();
-  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
+  interp = std::make_unique<InterpolateData2DSpline>(
+      x, y, z, ExtrapolationType::Constant_value);
 
   // x out of bounds
   FUZZY_COMPARE((*interp)(0.5, 4), (*interp)(1, 4));
