@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2019-2020,2022,2024-2025
+ *    Copyright (c) 2019-2020,2022,2024-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -362,14 +362,14 @@ void BremsstrahlungAction::create_interpolations() {
   pipi_pipi_opp_interpolation = std::make_unique<InterpolateDataLinear<double>>(
       sqrts, sigma_pipi_pipi_opp);
   pipi_pipi_same_interpolation =
-      std::make_unique<InterpolateDataLinear<double>>(sqrts,
-                                                      sigma_pipi_pipi_same);
-  pipi0_pipi0_interpolation =
-      std::make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi0_pipi0);
-  pipi_pi0pi0_interpolation =
-      std::make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pipi_pi0pi0);
-  pi0pi0_pipi_interpolation =
-      std::make_unique<InterpolateDataLinear<double>>(sqrts, sigma_pi0pi0_pipi);
+      std::make_unique<InterpolateDataLinear<double>>(
+          sqrts, sigma_pipi_pipi_same, ExtrapolationType::Constant_value);
+  pipi0_pipi0_interpolation = std::make_unique<InterpolateDataLinear<double>>(
+      sqrts, sigma_pipi0_pipi0, ExtrapolationType::Constant_value);
+  pipi_pi0pi0_interpolation = std::make_unique<InterpolateDataLinear<double>>(
+      sqrts, sigma_pipi_pi0pi0, ExtrapolationType::Constant_value);
+  pi0pi0_pipi_interpolation = std::make_unique<InterpolateDataLinear<double>>(
+      sqrts, sigma_pi0pi0_pipi, ExtrapolationType::Constant_value);
 
   // Create interpolation objects containing bicubic interpolations for
   // differential dSigma/dk
