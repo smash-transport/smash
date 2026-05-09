@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2020,2022
+ *    Copyright (c) 2020,2022,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -20,33 +20,36 @@ using namespace smash;
 std::unique_ptr<InterpolateData2DSpline> interp = nullptr;
 const double accuracy = 1e-6;
 
-TEST(fail_N_points) {
+static auto set_up_x_y_z_values() {
+  const std::vector<double> x = {1, 2, 3, 4, 5};
+  const std::vector<double> y = {1, 4, 8, 12};
+  const std::vector<double> z = {1, 3, 0, 5, 0, 7, 3, 8, 9, 1,
+                                 2, 5, 4, 5, 6, 1, 4, 7, 9, 2};
+  return std::make_tuple(x, y, z);
+}
+
+TEST_CATCH(fail_N_points, std::runtime_error) {
   std::vector<double> x = {1, 2, 3, 4, 5};
   std::vector<double> y = {1, 2, 0};
   std::vector<double> z = {1, 2, 0, 0, 0, 0, 0, 8, 9, 1, 2, 3, 4, 5, 2};
 
-  // Try creating 2D interpolation with too few points, which is expected
-  // to raise an exception
-  vir::test::expect_failure();
+  /* Try creating 2D interpolation with too few points, which is expected
+   * to raise an exception */
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 }
 
-TEST(fail_dimensions) {
+TEST_CATCH(fail_dimensions, std::runtime_error) {
   std::vector<double> x = {1, 2, 3, 4, 5};
   std::vector<double> y = {1, 2, 0};
   std::vector<double> z = {1, 2, 0, 0, 0, 8, 9, 1, 2, 3, 4, 5, 0};
 
-  // Try creating 2D interpolation with not-fitting dimensions, which is
-  // expected to raise an exception
-  vir::test::expect_failure();
+  /* Try creating 2D interpolation with not-fitting dimensions, which is
+   * expected to raise an exception */
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 }
 
 TEST(interpolate_bicubic) {
-  std::vector<double> x = {1, 2, 3, 4, 5};
-  std::vector<double> y = {1, 4, 8, 12};
-  std::vector<double> z = {1, 3, 0, 5, 0, 7, 3, 8, 9, 1,
-                           2, 5, 4, 5, 6, 1, 4, 7, 9, 2};
+  const auto [x, y, z] = set_up_x_y_z_values();
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 
   // check exact values at the nodes
@@ -67,15 +70,36 @@ TEST(interpolate_bicubic) {
   // check interpolation in both directions
   COMPARE_RELATIVE_ERROR((*interp)(1.5, 5.3), 4.246599, accuracy);
   COMPARE_RELATIVE_ERROR((*interp)(2.95, 9.1), 3.825197, accuracy);
-  COMPARE_RELATIVE_ERROR((*interp)(4.33, 92.04), 7.553750, accuracy);
+  COMPARE_RELATIVE_ERROR((*interp)(4.33, 11.4), 7.024691, accuracy);
+}
+
+TEST_CATCH(x_value_out_of_lower_bound, std::out_of_range) {
+  const auto [x, y, z] = set_up_x_y_z_values();
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
+  (*interp)(0.5, 4);
+}
+
+TEST_CATCH(x_value_out_of_upper_bound, std::out_of_range) {
+  const auto [x, y, z] = set_up_x_y_z_values();
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
+  (*interp)(5.5, 4);
+}
+
+TEST_CATCH(y_value_out_of_lower_bound, std::out_of_range) {
+  const auto [x, y, z] = set_up_x_y_z_values();
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
+  (*interp)(2, 0.8);
+}
+
+TEST_CATCH(y_value_out_of_upper_bound, std::out_of_range) {
+  const auto [x, y, z] = set_up_x_y_z_values();
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
+  (*interp)(2, 13);
 }
 
 TEST(extrapolate_constant) {
   // check constant extrapolation if x or y values are out of bounds
-  std::vector<double> x = {1, 2, 3, 4, 5};
-  std::vector<double> y = {1, 4, 8, 12};
-  std::vector<double> z = {1, 3, 0, 5, 0, 7, 3, 8, 9, 1,
-                           2, 5, 4, 5, 6, 1, 4, 7, 9, 2};
+  const auto [x, y, z] = set_up_x_y_z_values();
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 
   // x out of bounds
@@ -85,4 +109,8 @@ TEST(extrapolate_constant) {
   // y out of bounds
   FUZZY_COMPARE((*interp)(2, 0.8), (*interp)(2, 1));
   FUZZY_COMPARE((*interp)(5, 16), (*interp)(5, 12));
+
+  // x and y out of bounds
+  FUZZY_COMPARE((*interp)(0.5, 0.8), (*interp)(1, 1));
+  FUZZY_COMPARE((*interp)(7, 16), (*interp)(5, 12));
 }
