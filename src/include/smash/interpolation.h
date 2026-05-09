@@ -33,10 +33,6 @@ namespace smash {
 template <typename T>
 class InterpolateLinear {
  public:
-  /// Slope of the linear interpolation.
-  T slope_;
-  /// y-axis intercept of the linear interpolation.
-  T yintercept_;
   /**
    * Linear interpolation given two points (x0, y0) and (x1, y1).
    *
@@ -51,6 +47,12 @@ class InterpolateLinear {
    * \return Interpolated value.
    */
   T operator()(T x) const;
+
+ private:
+  /// Slope of the linear interpolation.
+  T slope_;
+  /// y-axis intercept of the linear interpolation.
+  T yintercept_;
 };
 
 /**
