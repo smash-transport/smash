@@ -374,37 +374,47 @@ void BremsstrahlungAction::create_interpolations() {
   // Create interpolation objects containing bicubic interpolations for
   // differential dSigma/dk
   pipi_pipi_opp_dsigma_dk_interpolation =
-      std::make_unique<InterpolateData2DSpline>(photon_momentum, sqrts,
-                                                dsigma_dk_pipi_pipi_opp);
+      std::make_unique<InterpolateData2DSpline>(
+          photon_momentum, sqrts, dsigma_dk_pipi_pipi_opp,
+          ExtrapolationType::Constant_value);
   pipi_pipi_same_dsigma_dk_interpolation =
-      std::make_unique<InterpolateData2DSpline>(photon_momentum, sqrts,
-                                                dsigma_dk_pipi_pipi_same);
+      std::make_unique<InterpolateData2DSpline>(
+          photon_momentum, sqrts, dsigma_dk_pipi_pipi_same,
+          ExtrapolationType::Constant_value);
   pipi0_pipi0_dsigma_dk_interpolation =
-      std::make_unique<InterpolateData2DSpline>(photon_momentum, sqrts,
-                                                dsigma_dk_pipi0_pipi0);
+      std::make_unique<InterpolateData2DSpline>(
+          photon_momentum, sqrts, dsigma_dk_pipi0_pipi0,
+          ExtrapolationType::Constant_value);
   pipi_pi0pi0_dsigma_dk_interpolation =
-      std::make_unique<InterpolateData2DSpline>(photon_momentum, sqrts,
-                                                dsigma_dk_pipi_pi0pi0);
+      std::make_unique<InterpolateData2DSpline>(
+          photon_momentum, sqrts, dsigma_dk_pipi_pi0pi0,
+          ExtrapolationType::Constant_value);
   pi0pi0_pipi_dsigma_dk_interpolation =
-      std::make_unique<InterpolateData2DSpline>(photon_momentum, sqrts,
-                                                dsigma_dk_pi0pi0_pipi);
+      std::make_unique<InterpolateData2DSpline>(
+          photon_momentum, sqrts, dsigma_dk_pi0pi0_pipi,
+          ExtrapolationType::Constant_value);
 
   // Create interpolation objects containing bicubic interpolations for
   // differential dSigma/dtheta
   pipi_pipi_opp_dsigma_dtheta_interpolation =
-      std::make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                                dsigma_dtheta_pipi_pipi_opp);
+      std::make_unique<InterpolateData2DSpline>(
+          photon_angle, sqrts, dsigma_dtheta_pipi_pipi_opp,
+          ExtrapolationType::Constant_value);
   pipi_pipi_same_dsigma_dtheta_interpolation =
-      std::make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                                dsigma_dtheta_pipi_pipi_same);
+      std::make_unique<InterpolateData2DSpline>(
+          photon_angle, sqrts, dsigma_dtheta_pipi_pipi_same,
+          ExtrapolationType::Constant_value);
   pipi0_pipi0_dsigma_dtheta_interpolation =
-      std::make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                                dsigma_dtheta_pipi0_pipi0);
+      std::make_unique<InterpolateData2DSpline>(
+          photon_angle, sqrts, dsigma_dtheta_pipi0_pipi0,
+          ExtrapolationType::Constant_value);
   pipi_pi0pi0_dsigma_dtheta_interpolation =
-      std::make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                                dsigma_dtheta_pipi_pi0pi0);
+      std::make_unique<InterpolateData2DSpline>(
+          photon_angle, sqrts, dsigma_dtheta_pipi_pi0pi0,
+          ExtrapolationType::Constant_value);
   pi0pi0_pipi_dsigma_dtheta_interpolation =
-      std::make_unique<InterpolateData2DSpline>(photon_angle, sqrts,
-                                                dsigma_dtheta_pi0pi0_pipi);
+      std::make_unique<InterpolateData2DSpline>(
+          photon_angle, sqrts, dsigma_dtheta_pi0pi0_pipi,
+          ExtrapolationType::Constant_value);
 }
 }  // namespace smash
