@@ -3125,24 +3125,20 @@ double CrossSections::string_probability(
                      finder_parameters.transition_high_energy.sqrts_range_width;
     }
 
-    if (sqrt_s_ > region_upper) {
-      return 1.;
-    } else if (sqrt_s_ < region_lower) {
-      return 0.;
-    } else {
-      // Rescale transition region to [-1, 1]
-      return interpolation_at_sqrts(region_lower, region_upper);
-    }
+    return interpolation_at_sqrts(region_lower, region_upper);
   }
 }
 
 double CrossSections::interpolation_at_sqrts(double region_lower,
                                              double region_upper) const {
-  if (sqrt_s_ < region_lower)
-    return 0.0;
-  if (sqrt_s_ > region_upper)
-    return 1.0;
+  if (sqrt_s_ < region_lower) {
+    return 0.;
+  } else if (sqrt_s_ > region_upper) {
+    return 1.;
+  }
 
+  /* Map sqrt_s_ from [region_lower, region_upper] to [-0.5, 0.5] that
+   * sin(pi * x) goes from -1 to 1 leading to a probability within 0 and 1. */
   const double x = (sqrt_s_ - 0.5 * (region_lower + region_upper)) /
                    (region_upper - region_lower);
   assert(x >= -0.5 && x <= 0.5);
