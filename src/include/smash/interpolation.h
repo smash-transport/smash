@@ -147,6 +147,9 @@ T InterpolateLinear<T>::operator()(T x) const {
 template <typename T>
 T interpolate_trilinear(T ax, T ay, T az, T f1, T f2, T f3, T f4, T f5, T f6,
                         T f7, T f8) {
+  assert(ax >= 0 && ax <= 1);
+  assert(ay >= 0 && ay <= 1);
+  assert(az >= 0 && az <= 1);
   T res = az * (ax * (ay * f8 + (1.0 - ay) * f6) +
                 (1.0 - ax) * (ay * f7 + (1.0 - ay) * f5)) +
           (1 - az) * (ax * (ay * f4 + (1.0 - ay) * f2) +
