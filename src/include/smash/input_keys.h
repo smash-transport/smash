@@ -71,7 +71,8 @@ struct Section {
    * \param name The name of the section
    * \param parent A pointer to the parent section
    */
-  constexpr Section(std::string_view name, const Section *parent = nullptr)
+  explicit constexpr Section(std::string_view name,
+                             const Section *parent = nullptr)
       : parent{parent}, name{name} {}
 
   /**
