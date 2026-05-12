@@ -39,10 +39,11 @@ using KeyMetadata = std::initializer_list<std::string_view>;
 
 /**
  * Descriptive alias for storing key labels, i.e. the series of strings that
- * identify a key in the input file from the main section.
- * At the moment simply a \c std::vector<std::string> .
+ * identify a key in the input file from the main section. At the moment simply
+ * a \c std::vector<std::string_view> (key labels in the database are meant to
+ * be literals and this is why we can work with views here).
  */
-using KeyLabels = std::vector<std::string>;
+using KeyLabels = std::vector<std::string_view>;
 
 /**
  * @brief New type to explicit distinguish between mandatory and optional keys.

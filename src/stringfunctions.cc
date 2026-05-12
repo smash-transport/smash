@@ -131,6 +131,15 @@ std::string join(const std::vector<std::string> &v, const std::string &delim) {
                          });
 }
 
+std::string join(const std::vector<std::string_view> &v,
+                 const std::string &delim) {
+  return std::accumulate(
+      std::begin(v), std::end(v), std::string{},
+      [&delim](const std::string &ss, const std::string_view &s) {
+        return ss.empty() ? std::string{s} : ss + delim + std::string{s};
+      });
+}
+
 std::string quote(const std::string &s) { return "\"" + s + "\""; }
 
 }  // namespace smash

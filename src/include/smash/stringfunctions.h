@@ -58,6 +58,16 @@ std::vector<std::string> split(const std::string &s, char delim);
 std::string join(const std::vector<std::string> &v, const std::string &delim);
 
 /**
+ * Join strings using delimiter.
+ *
+ * \param[in] v Strings to be joint.
+ * \param[in] delim Joining delimiter.
+ * \return Joint string.
+ */
+std::string join(const std::vector<std::string_view> &v,
+                 const std::string &delim);
+
+/**
  * Add quotes around string.
  * This is a simpler version of \c std::quoted that also escapes
  * e.g. contained quotes and cannot directly be converted to a string.

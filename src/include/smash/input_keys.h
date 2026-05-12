@@ -88,7 +88,7 @@ struct Section {
    * \return A list of labels representing the full path to the section
    */
   [[nodiscard]] KeyLabels materialize() const {
-    KeyLabels labels = {std::string{name}};
+    KeyLabels labels = {name};
     auto current = parent;
     while (current) {
       labels.emplace_back(current->name);

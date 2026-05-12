@@ -15,7 +15,7 @@
 
 using namespace smash;
 
-TEST(section_compile_time){
+TEST(section_compile_time) {
   static constexpr InputSections::Section a{"A"};
   static_assert(a.parent == nullptr);
   static_assert(a.name == "A");
