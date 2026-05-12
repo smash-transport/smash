@@ -54,8 +54,6 @@ TEST_CATCH(x_vector_not_sorted, std::runtime_error) {
   const std::vector<double> z = {1, 3, 0, 5, 0, 7, 3, 8, 9, 1,
                                  2, 5, 4, 5, 6, 1, 4, 7, 9, 2};
 
-  /* Try creating 2D interpolation with unsorted x vector, which is expected to
-   * to raise an exception */
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 }
 
@@ -65,8 +63,6 @@ TEST_CATCH(y_vector_not_sorted, std::runtime_error) {
   const std::vector<double> z = {1, 3, 0, 5, 0, 7, 3, 8, 9, 1,
                                  2, 5, 4, 5, 6, 1, 4, 7, 9, 2};
 
-  /* Try creating 2D interpolation with unsorted y vector, which is expected to
-   * to raise an exception */
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 }
 
@@ -123,7 +119,7 @@ TEST(extrapolate_constant) {
   // check constant extrapolation if x or y values are out of bounds
   const auto [x, y, z] = set_up_x_y_z_values();
   interp = std::make_unique<InterpolateData2DSpline>(
-      x, y, z, ExtrapolationType::Constant_value);
+      x, y, z, ExtrapolationType::Constant);
 
   // x out of bounds
   FUZZY_COMPARE((*interp)(0.5, 4), (*interp)(1, 4));
@@ -136,4 +132,13 @@ TEST(extrapolate_constant) {
   // x and y out of bounds
   FUZZY_COMPARE((*interp)(0.5, 0.8), (*interp)(1, 1));
   FUZZY_COMPARE((*interp)(7, 16), (*interp)(5, 12));
+}
+
+TEST_CATCH(invalid_extrapolation_type, std::invalid_argument) {
+  const auto [x, y, z] = set_up_x_y_z_values();
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z,
+                                                     ExtrapolationType::Linear);
+
+  // x and y out of bounds
+  (*interp)(0.5, 0.8);
 }

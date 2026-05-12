@@ -77,12 +77,16 @@ double InterpolateData2DSpline::operator()(double xi, double yi) const {
                 << "\nx value " << xi << " or y value " << yi
                 << " are out of bounds.";
       throw std::out_of_range(error_msg.str());
-    } else if (extrapolation_type_ == ExtrapolationType::Constant_value) {
+    } else if (extrapolation_type_ == ExtrapolationType::Constant) {
       // constant extrapolation at the edges
       xi = (xi < first_x_) ? first_x_ : xi;
       xi = (xi > last_x_) ? last_x_ : xi;
       yi = (yi < first_y_) ? first_y_ : yi;
       yi = (yi > last_y_) ? last_y_ : yi;
+    } else {
+      throw std::invalid_argument(
+          "The provided extrapolation type is not supported. Valid types are "
+          "'None' and 'Constant'.");
     }
   }
 

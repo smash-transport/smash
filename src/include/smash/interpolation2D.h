@@ -30,13 +30,15 @@ class InterpolateData2DSpline {
    * \param z z-values
    * \param extrapolation_type Type of extrapolation for requested x_i and y_i
    *                           values that are out of bounds. Extrapolation is
-   *                           by default disabled. See ExtrapolationType for
-   *                           all possible values.
+   *                           by default disabled. Possible types are
+   *                           <tt>None</tt> and <tt>Constant</tt>.
    *
    * \return The interpolation function.
    * \throw std::out_of_range if values outside of the boundaries of the
    *                          underlying data are tried to be accessed and
    *                          extrapolation is disabled.
+   * \throw std::invalid_argument if unsupported extrapolation type is
+   *                              requested.
    *
    */
   InterpolateData2DSpline(

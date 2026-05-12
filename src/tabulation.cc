@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015-2019,2024
+ *    Copyright (c) 2015-2019,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -37,15 +37,27 @@ double Tabulation::get_value_step(double x) const {
   }
 }
 
-double Tabulation::get_value_linear(double x, Extrapolation extrapol) const {
+double Tabulation::get_value_linear(double x,
+                                    ExtrapolationType extrapol) const {
+  double extrapolation_value = smash_NaN<double>;
+  switch (extrapol) {
+    case ExtrapolationType::Zero:
+      extrapolation_value = 0.;
+      break;
+    case ExtrapolationType::Constant:
+      extrapolation_value = values_.back();
+      break;
+    case ExtrapolationType::Linear:
+      break;
+    default:
+      throw std::invalid_argument(
+          "The provided extrapolation type is not supported. Valid types are "
+          "'Zero', 'Constant', and 'Linear'.");
+  }
   if (x < x_min_) {
     return 0.;
-  }
-  if (extrapol == Extrapolation::Zero && x > x_max_) {
-    return 0.0;
-  }
-  if (extrapol == Extrapolation::Const && x > x_max_) {
-    return values_.back();
+  } else if (x > x_max_ && !std::isnan(extrapolation_value)) {
+    return extrapolation_value;
   }
   const double index_double = (x - x_min_) * inv_dx_;
   // here n is the lower index

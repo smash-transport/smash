@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015-2020
+ *    Copyright (c) 2015-2020,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -21,13 +21,6 @@
 #include "sha256.h"
 
 namespace smash {
-
-/// The kind of extrapolation used by the tabulation.
-enum class Extrapolation {
-  Zero = 0,
-  Const = 1,
-  Linear = 2,
-};
 
 /**
  * A class for storing a one-dimensional lookup table of floating-point values.
@@ -89,12 +82,15 @@ class Tabulation {
    * asymptotics, e.g. rho(m) functions.
    *
    * \param x Argument to tabulated function.
-   * \param extrapolation Extrapolation that should be used for values
-   * outside the tabulation.
+   * \param extrapolation Extrapolation type that is used for values outside the
+   *                      tabulation.
+   *
    * \return Tabulated value using linear interpolation.
+   * \throw std::invalid_argument if unsupported extrapolation type is
+   *                              requested.
    */
-  double get_value_linear(
-      double x, Extrapolation extrapolation = Extrapolation::Linear) const;
+  double get_value_linear(double x, ExtrapolationType extrapolation =
+                                        ExtrapolationType::Linear) const;
 
   /**
    * Write a binary representation of the tabulation to a stream.

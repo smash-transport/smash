@@ -53,8 +53,12 @@ double InterpolateDataSpline::operator()(double xi) const {
              "range of the underlying data when extrapolation is not specified."
           << "\nx value " << xi << " is out of bounds.";
       throw std::out_of_range(error_msg.str());
-    } else if (extrapolation_type_ == ExtrapolationType::Constant_value) {
+    } else if (extrapolation_type_ == ExtrapolationType::Constant) {
       return (xi < first_x_) ? first_y_ : last_y_;
+    } else {
+      throw std::invalid_argument(
+          "The provided extrapolation type is not supported. Valid types are "
+          "'None' and 'Constant'.");
     }
   }
   // cubic spline interpolation
