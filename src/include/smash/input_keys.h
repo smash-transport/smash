@@ -72,6 +72,7 @@ struct InputSections {
   /// Subsection for the hard string transition
   inline static const Section c_hardStringTransition =
       InputSections::collisionTerm + "Hard_String_Transition";
+
   /// Section for the forced thermalization
   inline static const Section forcedThermalization{"Forced_Thermalization"};
 

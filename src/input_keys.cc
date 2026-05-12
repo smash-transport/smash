@@ -17,7 +17,7 @@ std::optional<InputKeys::key_references_variant> InputKeys::find_key(
     return std::nullopt;
   const auto& list = InputKeys::all_keys();
   auto iterator_to_key_references_variant =
-      std::find_if(list.begin(), list.end(), [&labels](auto key) {
+      std::find_if(list.begin(), list.end(), [&labels](const auto& key) {
         return std::visit(
             [&labels](auto&& arg) { return arg.get().has_same_labels(labels); },
             key);
