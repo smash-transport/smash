@@ -482,7 +482,7 @@ struct IsStdMap<std::map<MapKey, MapValue>> {
  */
 auto collect_input_keys_taken_as_maps() {
   std::vector<KeyLabels> labels_of_keys_taken_as_map{};
-  for (const auto &keys_variant : smash::InputKeys::list) {
+  for (const auto &keys_variant : smash::InputKeys::all_keys()) {
     std::visit(
         [&labels_of_keys_taken_as_map](auto &&var) {
           /*
@@ -553,14 +553,14 @@ void adjust_list_of_labels_dealing_with_keys_taken_as_maps(
  * \return \c Configuration::Is::Invalid if the key is invalid.
  */
 Configuration::Is validate_key(const KeyLabels &labels) {
-  auto key_ref_var_it = std::find_if(
-      smash::InputKeys::list.begin(), smash::InputKeys::list.end(),
-      [&labels](auto key) {
+  const auto &list = InputKeys::all_keys();
+  auto key_ref_var_it =
+      std::find_if(list.begin(), list.end(), [&labels](auto key) {
         return std::visit(
             [&labels](auto &&arg) { return arg.get().has_same_labels(labels); },
             key);
       });
-  if (key_ref_var_it == smash::InputKeys::list.end()) {
+  if (key_ref_var_it == list.end()) {
     logg[LConfiguration].error("Key ", smash::quote(smash::join(labels, ": ")),
                                " is not a valid SMASH input key.");
     return Configuration::Is::Invalid;
