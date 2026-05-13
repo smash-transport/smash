@@ -22,7 +22,6 @@
 #include "smash/random.h"
 
 namespace smash {
-static constexpr int LOutput = LogArea::Output::id;
 
 bool SmashFragHook::doChangeFragPar(
     [[maybe_unused]] Pythia8::StringFlav* flavSelPtr, Pythia8::StringZ* zSelPtr,
@@ -207,8 +206,6 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
                                         double string_sigma_T) {
   // choose parametrization for mass-dependent width
   pythia_in->readString("ParticleData:modeBreitWigner = 4");
-
-  pythia_in->readString("StringZ:aExtraDiquark=0.0");
   /* choose minimum transverse momentum scale
    * involved in partonic interactions */
   pythia_in->readString("MultipartonInteractions:pTmin = 1.5");
@@ -645,7 +642,6 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
 }
 
 // double-diffractive : A + B -> X + X
-
 bool StringProcess::next_DDiff() {
   std::array<std::array<int, 2>, 2> quarks;
 
