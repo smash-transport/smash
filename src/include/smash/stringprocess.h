@@ -192,10 +192,6 @@ class StringProcess {
    * where the 0th one is parallel to momentum of incoming particle A
    */
   std::array<ThreeVector, 3> evecBasisAB_;
-  /// total number of final state particles
-  int NpartFinal_;
-  /// number of particles fragmented from strings
-  std::array<int, 2> NpartString_;
   /// the minimum lightcone momentum scale carried by a gluon [GeV]
   double pmin_gluon_lightcone_;
   /**

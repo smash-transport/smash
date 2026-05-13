@@ -29,32 +29,33 @@ bool SmashFragHook::doChangeFragPar(
     [[maybe_unused]] Pythia8::StringPT* pTSelPtr, [[maybe_unused]] int idEnd,
     [[maybe_unused]] double m2Had, std::vector<int> iParton,
     const Pythia8::StringEnd* nowEnd) {
-  int iEnd = nowEnd->fromPos ? iParton.front() : iParton.back();
+  const int i_end = nowEnd->fromPos ? iParton.front() : iParton.back();
 
-  auto eventPtr_ = &pythia_hadron_->event;
-  if (iEnd < 0 || iEnd >= eventPtr_->size()) {
+  auto* event_ptr = &pythia_hadron_->event;
+  if (i_end < 0 || i_end >= event_ptr->size()) {
     settingsPtr->parm("StringZ:aLund", a_default_);
     settingsPtr->parm("StringZ:bLund", b_default_);
     zSelPtr->init();
     return true;
   }
 
-  int iMother = (*eventPtr_)[iEnd].mother1();
+  const int i_mother = (*event_ptr)[i_end].mother1();
 
-  const auto& mother = (*eventPtr_)[iMother];
-  const auto& end = (*eventPtr_)[iEnd];
-  // Pythia may copy they particles before hadronization and hence the status is
-  // lost. Therefore, check the mother also.
-  const bool isSpecialStatus =
+  const auto& mother = (*event_ptr)[i_mother];
+  const auto& end = (*event_ptr)[i_end];
+
+  // Pythia may copy the particles before hadronization, so the status may be
+  // lost. Therefore, check the mother as well.
+  const bool is_special_status =
       mother.statusAbs() == specialStatus_ || end.statusAbs() == specialStatus_;
 
-  const bool motherIsDiquark =
+  const bool mother_is_diquark =
       pythia_hadron_->particleData.isDiquark(mother.id());
 
-  const bool noHadronsProduced = nowEnd->hadSoFar == 0;
+  const bool no_hadrons_produced = nowEnd->hadSoFar == 0;
 
   const bool is_leading_baryon =
-      isSpecialStatus && motherIsDiquark && noHadronsProduced;
+      is_special_status && mother_is_diquark && no_hadrons_produced;
 
   settingsPtr->parm("StringZ:aLund",
                     is_leading_baryon ? a_leading_ : a_default_);
@@ -64,7 +65,6 @@ bool SmashFragHook::doChangeFragPar(
   zSelPtr->init();
   return true;
 }
-
 StringProcess::StringProcess(Configuration& config)
     : pmin_gluon_lightcone_(
           config.take(InputKeys::collTerm_stringParam_gluonPMin)),
@@ -154,14 +154,22 @@ StringProcess::StringProcess(Configuration& config)
              : "off"));
 
     logg[LPythia].warn(
-        "Using Pythia thermal fragmentation model. Please cite: "
-        "https://inspirehep.net/literature/1495274\n"
-        "This option is experimental and not validated in SMASH. "
-        "It uses a separate, internally defined fragmentation parameter set "
-        "(independent of standard Lund tuning)\n"
-        "and may significantly alter hadronization (yields, spectra, "
-        "strangeness).\n"
-        "Do not use for physics conclusions without careful validation.");
+        "Using Pythia thermal fragmentation model.\n"
+        "Please cite: https://inspirehep.net/literature/1495274\n"
+        "\n"
+        "This model uses thermal fragmentation settings that differ\n"
+        "partially from the standard tuning employed in SMASH.\n"
+        "\n"
+        "While the model itself is implemented in PYTHIA, its behaviour\n"
+        "within the SMASH framework has not yet been systematically\n"
+        "tuned or validated.\n"
+        "\n"
+        "The thermal fragmentation model may significantly modify\n"
+        "hadronization observables such as particle yields, spectra,\n"
+        "and strangeness production.\n"
+        "\n"
+        "Please validate carefully before drawing quantitative\n"
+        "physics conclusions.");
   }
   pythia_hadron_->init();
 
@@ -200,6 +208,7 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
   // choose parametrization for mass-dependent width
   pythia_in->readString("ParticleData:modeBreitWigner = 4");
 
+  pythia_in->readString("StringZ:aExtraDiquark=0.0");
   /* choose minimum transverse momentum scale
    * involved in partonic interactions */
   pythia_in->readString("MultipartonInteractions:pTmin = 1.5");
@@ -988,8 +997,6 @@ void StringProcess::tag_leading_hadron(Pythia8::Event& event,
 
 // hard non-diffractive
 bool StringProcess::next_Hard(ProcessType type) {
-  NpartFinal_ = 0;
-
   logg[LPythia].debug("Hard non-diff. with ", PDGcodes_[0], " + ", PDGcodes_[1],
                       " at CM energy [GeV] ", sqrtsAB_);
 
@@ -1112,7 +1119,6 @@ bool StringProcess::next_Hard(ProcessType type) {
   /* Update the partonic intermediate state from PYTHIA output.
    * Note that hadronization will be performed separately,
    * after identification of strings and replacement of constituents. */
-  hard_map_[idAB]->event.rotbst(to_cm_.inverse());
   for (int i = 0; i < hard_map_[idAB]->event.size(); i++) {
     if (hard_map_[idAB]->event[i].isFinal()) {
       const int pdgid = hard_map_[idAB]->event[i].id();
@@ -1150,6 +1156,8 @@ bool StringProcess::next_Hard(ProcessType type) {
     logg[LPythia].debug("failed to find correct partonic constituents.");
     return false;
   }
+  // Boost after the constituents have been corrected!
+  event_intermediate_.rotbst(to_cm_.inverse());
   int npart = event_intermediate_.size();
   int ipart = 0;
   while (ipart < npart) {
@@ -1198,7 +1206,6 @@ bool StringProcess::next_Hard(ProcessType type) {
       compose_string_parton(find_forward_string, event_intermediate_,
                             string_parton_events_.back());
     }
-
     if (!string_above_threshold(string_parton_events_.back())) {
       return false;
     }
@@ -1219,6 +1226,7 @@ double StringProcess::estimate_string_threshold(int p_left, int p_right) {
 
   if (!(left_is_q_or_dq && right_is_q_or_dq)) {
     std::cout << p_left << ", " << p_right << std::endl;
+    string_parton_events_.back().list();
     throw std::runtime_error(
         "Threshold can got input that is not quark or diquark.");
   }
@@ -1259,37 +1267,74 @@ void StringProcess::set_color_by_type(Pythia8::Particle& p, int color) {
   }
 }
 bool StringProcess::string_above_threshold(const Pythia8::Event& event) {
-  std::vector<std::pair<int, double>> particles;
-  particles.reserve(event.size());
+  const double string_mass = event[0].mCalc();
+  const auto& particle_data = pythia_hadron_->particleData;
+
+  std::vector<int> endpoints;
+  endpoints.reserve(event.size());
 
   for (const Pythia8::Particle& p : event) {
-    if (p.isFinal() && !p.isGluon() && p.isParton()) {
-      const int id = p.id();
-      const double m0 = pythia_hadron_->particleData.m0(id);
-      particles.emplace_back(id, m0);
+    if (!p.isFinal() || p.isGluon() || !p.isParton()) {
+      continue;
     }
-  }
-  // Closed string
-  if (particles.size() < 2) {
-    return event[0].mCalc() > 0.28;
-  }
 
-  const std::size_t k = std::min<std::size_t>(3, particles.size());
-  std::partial_sort(
-      particles.begin(), particles.begin() + k, particles.end(),
-      [](const auto& a, const auto& b) { return a.second > b.second; });
+    const int id = p.id();
 
-  const int id1 = particles[0].first;
-  const int id2 = particles[1].first;
+    if (!particle_data.isQuark(id) && !particle_data.isDiquark(id)) {
+      logg[LPythia].error("Colored non-quark/diquark in threshold check: id=",
+                          id, ", col=", p.col(), ", acol=", p.acol());
+      return false;
+    }
 
-  if (particles.size() == 2) {
-    return event[0].mCalc() > estimate_string_threshold(id1, id2);
+    endpoints.push_back(id);
   }
 
-  const int id3 = particles[2].first;
-  const int diquark_id = diquark_from_quarks(id1, id2);
+  // Closed gluon string.
+  if (endpoints.size() < 2) {
+    return string_mass > 0.28;
+  }
 
-  return event[0].mCalc() > estimate_string_threshold(diquark_id, id3);
+  // Ordinary open string.
+  if (endpoints.size() == 2) {
+    return string_mass > estimate_string_threshold(endpoints[0], endpoints[1]);
+  }
+
+  // Baryonic/antibaryonic endpoint: combine two same-sign quarks.
+  if (endpoints.size() == 3) {
+    for (std::size_t i = 0; i < endpoints.size(); ++i) {
+      for (std::size_t j = i + 1; j < endpoints.size(); ++j) {
+        const int id_i = endpoints[i];
+        const int id_j = endpoints[j];
+
+        if (!particle_data.isQuark(id_i) || !particle_data.isQuark(id_j)) {
+          continue;
+        }
+
+        if (id_i * id_j < 0) {
+          continue;
+        }
+
+        const int diquark_id = diquark_from_quarks(id_i, id_j);
+
+        const std::size_t k = 3 - i - j;
+        const int remaining_id = endpoints[k];
+
+        return string_mass >
+               estimate_string_threshold(diquark_id, remaining_id);
+      }
+    }
+
+    logg[LPythia].error(
+        "Cannot reduce 3 string endpoints to quark-diquark "
+        "threshold: ",
+        endpoints[0], ", ", endpoints[1], ", ", endpoints[2]);
+    return false;
+  }
+
+  logg[LPythia].error(
+      "Unexpected number of string endpoints in threshold check: ",
+      endpoints.size());
+  return false;
 }
 void StringProcess::find_excess_constituent(PdgCode& pdg_actual,
                                             PdgCode& pdg_mapped,
