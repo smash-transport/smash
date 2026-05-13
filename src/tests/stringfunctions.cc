@@ -64,6 +64,27 @@ TEST(join) {
   COMPARE(join(v, "__"), j2);
 }
 
+TEST(join_from_views) {
+  const std::vector<std::string_view> v = {"Hello", "my", "SMASHies!"};
+  const std::string j1 = "Hello my SMASHies!";
+  const std::string j2 = "Hello__my__SMASHies!";
+  COMPARE(join(v, " "), j1);
+  COMPARE(join(v, "__"), j2);
+}
+
+TEST(join_from_views_in_local_scope) {
+  std::vector<std::string_view> v{};
+  {
+    v.emplace_back("Hello");
+    v.emplace_back("my");
+    v.emplace_back("SMASHies!");
+  }
+  const std::string j1 = "Hello my SMASHies!";
+  const std::string j2 = "Hello__my__SMASHies!";
+  COMPARE(join(v, " "), j1);
+  COMPARE(join(v, "__"), j2);
+}
+
 TEST(quote) {
   const std::string input = "To be quoted";
   const std::string result = "\"To be quoted\"";
