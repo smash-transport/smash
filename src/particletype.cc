@@ -612,10 +612,9 @@ void ParticleType::calculate_max_ratio_spectral_full_to_breit_wigner() const {
    * the resolution can in principle be increased without significant impact.
    */
   constexpr double step_size = 0.02;
-  constexpr double mass_limit = 10.0;
   constexpr double safety_factor = 1.01;
-  double max_ratio = ratio_spectral_full_to_breit_wigner(mass_limit);
-  for (double m = mass_limit; m > mass_ - width_; m -= step_size) {
+  double max_ratio = ratio_spectral_full_to_breit_wigner(mass_limit_);
+  for (double m = mass_limit_; m > mass_ - width_; m -= step_size) {
     double current_value = ratio_spectral_full_to_breit_wigner(m);
     if (current_value > max_ratio) {
       max_ratio = current_value;
