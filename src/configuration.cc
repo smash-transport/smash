@@ -412,7 +412,7 @@ void fill_list_of_labels_per_key_in_yaml_tree(const YAML::Node &root_node,
   // Here sub_node is an iterator value, i.e. a key/value pair of nodes,
   // not a single YAML node (that's how YAML library works)
   for (const auto &sub_node : root_node) {
-    new_list_entry.push_back(sub_node.first.as<std::string>());
+    new_list_entry.push_back(sub_node.first.as<std::string_view>());
     if (sub_node.second.IsMap())
       fill_list_of_labels_per_key_in_yaml_tree(sub_node.second, list,
                                                new_list_entry);
