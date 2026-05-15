@@ -22,6 +22,7 @@
 
 #include "einhard.hpp"
 
+#include "constants.h"
 #include "forwarddeclarations.h"
 #include "key.h"
 #include "pdgcode.h"
@@ -2333,7 +2334,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_heavy_flavor
-   * \optional_key{key_CT_HF_AQM_b_suppression_,AQM_Bottom_Suppression,double,0.93}
+   * \optional_key{key_CT_HF_AQM_b_suppression_,AQM_Bottom_Suppression,double,
+   * 0.93,\f$0\leq x\leq 1\f$}
    *
    * Suppression parameter for AQM cross sections involving a bottom hadron.
    * Default value taken from Angantyr (\iref{Bierlich:2022pfr}).
@@ -2342,11 +2344,17 @@ struct InputKeys {
    * \see_key{key_CT_additional_el_cs_}
    */
   inline static const Key<double> collTerm_HF_AQMbSuppression{
-      InputSections::c_heavyFlavor + "AQM_Bottom_Suppression", 0.93, {"3.2"}};
+      InputSections::c_heavyFlavor + "AQM_Bottom_Suppression",
+      0.93,
+      {"3.2"},
+      [](const double& value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_heavy_flavor
-   * \optional_key{key_CT_HF_AQM_c_suppression_,AQM_Charm_Suppression,double,0.8}
+   * \optional_key{key_CT_HF_AQM_c_suppression_,AQM_Charm_Suppression,double,
+   * 0.8,\f$0\leq x\leq 1\f$}
    *
    * Suppression parameter for AQM cross sections involving a charm hadron.
    * Default value taken from Angantyr (\iref{Bierlich:2022pfr}).
@@ -2355,11 +2363,17 @@ struct InputKeys {
    * \see_key{key_CT_additional_el_cs_}
    */
   inline static const Key<double> collTerm_HF_AQMcSuppression{
-      InputSections::c_heavyFlavor + "AQM_Charm_Suppression", 0.8, {"3.2"}};
+      InputSections::c_heavyFlavor + "AQM_Charm_Suppression",
+      0.8,
+      {"3.2"},
+      [](const double& value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_additional_el_cs_,Additional_Elastic_Cross_Section,double,0.0}
+   * \optional_key{key_CT_additional_el_cs_,Additional_Elastic_Cross_Section,
+   * double,0.0,\none}
    *
    * Add an additional constant contribution \unit{in mb} to the elastic cross
    * section.
@@ -2373,11 +2387,21 @@ struct InputKeys {
   inline static const Key<double> collTerm_additionalElasticCrossSection{
       InputSections::collisionTerm + "Additional_Elastic_Cross_Section",
       0.0,
-      {"2.0"}};
+      {"2.0"},
+      [](const double& value) noexcept {
+        if (value < 0.0 || value > 300.0) {
+          logg[LogArea::Configuration::id].warn(
+              "The additional elastic cross section is set to a value that is "
+              "either negative or very large,\nwhich may lead to nonphysical "
+              "results. Make sure that this is intended.");
+        }
+        return true;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_collision_criterion_,Collision_Criterion,string,"Covariant"}
+   * \optional_key{key_CT_collision_criterion_,Collision_Criterion,string,
+   * "Covariant",\any_valid}
    *
    * The following collision criterions can be used.
    *
@@ -2422,11 +2446,12 @@ struct InputKeys {
   inline static const Key<CollisionCriterion> collTerm_collisionCriterion{
       InputSections::collisionTerm + "Collision_Criterion",
       CollisionCriterion::Covariant,
-      {"1.7"}};
+      {"1.7"},
+      detail::get_default_validator<CollisionCriterion>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_cs_scaling_,Cross_Section_Scaling,double,1.0}
+   * \optional_key{key_CT_cs_scaling_,Cross_Section_Scaling,double,1.0,\f$x>0\f$}
    *
    * Scale all cross sections by a global factor.
    * \warning Most cross sections are constrained by experimental data. Scaling
@@ -2437,11 +2462,15 @@ struct InputKeys {
    * \see_key{key_CT_cs_scaling_}
    */
   inline static const Key<double> collTerm_crossSectionScaling{
-      InputSections::collisionTerm + "Cross_Section_Scaling", 1.0, {"2.0"}};
+      InputSections::collisionTerm + "Cross_Section_Scaling",
+      1.0,
+      {"2.0"},
+      [](const double& value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_elastic_cross_section_,Elastic_Cross_Section,double,-1.0}
+   * \optional_key{key_CT_elastic_cross_section_,Elastic_Cross_Section,
+   * double,-1.0,\f$x>0 \lor x=-1\f$}
    *
    * If a non-negative value is given, it will override the parametrized
    * elastic cross sections (which are energy-dependent) with a constant value
@@ -2452,29 +2481,41 @@ struct InputKeys {
    * \see_key{key_CT_elastic_cross_section_}
    */
   inline static const Key<double> collTerm_elasticCrossSection{
-      InputSections::collisionTerm + "Elastic_Cross_Section", -1.0, {"1.2"}};
+      InputSections::collisionTerm + "Elastic_Cross_Section",
+      -1.0,
+      {"1.2"},
+      [](const double& value) noexcept {
+        return value > 0.0 || value == -1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_elastic_nn_cutoff_sqrts_,Elastic_NN_Cutoff_Sqrts,double,1.98}
+   * \optional_key{key_CT_elastic_nn_cutoff_sqrts_,Elastic_NN_Cutoff_Sqrts,
+   * double,1.98,\f$1.88 \leq x \leq 2.02\f$}
    *
    * The elastic collisions between two nucleons with \f$\sqrt{s}\f$ below
    * the specified value (\unit{in GeV}) cannot happen.
    * - `Elastic_NN_Cutoff_Sqrts` < 1.88 &rarr;
-   *   Below the threshold energy of the elastic collision, no effect.
+   *   Below the threshold energy of the elastic collision, not accepted.
    * - `Elastic_NN_Cutoff_Sqrts` > 2.02 &rarr;
    *   Beyond the threshold energy of the inelastic collision
-   *   \f$NN\rightarrow NN\pi\f$, not suggested.
+   *   \f$NN\rightarrow NN\pi\f$, not accepted.
    */
   /**
    * \see_key{key_CT_elastic_nn_cutoff_sqrts_}
    */
   inline static const Key<double> collTerm_elasticNNCutoffSqrts{
-      InputSections::collisionTerm + "Elastic_NN_Cutoff_Sqrts", 1.98, {"1.0"}};
+      InputSections::collisionTerm + "Elastic_NN_Cutoff_Sqrts",
+      1.98,
+      {"1.0"},
+      [](const double& value) noexcept {
+        return value >= 1.88 && value <= 2.02;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,double,2.5}
+   * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,
+   * double,2.5,\f$x>0\f$}
    *
    * The (minimal) length \unit{in fm} used for the grid cells of the stochastic
    * criterion, only. Collisions are searched within grid cells only. Cell
@@ -2485,11 +2526,14 @@ struct InputKeys {
    * \see_key{key_CT_fixed_min_cell_length_}
    */
   inline static const Key<double> collTerm_fixedMinCellLength{
-      InputSections::collisionTerm + "Fixed_Min_Cell_Length", 2.5, {"2.1"}};
+      InputSections::collisionTerm + "Fixed_Min_Cell_Length",
+      2.5,
+      {"2.1"},
+      [](const double& value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_force_decays_at_end_,Force_Decays_At_End,bool,true}
+   * \optional_key{key_CT_force_decays_at_end_,Force_Decays_At_End,bool,true,\none}
    *
    * - `true` &rarr; Force all resonances to decay after last timestep.
    * - `false` &rarr; Don't force decays (final output can contain resonances).
@@ -2498,11 +2542,14 @@ struct InputKeys {
    * \see_key{key_CT_force_decays_at_end_}
    */
   inline static const Key<bool> collTerm_forceDecaysAtEnd{
-      InputSections::collisionTerm + "Force_Decays_At_End", true, {"0.60"}};
+      InputSections::collisionTerm + "Force_Decays_At_End",
+      true,
+      {"0.60"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_decay_initial_,Decay_Initial_Particles,bool,true}
+   * \optional_key{key_CT_decay_initial_,Decay_Initial_Particles,bool,true,\none}
    *
    * Allow or prohibit initial state particles from decaying before their first
    * collision. This is relevant when, for instance, studying the interactions
@@ -2512,11 +2559,15 @@ struct InputKeys {
    * \see_key{key_CT_decay_initial_}
    */
   inline static const Key<bool> collTerm_decayInitial{
-      InputSections::collisionTerm + "Decay_Initial_Particles", true, {"3.0"}};
+      InputSections::collisionTerm + "Decay_Initial_Particles",
+      true,
+      {"3.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_included_2to2_,Included_2to2,list of strings,["All"]}
+   * \optional_key{key_CT_included_2to2_,Included_2to2,list of
+   * strings,["All"],\any_valid}
    *
    * List that contains all possible 2 &harr; 2 process categories. Each process
    * of the listed category can be performed within the simulation. Possible
@@ -2551,7 +2602,8 @@ struct InputKeys {
   inline static const Key<ReactionsBitSet> collTerm_includedTwoToTwo{
       InputSections::collisionTerm + "Included_2to2",
       ReactionsBitSet{}.set(),  // All interactions => all bit set
-      {"1.3"}};
+      {"1.3"},
+      detail::get_default_validator<ReactionsBitSet>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -2566,12 +2618,13 @@ struct InputKeys {
   inline static const Key<bool> collTerm_includeDecaysAtTheEnd{
       InputSections::collisionTerm + "Include_Weak_And_EM_Decays_At_The_End",
       false,
-      {"2.2", "3.1", "3.2"}};
+      {"2.2", "3.1", "3.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_ignore_decay_width_end_,
-   * Ignore_Minimum_Decay_Width_For_Decays_At_The_End,bool,false}
+   * Ignore_Minimum_Decay_Width_For_Decays_At_The_End,bool,false,\none}
    *
    * If enabled, all non-strong decays are performed at the end of the
    * simulation, including weak and electro-magnetic ones. In particular, all
@@ -2593,11 +2646,12 @@ struct InputKeys {
       InputSections::collisionTerm +
           "Ignore_Minimum_Decay_Width_For_Decays_At_The_End",
       false,
-      {"3.2"}};
+      {"3.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_isotropic_,Isotropic,bool,false}
+   * \optional_key{key_CT_isotropic_,Isotropic,bool,false,\none}
    *
    * Do all collisions isotropically.
    */
@@ -2605,12 +2659,15 @@ struct InputKeys {
    * \see_key{key_CT_isotropic_}
    */
   inline static const Key<bool> collTerm_isotropic{
-      InputSections::collisionTerm + "Isotropic", false, {"0.7.1"}};
+      InputSections::collisionTerm + "Isotropic",
+      false,
+      {"0.7.1"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_max_cs_,Maximum_Cross_Section,double,
-   * 200</tt> or <tt>2000}
+   * 200</tt> or <tt>2000,\f$x>0\f$}
    *
    * The maximal cross section \unit{in mb} that should be used when looking for
    * collisions. This means that all particle pairs, whose transverse distance
@@ -2635,12 +2692,21 @@ struct InputKeys {
   inline static const Key<double> collTerm_maximumCrossSection{
       InputSections::collisionTerm + "Maximum_Cross_Section",
       DefaultType::Dependent,
-      {"2.0"}};
+      {"2.0"},
+      [](const double& value) noexcept {
+        if ((value < 200 && value > 0) || value > 2000) {
+          logg[LogArea::Configuration::id].warn(
+              "The maximum cross section is set to a value that is either "
+              "smaller than 200 mb or larger than 2000 mb,\nwhich may lead to "
+              "nonphysical results. Make sure that this is intended.");
+        }
+        return value > 0.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_mp_reactions_,Multi_Particle_Reactions,list of
-   * strings,[]}
+   * strings,[],\any_valid}
    *
    * List of reactions with more than 2 in- or outgoing particles that contains
    * all possible multi-particle process categories. Multi particle reactions
@@ -2683,11 +2749,12 @@ struct InputKeys {
       collTerm_multiParticleReactions{
           InputSections::collisionTerm + "Multi_Particle_Reactions",
           MultiParticleReactionsBitSet{}.reset(),  // Empty list => no bit set
-          {"2.0"}};
+          {"2.0"},
+          detail::get_default_validator<MultiParticleReactionsBitSet>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_nnbar_treatment_,NNbar_Treatment,string,"strings"}
+   * \optional_key{key_CT_nnbar_treatment_,NNbar_Treatment,string,"strings",\any_valid}
    *
    * - `"no annihilation"` &rarr; No annihilation of NNbar is performed.
    * - `"resonances"` &rarr; Annihilation through
@@ -2708,11 +2775,12 @@ struct InputKeys {
   inline static const Key<NNbarTreatment> collTerm_nnbarTreatment{
       InputSections::collisionTerm + "NNbar_Treatment",
       NNbarTreatment::Strings,
-      {"1.3"}};
+      {"1.3"},
+      detail::get_default_validator<NNbarTreatment>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_no_collisions_,No_Collisions,bool,false}
+   * \optional_key{key_CT_no_collisions_,No_Collisions,bool,false,\none}
    *
    * Disable all possible collisions, only allow decays to occur if not
    * forbidden by other options. Useful for running SMASH as a decay
@@ -2723,11 +2791,14 @@ struct InputKeys {
    * \see_key{key_CT_no_collisions_}
    */
   inline static const Key<bool> collTerm_noCollisions{
-      InputSections::collisionTerm + "No_Collisions", false, {"1.3"}};
+      InputSections::collisionTerm + "No_Collisions",
+      false,
+      {"1.3"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_warn_high_prob_,Only_Warn_For_High_Probability,bool,false}
+   * \optional_key{key_CT_warn_high_prob_,Only_Warn_For_High_Probability,bool,false,\none}
    *
    * Only warn and not error for reaction probabilities higher than 1.
    * This switch is meant for very long production runs with the stochastic
@@ -2741,11 +2812,13 @@ struct InputKeys {
   inline static const Key<bool> collTerm_onlyWarnForHighProbability{
       InputSections::collisionTerm + "Only_Warn_For_High_Probability",
       false,
-      {"3.0"}};
+      {"3.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,"LargestFromUnstable"}
+   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,
+   * "LargestFromUnstable",\any_valid}
    *
    * Due to the lack of known high-mass resonances for several processes, the
    * energy region between resonances and strings might lack inelastic
@@ -2775,11 +2848,13 @@ struct InputKeys {
   inline static const Key<PseudoResonance> collTerm_pseudoresonance{
       InputSections::collisionTerm + "Pseudoresonance",
       PseudoResonance::LargestFromUnstable,
-      {"3.1"}};
+      {"3.1"},
+      detail::get_default_validator<PseudoResonance>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_res_lifetime_mod_,Resonance_Lifetime_Modifier,double,1.0}
+   * \optional_key{key_CT_res_lifetime_mod_,Resonance_Lifetime_Modifier,double,
+   * 1.0,\f$x>0\f$}
    *
    * Multiplicative factor by which to scale the resonance lifetimes up or down.
    * This additionally has the effect of modifying the initial densities by
@@ -2791,7 +2866,7 @@ struct InputKeys {
    * other assumptions used in SMASH; notably, modifying this value **will**
    * break detailed balance in any gas which allows resonances to collide
    * inelastically, as this option breaks the relationship between the width and
-   * lifetime of resonances. Note as well that in such gases, using a value of
+   * lifetime of resonances. Note as well that in such cases, using a value of
    * 0.0 is known to make SMASH hang; it is recommended to use a small non-zero
    * value instead in these cases.
    */
@@ -2801,11 +2876,20 @@ struct InputKeys {
   inline static const Key<double> collTerm_resonanceLifetimeModifier{
       InputSections::collisionTerm + "Resonance_Lifetime_Modifier",
       1.0,
-      {"1.8"}};
+      {"1.8"},
+      [](const double& value) noexcept {
+        if (value > 0.0 && value < really_small) {
+          logg[LogArea::Configuration::id].warn(
+              "The resonance lifetime modifier is set to a value that is very "
+              "small, which may lead SMASH to hang.\nMake sure that this is "
+              "intended.");
+        }
+        return value > 0.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_spin_interactions
-   * \optional_key{key_CT_spin_interactions_,Spin_Interactions,string,"Off"}
+   * \optional_key{key_CT_spin_interactions_,Spin_Interactions,string,"Off",\any_valid}
    *
    * Whether or not to enable spin interactions in binary collisions.
    * \note So far we only include a spin flip in elastic scatterings.
@@ -2816,12 +2900,13 @@ struct InputKeys {
   inline static const Key<SpinInteractionType> collTerm_spinInteractions{
       InputSections::collisionTerm + "Spin_Interactions",
       SpinInteractionType::Off,
-      {"3.3"}};
+      {"3.3"},
+      detail::get_default_validator<SpinInteractionType>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_strings_,Strings,bool,
-   * (\ref key_gen_modus_ "Modus"!="Box")}
+   * (\ref key_gen_modus_ "Modus"!="Box"),\none}
    *
    * - `true` &rarr; String excitation is enabled
    * - `false` &rarr; String excitation is disabled
@@ -2832,11 +2917,12 @@ struct InputKeys {
   inline static const Key<bool> collTerm_strings{
       InputSections::collisionTerm + "Strings",
       DefaultType::Dependent,
-      {"1.0"}};
+      {"1.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_string_with_prob_,Strings_with_Probability,bool,true}
+   * \optional_key{key_CT_string_with_prob_,Strings_with_Probability,bool,true,\none}
    *
    * - `true` &rarr;
    *   String processes are triggered according to a probability increasing
@@ -2862,11 +2948,15 @@ struct InputKeys {
    * \see_key{key_CT_string_with_prob_}
    */
   inline static const Key<bool> collTerm_stringsWithProbability{
-      InputSections::collisionTerm + "Strings_with_Probability", true, {"1.3"}};
+      InputSections::collisionTerm + "Strings_with_Probability",
+      true,
+      {"1.3"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_totXsStrategy_,Total_Cross_Section_Strategy,string,"TopDownMeasured"}
+   * \optional_key{key_CT_totXsStrategy_,Total_Cross_Section_Strategy,string,
+   * "TopDownMeasured",\any_valid}
    *
    * Which strategy to use when evaluating total cross sections for collision
    * finding. Currently, possible options are
@@ -2896,11 +2986,12 @@ struct InputKeys {
   inline static const Key<TotalCrossSectionStrategy> collTerm_totXsStrategy{
       InputSections::collisionTerm + "Total_Cross_Section_Strategy",
       TotalCrossSectionStrategy::TopDownMeasured,
-      {"3.1"}};
+      {"3.1"},
+      detail::get_default_validator<TotalCrossSectionStrategy>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_two_to_one_,Two_to_One,bool,true}
+   * \optional_key{key_CT_two_to_one_,Two_to_One,bool,true,\none}
    *
    * Enable 2 &harr; 1 processes (resonance formation and decays).
    */
@@ -2908,11 +2999,14 @@ struct InputKeys {
    * \see_key{key_CT_two_to_one_}
    */
   inline static const Key<bool> collTerm_twoToOne{
-      InputSections::collisionTerm + "Two_to_One", true, {"0.85"}};
+      InputSections::collisionTerm + "Two_to_One",
+      true,
+      {"0.85"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_use_aqm_,Use_AQM,bool,true}
+   * \optional_key{key_CT_use_aqm_,Use_AQM,bool,true,\none}
    *
    * Turn on AQM cross-sections for exotic combination of particles
    * (baryon-baryon cross-sections are scaled from proton-proton high energy
@@ -2956,7 +3050,10 @@ struct InputKeys {
    * \see_key{key_CT_use_aqm_}
    */
   inline static const Key<bool> collTerm_useAQM{
-      InputSections::collisionTerm + "Use_AQM", true, {"1.3"}};
+      InputSections::collisionTerm + "Use_AQM",
+      true,
+      {"1.3"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_hard_string_transition
@@ -2979,7 +3076,6 @@ struct InputKeys {
    * For Custom_Range, the transition is controlled by Start_Energy and
    * End_Energy.
    */
-
   /**
    * \see_key{key_CT_hard_string_transition_mode_}
    */
@@ -3004,7 +3100,6 @@ struct InputKeys {
    * End_Energy.
    *
    */
-
   /**
    * \see_key{key_CT_hard_string_transition_start_energy_}
    */
@@ -3032,19 +3127,28 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
-   * \optional_key{key_CT_PB_gaussian_cutoff_,Gaussian_Cutoff,double,2.2}
+   * \optional_key{key_CT_PB_gaussian_cutoff_,Gaussian_Cutoff,double,
+   * 2.2,\f$1\leq x\leq10\f$}
    *
-   * Radius \unit{in fm} at which Gaussians used for smoothing are cut.
+   * Radius \unit{in fm} at which Gaussians used for smoothing are cut. It
+   * should be larger than \ref key_CT_PB_spatial_averaging_radius_
+   * "Spatial_Averaging_Radius".
    */
   /**
    * \see_key{key_CT_PB_gaussian_cutoff_}
    */
   inline static const Key<double> collTerm_pauliBlocking_gaussianCutoff{
-      InputSections::c_pauliBlocking + "Gaussian_Cutoff", 2.2, {"0.7.1"}};
+      InputSections::c_pauliBlocking + "Gaussian_Cutoff",
+      2.2,
+      {"0.7.1"},
+      [](const double& value) noexcept {
+        return value >= 1.0 && value <= 10.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
-   * \optional_key{key_CT_PB_momentum_av_radius_,Momentum_Averaging_Radius,double,0.08}
+   * \optional_key{key_CT_PB_momentum_av_radius_,Momentum_Averaging_Radius,
+   * double,0.08,\f$x>0\f$}
    *
    * Radius \unit{in GeV} of sphere for averaging in the momentum space.
    */
@@ -3055,13 +3159,16 @@ struct InputKeys {
       collTerm_pauliBlocking_momentumAveragingRadius{
           InputSections::c_pauliBlocking + "Momentum_Averaging_Radius",
           0.08,
-          {"0.7.1"}};
+          {"0.7.1"},
+          [](const double& value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
-   * \optional_key{key_CT_PB_spatial_averaging_radius_,Spatial_Averaging_Radius,double,1.86}
+   * \optional_key{key_CT_PB_spatial_averaging_radius_,Spatial_Averaging_Radius,
+   * double,1.86,\f$x>0\f$}
    *
-   * Radius \unit{in fm} of sphere for averaging in the coordinate space.
+   * Radius \unit{in fm} of sphere for averaging in the coordinate space. It
+   * should be smaller than \ref key_CT_PB_gaussian_cutoff_ "Gaussian_Cutoff".
    */
   /**
    * \see_key{key_CT_PB_spatial_averaging_radius_}
@@ -3069,11 +3176,12 @@ struct InputKeys {
   inline static const Key<double> collTerm_pauliBlocking_spatialAveragingRadius{
       InputSections::c_pauliBlocking + "Spatial_Averaging_Radius",
       1.86,
-      {"0.7.1"}};
+      {"0.7.1"},
+      [](const double& value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_KN_offset_,KN_Offset,double,15.15}
+   * \optional_key{key_CT_ST_KN_offset_,KN_Offset,double,15.15,\none}
    *
    * Offset \unit{in GeV} to turn on the strings for KN reactions.
    */
@@ -3081,11 +3189,14 @@ struct InputKeys {
    * \see_key{key_CT_ST_KN_offset_}
    */
   inline static const Key<double> collTerm_stringTrans_KNOffset{
-      InputSections::c_stringTransition + "KN_Offset", 15.15, {"3.0"}};
+      InputSections::c_stringTransition + "KN_Offset",
+      15.15,
+      {"3.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_pipi_offset_,PiPi_Offset,double,1.12}
+   * \optional_key{key_CT_ST_pipi_offset_,PiPi_Offset,double,1.12,\none}
    *
    * Offset \unit{in GeV} to turn on the strings and elastic processes
    * for \f$\pi\pi\f$ reactions (this is an exception because the normal AQM
@@ -3096,11 +3207,14 @@ struct InputKeys {
    * \see_key{key_CT_ST_pipi_offset_}
    */
   inline static const Key<double> collTerm_stringTrans_pipiOffset{
-      InputSections::c_stringTransition + "PiPi_Offset", 1.12, {"3.0"}};
+      InputSections::c_stringTransition + "PiPi_Offset",
+      1.12,
+      {"3.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_lower_,Sqrts_Lower,double,0.9}
+   * \optional_key{key_CT_ST_lower_,Sqrts_Lower,double,0.9,\none}
    *
    * Lower end of transition region \unit{in GeV} for the remaining
    * interactions, in case of AQM this is added to the sum of masses.
@@ -3109,16 +3223,19 @@ struct InputKeys {
    * \see_key{key_CT_ST_lower_}
    */
   inline static const Key<double> collTerm_stringTrans_lower{
-      InputSections::c_stringTransition + "Sqrts_Lower", 0.9, {"3.0"}};
+      InputSections::c_stringTransition + "Sqrts_Lower",
+      0.9,
+      {"3.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_rangeNN_,Sqrts_Range_NN,list of two
-   * doubles,[3.5\,4.5]}
+   * \optional_key{key_CT_ST_rangeNN_,Sqrts_Range_NN,list of two doubles,
+   * [3.5\,4.5],\f$x_1 \geq 1.876 \land x_1 < x_2\f$}
    *
    * Transition range in NN collisions \unit{in GeV}. The lowest value for the
-   * first parameter is the mass threshold 1.88. The default is tuned to
-   * reproduce experimental exclusive cross section data, and at the same
+   * first parameter is the mass threshold 1.876. The default is tuned to
+   * reproduce experimental exclusive cross section data, and at the same time
    * produce excitation functions that are as smooth as possible. The default of
    * a 1 GeV range is preserved.
    */
@@ -3129,15 +3246,26 @@ struct InputKeys {
       collTerm_stringTrans_rangeNN{
           InputSections::c_stringTransition + "Sqrts_Range_NN",
           std::make_pair(3.5, 4.5),
-          {"3.0"}};
+          {"3.0"},
+          [](const std::pair<double, double>& value) noexcept {
+            const bool valid =
+                value.first >= 1.876 && value.first < value.second;
+            if (valid && std::abs(value.second - value.first) != 1.0) {
+              logg[LogArea::Configuration::id].warn(
+                  "The string transition range for NN collisions is set to a "
+                  "range larger than 1 GeV, which may lead to nonphysical\n"
+                  "results. Make sure that this is intended.");
+            }
+            return valid;
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_rangeNPi_,Sqrts_Range_Npi,list of two
-   * doubles,[1.9\,2.2]}
+   * \optional_key{key_CT_ST_rangeNPi_,Sqrts_Range_Npi,list of two doubles,
+   * [1.9\,2.2],\f$x_1 \geq 1.076 \land x_1 < x_2\f$}
    *
    * Transition region in N\f$\pi\f$ scatterings \unit{in GeV}. The lowest value
-   * for the first parameter is the mass threshold 1.08.
+   * for the first parameter is the mass threshold 1.076.
    */
   /**
    * \see_key{key_CT_ST_rangeNPi_}
@@ -3146,11 +3274,14 @@ struct InputKeys {
       collTerm_stringTrans_rangeNpi{
           InputSections::c_stringTransition + "Sqrts_Range_Npi",
           std::make_pair(1.9, 2.2),
-          {"3.0"}};
+          {"3.0"},
+          [](const std::pair<double, double>& value) noexcept {
+            return value.first >= 1.076 && value.first < value.second;
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_range_width_,Sqrts_Range_Width,double,1.0}
+   * \optional_key{key_CT_ST_range_width_,Sqrts_Range_Width,double,1.0,\none}
    *
    * Width of the transition region \unit{in GeV} for the remaining
    * interactions, in case of AQM this is added to <tt>\ref key_CT_ST_lower_
@@ -3160,11 +3291,15 @@ struct InputKeys {
    * \see_key{key_CT_ST_range_width_}
    */
   inline static const Key<double> collTerm_stringTrans_range_width{
-      InputSections::c_stringTransition + "Sqrts_Range_Width", 1.0, {"3.0"}};
+      InputSections::c_stringTransition + "Sqrts_Range_Width",
+      1.0,
+      {"3.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_diquark_supp_,Diquark_Supp,double,0.036}
+   * \optional_key{key_CT_SP_diquark_supp_,Diquark_Supp,double,0.036,
+   * \f$0\leq x\leq 1\f$}
    *
    * Diquark suppression factor. Defines the probability to produce a diquark
    * antidiquark pair relative to producing a qurk antiquark pair.
@@ -3173,11 +3308,17 @@ struct InputKeys {
    * \see_key{key_CT_SP_diquark_supp_}
    */
   inline static const Key<double> collTerm_stringParam_diquarkSuppression{
-      InputSections::c_stringParameters + "Diquark_Supp", 0.036, {"1.3"}};
+      InputSections::c_stringParameters + "Diquark_Supp",
+      0.036,
+      {"1.3"},
+      [](const double& value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_form_time_factor_,Form_Time_Factor,double,1.0}
+   * \optional_key{key_CT_SP_form_time_factor_,Form_Time_Factor,double,
+   * 1.0,\f$x>0\f$}
    *
    * Factor to be multiplied with the formation time of string fragments from
    * the soft string routine.
@@ -3186,11 +3327,14 @@ struct InputKeys {
    * \see_key{key_CT_SP_form_time_factor_}
    */
   inline static const Key<double> collTerm_stringParam_formTimeFactor{
-      InputSections::c_stringParameters + "Form_Time_Factor", 1.0, {"1.4"}};
+      InputSections::c_stringParameters + "Form_Time_Factor",
+      1.0,
+      {"1.4"},
+      [](const double& value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_formation_time_,Formation_Time,double,1.0}
+   * \optional_key{key_CT_SP_formation_time_,Formation_Time,double,1.0,\f$x>0\f$}
    *
    * Parameter for formation time in string fragmentation, \unit{in fm}.
    */
@@ -3198,11 +3342,14 @@ struct InputKeys {
    * \see_key{key_CT_SP_formation_time_}
    */
   inline static const Key<double> collTerm_stringParam_formationTime{
-      InputSections::c_stringParameters + "Formation_Time", 1.0, {"1.0"}};
+      InputSections::c_stringParameters + "Formation_Time",
+      1.0,
+      {"1.0"},
+      [](const double& value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_gluon_beta_,Gluon_Beta,double,0.5}
+   * \optional_key{key_CT_SP_gluon_beta_,Gluon_Beta,double,0.5,\f$x>0\f$}
    *
    * Parameter \f$\beta\f$ in parton distribution function for gluons,
    * \f[\mathrm{PDF}_g(x) \propto \frac{1}{x}(1-x)^{\beta+1}\;.\f]
@@ -3211,11 +3358,14 @@ struct InputKeys {
    * \see_key{key_CT_SP_gluon_beta_}
    */
   inline static const Key<double> collTerm_stringParam_gluonBeta{
-      InputSections::c_stringParameters + "Gluon_Beta", 0.5, {"1.3"}};
+      InputSections::c_stringParameters + "Gluon_Beta",
+      0.5,
+      {"1.3"},
+      [](const double& value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_gluon_pmin_,Gluon_Pmin,double,0.001}
+   * \optional_key{key_CT_SP_gluon_pmin_,Gluon_Pmin,double,0.001,\f$x>0\f$}
    *
    * Smallest possible scale for gluon lightcone momentum \unit{in GeV}.
    * This is divided by \f$\sqrt{s}\f$ to get the minimum fraction to be sampled
@@ -3225,11 +3375,15 @@ struct InputKeys {
    * \see_key{key_CT_SP_gluon_pmin_}
    */
   inline static const Key<double> collTerm_stringParam_gluonPMin{
-      InputSections::c_stringParameters + "Gluon_Pmin", 0.001, {"1.3"}};
+      InputSections::c_stringParameters + "Gluon_Pmin",
+      0.001,
+      {"1.3"},
+      [](const double& value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_m_dependent_formation_t_,Mass_Dependent_Formation_Times,bool,false}
+   * \optional_key{key_CT_SP_m_dependent_formation_t_,
+   * Mass_Dependent_Formation_Times,bool,false,\none}
    *
    * Whether the formation time of string fragments should depend on their mass.
    * If it is set to `true`, the formation time is calculated as
@@ -3241,11 +3395,12 @@ struct InputKeys {
   inline static const Key<bool> collTerm_stringParam_mDependentFormationTimes{
       InputSections::c_stringParameters + "Mass_Dependent_Formation_Times",
       false,
-      {"1.5.2"}};
+      {"1.5.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_quark_alpha_,Quark_Alpha,double,2.0}
+   * \optional_key{key_CT_SP_quark_alpha_,Quark_Alpha,double,2.0,\f$x>0\f$}
    *
    * Parameter \f$\alpha\f$ in parton distribution function for quarks,
    * \f[\mathrm{PDF}_q\propto x^{\alpha-1}(1-x)^{\beta-1}\;.\f]
@@ -3254,11 +3409,14 @@ struct InputKeys {
    * \see_key{key_CT_SP_quark_alpha_}
    */
   inline static const Key<double> collTerm_stringParam_quarkAlpha{
-      InputSections::c_stringParameters + "Quark_Alpha", 2.0, {"1.3"}};
+      InputSections::c_stringParameters + "Quark_Alpha",
+      2.0,
+      {"1.3"},
+      [](const double& value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_quark_beta_,Quark_Beta,double,7.0}
+   * \optional_key{key_CT_SP_quark_beta_,Quark_Beta,double,7.0,\f$x>0\f$}
    *
    * Parameter \f$\beta\f$ in PDF for quarks shown in <tt>\ref
    * key_CT_SP_quark_alpha_ "Quark_Alpha"</tt>.
@@ -3267,11 +3425,15 @@ struct InputKeys {
    * \see_key{key_CT_SP_quark_beta_}
    */
   inline static const Key<double> collTerm_stringParam_quarkBeta{
-      InputSections::c_stringParameters + "Quark_Beta", 7.0, {"1.3"}};
+      InputSections::c_stringParameters + "Quark_Beta",
+      7.0,
+      {"1.3"},
+      [](const double& value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_popcorn_rate_,Popcorn_Rate,double,0.15}
+   * \optional_key{key_CT_SP_popcorn_rate_,Popcorn_Rate,double,
+   * 0.15,\f$0\leq x\leq 1\f$}
    *
    * Parameter StringFlav:popcornRate, which determines production rate of
    * popcorn mesons in string fragmentation. It is possible to produce a popcorn
@@ -3282,11 +3444,17 @@ struct InputKeys {
    * \see_key{key_CT_SP_popcorn_rate_}
    */
   inline static const Key<double> collTerm_stringParam_popcornRate{
-      InputSections::c_stringParameters + "Popcorn_Rate", 0.15, {"1.6"}};
+      InputSections::c_stringParameters + "Popcorn_Rate",
+      0.15,
+      {"1.6"},
+      [](const double& value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_power_part_formation_,Power_Particle_Formation,double,±1}
+   * \optional_key{key_CT_SP_power_part_formation_,Power_Particle_Formation,
+   * double,±1,\none}
    *
    * The default value of this parameter is `+1` if
    * \f$\sqrt{s}<200\,\mathrm{GeV}\f$ and `-1` otherwise. If positive, the power
@@ -3300,11 +3468,13 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_powerParticleFormation{
       InputSections::c_stringParameters + "Power_Particle_Formation",
       DefaultType::Dependent,
-      {"1.4"}};
+      {"1.4"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_probability_p_to_duu_,Prob_proton_to_d_uu,double,1./3}
+   * \optional_key{key_CT_SP_probability_p_to_duu_,Prob_proton_to_d_uu,
+   * double,1./3,\f$0<x\leq 1\f$}
    *
    * Probability of splitting an (anti)nucleon into the quark it has only once
    * and the diquark it contains twice in terms of flavour in the soft string
@@ -3316,11 +3486,13 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_probabilityPToDUU{
       InputSections::c_stringParameters + "Prob_proton_to_d_uu",
       1.0 / 3,
-      {"1.5"}};
+      {"1.5"},
+      [](const double& value) noexcept { return value > 0.0 && value <= 1.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_separate_fragment_bar_,Separate_Fragment_Baryon,bool,true}
+   * \optional_key{key_CT_SP_separate_fragment_bar_,Separate_Fragment_Baryon,
+   * bool,true,\none}
    *
    * Whether to use a separate fragmentation function for leading baryons in
    * non-diffractive string processes.
@@ -3331,11 +3503,12 @@ struct InputKeys {
   inline static const Key<bool> collTerm_stringParam_separateFragmentBaryon{
       InputSections::c_stringParameters + "Separate_Fragment_Baryon",
       true,
-      {"1.6"}};
+      {"1.6"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_sigma_perp_,Sigma_Perp,double,0.42}
+   * \optional_key{key_CT_SP_sigma_perp_,Sigma_Perp,double,0.42,\f$x>0\f$}
    *
    * Parameter \f$\sigma_\perp\f$ \unit{in GeV} in the distribution for
    * transverse momentum transfer between colliding hadrons \f$p_\perp\f$ and
@@ -3349,11 +3522,15 @@ struct InputKeys {
    * \see_key{key_CT_SP_sigma_perp_}
    */
   inline static const Key<double> collTerm_stringParam_sigmaPerp{
-      InputSections::c_stringParameters + "Sigma_Perp", 0.42, {"1.3"}};
+      InputSections::c_stringParameters + "Sigma_Perp",
+      0.42,
+      {"1.3"},
+      [](const double& value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_strange_supp_,Strange_Supp,double,0.16}
+   * \optional_key{key_CT_SP_strange_supp_,Strange_Supp,double,0.16,
+   * \f$0\leq x\leq 1\f$}
    *
    * Strangeness suppression factor \f$\lambda\f$,
    * \f[\lambda=
@@ -3367,11 +3544,17 @@ struct InputKeys {
    * \see_key{key_CT_SP_strange_supp_}
    */
   inline static const Key<double> collTerm_stringParam_strangeSuppression{
-      InputSections::c_stringParameters + "Strange_Supp", 0.16, {"1.3"}};
+      InputSections::c_stringParameters + "Strange_Supp",
+      0.16,
+      {"1.3"},
+      [](const double& value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_string_sigma_t_,String_Sigma_T,double,0.5}
+   * \optional_key{key_CT_SP_string_sigma_t_,String_Sigma_T,double,
+   * 0.5,\f$0<x<1\f$}
    *
    * Standard deviation \unit{in GeV} in Gaussian for transverse momentum
    * distributed to string fragments during fragmentation.
@@ -3380,11 +3563,15 @@ struct InputKeys {
    * \see_key{key_CT_SP_string_sigma_t_}
    */
   inline static const Key<double> collTerm_stringParam_stringSigmaT{
-      InputSections::c_stringParameters + "String_Sigma_T", 0.5, {"1.3"}};
+      InputSections::c_stringParameters + "String_Sigma_T",
+      0.5,
+      {"1.3"},
+      [](const double& value) noexcept { return value > 0.0 && value < 1.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_string_tension_,String_Tension,double,1.0}
+   * \optional_key{key_CT_SP_string_tension_,String_Tension,double,1.0,
+   * \f$x\geq 0\f$}
    *
    * String tension \f$\kappa\f$ \unit{in GeV/fm} connecting massless quarks in
    * Hamiltonian, \f[H=|p_1|+|p_2|+\kappa |x_1-x_2|\;.\f]
@@ -3395,11 +3582,15 @@ struct InputKeys {
    * \see_key{key_CT_SP_string_tension_}
    */
   inline static const Key<double> collTerm_stringParam_stringTension{
-      InputSections::c_stringParameters + "String_Tension", 1.0, {"1.3"}};
+      InputSections::c_stringParameters + "String_Tension",
+      1.0,
+      {"1.3"},
+      [](const double& value) noexcept { return value >= 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_a_,StringZ_A,double,2.0}
+   * \optional_key{key_CT_SP_stringz_a_,StringZ_A,double,2.0,
+   * \f$0\leq x\leq 2\f$}
    *
    * Parameter \f$a\f$ in Pythia fragmentation function \f$f(z)\f$,
    * \f[f(z) = \frac{1}{z} (1-z)^a \exp\left(-b\frac{m_T^2}{z}\right)\;.\f]
@@ -3408,11 +3599,17 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_a_}
    */
   inline static const Key<double> collTerm_stringParam_stringZA{
-      InputSections::c_stringParameters + "StringZ_A", 2.0, {"1.3"}};
+      InputSections::c_stringParameters + "StringZ_A",
+      2.0,
+      {"1.3"},
+      [](const double& value) noexcept {
+        return value >= 0.0 && value <= 2.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.2}
+   * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.2,
+   * \f$0\leq x\leq 2\f$}
    *
    * Parameter \f$a\f$ in Lund fragmentation function (see <tt>\ref
    * key_CT_SP_stringz_a_ "StringZ_A"</tt>) used to sample the light cone
@@ -3422,11 +3619,17 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_a_leading_}
    */
   inline static const Key<double> collTerm_stringParam_stringZALeading{
-      InputSections::c_stringParameters + "StringZ_A_Leading", 0.2, {"1.6"}};
+      InputSections::c_stringParameters + "StringZ_A_Leading",
+      0.2,
+      {"1.6"},
+      [](const double& value) noexcept {
+        return value >= 0.0 && value <= 2.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.55}
+   * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.55,
+   * \f$0\leq x\leq 2\f$}
    *
    * Parameter \f$b\f$ \unit{in 1/GeV²} in Pythia fragmentation function shown
    * in <tt>\ref key_CT_SP_stringz_a_ "StringZ_A"</tt>.
@@ -3435,11 +3638,17 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_b_}
    */
   inline static const Key<double> collTerm_stringParam_stringZB{
-      InputSections::c_stringParameters + "StringZ_B", 0.55, {"1.3"}};
+      InputSections::c_stringParameters + "StringZ_B",
+      0.55,
+      {"1.3"},
+      [](const double& value) noexcept {
+        return value >= 0.0 && value <= 2.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_b_leading_,StringZ_B_Leading,double,2.0}
+   * \optional_key{key_CT_SP_stringz_b_leading_,StringZ_B_Leading,double,
+   * 2.0,\f$0\leq x\leq 2\f$}
    *
    * Parameter \f$b\f$ \unit{in 1/GeV²} in Lund fraghmentation function (see
    * <tt>\ref key_CT_SP_stringz_a_ "StringZ_B"</tt>) used to sample the light
@@ -3450,13 +3659,18 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_b_leading_}
    */
   inline static const Key<double> collTerm_stringParam_stringZBLeading{
-      InputSections::c_stringParameters + "StringZ_B_Leading", 2.0, {"1.6"}};
+      InputSections::c_stringParameters + "StringZ_B_Leading",
+      2.0,
+      {"1.6"},
+      [](const double& value) noexcept {
+        return value >= 0.0 && value <= 2.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_use_monash_tune_,Use_Monash_Tune,bool,
    * (\ref key_gen_modus_ "Modus" == "Collider" &&
-   *  \ref key_MC_sqrtsnn_ "Sqrtsnn" >= 200)}
+   *  \ref key_MC_sqrtsnn_ "Sqrtsnn" >= 200),\none}
    *
    * Whether to use the monash tune \iref{Skands:2014pea} for all string
    * processes. If nothing is specified, this option will be generally `false`
@@ -3469,7 +3683,8 @@ struct InputKeys {
   inline static const Key<bool> collTerm_stringParam_useMonashTune{
       InputSections::c_stringParameters + "Use_Monash_Tune",
       DefaultType::Dependent,
-      {"3.0"}};
+      {"3.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3499,7 +3714,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
-   * \optional_key{key_CT_dileptons_decays_,Decays,bool,false}
+   * \optional_key{key_CT_dileptons_decays_,Decays,bool,false,\none}
    *
    * Whether or not to enable dilepton production from hadron decays.
    * This includes direct decays as well as Dalitz decays. Dilepton decays
@@ -3510,11 +3725,14 @@ struct InputKeys {
    * \see_key{key_CT_dileptons_decays_}
    */
   inline static const Key<bool> collTerm_dileptons_decays{
-      InputSections::c_dileptons + "Decays", false, {"0.50"}};
+      InputSections::c_dileptons + "Decays",
+      false,
+      {"0.50"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
-   * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false}
+   * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false,\none}
    *
    * Whether or not to enable photon production in mesonic scattering processes.
    */
@@ -3522,11 +3740,14 @@ struct InputKeys {
    * \see_key{key_CT_photons_2to2_scatterings_}
    */
   inline static const Key<bool> collTerm_photons_twoToTwoScatterings{
-      InputSections::c_photons + "2to2_Scatterings", false, {"1.8"}};
+      InputSections::c_photons + "2to2_Scatterings",
+      false,
+      {"1.8"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
-   * \optional_key{key_CT_photons_bremsstrahlung_,Bremsstrahlung,bool,false}
+   * \optional_key{key_CT_photons_bremsstrahlung_,Bremsstrahlung,bool,false,\none}
    *
    * Whether or not to enable photon production in bremsstrahlung processes.
    */
@@ -3534,11 +3755,15 @@ struct InputKeys {
    * \see_key{key_CT_photons_bremsstrahlung_}
    */
   inline static const Key<bool> collTerm_photons_bremsstrahlung{
-      InputSections::c_photons + "Bremsstrahlung", false, {"1.8"}};
+      InputSections::c_photons + "Bremsstrahlung",
+      false,
+      {"1.8"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
-   * \required_key{key_CT_photons_fractional_photons,Fractional_Photons,int}
+   * \required_key{key_CT_photons_fractional_photons,Fractional_Photons,
+   * int,\f$x\geq 1\f$}
    *
    * Number of fractional photons sampled per single perturbatively produced
    * photon.
@@ -3547,7 +3772,17 @@ struct InputKeys {
    * \see_key{key_CT_photons_fractional_photons}
    */
   inline static const Key<int> collTerm_photons_fractionalPhotons{
-      InputSections::c_photons + "Fractional_Photons", {"1.8"}};
+      InputSections::c_photons + "Fractional_Photons",
+      {"1.8"},
+      [](const int& value) noexcept {
+        if (value > 10'000) {
+          logg[LogArea::Configuration::id].warn(
+              "The number of fractional photons per perturbatively produced "
+              "photon is set to a very large value, which may lead to long\n"
+              "runtimes. Make sure that this is intended.");
+        }
+        return value >= 1;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
