@@ -127,30 +127,8 @@ ScatterActionsFinder::ScatterActionsFinder(
 
 static StringTransitionParameters create_string_transition_parameters(
     Configuration& config) {
-  auto sqrts_range_Npi = config.take(InputKeys::collTerm_stringTrans_rangeNpi);
-  auto sqrts_range_NN = config.take(InputKeys::collTerm_stringTrans_rangeNN);
-
-  if (sqrts_range_Npi.first < nucleon_mass + pion_mass) {
-    sqrts_range_Npi.first = nucleon_mass + pion_mass;
-    if (sqrts_range_Npi.second < sqrts_range_Npi.first)
-      sqrts_range_Npi.second = sqrts_range_Npi.first;
-    logg[LFindScatter].warn(
-        "Lower bound of Sqrts_Range_Npi too small, setting it to mass "
-        "threshold. New range is [",
-        sqrts_range_Npi.first, ',', sqrts_range_Npi.second, "] GeV");
-  }
-  if (sqrts_range_NN.first < 2 * nucleon_mass) {
-    sqrts_range_NN.first = 2 * nucleon_mass;
-    if (sqrts_range_NN.second < sqrts_range_NN.first)
-      sqrts_range_NN.second = sqrts_range_NN.first;
-    logg[LFindScatter].warn(
-        "Lower bound of Sqrts_Range_NN too small, setting it to mass "
-        "threshold. New range is [",
-        sqrts_range_NN.first, ',', sqrts_range_NN.second, "] GeV.");
-  }
-
-  return {sqrts_range_Npi,
-          sqrts_range_NN,
+  return {config.take(InputKeys::collTerm_stringTrans_rangeNpi),
+          config.take(InputKeys::collTerm_stringTrans_rangeNN),
           config.take(InputKeys::collTerm_stringTrans_lower),
           config.take(InputKeys::collTerm_stringTrans_range_width),
           config.take(InputKeys::collTerm_stringTrans_pipiOffset),
@@ -236,12 +214,6 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
         "Total_Cross_Section_Strategy is set to \"TopDown\" or "
         "\"TopDownMeasured\".\n"
         "AQM will be used for total parametrizations of cross sections.");
-  }
-
-  if (AQM_charm_suppression < 0 || AQM_bottom_suppression < 0 ||
-      AQM_charm_suppression > 1 || AQM_bottom_suppression > 1) {
-    throw std::invalid_argument(
-        "Suppression factors for AQM should be between 0 and 1.");
   }
 }
 

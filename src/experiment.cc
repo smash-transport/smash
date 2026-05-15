@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2013-2025
+ *    Copyright (c) 2013-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -235,8 +235,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     if (missing_output_decays) {
       throw std::invalid_argument(
           "Dilepton output is disabled although dilepton production is "
-          "enabled. "
-          "Please enable the dilepton output.");
+          "enabled. Please enable the dilepton output.");
     }
   }
   /* Elastic collisions between the nucleons with the square root s

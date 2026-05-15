@@ -967,15 +967,6 @@ Experiment<Modus>::Experiment(Configuration &config,
         "smearing!");
   }
 
-  // for triangular smearing:
-  // the weight needs to be larger than 1./7. for the center cell to contribute
-  // more than the surrounding cells
-  if (parameters_.smearing_mode == SmearingMode::Discrete &&
-      parameters_.discrete_weight < (1. / 7.)) {
-    throw std::invalid_argument(
-        "The central weight for discrete smearing should be >= 1./7.");
-  }
-
   if (parameters_.coll_crit == CollisionCriterion::Stochastic &&
       (time_step_mode_ != TimeStepMode::Fixed || !use_grid_)) {
     throw std::invalid_argument(
@@ -1040,16 +1031,11 @@ Experiment<Modus>::Experiment(Configuration &config,
         config.take(InputKeys::collTerm_photons_fractionalPhotons);
   }
   if (parameters_.two_to_one) {
-    if (parameters_.res_lifetime_factor < 0.) {
-      throw std::invalid_argument(
-          "Resonance lifetime modifier cannot be negative!");
-    }
     if (parameters_.res_lifetime_factor < really_small) {
       logg[LExperiment].warn(
           "Resonance lifetime set to zero. Make sure resonances cannot "
-          "interact",
-          "inelastically (e.g. resonance chains), else SMASH is known to "
-          "hang.");
+          "interact inelastically (e.g. resonance chains), else SMASH is known "
+          "to hang.");
     }
     action_finders_.emplace_back(
         std::make_unique<DecayActionsFinder>(parameters_));
