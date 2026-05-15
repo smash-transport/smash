@@ -7888,8 +7888,7 @@ General:
  *
  * The following example configures the dilepton production for dileptons
  * originating from resonance decays and bremsstrahlung. In addition, the
- extended
- * OSCAR2013 dilepton output is enabled.
+ * extended OSCAR2013 dilepton output is enabled.
  *
  *\verbatim
  Output:
@@ -7924,17 +7923,17 @@ General:
  * of your choice, which you then specify as the input with the `-d` command
  * line option. <b>Without this decay modes modification the dilepton output
  * will be empty</b>. Dilepton decays are commented out by default. Therefore,
- * you need to uncomment them. For the N(1520) Dalitz decay, two treatments
- are
- * available: Either by proxy of the \f$\rho N\f$ decay, which is enabled by
- * default (and leads to a dilepton Dalitz decay, if \f$\rho \rightarrow
- * e^+e^-\f$ is also enabled) or as a direct Dalitz decay to \f$e^+e^- N\f$.
- * If using the latter comment-out the \f$\rho N\f$ decay to avoid double
- * counting. The form factor in the direct case, is constant and fixed at the
- * real photon point. Furthermore note, that for dilepton decays, new decay
- * channels can \b not simply be added to the *decaymodes.txt* file. You also
- * have to modify the decay width formulas \c TwoBodyDecayDilepton::width and
- * \c ThreeBodyDecayDilepton::diff_width in *decaytype.cc* file.
+ * you need to uncomment them. For the N(1520) Dalitz decay, two
+ * treatments are available: Either by proxy of the \f$\rho N\f$ decay, which
+ * is enabled by default (and leads to a dilepton Dalitz decay, if
+ * \f$\rho \rightarrow e^+e^-\f$ is also enabled) or as a direct Dalitz decay
+ * to \f$e^+e^- N\f$. If using the latter, comment-out the \f$\rho N\f$ decay
+ * to avoid double counting. The form factor in the direct case, is constant
+ * and fixed at the real photon point. Furthermore note, that for dilepton
+ * decays, new decay channels can \b not simply be added to the
+ * *decaymodes.txt* file. You also have to modify the decay width formulas
+ * \c TwoBodyDecayDilepton::width and \c ThreeBodyDecayDilepton::diff_width
+ * in *decaytype.cc* file.
  *
  */
 
@@ -7979,8 +7978,7 @@ General:
  *    photon processes are significantly less likely than hadronic processes,
  *    the produced photons are weighted according to the ratio of the photon
  *    cross section to the hadronic cross section used to find the
- interaction,
- *    \f[W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\;.\f]
+ *    interaction, \f[W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\;.\f]
  *    This weight can be found in the weight element of the photon output,
  *    denoted as `photon_weight` there.
  * -# Perform the original hadronic action based on which the photon action
@@ -8032,10 +8030,9 @@ General:
  * The following example configures a Cu63-Cu63 collision at
  * \f$\sqrt{s_{NN}}=3.0\,\mathrm{GeV}\f$ with zero impact parameter and Fermi
  * motion taken into consideration. The calculation frame is the default,
- center
- * of velocity, and the nuclei are not deformed. Refer to \ref
- * doxypage_input_conf_modi_C_proj_targ for information about the
- * `%Particles` and `Target` sections.
+ * center of velocity, and the nuclei are not deformed. Refer to
+ * \ref doxypage_input_conf_modi_C_proj_targ for information about the
+ * `Particles` and `Target` sections.
  *
  *\verbatim
  Modi:
@@ -8049,8 +8046,7 @@ General:
  *
  * To further use Fermi motion and allow the first collisions within the
  * projectile or target nucleus, the corresponding options need to be
- activated
- * by means of:
+ * activated by means of:
  *\verbatim
          Fermi_Motion: "on"
          Collisions_Within_Nucleus: True
@@ -8064,17 +8060,14 @@ General:
  * By default, executing SMASH from the codebase build folder without further
  * specifying the configuration, particles and decay modes files, a collider
  * simulation is set up according to the default _config.yaml_,
- _particles.txt_
- * and _decaymodes.txt_ files located in the _**input**_ directory at the
- * top-level of the codebase. However, changing the _**input**_ directory
- * content will not affect the default SMASH run, unless a clean build folder
- is
- * created over again. This is because the triplet of input files are
- * transformed into another triplet of files into the build directory when
- * `cmake` is run. Hence prefer to use `smash` command line options in case
- you
- * want to refer to possibly modified configuration, particles and decay modes
- * files.\n
+ * _particles.txt_ and _decaymodes.txt_ files located in the _**input**_
+ * directory at the top-level of the codebase. However, changing the
+ * _**input**_ directory content will not affect the default SMASH run,
+ * unless a clean build folder is created over again. This is because the
+ * triplet of input files are transformed into another triplet of files into
+ * the build directory when `cmake` is run. Hence prefer to use `smash`
+ * command line options in case you want to refer to possibly modified
+ * configuration, particles and decay modes files.\n
  * To run SMASH in the (default) collider setup, execute
  * \verbatim
     ./smash

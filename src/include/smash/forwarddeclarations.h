@@ -61,15 +61,19 @@ enum class CalculationFrame {
   FixedTarget,
 };
 
-/// Option to use form factors in dilepton bremsstrahlung as described in
-/// \iref{Shyam:2010vr}.
+/**
+ * Option to use form factors in dilepton bremsstrahlung as described in
+ * \iref{Shyam:2010vr}.
+ */
 enum class DileptonBremsPionFormFactor {
   /// Don't use form factors, i.e. multiply by 1.
   Off,
   /// Photon couples to pion only via \f$\rho_0\f$ meson.
   FF1,
-  /// Photon couples 40% directly to intrinsice quark structure of pion and
-  /// 60% indirectly via \f$\rho_0\f$ meson.
+  /**
+   * Photon couples 40% directly to intrinsice quark structure of pion and
+   * 60% indirectly via \f$\rho_0\f$ meson.
+   */
   FF2,
 };
 

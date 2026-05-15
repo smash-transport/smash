@@ -147,35 +147,36 @@ inline double em_form_factor_sqr_vec(PdgCode pdg, double mass) {
 inline double form_factor_delta([[maybe_unused]] double m) { return 3.12; }
 
 /**
- * \return Squared pion electromagnetic form factor |F_π(M²)|²
- * for the internal pion propagator in p n -> p n e⁺ e⁻ bremsstrahlung.
+ * \return Squared pion electromagnetic form factor \f$|F_\pi(m_{inv}^2)|^2\f$
+ * for the internal pion propagator in \f$ pn \rightarrow pn e^+ e^- \f$
+ * bremsstrahlung.
  *
- * FF1: pure vector-meson dominance, direct ρ⁰ coupling
- * FF2: mixed direct-quark + ρ⁰ coupling (\iref{Shyam:2010vr}, FF2)
+ * FF1: pure vector-meson dominance, direct \f$\rho0\f$ coupling
+ * FF2: mixed direct-quark + \f$\rho0\f$ coupling (\iref{Shyam:2010vr}, FF2)
  *
- * \param M_sq  Invariant dilepton mass squared M² [GeV²]
- * \param m_rho ρ⁰ pole mass [GeV]
- * \param Gamma_rho Energy-dependent ρ⁰ width Γ_ρ(M²) [GeV]
+ * \param m_inv_sqr  Invariant dilepton mass squared m_{inv}^2 [GeV²]
+ * \param m_rho      \f$\rho0\f$ pole mass [GeV]
+ * \param gamma_rho  Energy-dependent \f$\rho0\f$ width
+ *                   \f$\Gamma_\rho(m_{inv}^2)\f$ [GeV]
  */
-inline double pion_em_form_factor_sqr_FF1(double M_sq, double m_rho,
-                                          double Gamma_rho) {
+inline double pion_em_form_factor_sqr_FF1(double m_inv_sqr, double m_rho,
+                                          double gamma_rho) {
+  assert(gamma_rho > 0.0);
   const double m_rho_sq = m_rho * m_rho;
-  const double Gamma_safe = std::max(Gamma_rho, really_small);
-  const std::complex<double> denom(m_rho_sq - M_sq, -m_rho * Gamma_safe);
-  return std::norm(std::complex<double>(m_rho_sq, 0.0) / denom);
+  const std::complex<double> denom(m_rho_sq - m_inv_sqr, -m_rho * gamma_rho);
+  return std::norm(m_rho_sq / denom);
 }
 
-inline double pion_em_form_factor_sqr_FF2(double M_sq, double m_rho,
-                                          double Gamma_rho) {
+inline double pion_em_form_factor_sqr_FF2(double m_inv_sqr, double m_rho,
+                                          double gamma_rho) {
+  assert(gamma_rho > 0.0);
   /// Lambda² constant (\iref{Shyam:2010vr}, FF2) in GeV².
   constexpr double lambda_sq_FF2 = 1.9;
   const double m_rho_sq = m_rho * m_rho;
-  const double Gamma_safe = std::max(Gamma_rho, really_small);
-  const std::complex<double> denom(m_rho_sq - M_sq, -m_rho * Gamma_safe);
+  const std::complex<double> denom(m_rho_sq - m_inv_sqr, -m_rho * gamma_rho);
   const std::complex<double> F =
-      std::complex<double>(0.4 / (1.0 - M_sq / lambda_sq_FF2), 0.0) +
-      0.6 / (1.0 - M_sq / (2 * m_rho_sq)) *
-          std::complex<double>(m_rho_sq, 0.0) / denom;
+      0.4 / (1.0 - m_inv_sqr / lambda_sq_FF2) +
+      0.6 / (1.0 - m_inv_sqr / (2 * m_rho_sq)) * m_rho_sq / denom;
   return std::norm(F);
 }
 

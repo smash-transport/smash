@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2019-2022,2026
+ *    Copyright (c) 2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -28,20 +28,21 @@ namespace smash {
  * the phase-space corrected soft-photon approximation (SPA) as e.g. outlined
  * in \iref{Weil:2013mya} (see eq. (40)–(43) in the reference document).
  *
- * The electromagnetic pion form factor (PEFF) from \iref{Shyam:2010vr} is
- * optionally applied, modifying the differential cross section by |F_pi(M²)|².
- * The form factor accounts for the internal charged pion propagator.
+ * The pion electromagnetic form factor (PEFF) from \iref{Shyam:2010vr} is
+ * optionally applied, modifying the differential cross section by
+ * \f$|F_\pi(M^2)|^2\f$. The form factor accounts for the internal charged
+ * pion propagator.
  *
  * Kinematic variables sampled (analogous to BremsstrahlungAction):
- *   - M:     invariant mass of the dilepton pair  [2me, M_max]
- *   - q:     3-momentum of dilepton in pn-CM frame
- *   - θ:     polar angle of dilepton in pn-CM frame  [0, pi]
- *   - phi:   azimuthal angle of dilepton in pn-CM frame  [0, 2pi]
+ *   - m_inv:        invariant mass of the dilepton pair [2m_e, m_inv_max]
+ *   - q:            3-momentum of dilepton in pn-CM frame
+ *   - \f$\theta\f$: polar angle of dilepton in pn-CM frame \f$[0, \pi]\f$
+ *   - \f$\phi\f$:   azimuthal angle of dilepton in pn-CM frame \f$[0, 2\pi]\f$
  *
- * The dilepton 4-momentum is constructed directly from (M, q, θ, phi) to enable
- * event-by-event acceptance cuts.
- * The e⁺e⁻ pair is subsequently produced isotropically in the virtual photon's
- * rest frame.
+ * The dilepton 4-momentum is constructed directly from
+ * (m_inv, q, \f$\theta\f$, \f$\phi\f$) to enable event-by-event acceptance
+ * cuts. The e⁺e⁻ pair is subsequently produced isotropically in the virtual
+ * photon's rest frame.
  *
  */
 class BremsstrahlungActionDilepton : public ScatterAction {
@@ -68,15 +69,16 @@ class BremsstrahlungActionDilepton : public ScatterAction {
 
   /**
    * Check if particles can undergo an implemented dilepton
-   * bremsstrahlung process for invocation in experiment.h/.cc.
+   * bremsstrahlung process.
    *
    * This function does not check the involved kinematics.
    *
    * \param[in] in ParticleList of incoming particles.
+   *
    * \return bool if dilepton bremsstrahlung reaction implemented.
    */
   static bool is_dilepton_brems_reaction(const ParticleList &in) {
-    return dilepton_brems_reaction_type(in) != ReactionType::no_reaction;
+    return dilepton_brems_reaction_type_(in) != ReactionType::no_reaction;
   }
 
   /**
@@ -86,7 +88,7 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    * performed hadronic action without recomputing it.
    *
    * \param[in] reaction_cross_section Total cross section of underlying
-   *                                    hadronic process [mb]
+   *                                   hadronic process [mb]
    */
   void add_dummy_hadronic_process(double reaction_cross_section);
 
@@ -94,7 +96,7 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    * Create the final state and write to output.
    *
    * \param[in] outputs List of all outputs. Does not have to be a specific
-   *                      dilepton output, the function will take care of this.
+   *                    dilepton output, the function will take care of this.
    */
   void perform_dilepton_bremsstrahlung(const OutputsList &outputs);
 
@@ -128,65 +130,73 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    * the function will return no_reaction.
    *
    * \param[in] in ParticleList of incoming particles.
+   *
    * \return ReactionType enum-member
    */
-  static ReactionType dilepton_brems_reaction_type(const ParticleList &in);
+  static ReactionType dilepton_brems_reaction_type_(const ParticleList &in);
 
   /**
    * Generates momenta of outgoing particles (for 2-body isotropic decays only).
    *
    * \param[in] p_parent FourVector of incoming particle momentum.
-   * \param[in] daughter1 First daughter particle.
-   * \param[in] daughter2 Second daughter particle.
-   * \return    bool if sampling successful, i.e. if there is enough energy
+   * \param[in] child_1 First child particle.
+   * \param[in] child_2 Second child particle.
+   *
+   * \return    bool if sampling is successful, i.e. if there is enough energy
    *            to create the outgoing particles. If sampling fails, the
-   * function returns false and the weight of the dilepton pair is set to 0 in
-   * generate_final_state().
+   *            function returns false and the weight of the dilepton pair
+   *            is set to 0 when generating the final state.
    */
-  bool sample_2body_isotropic(const FourVector &p_parent,
-                              ParticleData &daughter1, ParticleData &daughter2);
+  bool sample_2body_isotropic_(const FourVector &p_parent,
+                               ParticleData &child_1, ParticleData &child_2);
 
   /**
-   * Fully differential cross section dsigma/(dM dq dOmega) for pn -> pne⁺e⁻.
+   * Fully differential cross section \f$\frac{d\sigma}{dM dq d\Omega}\f$
+   * for \f$ pn \rightarrow pne^+ e^- \f$.
    *
-   * \param[in] M      Invariant mass of dilepton pair
+   * \param[in] m_inv  Invariant mass of dilepton pair
    * \param[in] q      3-momentum of dilepton in pn-CM frame
-   * \param[in] sqrts  CM energy sqrt(s)
-   * \return           dsigma/(dM dq dOmega)
+   * \param[in] sqrts  CM energy \f$\sqrt(s)\f$
+   *
+   * \return           \f$\frac{d\sigma}{dM dq d\Omega}\f$
    */
-  double diff_xs_pn_dilepton(double M, double q, double sqrts) const;
+  double diff_xs_pn_dilepton_(double m_inv, double q, double sqrts) const;
 
   /**
-   * Returns |F_pi(M²)|², the squared pion electromagnetic form factor.
+   * Returns \f$|F_\pi(m_{inv}^2)|^2\f$, the squared pion electromagnetic form
+   * factor.
    *
-   * \param[in] M2  M² = invariant mass squared of dilepton pair [GeV²]
-   * \return |F_pi(M²)|² (dimensionless)
+   * \param[in] m_inv_sqr  Invariant mass squared of dilepton pair [GeV²]
+   *
+   * \return \f$|F_\pi(m_{inv}^2)|^2\f$ (dimensionless)
    */
-  double pion_em_form_factor_sq(double M2) const;
+  double pion_em_form_factor_sq_(double m_inv_sqr) const;
 
   /**
-   * Energy-dependent Gamma_rho(M²) used in the form factor.
+   * Energy-dependent \f$\Gamma_\rho(m_{inv}^2)\f$ used in the form factor.
    *
-   * \param[in] M_sq  Invariant mass squared [GeV²]
-   * \return Gamma_rho(M²) [GeV]
+   * \param[in] m_inv_sqr  Invariant mass squared [GeV²]
+   *
+   * \return \f$\Gamma_\rho(m_{inv}^2)\f$ [GeV]
    */
-  double gamma_rho(double M_sq) const;
+  double gamma_rho_(double m_inv_sqr) const;
 
   /**
    * Helper function for calculating R_2 as defined in \iref{Weil:2013mya},
    * eq. (42).
    *
    * \param[in] s Mandelstam variable s [GeV²]
-   * \return R_2(M²) (dimensionless)
+   *
+   * \return R_2(m_{inv}^2) (dimensionless)
    */
-  double R_2_helper(const double s) const;
+  double R_2_helper_(const double s) const;
   /**
    * Holds the bremsstrahlung branch. As of now, this will hold only one branch.
    */
   CollisionBranchList collision_processes_dilepton_bremsstrahlung_;
 
   /// Reaction process as determined from incoming particles.
-  const ReactionType reac_;
+  const ReactionType reaction_type_;
 
   /// Weight of the dilepton event.
   double weight_ = 0.0;
@@ -197,7 +207,7 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   /// Total hadronic cross section
   const double hadronic_cross_section_;
 
-  /// Form factor type: Off (FF=1), FF1, FF2.
+  /// Form factor type: Off, FF1, FF2.
   const DileptonBremsPionFormFactor form_factor_type_;
 
   /// Sampled 3-momentum of dilepton pair in pn-CM frame
@@ -207,7 +217,7 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   double theta_;
 
   /// Sampled invariant mass of the dilepton pair
-  double M_;
+  double m_inv_;
 };
 
 }  // namespace smash
