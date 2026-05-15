@@ -6331,7 +6331,7 @@ struct InputKeys {
       InputSections::forcedThermalization + "Cell_Number",
       {"1.1"},
       [](const std::array<int, 3> &value) noexcept {
-        if (std::abs(value[0] * value[1] * value[2]) > 30'000'000) {
+        if (std::abs(value[0] * value[1] * value[2]) > 2'000'000) {
           logg[LogArea::Configuration::id].warn(
               "Number of total cells for forced thermalization is very large, "
               "which may lead to long runtime. Make sure this is intended.");
