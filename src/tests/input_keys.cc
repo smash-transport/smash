@@ -675,10 +675,10 @@ TEST(validators_collision_term) {
   VERIFY(!elastic_xs.validate(0.0));
   VERIFY(!elastic_xs.validate(-2.0));
   const auto& elastic_NN_cutoff = InputKeys::collTerm_elasticNNCutoffSqrts;
-  VERIFY(elastic_NN_cutoff.validate(1.88));
-  VERIFY(elastic_NN_cutoff.validate(2.02));
-  VERIFY(!elastic_NN_cutoff.validate(1.87));
-  VERIFY(!elastic_NN_cutoff.validate(2.03));
+  VERIFY(elastic_NN_cutoff.validate(1.876));
+  VERIFY(elastic_NN_cutoff.validate(2.014));
+  VERIFY(!elastic_NN_cutoff.validate(1.875));
+  VERIFY(!elastic_NN_cutoff.validate(2.015));
   const auto& min_cell_length = InputKeys::collTerm_fixedMinCellLength;
   VERIFY(min_cell_length.validate(1e-6));
   VERIFY(!min_cell_length.validate(0.0));
@@ -740,11 +740,11 @@ TEST(validators_collision_term) {
   const auto& lower = InputKeys::collTerm_stringTrans_lower;
   VERIFY(lower.validate(0.9));
   const auto& range_NN = InputKeys::collTerm_stringTrans_rangeNN;
-  VERIFY(range_NN.validate(std::make_pair(1.88, 2.88)));
+  VERIFY(range_NN.validate(std::make_pair(1.876, 2.876)));
   VERIFY(!range_NN.validate(std::make_pair(1.87, 4.5)));
   VERIFY(!range_NN.validate(std::make_pair(4.5, 3.5)));
   const auto& range_Npi = InputKeys::collTerm_stringTrans_rangeNpi;
-  VERIFY(range_Npi.validate(std::make_pair(1.08, 2.2)));
+  VERIFY(range_Npi.validate(std::make_pair(1.076, 2.2)));
   VERIFY(!range_Npi.validate(std::make_pair(1.07, 2.2)));
   VERIFY(!range_Npi.validate(std::make_pair(2.2, 1.5)));
   const auto& range_width = InputKeys::collTerm_stringTrans_range_width;

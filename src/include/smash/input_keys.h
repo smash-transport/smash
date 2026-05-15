@@ -2491,13 +2491,13 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_elastic_nn_cutoff_sqrts_,Elastic_NN_Cutoff_Sqrts,
-   * double,1.98,\f$1.88 \leq x \leq 2.02\f$}
+   * double,1.98,\f$1.876 \leq x \leq 2.014\f$}
    *
    * The elastic collisions between two nucleons with \f$\sqrt{s}\f$ below
    * the specified value (\unit{in GeV}) cannot happen.
-   * - `Elastic_NN_Cutoff_Sqrts` < 1.88 &rarr;
+   * - `Elastic_NN_Cutoff_Sqrts` < 1.876 &rarr;
    *   Below the threshold energy of the elastic collision, not accepted.
-   * - `Elastic_NN_Cutoff_Sqrts` > 2.02 &rarr;
+   * - `Elastic_NN_Cutoff_Sqrts` > 2.014 &rarr;
    *   Beyond the threshold energy of the inelastic collision
    *   \f$NN\rightarrow NN\pi\f$, not accepted.
    */
@@ -2509,7 +2509,8 @@ struct InputKeys {
       1.98,
       {"1.0"},
       [](const double& value) noexcept {
-        return value >= 1.88 && value <= 2.02;
+        return value >= 2 * nucleon_mass &&
+               value <= 2 * nucleon_mass + pion_mass;
       }};
 
   /*!\Userguide
@@ -3249,7 +3250,7 @@ struct InputKeys {
           {"3.0"},
           [](const std::pair<double, double>& value) noexcept {
             const bool valid =
-                value.first >= 1.876 && value.first < value.second;
+                value.first >= 2 * nucleon_mass && value.first < value.second;
             if (valid && std::abs(value.second - value.first) != 1.0) {
               logg[LogArea::Configuration::id].warn(
                   "The string transition range for NN collisions is set to a "
@@ -3276,7 +3277,8 @@ struct InputKeys {
           std::make_pair(1.9, 2.2),
           {"3.0"},
           [](const std::pair<double, double>& value) noexcept {
-            return value.first >= 1.076 && value.first < value.second;
+            return value.first >= nucleon_mass + pion_mass &&
+                   value.first < value.second;
           }};
 
   /*!\Userguide
