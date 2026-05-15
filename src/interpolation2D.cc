@@ -19,24 +19,35 @@ InterpolateData2DSpline::InterpolateData2DSpline(
     const std::vector<double>& x, const std::vector<double>& y,
     const std::vector<double>& z, const ExtrapolationType extrapolation_type) {
   extrapolation_type_ = extrapolation_type;
+  switch (extrapolation_type_) {
+    case ExtrapolationType::None:
+    case ExtrapolationType::Zero:
+    case ExtrapolationType::Constant:
+      break;
+    default:
+      throw std::invalid_argument(
+          "The provided extrapolation type is not supported. Valid types are "
+          "'None', 'Zero', and 'Constant'.");
+  }
+
   const size_t M = x.size();
   const size_t N = y.size();
 
   if (z.size() != N * M) {
-    throw std::runtime_error(
+    throw std::invalid_argument(
         "Dimensions not suitable for 2D interpolation. DIM(z) != DIM(x) * "
         "DIM(y).");
   }
 
   if (M < 4 || N < 4) {
-    throw std::runtime_error(
+    throw std::invalid_argument(
         "Need at least 4 data points in each dimension for bicubic spline "
         "interpolation.");
   }
 
   if (!std::is_sorted(x.begin(), x.end()) ||
       !std::is_sorted(y.begin(), y.end())) {
-    throw std::runtime_error(
+    throw std::invalid_argument(
         "x and y values must be strictly increasing, i.e. the vectors have to "
         "be sorted by size of their values. This is required by GSL.");
   }
@@ -77,16 +88,14 @@ double InterpolateData2DSpline::operator()(double xi, double yi) const {
                 << "\nx value " << xi << " or y value " << yi
                 << " are out of bounds.";
       throw std::out_of_range(error_msg.str());
+    } else if (extrapolation_type_ == ExtrapolationType::Zero) {
+      return 0.;
     } else if (extrapolation_type_ == ExtrapolationType::Constant) {
       // constant extrapolation at the edges
       xi = (xi < first_x_) ? first_x_ : xi;
       xi = (xi > last_x_) ? last_x_ : xi;
       yi = (yi < first_y_) ? first_y_ : yi;
       yi = (yi > last_y_) ? last_y_ : yi;
-    } else {
-      throw std::invalid_argument(
-          "The provided extrapolation type is not supported. Valid types are "
-          "'None' and 'Constant'.");
     }
   }
 

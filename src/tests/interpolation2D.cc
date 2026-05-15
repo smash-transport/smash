@@ -28,7 +28,7 @@ static auto set_up_x_y_z_values() {
   return std::make_tuple(x, y, z);
 }
 
-TEST_CATCH(fail_N_points, std::runtime_error) {
+TEST_CATCH(fail_N_points, std::invalid_argument) {
   const std::vector<double> x = {1, 2, 3, 4, 5};
   const std::vector<double> y = {0, 1, 2};
   const std::vector<double> z = {1, 2, 0, 0, 0, 0, 0, 8, 9, 1, 2, 3, 4, 5, 2};
@@ -38,9 +38,9 @@ TEST_CATCH(fail_N_points, std::runtime_error) {
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 }
 
-TEST_CATCH(fail_dimensions, std::runtime_error) {
+TEST_CATCH(fail_dimensions, std::invalid_argument) {
   const std::vector<double> x = {1, 2, 3, 4, 5};
-  const std::vector<double> y = {0, 1, 2};
+  const std::vector<double> y = {0, 1, 2, 3};
   const std::vector<double> z = {1, 2, 0, 0, 0, 8, 9, 1, 2, 3, 4, 5, 0};
 
   /* Try creating 2D interpolation with not-fitting dimensions, which is
@@ -48,20 +48,16 @@ TEST_CATCH(fail_dimensions, std::runtime_error) {
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 }
 
-TEST_CATCH(x_vector_not_sorted, std::runtime_error) {
-  const std::vector<double> x = {2, 1, 4, 3, 5};
-  const std::vector<double> y = {0, 1, 2, 3};
-  const std::vector<double> z = {1, 3, 0, 5, 0, 7, 3, 8, 9, 1,
-                                 2, 5, 4, 5, 6, 1, 4, 7, 9, 2};
+TEST_CATCH(x_vector_not_sorted, std::invalid_argument) {
+  auto [x, y, z] = set_up_x_y_z_values();
+  std::swap(x[0], x[1]);
 
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 }
 
-TEST_CATCH(y_vector_not_sorted, std::runtime_error) {
-  const std::vector<double> x = {1, 2, 3, 4, 5};
-  const std::vector<double> y = {1, 2, 0, 3};
-  const std::vector<double> z = {1, 3, 0, 5, 0, 7, 3, 8, 9, 1,
-                                 2, 5, 4, 5, 6, 1, 4, 7, 9, 2};
+TEST_CATCH(y_vector_not_sorted, std::invalid_argument) {
+  auto [x, y, z] = set_up_x_y_z_values();
+  std::swap(y[0], y[1]);
 
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
 }
@@ -93,26 +89,49 @@ TEST(interpolate_bicubic) {
 
 TEST_CATCH(x_value_out_of_lower_bound, std::out_of_range) {
   const auto [x, y, z] = set_up_x_y_z_values();
-  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z,
+                                                     ExtrapolationType::None);
   (*interp)(0.5, 4);
 }
 
 TEST_CATCH(x_value_out_of_upper_bound, std::out_of_range) {
   const auto [x, y, z] = set_up_x_y_z_values();
-  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z,
+                                                     ExtrapolationType::None);
   (*interp)(5.5, 4);
 }
 
 TEST_CATCH(y_value_out_of_lower_bound, std::out_of_range) {
   const auto [x, y, z] = set_up_x_y_z_values();
-  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z,
+                                                     ExtrapolationType::None);
   (*interp)(2, 0.8);
 }
 
 TEST_CATCH(y_value_out_of_upper_bound, std::out_of_range) {
   const auto [x, y, z] = set_up_x_y_z_values();
-  interp = std::make_unique<InterpolateData2DSpline>(x, y, z);
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z,
+                                                     ExtrapolationType::None);
   (*interp)(2, 13);
+}
+
+TEST(extrapolate_zero) {
+  // check constant extrapolation if x or y values are out of bounds
+  const auto [x, y, z] = set_up_x_y_z_values();
+  interp = std::make_unique<InterpolateData2DSpline>(x, y, z,
+                                                     ExtrapolationType::Zero);
+
+  // x out of bounds
+  FUZZY_COMPARE((*interp)(0.5, 4), 0.);
+  FUZZY_COMPARE((*interp)(8, 4), 0.);
+
+  // y out of bounds
+  FUZZY_COMPARE((*interp)(2, 0.8), 0.);
+  FUZZY_COMPARE((*interp)(5, 16), 0.);
+
+  // x and y out of bounds
+  FUZZY_COMPARE((*interp)(0.5, 0.8), 0.);
+  FUZZY_COMPARE((*interp)(7, 16), 0.);
 }
 
 TEST(extrapolate_constant) {
@@ -138,7 +157,4 @@ TEST_CATCH(invalid_extrapolation_type, std::invalid_argument) {
   const auto [x, y, z] = set_up_x_y_z_values();
   interp = std::make_unique<InterpolateData2DSpline>(x, y, z,
                                                      ExtrapolationType::Linear);
-
-  // x and y out of bounds
-  (*interp)(0.5, 0.8);
 }

@@ -91,6 +91,14 @@ TEST(interpolate_data_linear_unsorted) {
   COMPARE(f(5), 0.0);
 }
 
+TEST(interpolate_data_linear_with_zero_extrapolation) {
+  const InterpolateDataLinear<double> f =
+      set_up_interpolate_data_linear_sorted(ExtrapolationType::Zero);
+  COMPARE(f(1.5), 1.5);
+  COMPARE(f(0), 0.);
+  COMPARE(f(10), 0.);
+}
+
 TEST(interpolate_data_linear_with_constant_extrapolation) {
   const InterpolateDataLinear<double> f =
       set_up_interpolate_data_linear_sorted(ExtrapolationType::Constant);
@@ -99,11 +107,12 @@ TEST(interpolate_data_linear_with_constant_extrapolation) {
   COMPARE(f(10), 9.);
 }
 
-TEST_CATCH(interpolate_data_linear_invalid_extrapolation_type,
-           std::invalid_argument) {
+TEST(interpolate_data_linear_with_linear_extrapolation) {
   const InterpolateDataLinear<double> f =
       set_up_interpolate_data_linear_sorted(ExtrapolationType::Linear);
-  f(10);
+  COMPARE(f(1.5), 1.5);
+  COMPARE(f(0), 0.);
+  COMPARE(f(10), 10.);
 }
 
 TEST(trilinear_interpolation) {
@@ -169,6 +178,14 @@ TEST(interpolate_data_spline_unsorted) {
   COMPARE(f(1.5), 1.5);
 }
 
+TEST(interpolate_data_spline_with_zero_extrapolation) {
+  const InterpolateDataSpline f =
+      set_up_interpolate_data_spline_sorted(ExtrapolationType::Zero);
+  COMPARE(f(1.5), 1.5);
+  COMPARE(f(0), 0.);
+  COMPARE(f(10), 0.);
+}
+
 TEST(interpolate_data_spline_with_constant_extrapolation) {
   const InterpolateDataSpline f =
       set_up_interpolate_data_spline_sorted(ExtrapolationType::Constant);
@@ -179,7 +196,5 @@ TEST(interpolate_data_spline_with_constant_extrapolation) {
 
 TEST_CATCH(interpolate_data_spline_invalid_extrapolation_type,
            std::invalid_argument) {
-  const InterpolateDataSpline f =
-      set_up_interpolate_data_spline_sorted(ExtrapolationType::Linear);
-  f(10);
+  set_up_interpolate_data_spline_sorted(ExtrapolationType::Linear);
 }

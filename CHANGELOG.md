@@ -34,7 +34,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Minimum supported HepMC3 version is now version `3.2.6`.
 * The `make install` target has been standardized to create an enclosing version-specific folder inside which the standard `bin`, `lib`, `include` and `share` directories are created (previously, the version specific folder was created inside the standard ones).
 * The interpolations `InterpolateDataLinear`, `InterpolateDataSpline`, and `InterpolateData2DSpline` are restricted to not extrapolate by default and will in this case now throw if out-of-bounds values are tried to access.
-  Constant extrapolation can be achieved by giving the argument `ExtrapolationType::Constant_value` during construction.
+  Extrapolation can be enabled by giving an `ExtrapolationType` as an argument during construction.
 
 ### Removed
 * CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally.

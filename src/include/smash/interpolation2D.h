@@ -31,7 +31,8 @@ class InterpolateData2DSpline {
    * \param extrapolation_type Type of extrapolation for requested x_i and y_i
    *                           values that are out of bounds. Extrapolation is
    *                           by default disabled. Possible types are
-   *                           <tt>None</tt> and <tt>Constant</tt>.
+   *                           <tt>None</tt>, <tt>Zero</tt>, and
+   *                           <tt>Constant</tt>.
    *
    * \return The interpolation function.
    * \throw std::out_of_range if values outside of the boundaries of the
@@ -39,12 +40,18 @@ class InterpolateData2DSpline {
    *                          extrapolation is disabled.
    * \throw std::invalid_argument if unsupported extrapolation type is
    *                              requested.
+   * \throw std::invalid_argument if product of dimensions of x and y does not
+   *                              equal dimension of z.
+   * \throw std::invalid_argument if less than three data points in x or y are
+   *                              provided.
+   * \throw std::invalid_argument if x and y are not sorted that their values
+   *                              strictly increase.
    *
    */
   InterpolateData2DSpline(
       const std::vector<double>& x, const std::vector<double>& y,
       const std::vector<double>& z,
-      const ExtrapolationType extrapolation_type = ExtrapolationType::None);
+      ExtrapolationType extrapolation_type = ExtrapolationType::None);
 
   /// Destructor
   ~InterpolateData2DSpline();

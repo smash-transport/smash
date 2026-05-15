@@ -74,9 +74,11 @@ class InterpolateDataLinear {
    * \param extrapolation_type Type of extrapolation for requested x_i values
    *                           that are out of bounds. Extrapolation is by
    *                           default disabled. Possible types are
-   *                           <tt>None</tt> and <tt>Constant</tt>.
+   *                           <tt>None</tt>, <tt>Zero</tt>, <tt>Constant</tt>,
+   *                           and <tt>Linear</tt>.
    *
    * \return The interpolation function.
+   * \throw std::invalid_argument if vectors x and y have different length.
    * \throw std::out_of_range if values outside of the boundaries of the
    *                          underlying data are tried to be accessed and
    *                          extrapolation is disabled.
@@ -85,7 +87,7 @@ class InterpolateDataLinear {
    */
   InterpolateDataLinear(
       const std::vector<T>& x, const std::vector<T>& y,
-      const ExtrapolationType extrapolation_type = ExtrapolationType::None);
+      ExtrapolationType extrapolation_type = ExtrapolationType::None);
 
   /**
    * Calculate linear interpolation at x.
@@ -223,7 +225,21 @@ InterpolateDataLinear<T>::InterpolateDataLinear(
     const std::vector<T>& x, const std::vector<T>& y,
     const ExtrapolationType extrapolation_type) {
   extrapolation_type_ = extrapolation_type;
-  assert(x.size() == y.size());
+  switch (extrapolation_type_) {
+    case ExtrapolationType::None:
+    case ExtrapolationType::Zero:
+    case ExtrapolationType::Constant:
+    case ExtrapolationType::Linear:
+      break;
+    default:
+      throw std::invalid_argument(
+          "The provided extrapolation type is not supported. Valid types are "
+          "'None', 'Zero', 'Constant', and 'Linear'.");
+  }
+  if (x.size() != y.size()) {
+    throw std::invalid_argument(
+        "The interpolation requires two vectors of equal length.");
+  }
   const size_t n = x.size();
   const auto p = generate_sort_permutation(
       x, [&](T const& a, T const& b) { return a < b; });
@@ -267,26 +283,25 @@ size_t find_index(const std::vector<T>& v, T x) {
 
 template <typename T>
 T InterpolateDataLinear<T>::operator()(T x0) const {
-  double first_x = x_.front();
-  double last_x = x_.back();
+  const double first_x = x_.front();
+  const double last_x = x_.back();
   if (x0 < first_x || x0 > last_x) {
     if (extrapolation_type_ == ExtrapolationType::None) {
-      std::stringstream error_msg{};
-      error_msg
-          << "InterpolateDataLinear only accepts x values within the "
-             "range of the underlying data when extrapolation is not specified."
-          << "\nx value " << x0 << " is out of bounds.";
+      std::stringstream error_msg{
+          "InterpolateDataLinear only accepts x values within the range of the "
+          "underlying data when an extrapolation type is not specified."};
+      error_msg << "\nx value " << x0 << " is out of bounds.";
       throw std::out_of_range(error_msg.str());
+    } else if (extrapolation_type_ == ExtrapolationType::Zero) {
+      return 0.;
     } else if (extrapolation_type_ == ExtrapolationType::Constant) {
       return (x0 < first_x) ? f_.front()(first_x) : f_.back()(last_x);
-    } else {
-      throw std::invalid_argument(
-          "The provided extrapolation type is not supported. Valid types are "
-          "'None' and 'Constant'.");
+    } else if (extrapolation_type_ == ExtrapolationType::Linear) {
+      return (x0 < first_x) ? f_.front()(x0) : f_.back()(x0);
     }
   }
   // Find the piecewise linear interpolation corresponding to x0.
-  size_t i = find_index(x_, x0);
+  const size_t i = find_index(x_, x0);
   return f_[i](x0);
 }
 
@@ -302,11 +317,12 @@ class InterpolateDataSpline {
    * \param extrapolation_type Type of extrapolation for requested x_i values
    *                           that are out of bounds. Extrapolation is by
    *                           default disabled. Possible types are
-   *                           <tt>None</tt> and <tt>Constant</tt>.
+   *                           <tt>None</tt>, <tt>Zero</tt>, and
+   *                           <tt>Constant</tt>.
    *
    * \return The interpolation function.
-   * \throw std::runtime_error if vectors x and y have different length.
-   * \throw std::runtime_error if less than 3 data points are provided.
+   * \throw std::invalid_argument if vectors x and y have different length.
+   * \throw std::invalid_argument if less than 3 data points are provided.
    * \throw std::out_of_range if values outside of the boundaries of the
    *                          underlying data are tried to be accessed and
    *                          extrapolation is disabled.
@@ -315,7 +331,7 @@ class InterpolateDataSpline {
    */
   InterpolateDataSpline(
       const std::vector<double>& x, const std::vector<double>& y,
-      const ExtrapolationType extrapolation_type = ExtrapolationType::None);
+      ExtrapolationType extrapolation_type = ExtrapolationType::None);
 
   /// Destructor
   ~InterpolateDataSpline();
