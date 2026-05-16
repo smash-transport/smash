@@ -14,6 +14,7 @@
 
 #include "gsl/gsl_spline2d.h"
 
+#include "smash/constants.h"
 #include "smash/forwarddeclarations.h"
 
 namespace smash {
@@ -71,22 +72,22 @@ class InterpolateData2DSpline {
 
  private:
   /// Extrapolation type.
-  ExtrapolationType extrapolation_type_;
+  ExtrapolationType extrapolation_type_ = ExtrapolationType::None;
   /// First x value of underlying data.
-  double first_x_;
+  double first_x_ = smash_NaN<double>;
   /// Last x value of underlying data.
-  double last_x_;
+  double last_x_ = smash_NaN<double>;
   /// First y value of underlying data.
-  double first_y_;
+  double first_y_ = smash_NaN<double>;
   /// Last y value of underlying data.
-  double last_y_;
+  double last_y_ = smash_NaN<double>;
 
   /// GSL iterator for interpolation lookups in x direction.
-  gsl_interp_accel* xacc_;
+  gsl_interp_accel* xacc_ = nullptr;
   /// GSL iterator for interpolation lookupin y direction.
-  gsl_interp_accel* yacc_;
+  gsl_interp_accel* yacc_ = nullptr;
   /// GSL spline in 2D.
-  gsl_spline2d* spline_;
+  gsl_spline2d* spline_ = nullptr;
 };
 
 }  // namespace smash

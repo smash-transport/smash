@@ -13,8 +13,8 @@ namespace smash {
 
 InterpolateDataSpline::InterpolateDataSpline(
     const std::vector<double>& x, const std::vector<double>& y,
-    const ExtrapolationType extrapolation_type) {
-  extrapolation_type_ = extrapolation_type;
+    const ExtrapolationType extrapolation_type)
+    : extrapolation_type_{extrapolation_type} {
   switch (extrapolation_type_) {
     case ExtrapolationType::None:
     case ExtrapolationType::Zero:

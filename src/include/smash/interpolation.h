@@ -23,6 +23,7 @@
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 
+#include "smash/constants.h"
 #include "smash/forwarddeclarations.h"
 
 namespace smash {
@@ -52,9 +53,9 @@ class InterpolateLinear {
 
  private:
   /// Slope of the linear interpolation.
-  T slope_;
+  T slope_{};
   /// y-axis intercept of the linear interpolation.
-  T yintercept_;
+  T yintercept_{};
 };
 
 /**
@@ -103,11 +104,11 @@ class InterpolateDataLinear {
 
  private:
   /// x_i
-  std::vector<T> x_;
+  std::vector<T> x_{};
   /// Piecewise linear interpolation using f(x_i)
-  std::vector<InterpolateLinear<T>> f_;
+  std::vector<InterpolateLinear<T>> f_{};
   /// Extrapolation type
-  ExtrapolationType extrapolation_type_;
+  ExtrapolationType extrapolation_type_ = ExtrapolationType::None;
 };
 
 template <typename T>
@@ -246,8 +247,8 @@ void check_duplicates(const std::vector<T>& x,
 template <typename T>
 InterpolateDataLinear<T>::InterpolateDataLinear(
     const std::vector<T>& x, const std::vector<T>& y,
-    const ExtrapolationType extrapolation_type) {
-  extrapolation_type_ = extrapolation_type;
+    const ExtrapolationType extrapolation_type)
+    : extrapolation_type_{extrapolation_type} {
   switch (extrapolation_type_) {
     case ExtrapolationType::None:
     case ExtrapolationType::Zero:
@@ -373,19 +374,19 @@ class InterpolateDataSpline {
 
  private:
   /// Extrapolation type.
-  ExtrapolationType extrapolation_type_;
+  ExtrapolationType extrapolation_type_ = ExtrapolationType::None;
   /// First x value of underlying data.
-  double first_x_;
+  double first_x_ = smash_NaN<double>;
   /// Last x value of underlying data.
-  double last_x_;
+  double last_x_ = smash_NaN<double>;
   /// First y value of underlying data.
-  double first_y_;
+  double first_y_ = smash_NaN<double>;
   /// Last y value of underlying data.
-  double last_y_;
+  double last_y_ = smash_NaN<double>;
   /// GSL iterator for interpolation lookups.
-  gsl_interp_accel* acc_;
+  gsl_interp_accel* acc_ = nullptr;
   /// GSL spline.
-  gsl_spline* spline_;
+  gsl_spline* spline_ = nullptr;
 };
 
 }  // namespace smash
