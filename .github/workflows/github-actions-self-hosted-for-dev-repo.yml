@@ -57,7 +57,8 @@ jobs:
           singularity exec ${container_file} make -j $(nproc)
           echo "SMASH has been successfully built."
           # now we run the tests, excluding cpplint (which has been already executed) and potentials*
-          singularity exec ${container_file} ctest -j$(nproc) -E "^(potentials(_run)?|cpplint)$"
+          singularity exec ${container_file} env LSAN_OPTIONS="verbosity=1:log_threads=1" ASAN_OPTIONS="verbosity=1" \
+            ctest -j$(nproc) -E "^(potentials(_run)?|cpplint)$"
           # now we run the potentials* tests that require some additional care
           singularity exec ${container_file} ctest -R "^potentials$" --repeat until-pass:3
           singularity exec ${container_file} ctest -R "^potentials_run$" --timeout 3600
