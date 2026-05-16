@@ -125,14 +125,41 @@ T InterpolateLinear<T>::operator()(T x) const {
 /**
  * Perform a trilinear 1st order interpolation
  *
- * Assume, we seek the value of a function f at position (x, y, z). We know the
- * position (x, y, z) lies within a 3D cube, for which the values of the
- * function f are known at each corner (f1, ..., f8). We can now interpolate
- * those values trilinearly to obtain an estimate of f at position (x, y, z).
+ * Assume, we seek the value of a function \f$ f \f$ at position
+ * \f$(x, y, z)\f$. We know the position \f$(x, y, z)\f$ lies within a 3D cube,
+ * for which the values of the function f are known at each corner
+ * \f$(f_1, ..., f_8)\f$. We can now interpolate those values trilinearly to
+ * obtain an estimate of \f$ f \f$ at position \f$(x, y, z)\f$.
  *
- * \param[in] ax fraction of the step in x-direction
- * \param[in] ay fraction of the step in y-direction
- * \param[in] az fraction of the step in z-direction
+ * For this interpolation, linear functions are used in each direction \f$x\f$,
+ * \f$y\f$, and \f$z\f$ respectively with \f$ a_x \f$, \f$ a_y \f$, and \f$ a_z
+ * \f$ as the slope parameters, e.g., \f$ f_1 + a_y \cdot (f_3 - f_1) \f$ for an
+ * approximation between the corners \f$ f_1 \f$ and \f$ f_3 \f$. For the
+ * \f$y\f$-direction, the linear functions are based on the cube's corners. The
+ * \f$x\f$-direction then uses the four obtained values from the interpolation
+ * in \f$y\f$-direction and finally the \f$z\f$-direction interpolation is based
+ * on the two values obtained by the combined interpolations in \f$x\f$- and
+ * \f$y\f$-direction. Since the position \f$(x, y, z)\f$ of the wanted value of
+ * function \f$ f \f$ is within the cube, the allowed values for \f$ a_x \f$,
+ * \f$ a_y \f$, and \f$ a_z \f$ are between 0 and 1.
+ *
+ * Positional placement of the cube:
+ * - \f$x\f$-direction: lower left front to lower right front corner
+ *                \f$ (f_1 \f$ to \f$ f_2) \f$
+ * - \f$y\f$-direction: lower left front to upper left front corner
+ *                \f$ (f_1 \f$ to \f$ f_3) \f$
+ * - \f$z\f$-direction: lower left front to lower left back corner
+ *                \f$ (f_1 \f$ to \f$ f_5) \f$
+ *
+ * \note \f$ a_x \f$, \f$ a_y \f$, and \f$ a_z \f$ have to be chosen in a way
+ *       that the linear interpolations reflect the position \f$ (x, y, z) \f$,
+ *       i.e. \f$ (x, y, z) = (x_1 + a_x \cdot x_2, y_1 + a_y \cdot y_3,
+ *       z_1 + a_z \cdot z_5) \f$ with \f$ (x_i, y_i, z_i) \f$ representing the
+ *       coordinates of the corner at \f$ f_i \f$.
+ *
+ * \param[in] ax Fraction of the step in x-direction and used as slope parameter
+ * \param[in] ay Fraction of the step in y-direction and used as slope parameter
+ * \param[in] az Fraction of the step in z-direction and used as slope parameter
  * \param[in] f1 Value at the lower left front corner of the cube
  * \param[in] f2 Value at the lower right front corner of the cube
  * \param[in] f3 Value at the upper left front corner of the cube
@@ -141,10 +168,6 @@ T InterpolateLinear<T>::operator()(T x) const {
  * \param[in] f6 Value at the lower right back corner of the cube
  * \param[in] f7 Value at the upper left back corner of the cube
  * \param[in] f8 Value at the upper right back corner of the cube
- *
- * - x-direction: lower left front to lower right front corner (f1 to f2)
- * - y-direction: lower left front to upper left front corner (f1 to f3)
- * - z-direction: lower left front to lower left back corner (f1 to f5)
  *
  * \return Interpolated value
  */
