@@ -71,14 +71,21 @@ class SmashFragHook : public Pythia8::UserHooks {
    */
   SmashFragHook(Pythia8::Pythia *pythia_hadron, int special_status,
                 double a_default, double b_default, double a_leading,
-                double b_leading)
+                double b_leading, double popcorn_rate)
       : pythia_hadron_(pythia_hadron),
         specialStatus_(std::abs(special_status)),
         a_default_(a_default),
         b_default_(b_default),
         a_leading_(a_leading),
-        b_leading_(b_leading) {}
+        b_leading_(b_leading),
+        popcorn_rate_(popcorn_rate) {}
 
+  bool canVetoFragmentation() override { return true; }
+  bool doVetoFragmentation(const Pythia8::Particle had,
+
+                           const Pythia8::StringEnd *) override;
+
+  bool should_be_meson;
   /**
    * Inform PYTHIA that fragmentation parameters may be modified dynamically.
    *
@@ -137,6 +144,8 @@ class SmashFragHook : public Pythia8::UserHooks {
 
   /// StringZ:bLund parameter used for leading baryons.
   double b_leading_;
+
+  double popcorn_rate_;
 };
 
 /**
@@ -241,6 +250,7 @@ class StringProcess {
   double diquark_supp_;
   /// popcorn rate
   double popcorn_rate_;
+  double damp_popcorn_;
   /// transverse momentum spread in string fragmentation
   double string_sigma_T_;
   /// string tension [GeV/fm]
@@ -336,6 +346,10 @@ class StringProcess {
   enum class LeadingStatus : int {
     /// Status code assigned to leading (valence) partons in the event record.
     LEADING_PARTON = 202,
+
+    /// Status code for leading diquarks which should have beam remnant id
+    LEADING_DIQUARK = 63,
+
     /// Status code assigned to hadrons traced back to a leading quark
     /// endpoint.
     FROM_LEADING_QUARK = 203,

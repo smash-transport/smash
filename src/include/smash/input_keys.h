@@ -3191,6 +3191,27 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_damp_popcorn_,Damp_Popcorn,double,1.0}
+   *
+   * Controls whether a diquark endpoint may hadronize via the popcorn
+   * mechanism into a leading meson before producing the baryon.
+   *
+   * A value of \f$1\f$ corresponds to normal popcorn production, while
+   * \f$0\f$ suppresses popcorn completely such that the diquark always
+   * fragments directly into a leading baryon. Intermediate values interpolate
+   * between these two limits.
+   *
+   * Corresponds to Pythia's
+   * <tt>BeamRemnants:dampPopcorn</tt> parameter.
+   */
+  /**
+   * \see_key{key_CT_SP_damp_popcorn_}
+   */
+  inline static const Key<double> collTerm_stringParam_dampPopcorn{
+      InputSections::c_stringParameters + "Damp_Popcorn", 1.0, {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.55}
    *
    * Parameter \f$b\f$ \unit{in 1/GeV²} in Pythia fragmentation function shown
@@ -6529,6 +6550,7 @@ struct InputKeys {
       std::cref(collTerm_stringParam_stringZALeading),
       std::cref(collTerm_stringParam_stringZB),
       std::cref(collTerm_stringParam_stringZBLeading),
+      std::cref(collTerm_stringParam_dampPopcorn),
       std::cref(collTerm_stringParam_useMonashTune),
       std::cref(collTerm_stringParam_unformedXsecSuppression),
       std::cref(collTerm_stringParam_fragmentationModel),

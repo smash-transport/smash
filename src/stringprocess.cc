@@ -28,42 +28,14 @@ bool SmashFragHook::doChangeFragPar(
     [[maybe_unused]] Pythia8::StringPT* pTSelPtr, [[maybe_unused]] int idEnd,
     [[maybe_unused]] double m2Had, std::vector<int> iParton,
     const Pythia8::StringEnd* nowEnd) {
-  const int i_end = nowEnd->fromPos ? iParton.front() : iParton.back();
-
-  auto* event_ptr = &pythia_hadron_->event;
-  if (i_end < 0 || i_end >= event_ptr->size()) {
-    settingsPtr->parm("StringZ:aLund", a_default_);
-    settingsPtr->parm("StringZ:bLund", b_default_);
-    zSelPtr->init();
-    return true;
-  }
-
-  const int i_mother = (*event_ptr)[i_end].mother1();
-
-  const auto& mother = (*event_ptr)[i_mother];
-  const auto& end = (*event_ptr)[i_end];
-
-  // Pythia may copy the particles before hadronization, so the status may be
-  // lost. Therefore, check the mother as well.
-  const bool is_special_status =
-      mother.statusAbs() == specialStatus_ || end.statusAbs() == specialStatus_;
-
-  const bool mother_is_diquark =
-      pythia_hadron_->particleData.isDiquark(mother.id());
-
-  const bool no_hadrons_produced = nowEnd->hadSoFar == 0;
-
-  const bool is_leading_baryon =
-      is_special_status && mother_is_diquark && no_hadrons_produced;
-
-  settingsPtr->parm("StringZ:aLund",
-                    is_leading_baryon ? a_leading_ : a_default_);
-  settingsPtr->parm("StringZ:bLund",
-                    is_leading_baryon ? b_leading_ : b_default_);
-
-  zSelPtr->init();
   return true;
 }
+
+bool SmashFragHook::doVetoFragmentation(const Pythia8::Particle had,
+                                        const Pythia8::StringEnd* sEnd) {
+  return false;
+}
+
 StringProcess::StringProcess(Configuration& config)
     : pmin_gluon_lightcone_(
           config.take(InputKeys::collTerm_stringParam_gluonPMin)),
@@ -83,6 +55,7 @@ StringProcess::StringProcess(Configuration& config)
       diquark_supp_(
           config.take(InputKeys::collTerm_stringParam_diquarkSuppression)),
       popcorn_rate_(config.take(InputKeys::collTerm_stringParam_popcornRate)),
+      damp_popcorn_(config.take(InputKeys::collTerm_stringParam_dampPopcorn)),
       string_sigma_T_(
           config.take(InputKeys::collTerm_stringParam_stringSigmaT)),
       kappa_tension_string_(
@@ -113,7 +86,7 @@ StringProcess::StringProcess(Configuration& config)
         pythia_hadron_.get(),
         static_cast<int>(StringProcess::LeadingStatus::LEADING_PARTON),
         stringz_a_produce_, stringz_b_produce_, stringz_a_leading_,
-        stringz_b_leading_);
+        stringz_b_leading_, popcorn_rate_);
     pythia_hadron_->addUserHooksPtr(frag_hook);
   }
 
@@ -214,6 +187,13 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
   pythia_in->readString("StringZ:aLund = " + std::to_string(stringz_a));
   pythia_in->readString("StringZ:bLund = " + std::to_string(stringz_b));
 
+  pythia_in->readString("BeamRemnants:dampPopcorn = " +
+                        std::to_string(damp_popcorn_));
+  pythia_in->readString("BeamRemnants:hardRemnantBaryon = on");
+  pythia_in->readString("BeamRemnants:aRemnantBaryon = " +
+                        std::to_string(stringz_a_leading_));
+  pythia_in->readString("BeamRemnants:bRemnantBaryon = " +
+                        std::to_string(stringz_b_leading_));
   pythia_in->readString("StringPT:sigma = " + std::to_string(string_sigma_T));
   // diquark suppression factor in string fragmentation
   pythia_in->readString("StringFlav:probQQtoQ = " +
@@ -558,14 +538,20 @@ bool StringProcess::append_string(const Pythia8::Vec4& p_str,
   // Create event for this string.
   string_parton_events_.emplace_back();
   Pythia8::Event& evt = string_parton_events_.back();
-  evt.init("string event", &pythia_hadron_->particleData);
+  evt.init("Soft SMASH string", &pythia_hadron_->particleData);
 
   evt.append(90, -11, 0, 0, p1_cm + p2_cm, (p1_cm + p2_cm).mCalc());
 
-  const int status = static_cast<int>(LeadingStatus::LEADING_PARTON);
+  const int status_quark = static_cast<int>(LeadingStatus::LEADING_PARTON);
+  const int status_diquark = static_cast<int>(LeadingStatus::LEADING_DIQUARK);
 
-  const int i1 = evt.append(id1, status, 0, 0, p1_cm, m1);
-  const int i2 = evt.append(id2, status, 0, 0, p2_cm, m2);
+  const bool id1_is_quark = pythia_hadron_->particleData.isQuark(id1);
+  const bool id2_is_quark = pythia_hadron_->particleData.isQuark(id2);
+
+  const int i1 = evt.append(id1, id1_is_quark ? status_quark : status_diquark,
+                            0, 0, p1_cm, m1);
+  const int i2 = evt.append(id2, id2_is_quark ? status_quark : status_diquark,
+                            0, 0, p2_cm, m2);
 
   set_color_by_type(evt[i1], color_tag);
   set_color_by_type(evt[i2], color_tag);
@@ -1103,7 +1089,9 @@ bool StringProcess::next_Hard(ProcessType type) {
   auto valance_tags = compute_beam_valence_flags(*hard_map_[idAB]);
   for (auto& p : hard_map_[idAB]->event) {
     if (valance_tags[p.index()] && p.isFinal()) {
-      p.statusCode(static_cast<int>(LeadingStatus::LEADING_PARTON));
+      p.statusCode(static_cast<int>(p.isDiquark()
+                                        ? LeadingStatus::LEADING_DIQUARK
+                                        : LeadingStatus::LEADING_PARTON));
     }
   }
 
