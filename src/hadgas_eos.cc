@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2020,2022
+ *    Copyright (c) 2016-2020,2022,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -181,16 +181,19 @@ void EosTable::get(EosTable::table_element &res, double e, double nb,
     const EosTable::table_element s7 = table_[index(ie, inb + 1, iq + 1)];
     const EosTable::table_element s8 = table_[index(ie + 1, inb + 1, iq + 1)];
 
-    res.p = interpolate_trilinear(ae, an, aq, s1.p, s2.p, s3.p, s4.p, s5.p,
-                                  s6.p, s7.p, s8.p);
-    res.T = interpolate_trilinear(ae, an, aq, s1.T, s2.T, s3.T, s4.T, s5.T,
-                                  s6.T, s7.T, s8.T);
-    res.mub = interpolate_trilinear(ae, an, aq, s1.mub, s2.mub, s3.mub, s4.mub,
-                                    s5.mub, s6.mub, s7.mub, s8.mub);
-    res.mus = interpolate_trilinear(ae, an, aq, s1.mus, s2.mus, s3.mus, s4.mus,
-                                    s5.mus, s6.mus, s7.mus, s8.mus);
-    res.muq = interpolate_trilinear(ae, an, aq, s1.muq, s2.muq, s3.muq, s4.muq,
-                                    s5.muq, s6.muq, s7.muq, s8.muq);
+    res.p = detail::interpolate_trilinear(ae, an, aq, s1.p, s2.p, s3.p, s4.p,
+                                          s5.p, s6.p, s7.p, s8.p);
+    res.T = detail::interpolate_trilinear(ae, an, aq, s1.T, s2.T, s3.T, s4.T,
+                                          s5.T, s6.T, s7.T, s8.T);
+    res.mub =
+        detail::interpolate_trilinear(ae, an, aq, s1.mub, s2.mub, s3.mub,
+                                      s4.mub, s5.mub, s6.mub, s7.mub, s8.mub);
+    res.mus =
+        detail::interpolate_trilinear(ae, an, aq, s1.mus, s2.mus, s3.mus,
+                                      s4.mus, s5.mus, s6.mus, s7.mus, s8.mus);
+    res.muq =
+        detail::interpolate_trilinear(ae, an, aq, s1.muq, s2.muq, s3.muq,
+                                      s4.muq, s5.muq, s6.muq, s7.muq, s8.muq);
   }
 }
 
@@ -649,5 +652,22 @@ std::string HadronGasEos::print_solver_state(size_t iter) const {
   // clang-format on
   return s.str();
 }
+
+namespace detail {
+
+double interpolate_trilinear(double ax, double ay, double az, double f1,
+                             double f2, double f3, double f4, double f5,
+                             double f6, double f7, double f8) {
+  assert(ax >= 0 && ax <= 1);
+  assert(ay >= 0 && ay <= 1);
+  assert(az >= 0 && az <= 1);
+  double res = az * (ax * (ay * f8 + (1.0 - ay) * f6) +
+                     (1.0 - ax) * (ay * f7 + (1.0 - ay) * f5)) +
+               (1 - az) * (ax * (ay * f4 + (1.0 - ay) * f2) +
+                           (1.0 - ax) * (ay * f3 + (1.0 - ay) * f1));
+  return res;
+}
+
+}  // namespace detail
 
 }  // namespace smash
