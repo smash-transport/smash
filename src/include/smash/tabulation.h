@@ -8,17 +8,19 @@
 #ifndef SRC_INCLUDE_SMASH_TABULATION_H_
 #define SRC_INCLUDE_SMASH_TABULATION_H_
 
+#include <algorithm>
 #include <fstream>
 #include <functional>
 #include <map>
 #include <memory>
 #include <vector>
 
-#include "forwarddeclarations.h"
-#include "integrate.h"
-#include "kinematics.h"
-#include "particletype.h"
-#include "sha256.h"
+#include "smash/constants.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/integrate.h"
+#include "smash/kinematics.h"
+#include "smash/particletype.h"
+#include "smash/sha256.h"
 
 namespace smash {
 
@@ -82,8 +84,8 @@ class Tabulation {
    * asymptotics, e.g. rho(m) functions.
    *
    * \param x Argument to tabulated function.
-   * \param extrapolation Extrapolation type that is used for values outside the
-   *                      tabulation.
+   * \param extrapolation Extrapolation type that is used for values greater
+   *                      than the maximum x in the tabulation.
    *
    * \return Tabulated value using linear interpolation.
    * \throw std::invalid_argument if unsupported extrapolation type is
@@ -101,18 +103,28 @@ class Tabulation {
    */
   void write(std::ofstream& stream, sha256::Hash hash) const;
 
- protected:
+ private:
   /// vector for storing tabulated values
-  std::vector<double> values_;
+  std::vector<double> values_{};
 
   /// lower bound for tabulation
-  double x_min_;
+  double x_min_ = smash_NaN<double>;
 
   /// upper bound for tabulation
-  double x_max_;
+  double x_max_ = smash_NaN<double>;
 
   /// inverse step size 1/dx
-  double inv_dx_;
+  double inv_dx_ = smash_NaN<double>;
+
+  /// Linear approximation to interpolate and extrapolate tabulations
+  double linear_approximation_(double x) const {
+    const double index_double = (x - x_min_) * inv_dx_;
+    // here n is the lower index
+    const size_t n =
+        std::min(static_cast<size_t>(index_double), values_.size() - 2);
+    const double r = index_double - n;
+    return values_[n] + (values_[n + 1] - values_[n]) * r;
+  }
 };
 
 /**

@@ -37,34 +37,29 @@ double Tabulation::get_value_step(double x) const {
   }
 }
 
-double Tabulation::get_value_linear(double x,
-                                    ExtrapolationType extrapol) const {
-  double extrapolation_value = smash_NaN<double>;
-  switch (extrapol) {
+double Tabulation::get_value_linear(
+    double x, ExtrapolationType extrapolation_type_for_x_beyond_xmax) const {
+  if (x < x_min_) {
+    return 0.;
+  }
+  switch (extrapolation_type_for_x_beyond_xmax) {
     case ExtrapolationType::Zero:
-      extrapolation_value = 0.;
-      break;
+      if (x > x_max_) {
+        return 0.;
+      }
+      [[fallthrough]];
     case ExtrapolationType::Constant:
-      extrapolation_value = values_.back();
-      break;
+      if (x > x_max_) {
+        return values_.back();
+      }
+      [[fallthrough]];
     case ExtrapolationType::Linear:
-      break;
+      return linear_approximation_(x);
     default:
       throw std::invalid_argument(
           "The provided extrapolation type is not supported. Valid types are "
           "'Zero', 'Constant', and 'Linear'.");
   }
-  if (x < x_min_) {
-    return 0.;
-  } else if (x > x_max_ && !std::isnan(extrapolation_value)) {
-    return extrapolation_value;
-  }
-  const double index_double = (x - x_min_) * inv_dx_;
-  // here n is the lower index
-  const size_t n =
-      std::min(static_cast<size_t>(index_double), values_.size() - 2);
-  const double r = index_double - n;
-  return values_[n] + (values_[n + 1] - values_[n]) * r;
 }
 
 /**
