@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2020,2022-2025
+ *    Copyright (c) 2012-2020,2022-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,15 +14,15 @@
 #include <utility>
 #include <vector>
 
-#include "alphaclusterednucleus.h"
-#include "deformednucleus.h"
-#include "forwarddeclarations.h"
-#include "fourvector.h"
-#include "icparameters.h"
-#include "interpolation.h"
-#include "modusdefault.h"
-#include "nucleus.h"
-#include "pdgcode.h"
+#include "smash/alphaclusterednucleus.h"
+#include "smash/deformednucleus.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/fourvector.h"
+#include "smash/icparameters.h"
+#include "smash/interpolation.h"
+#include "smash/modusdefault.h"
+#include "smash/nucleus.h"
+#include "smash/pdgcode.h"
 
 namespace smash {
 

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2020,2022
+ *    Copyright (c) 2020,2022,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,8 +13,8 @@
 #include <initializer_list>
 #include <memory>
 
-#include "interpolation.h"
-#include "interpolation2D.h"
+#include "smash/interpolation.h"
+#include "smash/interpolation2D.h"
 
 namespace smash {
 // sqrt(s), k and theta lists are identical for all channels, so we need

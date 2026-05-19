@@ -13,12 +13,12 @@
 #include <memory>
 #include <utility>
 
-#include "forwarddeclarations.h"
-#include "isoparticletype.h"
-#include "particles.h"
-#include "potential_globals.h"
-#include "scatteractionsfinderparameters.h"
-#include "stringprocess.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/isoparticletype.h"
+#include "smash/particles.h"
+#include "smash/potential_globals.h"
+#include "smash/scatteractionsfinderparameters.h"
+#include "smash/stringprocess.h"
 
 namespace smash {
 

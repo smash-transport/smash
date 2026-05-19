@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015-2022,2025
+ *    Copyright (c) 2015-2022,2025-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -484,7 +484,7 @@ double ThreeBodyDecayDilepton::width(double, double G0, double m) const {
         });
   }
 
-  return tabulation_->get_value_linear(m, Extrapolation::Const);
+  return tabulation_->get_value_linear(m, ExtrapolationType::Constant);
 }
 
 }  // namespace smash
