@@ -39,6 +39,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * The interpolations `InterpolateDataLinear`, `InterpolateDataSpline`, and `InterpolateData2DSpline` are restricted to not extrapolate by default and will in this case now throw if out-of-bounds values are tried to access.
   Extrapolation can be enabled by giving an `ExtrapolationType` as an argument during construction.
 * The value `0.0` for the incident energy in collider modus is not accepted anymore.
+* The `Elastic_NN_Cutoff_Sqrts: 1.8` has been removed from shipped input file for `Box` and `Sphere` cases (the default value `1.98` is then used).
 
 ### Removed
 * CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally.
