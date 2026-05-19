@@ -238,8 +238,8 @@ double piplusp_sigmapluskplus_pdg(double mandelstam_s) {
   }
   const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
   /* If p_lab is beyond the upper bound of the linear interpolation,
-   * InterpolationDataLinear will return the value at the upper bound and this
-   * is what we want here. */
+   * InterpolateDataLinear will return the value at the upper bound if
+   * ExtrapolationType::Constant is set and this is what we want here. */
   return (*piplusp_sigmapluskplus_interpolation)(p_lab);
 }
 
