@@ -162,11 +162,8 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   const Angles phitheta(phi, std::cos(theta_));
   const FourVector p_ll(E_ll, q_ * phitheta.threevec());
 
-  // Calculate total momentum via momentum conservation.
-  const FourVector total_momentum =
-      incoming_particles_[0].momentum() + incoming_particles_[1].momentum();
   // Calculate the recoil for the (pn)' subsystem after the collision.
-  const FourVector p_recoil = total_momentum - p_ll;
+  const FourVector p_recoil = FourVector(sqrt_s(), 0.0, 0.0, 0.0) - p_ll;
 
   /* If the invariant mass of (pn)' is smaller than the rest masses of p and n,
    * the sampling check fails and the function returns false, as the action is
@@ -261,7 +258,6 @@ double BremsstrahlungActionDilepton::diff_xs_pn_dilepton_(
 }
 
 double BremsstrahlungActionDilepton::R_2_helper_(const double s) const {
-  assert(outgoing_particles_.size() == 2);
   const double m_p = outgoing_particles_[0].type().mass();
   const double m_n = outgoing_particles_[1].type().mass();
   const double m_pn = m_p + m_n;
