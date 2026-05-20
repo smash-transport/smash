@@ -349,7 +349,7 @@ TEST(validators_potentials) {
 
 TEST(validators_forced_thermalization) {
   const auto& cell_number = InputKeys::forcedThermalization_cellNumber;
-  VERIFY(cell_number.validate({300, 300, 300}));
+  VERIFY(cell_number.validate({100, 100, 200}));
   VERIFY(!cell_number.validate({0, 1, 1}));
   VERIFY(!cell_number.validate({1, 0, 1}));
   VERIFY(!cell_number.validate({1, 1, 0}));
