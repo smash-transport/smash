@@ -1530,7 +1530,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_general
    * \optional_key{key_gen_gauss_cutoff_in_sigma_,Gauss_Cutoff_In_Sigma,double,4.0,
-   * \f$3\leq x\leq10\f$}
+   * \f$2\leq x\leq10\f$}
    *
    * Parameter for Covariant Gaussian smearing: Distance in sigma at which
    * gaussian is considered 0. Lower bound avoids density loss; upper bound
@@ -1544,7 +1544,7 @@ struct InputKeys {
       4.0,
       {"0.80"},
       [](const double &value) noexcept {
-        return value >= 3.0 && value <= 10.0;
+        return value >= 2.0 && value <= 10.0;
       }};
 
   /*!\Userguide

@@ -200,10 +200,10 @@ TEST(validators_general) {
   const auto& field_derivatives_mode = InputKeys::gen_fieldDerivativesMode;
   VERIFY(field_derivatives_mode.validate(FieldDerivativesMode::ChainRule));
   const auto& smearing_cutoff = InputKeys::gen_smearingGaussCutoffInSigma;
-  VERIFY(smearing_cutoff.validate(3.0));
+  VERIFY(smearing_cutoff.validate(2.0));
   VERIFY(smearing_cutoff.validate(6.5));
   VERIFY(smearing_cutoff.validate(10.0));
-  VERIFY(!smearing_cutoff.validate(2.9));
+  VERIFY(!smearing_cutoff.validate(1.9));
   VERIFY(!smearing_cutoff.validate(10.1));
   const auto& smearing_sigma = InputKeys::gen_smearingGaussianSigma;
   VERIFY(smearing_sigma.validate(2.99));
