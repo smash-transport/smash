@@ -282,6 +282,71 @@ TEST(validators_version) {
   VERIFY(version.validate("any string"));
 }
 
+TEST(validators_lattice) {
+  const auto& automatic = InputKeys::lattice_automatic;
+  VERIFY(automatic.validate(true));
+  const auto& cell_number = InputKeys::lattice_cellNumber;
+  VERIFY(cell_number.validate({200, 250, 300}));
+  VERIFY(!cell_number.validate({0, 1, 1}));
+  VERIFY(!cell_number.validate({1, 0, 1}));
+  VERIFY(!cell_number.validate({1, 1, 0}));
+  VERIFY(!cell_number.validate({-1, 1, 1}));
+  const auto& origin = InputKeys::lattice_origin;
+  VERIFY(origin.validate({0.0, 0.0, 0.0}));
+  VERIFY(origin.validate({-1.5, 2.3, 1.e42}));
+  const auto& periodic = InputKeys::lattice_periodic;
+  VERIFY(periodic.validate(false));
+  const auto& pot_affect_thresh = InputKeys::lattice_potentialsAffectThreshold;
+  VERIFY(pot_affect_thresh.validate(false));
+  const auto& sizes = InputKeys::lattice_sizes;
+  VERIFY(sizes.validate({42.0, 199.9, 1.234}));
+  VERIFY(!sizes.validate({0.0, 1.0, 1.0}));
+  VERIFY(!sizes.validate({1.0, 0.0, 1.0}));
+  VERIFY(!sizes.validate({1.0, 1.0, 0.0}));
+  VERIFY(!sizes.validate({-1.0, 1.0, 1.0}));
+}
+
+TEST(validators_potentials) {
+  const auto& use_out = InputKeys::potentials_use_potentials_outside_lattice;
+  VERIFY(use_out.validate(false));
+  const auto& skyrme_a = InputKeys::potentials_skyrme_skyrmeA;
+  VERIFY(skyrme_a.validate(-1.0));
+  VERIFY(!skyrme_a.validate(0.0));
+  const auto& skyrme_b = InputKeys::potentials_skyrme_skyrmeB;
+  VERIFY(skyrme_b.validate(1.0));
+  VERIFY(!skyrme_b.validate(0.0));
+  const auto& skyrme_tau = InputKeys::potentials_skyrme_skyrmeTau;
+  VERIFY(skyrme_tau.validate(0.6667));
+  VERIFY(!skyrme_tau.validate(2.0 / 3.0));
+  const auto& symmetry_gamma = InputKeys::potentials_symmetry_gamma;
+  VERIFY(symmetry_gamma.validate(0.01));
+  VERIFY(!symmetry_gamma.validate(0.0));
+  const auto& symmetry_s_pot = InputKeys::potentials_symmetry_sPot;
+  VERIFY(symmetry_s_pot.validate(30.0));
+  VERIFY(symmetry_s_pot.validate(-10.0));
+  const auto& vdf_coeffs = InputKeys::potentials_vdf_coeffs;
+  VERIFY(vdf_coeffs.validate({1.0, 2.0, 3.0}));
+  VERIFY(vdf_coeffs.validate({}));
+  const auto& vdf_powers = InputKeys::potentials_vdf_powers;
+  VERIFY(vdf_powers.validate({1.0, 2.0, 3.0}));
+  VERIFY(vdf_powers.validate({}));
+  VERIFY(!vdf_powers.validate({1.0, -2.0, 3.0}));
+  const auto& sat_rho_b = InputKeys::potentials_vdf_satRhoB;
+  VERIFY(sat_rho_b.validate(0.13));
+  VERIFY(sat_rho_b.validate(0.19));
+  VERIFY(!sat_rho_b.validate(0.1299));
+  VERIFY(!sat_rho_b.validate(0.1901));
+  const auto& r_cut = InputKeys::potentials_coulomb_rCut;
+  VERIFY(r_cut.validate(0.1));
+  VERIFY(!r_cut.validate(0.0));
+  const auto& momentum_dep_c = InputKeys::potentials_momentum_dependence_C;
+  VERIFY(momentum_dep_c.validate(0.0));
+  VERIFY(momentum_dep_c.validate(-1.e123));
+  const auto& mom_dep_lambda = InputKeys::potentials_momentum_dependence_Lambda;
+  VERIFY(mom_dep_lambda.validate(1.0));
+  VERIFY(!mom_dep_lambda.validate(0.0));
+}
+
 TEST(validators_forced_thermalization) {
   const auto& cell_number = InputKeys::forcedThermalization_cellNumber;
   VERIFY(cell_number.validate({300, 300, 300}));

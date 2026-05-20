@@ -6051,7 +6051,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
-   * \required_key{key_lattice_automatic_,Automatic,bool}
+   * \required_key{key_lattice_automatic_,Automatic,bool,\none}
    *
    * Whether to automatically determine the geometry of the lattice. If set to
    * `False`, both <tt>\ref key_lattice_cell_number_ "Cell_Number"</tt> and
@@ -6074,12 +6074,14 @@ struct InputKeys {
    * \see_key{key_lattice_automatic_}
    */
   inline static const Key<bool> lattice_automatic{
-      InputSections::lattice + "Automatic", {"3.0"}};
+      InputSections::lattice + "Automatic",
+      {"3.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_cell_number_,Cell_Number,list of 3 ints,
-   * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * </tt>depends on <tt>\ref key_gen_modus_ "Modus", \f$x_i>0\f$}
    * (see \ref doxypage_input_lattice_default_parameters)
    *
    * Number of cells in x, y, z directions.
@@ -6088,12 +6090,22 @@ struct InputKeys {
    * \see_key{key_lattice_cell_number_}
    */
   inline static const Key<std::array<int, 3>> lattice_cellNumber{
-      InputSections::lattice + "Cell_Number", DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Cell_Number",
+      DefaultType::Dependent,
+      {"0.80"},
+      [](const std::array<int, 3> &value) noexcept {
+        if (std::abs(value[0] * value[1] * value[2]) > 15'000'000) {
+          logg[LogArea::Configuration::id].warn(
+              "Number of total cells for lattice is very large, which may lead "
+              "to long runtime. Make sure this is intended.");
+        }
+        return value[0] > 0 && value[1] > 0 && value[2] > 0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_origin_,Origin,list of 3 doubles,
-   * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * </tt>depends on <tt>\ref key_gen_modus_ "Modus",\none}
    * (see \ref doxypage_input_lattice_default_parameters)
    *
    * The lattice covers a cuboid region whose vertices \f$V_n\f$ are uniquely
@@ -6107,13 +6119,16 @@ struct InputKeys {
    * \see_key{key_lattice_origin_}
    */
   inline static const Key<std::array<double, 3>> lattice_origin{
-      InputSections::lattice + "Origin", DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Origin",
+      DefaultType::Dependent,
+      {"0.80"},
+      detail::get_default_validator<std::array<double, 3>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_periodic_,Periodic,bool,
    * (\ref key_gen_modus_ "Modus" == "Box"
-   * || \ref key_gen_modus_ "Modus" == "ListBox")}
+   * || \ref key_gen_modus_ "Modus" == "ListBox"),\none}
    *
    * Use periodic continuation or not. With periodic continuation
    * \f$(x,y,z) + (i\cdot L_x,\,j\cdot L_y,\,k\cdot L_z) \equiv (x,y,z)\f$
@@ -6124,11 +6139,15 @@ struct InputKeys {
    * \see_key{key_lattice_periodic_}
    */
   inline static const Key<bool> lattice_periodic{
-      InputSections::lattice + "Periodic", DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Periodic",
+      DefaultType::Dependent,
+      {"0.80"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
-   * \optional_key{key_lattice_pot_affect_threshold_,Potentials_Affect_Thresholds,bool,false}
+   * \optional_key{key_lattice_pot_affect_threshold_,
+   * Potentials_Affect_Thresholds,bool,false,\none}
    *
    * Include potential effects, since mean field potentials change the threshold
    * energies of the actions.
@@ -6137,12 +6156,15 @@ struct InputKeys {
    * \see_key{key_lattice_pot_affect_threshold_}
    */
   inline static const Key<bool> lattice_potentialsAffectThreshold{
-      InputSections::lattice + "Potentials_Affect_Thresholds", false, {"1.3"}};
+      InputSections::lattice + "Potentials_Affect_Thresholds",
+      false,
+      {"1.3"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_sizes_,Sizes,list of 3 doubles,
-   * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * </tt>depends on <tt>\ref key_gen_modus_ "Modus", \f$x_i>0\f$}
    * (see \ref doxypage_input_lattice_default_parameters)
    *
    * Sizes of lattice in x, y, z directions \unit{in fm}.
@@ -6151,14 +6173,25 @@ struct InputKeys {
    * \see_key{key_lattice_sizes_}
    */
   inline static const Key<std::array<double, 3>> lattice_sizes{
-      InputSections::lattice + "Sizes", DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Sizes",
+      DefaultType::Dependent,
+      {"0.80"},
+      [](const std::array<double, 3> &value) noexcept {
+        const double max = 200.0;
+        if (value[0] > max || value[1] > max || value[2] > max) {
+          logg[LogArea::Configuration::id].warn(
+              "Lattice size(s) larger than " + std::to_string(max) +
+              " fm may lead to long runtime. Make sure this is intended.");
+        }
+        return value[0] > 0 && value[1] > 0 && value[2] > 0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_potentials
    * \optional_key{key_potentials_use_potentials_outside_lattice_,
-   * Use_Potentials_Outside_Lattice, bool, true}
+   * Use_Potentials_Outside_Lattice,bool,true,\none}
    *
-   * Wether to include the potentials also for particles that have left the
+   * Whether to include the potentials also for particles that have left the
    * lattice. If set to false, the particles will propagate on straight lines
    * once they leave the volume that is covered by the lattice.
    */
@@ -6168,11 +6201,12 @@ struct InputKeys {
   inline static const Key<bool> potentials_use_potentials_outside_lattice{
       InputSections::potentials + "Use_Potentials_Outside_Lattice",
       true,
-      {"3.1"}};
+      {"3.1"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
-   * \required_key{key_potentials_skyrme_a_,Skyrme_A,double}
+   * \required_key{key_potentials_skyrme_a_,Skyrme_A,double,\f$x<0\f$}
    *
    * Parameter \f$A\f$ of Skyrme potential \unit{in MeV}.
    */
@@ -6180,11 +6214,13 @@ struct InputKeys {
    * \see_key{key_potentials_skyrme_a_}
    */
   inline static const Key<double> potentials_skyrme_skyrmeA{
-      InputSections::p_skyrme + "Skyrme_A", {"0.60"}};
+      InputSections::p_skyrme + "Skyrme_A",
+      {"0.60"},
+      [](const double &value) noexcept { return value < 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
-   * \required_key{key_potentials_skyrme_b_,Skyrme_B,double}
+   * \required_key{key_potentials_skyrme_b_,Skyrme_B,double,\f$x>0\f$}
    *
    * Parameter \f$B\f$ of Skyrme potential \unit{in MeV}.
    */
@@ -6192,25 +6228,29 @@ struct InputKeys {
    * \see_key{key_potentials_skyrme_b_}
    */
   inline static const Key<double> potentials_skyrme_skyrmeB{
-      InputSections::p_skyrme + "Skyrme_B", {"0.60"}};
+      InputSections::p_skyrme + "Skyrme_B",
+      {"0.60"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
-   * \required_key{key_potentials_skyrme_tau_,Skyrme_Tau,double}
+   * \required_key{key_potentials_skyrme_tau_,Skyrme_Tau,double,
+   * \f$x>\frac{2}{3}\f$}
    *
    * Parameter \f$\tau\f$ of Skyrme potential.
-   *
    */
   /**
    * \see_key{key_potentials_skyrme_tau_}
    */
   inline static const Key<double> potentials_skyrme_skyrmeTau{
-      InputSections::p_skyrme + "Skyrme_Tau", {"0.60"}};
+      InputSections::p_skyrme + "Skyrme_Tau",
+      {"0.60"},
+      [](const double &value) noexcept { return value > 2.0 / 3.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_symmetry
    * \optional_key{key_potentials_symmetry_gamma_,gamma,double,
-   * </tt>do not consider last term in \f$S(\rho_B)\f$<tt>}
+   * </tt>do not consider last term in \f$S(\rho_B)\f$<tt>,\f$x>0\f$}
    *
    * Exponent \f$\gamma\f$ in formula for \f$S(\rho_B)\f$. If `gamma` is
    * specified, the baryon density dependence is included in the potential.
@@ -6220,23 +6260,29 @@ struct InputKeys {
    * \see_key{key_potentials_symmetry_gamma_}
    */
   inline static const Key<double> potentials_symmetry_gamma{
-      InputSections::p_symmetry + "gamma", DefaultType::Dependent, {"1.7"}};
+      InputSections::p_symmetry + "gamma",
+      DefaultType::Dependent,
+      {"1.7"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_symmetry
-   * \required_key{key_potentials_symmetry_s_pot_,S_Pot,double}
+   * \required_key{key_potentials_symmetry_s_pot_,S_Pot,double,\none}
    *
-   * Parameter \f$S_{pot}\f$ of symmetry potential \unit{in MeV}.
+   * Parameter \f$S_{pot}\f$ of symmetry potential \unit{in MeV}. Note that
+   * \iref{Mohs:2024gyc} Bayesian analysis suggests \f$0<S_{pot}<30\f$.
    */
   /**
    * \see_key{key_potentials_symmetry_s_pot_}
    */
   inline static const Key<double> potentials_symmetry_sPot{
-      InputSections::p_symmetry + "S_Pot", {"0.60"}};
+      InputSections::p_symmetry + "S_Pot",
+      {"0.60"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_VDF
-   * \required_key{key_potentials_vdf_coeffs_,Coeffs,list of doubles}
+   * \required_key{key_potentials_vdf_coeffs_,Coeffs,list of doubles,\none}
    *
    * Parameters \f$C_i\f$ of the VDF potential \unit{in MeV}.
    */
@@ -6244,11 +6290,14 @@ struct InputKeys {
    * \see_key{key_potentials_vdf_coeffs_}
    */
   inline static const Key<std::vector<double>> potentials_vdf_coeffs{
-      InputSections::p_vdf + "Coeffs", {"2.1"}};
+      InputSections::p_vdf + "Coeffs",
+      {"2.1"},
+      detail::get_default_validator<std::vector<double>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_VDF
-   * \required_key{key_potentials_vdf_powers_,Powers,double}
+   * \required_key{key_potentials_vdf_powers_,Powers,list of doubles,
+   * \f$x_i > 0\f$}
    *
    * Parameters \f$b_i\f$ of the VDF potential.
    *
@@ -6259,23 +6308,33 @@ struct InputKeys {
    * \see_key{key_potentials_vdf_powers_}
    */
   inline static const Key<std::vector<double>> potentials_vdf_powers{
-      InputSections::p_vdf + "Powers", {"2.1"}};
+      InputSections::p_vdf + "Powers",
+      {"2.1"},
+      [](const std::vector<double> &value) noexcept {
+        return std::all_of(value.begin(), value.end(),
+                           [](double x) { return x > 0; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_VDF
-   * \required_key{key_potentials_vdf_sat_rhoB_,Sat_rhoB,double}
+   * \required_key{key_potentials_vdf_sat_rhoB_,Sat_rhoB,double,
+   * \f$0.13 \le x \le 0.19\f$}
    *
    * The saturation density of nuclear matter \unit{in 1/fm³}.
    */
   /**
-   * \see_key{key_potentials_symmetry_gamma_}
+   * \see_key{key_potentials_vdf_sat_rhoB_}
    */
   inline static const Key<double> potentials_vdf_satRhoB{
-      InputSections::p_vdf + "Sat_rhoB", {"2.1"}};
+      InputSections::p_vdf + "Sat_rhoB",
+      {"2.1"},
+      [](const double &value) noexcept {
+        return value >= 0.13 && value <= 0.19;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_coulomb
-   * \required_key{key_potentials_coulomb_r_cut_,R_Cut,double}
+   * \required_key{key_potentials_coulomb_r_cut_,R_Cut,double,\f$x>0\f$}
    *
    * The radius value \unit{in fm} at which the integration volume is cut.
    */
@@ -6283,24 +6342,29 @@ struct InputKeys {
    * \see_key{key_potentials_coulomb_r_cut_}
    */
   inline static const Key<double> potentials_coulomb_rCut{
-      InputSections::p_coulomb + "R_Cut", {"2.1"}};
+      InputSections::p_coulomb + "R_Cut",
+      {"2.1"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_momentum_dependence
-   * \required_key{key_potentials_momentum_dependence_C,C,double}
+   * \required_key{key_potentials_momentum_dependence_C,C,double,\none}
    *
-   * Parameter \f$ C \f$ of the momentum-dependent term of the
-   * potential \unit{in MeV}.
+   * Parameter \f$ C \f$ of the momentum-dependent term of the potential
+   * \unit{in MeV}.
    */
   /**
    * \see_key{key_potentials_momentum_dependence_C}
    */
   inline static const Key<double> potentials_momentum_dependence_C{
-      InputSections::p_momentumDependence + "C", {"3.1"}};
+      InputSections::p_momentumDependence + "C",
+      {"3.1"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_momentum_dependence
-   * \required_key{key_potentials_momentum_dependence_Lambda,Lambda,double}
+   * \required_key{key_potentials_momentum_dependence_Lambda,Lambda,
+   * double,\f$x \ne 0\f$}
    *
    * Parameter \f$ \Lambda \f$ of the momentum-dependent term in the
    * potential \unit{in 1/fm}.
@@ -6309,7 +6373,9 @@ struct InputKeys {
    * \see_key{key_potentials_momentum_dependence_Lambda}
    */
   inline static const Key<double> potentials_momentum_dependence_Lambda{
-      InputSections::p_momentumDependence + "Lambda", {"3.1"}};
+      InputSections::p_momentumDependence + "Lambda",
+      {"3.1"},
+      [](const double &value) noexcept { return value != 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
