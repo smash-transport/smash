@@ -2698,17 +2698,17 @@ struct InputKeys {
    * \sigma^{\mathrm{param}}_\mathrm{ref\_process}
    * \f]
    * where "process" refers to a generic process and "ref_process" to a
-   * reference process such as PP for which solid parametrizations exist.
+   * reference process such as \f$pp\f$ for which solid parametrizations exist.
    * The AQM cross-section for a process involving the incoming particles
-   * \f$a\f$ and \f$b\f$ is determined by the following calculation:
+   * \f$1\f$ and \f$2\f$ is determined by the following calculation:
    * \f[
-   * \sigma^{\mathrm{AQM}}_{ab} = 40 \left( \frac{2}{3}
-   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_a) (1 - 0.4 x^s_b) (1 - \kappa^c
-   * x^c_a) (1 - \kappa^c x^c_b) (1 - \kappa^b x^b_a) (1 - \kappa^b x^b_b) \f]
+   * \sigma^{\mathrm{AQM}}_{12} = 40 \left( \frac{2}{3}
+   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) (1 - \kappa^c
+   * x^c_1) (1 - \kappa^c x^c_2) (1 - \kappa^b x^b_1) (1 - \kappa^b x^b_2) \f]
    * with \f$n_\mathrm{meson}\f$ being the number of mesons in the process,
-   * \f$x^s_{a,b}\f$ the fraction of strange quarks, \f$x^c_{a,b}\f$ the
-   * fraction of charm quarks, and \f$x^b_{a,b}\f$ the fraction of bottom quarks
-   * of the hadrons \f$a\f$ and \f$b\f$. \f$ \kappa^c \f$ and \f$ \kappa^b \f$
+   * \f$x^s_{1,2}\f$ the fraction of strange quarks, \f$x^c_{1,2}\f$ the
+   * fraction of charm quarks, and \f$x^b_{1,2}\f$ the fraction of bottom quarks
+   * of the hadrons \f$1\f$ and \f$2\f$. \f$ \kappa^c \f$ and \f$ \kappa^b \f$
    * are the respective suppression factors for interactions involving charm and
    * bottom hadrons (see
    * <tt>\ref key_CT_HF_AQM_c_suppression_ "AQM_Charm_Suppression"</tt> and
