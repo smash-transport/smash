@@ -229,6 +229,60 @@ TEST(validators_general) {
   VERIFY(use_grid.validate(true));
 }
 
+TEST(validators_modi_sphere) {
+  const auto& init_mult = InputKeys::modi_sphere_initialMultiplicities;
+  VERIFY(init_mult.validate(std::map<PdgCode, int>{{{0x2212}, 10}}));
+  VERIFY(!init_mult.validate(std::map<PdgCode, int>{{{0x2212}, 0}}));
+  VERIFY(!init_mult.validate(std::map<PdgCode, int>{{{0x2212}, -1}}));
+  const auto& radius = InputKeys::modi_sphere_radius;
+  VERIFY(radius.validate(1.0));
+  VERIFY(!radius.validate(0.0));
+  VERIFY(!radius.validate(-1.0));
+  const auto& start_time = InputKeys::modi_sphere_startTime;
+  VERIFY(start_time.validate(0.0));
+  VERIFY(start_time.validate(-3.14e66));
+  const auto& temperature = InputKeys::modi_sphere_temperature;
+  VERIFY(temperature.validate(0.1));
+  VERIFY(!temperature.validate(0.0));
+  const auto& acc_res_widths = InputKeys::modi_sphere_accountResonanceWidths;
+  VERIFY(acc_res_widths.validate(true));
+  const auto& add_radial_velocity = InputKeys::modi_sphere_addRadialVelocity;
+  VERIFY(add_radial_velocity.validate(-1.0));
+  VERIFY(add_radial_velocity.validate(0.0));
+  VERIFY(add_radial_velocity.validate(1.0));
+  VERIFY(!add_radial_velocity.validate(1.1));
+  VERIFY(!add_radial_velocity.validate(-1.e-123));
+  const auto& add_vel_exp = InputKeys::modi_sphere_addRadialVelocityExponent;
+  VERIFY(add_vel_exp.validate(0.0));
+  VERIFY(add_vel_exp.validate(2.5));
+  VERIFY(!add_vel_exp.validate(-0.1));
+  const auto& baryon_chem_pot = InputKeys::modi_sphere_baryonChemicalPotential;
+  VERIFY(baryon_chem_pot.validate(-1.0));
+  const auto& charge_chem_pot = InputKeys::modi_sphere_chargeChemicalPotential;
+  VERIFY(charge_chem_pot.validate(-2.0));
+  const auto& ic = InputKeys::modi_sphere_initialCondition;
+  VERIFY(ic.validate(SphereInitialCondition::ThermalMomentaBoltzmann));
+  const auto& s_chem_pot = InputKeys::modi_sphere_strangeChemicalPotential;
+  VERIFY(s_chem_pot.validate(1.e10));
+  const auto& hf_multiplier = InputKeys::modi_sphere_heavyFlavorMultiplier;
+  VERIFY(hf_multiplier.validate(1.0));
+  const auto& use_therm_mult = InputKeys::modi_sphere_useThermalMultiplicities;
+  VERIFY(use_therm_mult.validate(true));
+  const auto& jet_pdg = InputKeys::modi_sphere_jet_jetPdg;
+  VERIFY(jet_pdg.validate(PdgCode{0x2212}));
+  const auto& jet_momentum = InputKeys::modi_sphere_jet_jetMomentum;
+  VERIFY(jet_momentum.validate(0.1));
+  VERIFY(!jet_momentum.validate(0.0));
+  const auto& jet_position = InputKeys::modi_sphere_jet_jetPosition;
+  VERIFY(jet_position.validate(std::array<double, 3>{{0.0, -1.23, 1.e20}}));
+  const auto& jet_back_to_back = InputKeys::modi_sphere_jet_backToBack;
+  VERIFY(jet_back_to_back.validate(true));
+  const auto& b2b_separation = InputKeys::modi_sphere_jet_backToBackSeparation;
+  VERIFY(b2b_separation.validate(0.01));
+  VERIFY(!b2b_separation.validate(0.0));
+  VERIFY(!b2b_separation.validate(-0.1));
+}
+
 TEST(validate_logging) {
   const auto& log_default = InputKeys::log_default;
   VERIFY(log_default.validate(einhard::ALL));

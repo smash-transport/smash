@@ -4537,7 +4537,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key_no_line{key_MS_init_mult_,Init_Multiplicities,map<int\,int>}
+   * \required_key_no_line{key_MS_init_mult_,Init_Multiplicities,
+   * map<int\,int>,\f$x>0\f$}
    *
    * Initial multiplicities per particle species. The value of this key shall be
    * a map of PDG number and amount corresponding to it. Use this key to specify
@@ -4550,11 +4551,18 @@ struct InputKeys {
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_sphere_initialMultiplicities{
-          InputSections::m_sphere + "Init_Multiplicities", {"0.50"}};
+          InputSections::m_sphere + "Init_Multiplicities",
+          {"0.50"},
+          [](auto const &value) noexcept {
+            return !value.empty() && std::all_of(value.begin(), value.end(),
+                                                 [](auto const &entry) {
+                                                   return entry.second > 0;
+                                                 });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key{key_MS_radius_,Radius,double}
+   * \required_key{key_MS_radius_,Radius,double,\f$x>0\f$}
    *
    * Radius of the sphere \unit{in fm}.
    */
@@ -4562,11 +4570,13 @@ struct InputKeys {
    * \see_key{key_MS_radius_}
    */
   inline static const Key<double> modi_sphere_radius{
-      InputSections::m_sphere + "Radius", {"0.50"}};
+      InputSections::m_sphere + "Radius", {"0.50"}, [](auto value) noexcept {
+        return value > 0.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key{key_MS_start_time_,Start_Time,double}
+   * \required_key{key_MS_start_time_,Start_Time,double,\none}
    *
    * Starting time of sphere calculation \unit{in fm}.
    */
@@ -4574,11 +4584,13 @@ struct InputKeys {
    * \see_key{key_MS_start_time_}
    */
   inline static const Key<double> modi_sphere_startTime{
-      InputSections::m_sphere + "Start_Time", {"0.50"}};
+      InputSections::m_sphere + "Start_Time",
+      {"0.50"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key{key_MS_temperature_,Temperature,double}
+   * \required_key{key_MS_temperature_,Temperature,double,\f$x>0\f$}
    *
    * Temperature \unit{in GeV} to sample momenta in the sphere.
    */
@@ -4586,7 +4598,9 @@ struct InputKeys {
    * \see_key{key_MS_radius_}
    */
   inline static const Key<double> modi_sphere_temperature{
-      InputSections::m_sphere + "Temperature", {"1.5.2"}};
+      InputSections::m_sphere + "Temperature",
+      {"1.5.2"},
+      [](auto value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4596,7 +4610,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key_no_line{key_MS_account_res_widths_,Account_Resonance_Widths,bool,true}
+   * \optional_key_no_line{key_MS_account_res_widths_,Account_Resonance_Widths,
+   * bool,true,\none}
    *
    * This key is considered only in case of thermal initialization and the
    * following two behaviors can be chosen:
@@ -4608,46 +4623,58 @@ struct InputKeys {
    * \see_key{key_MS_account_res_widths_}
    */
   inline static const Key<bool> modi_sphere_accountResonanceWidths{
-      InputSections::m_sphere + "Account_Resonance_Widths", true, {"1.7"}};
+      InputSections::m_sphere + "Account_Resonance_Widths",
+      true,
+      {"1.7"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,-1.0}
+   * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,-1.0,
+   * \f$0 \le x \le 1 \lor x = -1\f$}
    *
    * This can be used in order to give each particle in the sphere an additional
    * velocity in radial direction of the size \f$u_r = u_0 \,
    * \left(\frac{r}{R}\right)^n\f$ with \f$u_0\f$ being the parameter of this
    * feature, \f$r\f$ the radial coordinate of the particle and \f$R\f$ the
    * total radius of the sphere. \f$u_0\f$ can only take values in \f$[0, 1]\f$
-   * and a negative value is equivalent to omitting this key (i.e. not
-   * attributing any additional radial velocity). The exponent \f$n\f$ is set
-   * by <tt>\ref key_MS_add_radial_velocity_exponent
+   * and a value of -1 is equivalent to omitting this key (i.e. not attributing
+   * any additional radial velocity). The exponent \f$n\f$ is set by
+   * <tt>\ref key_MS_add_radial_velocity_exponent
    * "Add_Radial_Velocity_Exponent"</tt>.
    */
   /**
    * \see_key{key_MS_add_radial_velocity_}
    */
   inline static const Key<double> modi_sphere_addRadialVelocity{
-      InputSections::m_sphere + "Add_Radial_Velocity", -1.0, {"2.2"}};
+      InputSections::m_sphere + "Add_Radial_Velocity",
+      -1.0,
+      {"2.2"},
+      [](auto value) noexcept {
+        return (value >= 0.0 && value <= 1.0) || value == -1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_add_radial_velocity_exponent,
-   * Add_Radial_Velocity_Exponent,double,1.0}
+   * Add_Radial_Velocity_Exponent,double,1.0,\f$x\ge 0\f$}
    *
-   * Exponent in the initial radial flow profile (see <tt>\ref
-   * key_MS_add_radial_velocity_ "Add_Radial_Velocity"</tt>). It cannot be
-   * negative.
+   * Exponent in the initial radial flow profile (see
+   * <tt>\ref key_MS_add_radial_velocity_ "Add_Radial_Velocity"</tt>).
    */
   /**
    * \see_key{key_MS_add_radial_velocity_exponent}
    */
   inline static const Key<double> modi_sphere_addRadialVelocityExponent{
-      InputSections::m_sphere + "Add_Radial_Velocity_Exponent", 1.0, {"3.3"}};
+      InputSections::m_sphere + "Add_Radial_Velocity_Exponent",
+      1.0,
+      {"3.3"},
+      [](auto value) noexcept { return value >= 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_use_bar_chem_pot_,Baryon_Chemical_Potential,double,0.0}
+   * \optional_key{key_MS_use_bar_chem_pot_,Baryon_Chemical_Potential,double,
+   * 0.0,\none}
    *
    * Baryon chemical potential \f$\mu_B\f$ \unit{in GeV}. This key is used to
    * compute thermal densities \f$n_i\f$ only if
@@ -4658,11 +4685,15 @@ struct InputKeys {
    * \see_key{key_MS_use_bar_chem_pot_}
    */
   inline static const Key<double> modi_sphere_baryonChemicalPotential{
-      InputSections::m_sphere + "Baryon_Chemical_Potential", 0.0, {"1.0"}};
+      InputSections::m_sphere + "Baryon_Chemical_Potential",
+      0.0,
+      {"1.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_charge_chem_pot_,Charge_Chemical_Potential,double,0.0}
+   * \optional_key{key_MS_charge_chem_pot_,Charge_Chemical_Potential,double,
+   * 0.0,\none}
    *
    * Charge chemical potential \f$\mu_Q\f$ \unit{in GeV}. This key is used to
    * compute thermal densities \f$n_i\f$ only if
@@ -4673,12 +4704,15 @@ struct InputKeys {
    * \see_key{key_MS_charge_chem_pot_}
    */
   inline static const Key<double> modi_sphere_chargeChemicalPotential{
-      InputSections::m_sphere + "Charge_Chemical_Potential", 0.0, {"2.1"}};
+      InputSections::m_sphere + "Charge_Chemical_Potential",
+      0.0,
+      {"2.1"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_initial_cond_,Initial_Condition,string,
-   * "thermal momenta"}
+   * "thermal momenta",\any_valid}
    *
    * Initial distribution to use for momenta of particles. Mainly used in the
    * expanding universe scenario, options are:
@@ -4699,11 +4733,13 @@ struct InputKeys {
   inline static const Key<SphereInitialCondition> modi_sphere_initialCondition{
       InputSections::m_sphere + "Initial_Condition",
       SphereInitialCondition::ThermalMomentaBoltzmann,
-      {"1.1"}};
+      {"1.1"},
+      detail::get_default_validator<SphereInitialCondition>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
+   * \optional_key{key_MS_strange_chem_pot_,Strange_Chemical_Potential,double,
+   * 0.0,\none}
    *
    * Strangeness chemical potential \f$\mu_S\f$ \unit{in GeV}. This key is used
    * to compute thermal densities \f$n_i\f$ only if
@@ -4714,11 +4750,15 @@ struct InputKeys {
    * \see_key{key_MS_strange_chem_pot_}
    */
   inline static const Key<double> modi_sphere_strangeChemicalPotential{
-      InputSections::m_sphere + "Strange_Chemical_Potential", 0.0, {"1.0"}};
+      InputSections::m_sphere + "Strange_Chemical_Potential",
+      0.0,
+      {"1.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_hf_multiplier_,Heavy_Flavor_Multiplier,double,0.0}
+   * \optional_key{key_MS_hf_multiplier_,Heavy_Flavor_Multiplier,double,
+   * 0.0,\none}
    *
    * Multiply the thermal multiplicity of heavy flavor particles. This is a way
    * to perturbatively obtain more statistics on heavy hadron observables with
@@ -4729,7 +4769,7 @@ struct InputKeys {
    *
    * By default, it is set to 0 so that no heavy flavor is initialized. For any
    * positive value, a partial density is computed as described in \ref
-   * key_MS_use_thermal_mult_  "Use_Thermal_Multiplicities" and multiplied by
+   * key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities" and multiplied by
    * it. Naturally, with a value of 1, each hadron corresponds to a real
    * thermalized hadron.
    */
@@ -4737,11 +4777,15 @@ struct InputKeys {
    * \see_key{key_MS_hf_multiplier_}
    */
   inline static const Key<double> modi_sphere_heavyFlavorMultiplier{
-      InputSections::m_sphere + "Heavy_Flavor_Multiplier", 0.0, {"3.3"}};
+      InputSections::m_sphere + "Heavy_Flavor_Multiplier",
+      0.0,
+      {"3.3"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
+   * \optional_key{key_MS_use_thermal_mult_,Use_Thermal_Multiplicities,bool,
+   * false,\none}
    *
    * The system is initialized with all particle species of the particle table
    * that belong to the hadron gas equation of state, see
@@ -4758,7 +4802,10 @@ struct InputKeys {
    * \see_key{key_MS_use_thermal_mult_}
    */
   inline static const Key<bool> modi_sphere_useThermalMultiplicities{
-      InputSections::m_sphere + "Use_Thermal_Multiplicities", false, {"1.0"}};
+      InputSections::m_sphere + "Use_Thermal_Multiplicities",
+      false,
+      {"1.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4773,7 +4820,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int}
+   * \required_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int,\none}
    *
    * The type of particle to be used as a jet, as given by its PDG code.
    */
@@ -4781,11 +4828,14 @@ struct InputKeys {
    * \see_key{key_MS_jet_jet_pdg_}
    */
   inline static const Key<PdgCode> modi_sphere_jet_jetPdg{
-      InputSections::m_s_jet + "Jet_PDG", {"1.5.2"}};
+      InputSections::m_s_jet + "Jet_PDG",
+      {"1.5.2"},
+      detail::get_default_validator<PdgCode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key_no_line{key_MS_jet_jet_momentum_,Jet_Momentum,double,20.0}
+   * \optional_key_no_line{key_MS_jet_jet_momentum_,Jet_Momentum,double,20.0,
+   * \f$x>0\f$}
    *
    * The initial momentum \unit{in GeV} to give to the jet particle.
    */
@@ -4793,12 +4843,15 @@ struct InputKeys {
    * \see_key{key_MS_jet_jet_momentum_}
    */
   inline static const Key<double> modi_sphere_jet_jetMomentum{
-      InputSections::m_s_jet + "Jet_Momentum", 20.0, {"1.5.2"}};
+      InputSections::m_s_jet + "Jet_Momentum",
+      20.0,
+      {"1.5.2"},
+      [](auto value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * \optional_key_no_line{key_MS_jet_jet_position_,Jet_Position,
-   * list of 3 doubles,[0.0\, 0.0\, 0.0]}
+   * list of 3 doubles,[0.0\, 0.0\, 0.0],\none}
    *
    * Coordinates (x,y,z) \unit{in fm} where the jet particle is initially
    * positioned.
@@ -4809,11 +4862,12 @@ struct InputKeys {
   inline static const Key<std::array<double, 3>> modi_sphere_jet_jetPosition{
       InputSections::m_s_jet + "Jet_Position",
       std::array<double, 3>{{0.0, 0.0, 0.0}},
-      {"3.3"}};
+      {"3.3"},
+      detail::get_default_validator<std::array<double, 3>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key_no_line{key_MS_jet_backtoback_,Back_To_Back,bool,false}
+   * \optional_key_no_line{key_MS_jet_backtoback_,Back_To_Back,bool,false,\none}
    *
    * Whether to create a jet with the corresponding antiparticle in the opposite
    * direction with the same momentum. If the particle is a singlet, such as the
@@ -4823,12 +4877,15 @@ struct InputKeys {
    * \see_key{key_MS_jet_backtoback_}
    */
   inline static const Key<bool> modi_sphere_jet_backToBack{
-      InputSections::m_s_jet + "Back_To_Back", false, {"3.3"}};
+      InputSections::m_s_jet + "Back_To_Back",
+      false,
+      {"3.3"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * \optional_key_no_line{key_MS_jet_b2b_separation,Back_To_Back_Separation,
-   * double,0.01}
+   * double,0.01,\f$x>0\f$}
    *
    * Separation \unit{in fm} between the back to back jets. Each jet particle
    * is translated by half of this value in the direction of motion. Can only
@@ -4839,7 +4896,10 @@ struct InputKeys {
    * \see_key{key_MS_jet_b2b_separation}
    */
   inline static const Key<double> modi_sphere_jet_backToBackSeparation{
-      InputSections::m_s_jet + "Back_To_Back_Separation", 0.01, {"3.3"}};
+      InputSections::m_s_jet + "Back_To_Back_Separation",
+      0.01,
+      {"3.3"},
+      [](auto value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
