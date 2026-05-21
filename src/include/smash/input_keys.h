@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_INPUT_KEYS_H_
 
 #include <array>
+#include <filesystem>
 #include <functional>
 #include <map>
 #include <set>
@@ -5160,7 +5161,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
-   * \required_key{key_ML_file_dir_,File_Directory,string}
+   * \required_key{key_ML_file_dir_,File_Directory,string,
+   * <b>Existing directory</b>}
    *
    * Directory for the external particle lists. Although relative paths to the
    * execution directory should work, you are encouraged to <b>prefer absolute
@@ -5170,11 +5172,16 @@ struct InputKeys {
    * \see_key{key_ML_file_dir_}
    */
   inline static const Key<std::string> modi_list_fileDirectory{
-      InputSections::m_list + "File_Directory", {"0.60"}};
+      InputSections::m_list + "File_Directory",
+      {"0.60"},
+      [](const std::string &value) noexcept {
+        return std::filesystem::is_directory(value);
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
-   * \required_key{key_ML_filename_,Filename,string}
+   * \required_key{key_ML_filename_,Filename,string,
+   * <b>Possible filename on Linux OS</b>}
    *
    * External particle lists filename. This key shall be omitted if
    * <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt> is used. By using
@@ -5185,11 +5192,19 @@ struct InputKeys {
    * \see_key{key_ML_filename_}
    */
   inline static const Key<std::string> modi_list_filename{
-      InputSections::m_list + "Filename", {"3.1"}};
+      InputSections::m_list + "Filename",
+      {"3.1"},
+      [](const std::string &value) noexcept {
+        if (value.empty() || value == "." || value == "..")
+          return false;
+        else
+          return std::none_of(value.begin(), value.end(),
+                              [](auto c) { return c == '/' || c == '\0'; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
-   * \required_key{key_ML_file_prefix_,File_Prefix,string}
+   * \required_key{key_ML_file_prefix_,File_Prefix,string,\none}
    *
    * Prefix for the external particle lists file. This key shall be omitted if
    * <tt>\ref key_ML_filename_ "List: Filename"</tt> is used.
@@ -5198,11 +5213,13 @@ struct InputKeys {
    * \see_key{key_ML_file_prefix_}
    */
   inline static const Key<std::string> modi_list_filePrefix{
-      InputSections::m_list + "File_Prefix", {"0.60"}};
+      InputSections::m_list + "File_Prefix",
+      {"0.60"},
+      detail::get_default_validator<std::string>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
-   * \optional_key{key_ML_shift_id_,Shift_Id,int,0}
+   * \optional_key{key_ML_shift_id_,Shift_Id,int,0,\none}
    *
    * Index of the \b first processed particle list file. Files with index
    * smaller than the specidifed value are skipped. This key is considered when
@@ -5215,12 +5232,15 @@ struct InputKeys {
    * \see_key{key_ML_shift_id_}
    */
   inline static const Key<int> modi_list_shiftId{
-      InputSections::m_list + "Shift_Id", 0, {"0.60"}};
+      InputSections::m_list + "Shift_Id",
+      0,
+      {"0.60"},
+      detail::get_default_validator<int>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
    * \optional_key{key_ML_optional_quantities_,Optional_Quantities,list of
-   * strings,["ID"\, "charge"]}
+   * strings,["ID"\, "charge"],\any_valid}
    *
    * Extra columns to be expected in the input file containing the list of
    * particles. This is useful to e.g. continue a SMASH run that was paused
@@ -5281,11 +5301,33 @@ struct InputKeys {
       modi_list_optionalQuantities{
           InputSections::m_list + "Optional_Quantities",
           std::vector<std::string>{"ID", "charge"},
-          {"3.3"}};
+          {"3.3"},
+          [](const std::vector<std::string> &value) noexcept {
+            const std::set<std::string> valid_quantities{"ID",
+                                                         "charge",
+                                                         "ncoll",
+                                                         "form_time",
+                                                         "xsecfac",
+                                                         "proc_type",
+                                                         "time_last_coll",
+                                                         "pdg_mother1",
+                                                         "pdg_mother2",
+                                                         "spin0",
+                                                         "spin1",
+                                                         "spin2",
+                                                         "spin3",
+                                                         "perturbative_weight"};
+            return std::all_of(
+                value.begin(), value.end(),
+                [&valid_quantities](const std::string &quantity) {
+                  return valid_quantities.count(quantity) > 0;
+                });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \required_key{key_MLB_file_dir_,File_Directory,string}
+   * \required_key{key_MLB_file_dir_,File_Directory,string,
+   * <b>Existing directory</b>}
    *
    * See &nbsp;
    * <tt>\ref key_ML_file_dir_ "List: File_Directory"</tt>.
@@ -5294,11 +5336,16 @@ struct InputKeys {
    * \see_key{key_MLB_file_dir_}
    */
   inline static const Key<std::string> modi_listBox_fileDirectory{
-      InputSections::m_listBox + "File_Directory", {"2.1"}};
+      InputSections::m_listBox + "File_Directory",
+      {"2.1"},
+      [](const std::string &value) noexcept {
+        return std::filesystem::is_directory(value);
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \required_key{key_MLB_filename_,Filename,string}
+   * \required_key{key_MLB_filename_,Filename,string,
+   * <b>Possible filename on Linux OS</b>}
    *
    * See &nbsp;
    * <tt>\ref key_ML_filename_ "List: Filename"</tt>.
@@ -5307,11 +5354,19 @@ struct InputKeys {
    * \see_key{key_MLB_filename_}
    */
   inline static const Key<std::string> modi_listBox_filename{
-      InputSections::m_listBox + "Filename", {"3.1"}};
+      InputSections::m_listBox + "Filename",
+      {"3.1"},
+      [](const std::string &value) noexcept {
+        if (value.empty() || value == "." || value == "..")
+          return false;
+        else
+          return std::none_of(value.begin(), value.end(),
+                              [](auto c) { return c == '/' || c == '\0'; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \required_key{key_MLB_file_prefix_,File_Prefix,string}
+   * \required_key{key_MLB_file_prefix_,File_Prefix,string,\none}
    *
    * See &nbsp;
    * <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt>.
@@ -5320,11 +5375,13 @@ struct InputKeys {
    * \see_key{key_MLB_file_prefix_}
    */
   inline static const Key<std::string> modi_listBox_filePrefix{
-      InputSections::m_listBox + "File_Prefix", {"2.1"}};
+      InputSections::m_listBox + "File_Prefix",
+      {"2.1"},
+      detail::get_default_validator<std::string>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \required_key{key_MLB_length_,Length,double}
+   * \required_key{key_MLB_length_,Length,double,\f$x>0\f$}
    *
    * See &nbsp;
    * <tt>\ref key_MB_length_ "Box: Length"</tt>.
@@ -5333,11 +5390,13 @@ struct InputKeys {
    * \see_key{key_MLB_length_}
    */
   inline static const Key<double> modi_listBox_length{
-      InputSections::m_listBox + "Length", {"2.1"}};
+      InputSections::m_listBox + "Length", {"2.1"}, [](auto value) noexcept {
+        return value > 0.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \optional_key{key_MLB_shift_id_,Shift_Id,int,0}
+   * \optional_key{key_MLB_shift_id_,Shift_Id,int,0,\none}
    *
    * See &nbsp;
    * <tt>\ref key_ML_shift_id_ "List: Shift_Id"</tt>.
@@ -5346,12 +5405,15 @@ struct InputKeys {
    * \see_key{key_MLB_shift_id_}
    */
   inline static const Key<int> modi_listBox_shiftId{
-      InputSections::m_listBox + "Shift_Id", 0, {"2.1"}};
+      InputSections::m_listBox + "Shift_Id",
+      0,
+      {"2.1"},
+      detail::get_default_validator<int>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
    * \optional_key{key_MLB_optional_quantities_,Optional_Quantities,list of
-   * strings,["ID"\, "charge"]}
+   * strings,["ID"\, "charge"],\any_valid}
    *
    * See &nbsp;
    * <tt>\ref key_ML_optional_quantities_ "List: Optional_Quantities"</tt>.
@@ -5363,7 +5425,28 @@ struct InputKeys {
       modi_listBox_optionalQuantities{
           InputSections::m_listBox + "Optional_Quantities",
           std::vector<std::string>{"ID", "charge"},
-          {"3.3"}};
+          {"3.3"},
+          [](const std::vector<std::string> &value) noexcept {
+            const std::set<std::string> valid_quantities{"ID",
+                                                         "charge",
+                                                         "ncoll",
+                                                         "form_time",
+                                                         "xsecfac",
+                                                         "proc_type",
+                                                         "time_last_coll",
+                                                         "pdg_mother1",
+                                                         "pdg_mother2",
+                                                         "spin0",
+                                                         "spin1",
+                                                         "spin2",
+                                                         "spin3",
+                                                         "perturbative_weight"};
+            return std::all_of(
+                value.begin(), value.end(),
+                [&valid_quantities](const std::string &quantity) {
+                  return valid_quantities.count(quantity) > 0;
+                });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output

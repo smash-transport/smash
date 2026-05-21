@@ -320,6 +320,57 @@ TEST(validators_modi_box) {
   VERIFY(jet_pdg.validate(PdgCode{0x2212}));
 }
 
+TEST(validators_modi_list) {
+  const auto& file_directory = InputKeys::modi_list_fileDirectory;
+  VERIFY(file_directory.validate("/tmp"));
+  VERIFY(!file_directory.validate("/dev/null"));
+  VERIFY(!file_directory.validate("/not-existing-directory"));
+  const auto& filename = InputKeys::modi_list_filename;
+  VERIFY(filename.validate("dummy.txt"));
+  VERIFY(!filename.validate(""));
+  VERIFY(!filename.validate("."));
+  VERIFY(!filename.validate(".."));
+  VERIFY(!filename.validate("foo/bar.dat"));
+  const auto& file_prefix = InputKeys::modi_list_filePrefix;
+  VERIFY(file_prefix.validate("prefix"));
+  const auto& shift_id = InputKeys::modi_list_shiftId;
+  VERIFY(shift_id.validate(42));
+  VERIFY(shift_id.validate(-17));
+  const auto& opt_quantities = InputKeys::modi_list_optionalQuantities;
+  VERIFY(opt_quantities.validate(std::vector<std::string>{"ID", "charge"}));
+  VERIFY(opt_quantities.validate(std::vector<std::string>{"proc_type"}));
+  VERIFY(opt_quantities.validate(std::vector<std::string>{}));
+  VERIFY(!opt_quantities.validate(std::vector<std::string>{""}));
+}
+
+TEST(validators_modi_listbox) {
+  const auto& file_directory = InputKeys::modi_listBox_fileDirectory;
+  VERIFY(file_directory.validate("/tmp"));
+  VERIFY(!file_directory.validate("/dev/null"));
+  VERIFY(!file_directory.validate("/not-existing-directory"));
+  const auto& filename = InputKeys::modi_listBox_filename;
+  VERIFY(filename.validate("dummy.txt"));
+  VERIFY(!filename.validate(""));
+  VERIFY(!filename.validate("."));
+  VERIFY(!filename.validate(".."));
+  VERIFY(!filename.validate("foo/bar.dat"));
+  const auto& file_prefix = InputKeys::modi_listBox_filePrefix;
+  VERIFY(file_prefix.validate("prefix"));
+  const auto& length = InputKeys::modi_listBox_length;
+  VERIFY(length.validate(1.0));
+  VERIFY(!length.validate(0.0));
+  VERIFY(!length.validate(-1.0));
+  const auto& shift_id = InputKeys::modi_listBox_shiftId;
+  VERIFY(shift_id.validate(0));
+  VERIFY(shift_id.validate(100));
+  VERIFY(shift_id.validate(-1));
+  const auto& opt_quantities = InputKeys::modi_listBox_optionalQuantities;
+  VERIFY(opt_quantities.validate(std::vector<std::string>{"ID", "charge"}));
+  VERIFY(opt_quantities.validate(std::vector<std::string>{"ncoll"}));
+  VERIFY(opt_quantities.validate(std::vector<std::string>{}));
+  VERIFY(!opt_quantities.validate(std::vector<std::string>{"ID", "invalid"}));
+}
+
 TEST(validate_logging) {
   const auto& log_default = InputKeys::log_default;
   VERIFY(log_default.validate(einhard::ALL));
