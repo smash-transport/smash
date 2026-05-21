@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2025
+ *    Copyright (c) 2015-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -240,6 +240,10 @@ void ListModus::insert_optional_quantities_to_(
       }
       p.set_perturbative_weight(weight);
     } else {
+      /* Keep this else branch even if the list of optional fields is validated
+       * at take time from the configuration, because it might help the
+       * developer if they forget to add a new branch here above to handle the
+       * new quantity. */
       error_message << " Unknown quantities given in the configuration.\n";
     }
     /* This is to assist the user, in case of a mistype in the inputfile.
@@ -253,8 +257,7 @@ void ListModus::insert_optional_quantities_to_(
 
   if (error_message.str().size() > 0) {
     logg[LList].error()
-        << "The reading-in of optional quantities had the following problems:"
-        << std::endl
+        << "The reading-in of optional quantities had the following problems:\n"
         << error_message.str();
     throw std::invalid_argument(
         "Please fix the list of input particles and/or configuration.");
@@ -456,25 +459,20 @@ void ListModus::validate_list_of_particles_of_all_events_() const {
 void ListModus::validate_optional_fields_() const {
   // If spin interactions are enabled, require all four spin components.
   if (spin_interaction_type_ != SpinInteractionType::Off) {
-    std::array<bool, 4> has_spin{{false, false, false, false}};
-    for (const auto &field : optional_fields_) {
-      if (field == "spin0") {
-        has_spin[0] = true;
-      } else if (field == "spinx") {
-        has_spin[1] = true;
-      } else if (field == "spiny") {
-        has_spin[2] = true;
-      } else if (field == "spinz") {
-        has_spin[3] = true;
-      }
-    }
-    for (int c = 0; c < 4; ++c) {
-      if (!has_spin[c]) {
-        throw std::invalid_argument(
-            "When spin interactions are enabled, all four spin components "
-            "(spin0, spinx, spiny, spinz) must be provided in the config "
-            "file.");
-      }
+    static constexpr std::array<std::string_view, 4> required_fields{
+        "spin0", "spinx", "spiny", "spinz"};
+
+    const bool all_present = std::all_of(
+        required_fields.begin(), required_fields.end(), [this](auto field) {
+          return std::find(optional_fields_.begin(), optional_fields_.end(),
+                           field) != optional_fields_.end();
+        });
+
+    if (!all_present) {
+      throw std::invalid_argument(
+          "When spin interactions are enabled, all four spin components "
+          "(spin0, spinx, spiny, spinz) must be provided in the config "
+          "file.");
     }
   }
 }
