@@ -4538,12 +4538,12 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * \required_key_no_line{key_MS_init_mult_,Init_Multiplicities,
-   * map<int\,int>,\f$x>0\f$}
+   * map<int\,int>,\f$n_i>0\f$}
    *
    * Initial multiplicities per particle species. The value of this key shall be
-   * a map of PDG number and amount corresponding to it. Use this key to specify
-   * how many particles of each species will be initialized. This key cannot be
-   * used if <tt>\ref key_MS_use_thermal_mult_
+   * a map of PDG number and amount \f$n_i\f$ corresponding to it. Use this key
+   * to specify how many particles of each species will be initialized. This key
+   * cannot be used if <tt>\ref key_MS_use_thermal_mult_
    * "Use_Thermal_Multiplicities"</tt> is `true`.
    */
   /**
