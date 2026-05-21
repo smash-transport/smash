@@ -4907,7 +4907,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key_no_line{key_MB_init_mult_,Init_Multiplicities,map<int\,int>}
+   * \required_key_no_line{key_MB_init_mult_,Init_Multiplicities,
+   * map<int\,int>,\f$n_i>0\f$}
    *
    * See &nbsp;
    * <tt>\ref key_MS_init_mult_ "Sphere: Init_Multiplicities"</tt>.
@@ -4917,11 +4918,18 @@ struct InputKeys {
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_box_initialMultiplicities{
-          InputSections::m_box + "Init_Multiplicities", {"0.50"}};
+          InputSections::m_box + "Init_Multiplicities",
+          {"0.50"},
+          [](auto const &value) noexcept {
+            return !value.empty() && std::all_of(value.begin(), value.end(),
+                                                 [](auto const &entry) {
+                                                   return entry.second > 0;
+                                                 });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key{key_MB_initial_condition_,Initial_Condition,string}
+   * \required_key{key_MB_initial_condition_,Initial_Condition,string,\any_valid}
    *
    * Controls initial momentum distribution of particles.
    * - `"peaked momenta"` &rarr; All particles have momentum \f$p=3\,T\f$,
@@ -4937,11 +4945,13 @@ struct InputKeys {
    * \see_key{key_MB_initial_condition_}
    */
   inline static const Key<BoxInitialCondition> modi_box_initialCondition{
-      InputSections::m_box + "Initial_Condition", {"0.50"}};
+      InputSections::m_box + "Initial_Condition",
+      {"0.50"},
+      detail::get_default_validator<BoxInitialCondition>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key{key_MB_length_,Length,double}
+   * \required_key{key_MB_length_,Length,double,\f$x>0\f$}
    *
    * Length of the cube's edge \unit{in fm}.
    */
@@ -4949,11 +4959,13 @@ struct InputKeys {
    * \see_key{key_MB_length_}
    */
   inline static const Key<double> modi_box_length{
-      InputSections::m_box + "Length", {"0.50"}};
+      InputSections::m_box + "Length", {"0.50"}, [](auto value) noexcept {
+        return value > 0.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key{key_MB_start_time_,Start_Time,double}
+   * \required_key{key_MB_start_time_,Start_Time,double,\none}
    *
    * Starting time of the simulation \unit{in fm}. All particles in the box are
    * initialized with \f$x^0=\f$`Start_Time`.
@@ -4962,11 +4974,13 @@ struct InputKeys {
    * \see_key{key_MB_start_time_}
    */
   inline static const Key<double> modi_box_startTime{
-      InputSections::m_box + "Start_Time", {"0.50"}};
+      InputSections::m_box + "Start_Time",
+      {"0.50"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key{key_MB_temperature_,Temperature,double}
+   * \required_key{key_MB_temperature_,Temperature,double,\f$x>0\f$}
    *
    * Temperature \unit{in GeV} of the box.
    */
@@ -4974,7 +4988,9 @@ struct InputKeys {
    * \see_key{key_MB_temperature_}
    */
   inline static const Key<double> modi_box_temperature{
-      InputSections::m_box + "Temperature", {"0.50"}};
+      InputSections::m_box + "Temperature", {"0.50"}, [](auto value) noexcept {
+        return value > 0.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4984,7 +5000,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key_no_line{key_MB_account_res_widths_,Account_Resonance_Widths,bool,true}
+   * \optional_key_no_line{key_MB_account_res_widths_,Account_Resonance_Widths,
+   * bool,true,\none}
    *
    * See &nbsp;
    * <tt>\ref key_MS_account_res_widths_
@@ -5003,11 +5020,15 @@ struct InputKeys {
    * \see_key{key_MB_account_res_widths_}
    */
   inline static const Key<bool> modi_box_accountResonanceWidths{
-      InputSections::m_box + "Account_Resonance_Widths", true, {"1.7"}};
+      InputSections::m_box + "Account_Resonance_Widths",
+      true,
+      {"1.7"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_use_bar_chem_pot_,Baryon_Chemical_Potential,double,0.0}
+   * \optional_key{key_MB_use_bar_chem_pot_,Baryon_Chemical_Potential,
+   * double,0.0,\none}
    *
    * See &nbsp;
    * <tt>\ref key_MS_use_bar_chem_pot_ "Sphere: Baryon_Chemical_Potential"</tt>.
@@ -5016,11 +5037,15 @@ struct InputKeys {
    * \see_key{key_MB_use_bar_chem_pot_}
    */
   inline static const Key<double> modi_box_baryonChemicalPotential{
-      InputSections::m_box + "Baryon_Chemical_Potential", 0.0, {"1.0"}};
+      InputSections::m_box + "Baryon_Chemical_Potential",
+      0.0,
+      {"1.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_charge_chem_pot_,Charge_Chemical_Potential,bool,false}
+   * \optional_key{key_MB_charge_chem_pot_,Charge_Chemical_Potential,
+   * double,0.0,\none}
    *
    * See &nbsp;
    * <tt>\ref key_MS_charge_chem_pot_ "Sphere: Charge_Chemical_Potential"</tt>.
@@ -5029,11 +5054,14 @@ struct InputKeys {
    * \see_key{key_MB_charge_chem_pot_}
    */
   inline static const Key<double> modi_box_chargeChemicalPotential{
-      InputSections::m_box + "Charge_Chemical_Potential", 0.0, {"2.0"}};
+      InputSections::m_box + "Charge_Chemical_Potential",
+      0.0,
+      {"2.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_equilibration_time_,Equilibration_Time,double, -1.0}
+   * \optional_key{key_MB_equilibration_time_,Equilibration_Time,double,-1.0,\none}
    *
    * Time \unit{in fm} after which the output of the box is written out. The
    * first time however will be printed. This is useful if one wants to simulate
@@ -5045,11 +5073,15 @@ struct InputKeys {
    * \see_key{key_MB_equilibration_time_}
    */
   inline static const Key<double> modi_box_equilibrationTime{
-      InputSections::m_box + "Equilibration_Time", -1.0, {"1.8"}};
+      InputSections::m_box + "Equilibration_Time",
+      -1.0,
+      {"1.8"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
+   * \optional_key{key_MB_strange_chem_pot_,Strange_Chemical_Potential,
+   * double,0.0,\none}
    *
    * See &nbsp;
    * <tt>\ref key_MS_strange_chem_pot_
@@ -5059,11 +5091,15 @@ struct InputKeys {
    * \see_key{key_MB_strange_chem_pot_}
    */
   inline static const Key<double> modi_box_strangeChemicalPotential{
-      InputSections::m_box + "Strange_Chemical_Potential", 0.0, {"1.0"}};
+      InputSections::m_box + "Strange_Chemical_Potential",
+      0.0,
+      {"1.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
+   * \optional_key{key_MB_use_thermal_mult_,Use_Thermal_Multiplicities,
+   * bool,false,\none}
    *
    * See &nbsp;
    * <tt>\ref key_MS_use_thermal_mult_
@@ -5073,7 +5109,10 @@ struct InputKeys {
    * \see_key{key_MB_use_thermal_mult_}
    */
   inline static const Key<bool> modi_box_useThermalMultiplicities{
-      InputSections::m_box + "Use_Thermal_Multiplicities", false, {"1.0"}};
+      InputSections::m_box + "Use_Thermal_Multiplicities",
+      false,
+      {"1.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -5089,7 +5128,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key_no_line{key_MB_jet_jet_momentum_,Jet_Momentum,double,20.0}
+   * \optional_key_no_line{key_MB_jet_jet_momentum_,Jet_Momentum,
+   * double,20.0,\f$x>0\f$}
    *
    * See &nbsp;
    * <tt>\ref key_MS_jet_jet_momentum_ "Sphere: Jet: Jet_Momentum"</tt>.
@@ -5098,11 +5138,14 @@ struct InputKeys {
    * \see_key{key_MB_jet_jet_momentum_}
    */
   inline static const Key<double> modi_box_jet_jetMomentum{
-      InputSections::m_b_jet + "Jet_Momentum", 20.0, {"1.7"}};
+      InputSections::m_b_jet + "Jet_Momentum",
+      20.0,
+      {"1.7"},
+      [](auto value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key_no_line{key_MB_jet_jet_pdg_,Jet_PDG,int}
+   * \required_key_no_line{key_MB_jet_jet_pdg_,Jet_PDG,int,\none}
    *
    * See &nbsp;
    * <tt>\ref key_MS_jet_jet_pdg_ "Sphere: Jet: Jet_PDG"</tt>.
@@ -5111,7 +5154,9 @@ struct InputKeys {
    * \see_key{key_MB_jet_jet_pdg_}
    */
   inline static const Key<PdgCode> modi_box_jet_jetPdg{
-      InputSections::m_b_jet + "Jet_PDG", {"1.7"}};
+      InputSections::m_b_jet + "Jet_PDG",
+      {"1.7"},
+      detail::get_default_validator<PdgCode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
