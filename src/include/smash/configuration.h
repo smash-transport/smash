@@ -1379,7 +1379,7 @@ class Configuration {
      * Set collision criterion from configuration values.
      *
      * \return CollisionCriterion.
-     * \throw IncorrectTypeInAssignment in case an collision criterion that is
+     * \throw IncorrectTypeInAssignment in case a collision criterion that is
      * not available is provided as a configuration value.
      */
     operator CollisionCriterion() const {
@@ -1396,6 +1396,29 @@ class Configuration {
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) + "\" should be " +
           "\"Geometric\", \"Stochastic\" " + "or \"Covariant\".");
+    }
+
+    /**
+     * Set charm rescattering method from configuration values.
+     *
+     * \return CharmRescattering.
+     * \throw IncorrectTypeInAssignment in case a charm rescattering method that
+     * is not available is provided as a configuration value.
+     */
+    operator CharmRescattering() const {
+      const std::string c = operator std::string();
+      if (c == "T-matrix") {
+        return CharmRescattering::T_Matrix;
+      }
+      if (c == "resonances") {
+        return CharmRescattering::Resonances;
+      }
+      if (c == "none") {
+        return CharmRescattering::None;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) + "\" should be " +
+          "\"T-matrix\", \"resonances\", " + "or \"none\".");
     }
 
     /**

@@ -220,16 +220,17 @@ CollisionBranchList CrossSections::generate_collision_list(
   if (p_pythia < 1.) {
     if (finder_parameters.two_to_one) {
       // resonance formation (2->1)
-      append_list(process_list, two_to_one(),
+      append_list(process_list,
+                  two_to_one(finder_parameters.charm_rescattering),
                   (1. - p_pythia) * finder_parameters.scale_xs);
     }
     if (finder_parameters.included_2to2.any()) {
       // 2->2 (inelastic)
-      append_list(
-          process_list,
-          two_to_two(finder_parameters.included_2to2,
-                     finder_parameters.transition_high_energy.KN_offset),
-          (1. - p_pythia) * finder_parameters.scale_xs);
+      append_list(process_list,
+                  two_to_two(finder_parameters.included_2to2,
+                             finder_parameters.transition_high_energy.KN_offset,
+                             finder_parameters.charm_rescattering),
+                  (1. - p_pythia) * finder_parameters.scale_xs);
     }
     if (finder_parameters
             .included_multi[IncludedMultiParticleReactions::Deuteron_3to2] ==
@@ -360,11 +361,19 @@ double CrossSections::parametrized_total(
       }
     } else if ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
                (pdg_b.is_Dmeson() && pdg_a.is_pion())) {
+      const CharmRescattering& charm_rescattering =
+          finder_parameters.charm_rescattering;
       std::optional<double> elastic_xs = Dpi_elastic();
-      double inelastic_xs = Dpi_inelastic_xsec();
-      if (elastic_xs.has_value()) {
-        total_xs = elastic_xs.value() + inelastic_xs;
+      if (charm_rescattering == CharmRescattering::None) {
+        return 0.;
+      } else if ((charm_rescattering == CharmRescattering::T_Matrix) &&
+                 elastic_xs.has_value()) {
+        total_xs = elastic_xs.value() + Dpi_inelastic_xsec();
       } else {
+        /* use AQM if charm_rescattering == CharmRescattering::Resonances or if
+         * tmp_elastic_xs has no value, which happens when sqrts is above the
+         * upper bound of the energy range of the underlying cross section data
+         */
         total_xs = (2. / 3.) * piminusp_high_energy(sqrt_s_ * sqrt_s_) *
                    finder_parameters.AQM_scaling_factor(pdg_a) *
                    finder_parameters.AQM_scaling_factor(pdg_b);
@@ -451,16 +460,29 @@ double CrossSections::elastic_parametrization(
     }
   } else if ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
              (pdg_a.is_pion() && pdg_b.is_Dmeson())) {
+    const CharmRescattering& charm_rescattering =
+        finder_parameters.charm_rescattering;
     std::optional<double> tmp_elastic_xs = Dpi_elastic();
-    if (tmp_elastic_xs.has_value()) {
+    if (charm_rescattering == CharmRescattering::None) {
+      return 0.;
+    } else if ((charm_rescattering == CharmRescattering::T_Matrix) &&
+               tmp_elastic_xs.has_value()) {
       elastic_xs = tmp_elastic_xs.value();
     } else if (use_AQM) {
+      /* use AQM if charm_rescattering == CharmRescattering::Resonances or
+       * if tmp_elastic_xs has no value, which happens when sqrts is above the
+       * upper bound of the energy range of the underlying cross section data */
       const double m1 = incoming_particles_[0].effective_mass();
       const double m2 = incoming_particles_[1].effective_mass();
       const double s = sqrt_s_ * sqrt_s_;
       elastic_xs = 2. / 3. * piplusp_elastic_AQM(s, m1, m2) *
                    finder_parameters.AQM_scaling_factor(pdg_a) *
                    finder_parameters.AQM_scaling_factor(pdg_b);
+    } else {
+      logg[LCrossSections].warn(
+          "Neither charm rescattering nor AQM are enabled, i.e. Dpi to Dpi "
+          "interactions are disabled.");
+      return 0.;
     }
   } else if (use_AQM) {
     const double m1 = incoming_particles_[0].effective_mass();
@@ -982,10 +1004,19 @@ std::optional<double> CrossSections::Dpi_elastic() const {
   }
 }
 
-CollisionBranchList CrossSections::two_to_one() const {
+CollisionBranchList CrossSections::two_to_one(
+    const CharmRescattering charm_rescattering) const {
   CollisionBranchList resonance_process_list;
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
+  const PdgCode& pdg_a = type_particle_a.pdgcode();
+  const PdgCode& pdg_b = type_particle_b.pdgcode();
+
+  if (!(charm_rescattering == CharmRescattering::Resonances) &&
+      ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
+       (pdg_b.is_Dmeson() && pdg_a.is_pion()))) {
+    return resonance_process_list;
+  }
 
   const double m1 = incoming_particles_[0].effective_mass();
   const double m2 = incoming_particles_[1].effective_mass();
@@ -1040,7 +1071,8 @@ double CrossSections::formation(const ParticleType& type_resonance,
 }
 
 CollisionBranchList CrossSections::two_to_two(
-    const ReactionsBitSet& included_2to2, const double KN_offset) const {
+    const ReactionsBitSet& included_2to2, const double KN_offset,
+    const CharmRescattering charm_rescattering) const {
   CollisionBranchList process_list;
   const ParticleData& data_a = incoming_particles_[0];
   const ParticleData& data_b = incoming_particles_[1];
@@ -1078,7 +1110,7 @@ CollisionBranchList CrossSections::two_to_two(
     if ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
         (pdg_b.is_Dmeson() && pdg_a.is_pion())) {
       // D Meson Pion Scattering
-      process_list = Dpi_xx(included_2to2);
+      process_list = Dpi_xx(included_2to2, charm_rescattering);
     }
   } else if (type_a.is_nucleus() || type_b.is_nucleus()) {
     if ((type_a.is_nucleon() && type_b.is_nucleus()) ||
@@ -2640,9 +2672,11 @@ double CrossSections::Dpi_inelastic_xsec() const {
 }
 
 CollisionBranchList CrossSections::Dpi_xx(
-    const ReactionsBitSet& included_2to2) const {
+    const ReactionsBitSet& included_2to2,
+    const CharmRescattering charm_rescattering) const {
   CollisionBranchList process_list;
-  if (included_2to2[IncludedReactions::Dpi_to_Dpi] == 0) {
+  if ((included_2to2[IncludedReactions::Dpi_to_Dpi] == 0) ||
+      !(charm_rescattering == CharmRescattering::T_Matrix)) {
     return process_list;
   }
   const ParticleType& a = incoming_particles_[0].type();

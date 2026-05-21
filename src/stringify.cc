@@ -223,6 +223,18 @@ std::string to_string(CollisionCriterion c) {
   throw_unhandled_enum("CollisionCriterion", static_cast<int>(c));
 }
 
+std::string to_string(CharmRescattering c) {
+  switch (c) {
+    case CharmRescattering::None:
+      return "none";
+    case CharmRescattering::Resonances:
+      return "resonances";
+    case CharmRescattering::T_Matrix:
+      return "T-matrix";
+  }
+  throw_unhandled_enum("CharmRescattering", static_cast<int>(c));
+}
+
 std::string to_string(SpinInteractionType type) {
   switch (type) {
     case SpinInteractionType::On:

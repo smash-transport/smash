@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015,2017-2020,2022-2023
+ *    Copyright (c) 2015,2017-2020,2022-2023,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -43,9 +43,10 @@ static ScatterAction *set_up_action(const ParticleData &proj,
   act = new ScatterAction(proj, targ, 0.);
   CrossSections xs(act->incoming_particles(), act->sqrt_s(),
                    std::make_pair(FourVector(), FourVector()));
-  proc_list =
-      xs.two_to_two(Test::all_reactions_included(),
-                    InputKeys::collTerm_stringTrans_KNOffset.default_value());
+  proc_list = xs.two_to_two(
+      Test::all_reactions_included(),
+      InputKeys::collTerm_stringTrans_KNOffset.default_value(),
+      InputKeys::collTerm_charmRescatteringMethod.default_value());
   //   act->add_processes(proc_list);
 
   std::printf("%s+ %s, sqrt(s) = %f GeV, sigma = %f mb, %lu Channels \n",

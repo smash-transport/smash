@@ -2468,6 +2468,38 @@ struct InputKeys {
       }};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_heavy_flavor
+   * \optional_key{key_CT_charm_rescattering_,Charm_Rescattering_Method,string,
+   * "resonances"}
+   *
+   * With this key, the method of charm rescattering at lower energies can be
+   * chosen for two to two reactions including charmed hadrons that are
+   * mentioned in <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>.
+   *
+   * - `"resonances"` &rarr; Charm interactions are realized via resonance
+   *    formations.
+   * - `"T-matrix"` &rarr; Tabulated cross sections (\iref{Abreu:2011ic},
+   *    \iref{Tolos:2013kva}, \iref{Torres-Rincon:2014ffa}) are used, which
+   *    handle elastic and inelastic binary collisions.
+   *    \note Currently, only \f$ D\pi \leftrightarrow D\pi \f$ channels are
+   *    implemented and all other interactions including charmed hadrons are
+   *    treated via intermediate resonances.
+   * - `"none"` &rarr; Interactions of charmed hadrons will not be taken into
+   *    account, i.e. their cross sections are set to zero.
+   *    This option facilitates disabling the two to two interactions of charmed
+   *    hadrons that would otherwise be included via `"Dpi_to_Dpi"` in
+   *    <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>, without listing
+   *    every possible value except `"Dpi_to_Dpi"`.
+   */
+  /**
+   * \see_key{key_CT_charm_rescattering_}
+   */
+  inline static const Key<CharmRescattering> collTerm_charmRescatteringMethod{
+      InputSections::c_heavyFlavor + "Charm_Rescattering_Method",
+      CharmRescattering::Resonances,
+      {"3.4"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_collision_criterion_,Collision_Criterion,string,
    * "Covariant",\any_valid}
@@ -7618,6 +7650,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<einhard::LogLevel>>,
       std::reference_wrapper<const Key<BoxInitialCondition>>,
       std::reference_wrapper<const Key<CalculationFrame>>,
+      std::reference_wrapper<const Key<CharmRescattering>>,
       std::reference_wrapper<const Key<CollisionCriterion>>,
       std::reference_wrapper<const Key<DensityType>>,
       std::reference_wrapper<const Key<DerivativesMode>>,

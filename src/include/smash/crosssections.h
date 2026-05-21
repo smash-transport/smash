@@ -109,11 +109,17 @@ class CrossSections {
    * create a list of possible resonance production processes
    * and their cross sections.
    *
+   * If <tt>\ref key_CT_charm_rescattering_ "Charm_Rescattering_Method"</tt> is
+   * not set to `"Resonances"` then interactions of charmed hadrons will not be
+   * considered in two to one processes.
+   *
+   * \param[in] charm_rescattering Type of charm rescattering
+   *
    * \return A list of processes with resonance in the final state.
    * Each element in the list contains the type of the final-state particle
    * and the cross section for that particular process.
    */
-  CollisionBranchList two_to_one() const;
+  CollisionBranchList two_to_one(CharmRescattering charm_rescattering) const;
 
   /**
    * Calculates the 2-to-1 resonance production cross section for a given
@@ -153,11 +159,13 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \param[in] KN_offset Offset to the minimum energy for string production in
    * KN scatterings
+   * \param[in] charm_rescattering Type of charm rescattering
    *
    * \return List of all possible inelastic 2->2 processes.
    */
   CollisionBranchList two_to_two(const ReactionsBitSet& included_2to2,
-                                 double KN_offset) const;
+                                 const double KN_offset,
+                                 CharmRescattering charm_rescattering) const;
 
   /**
    * Find all 2->3 processes for the given scattering.
@@ -471,10 +479,12 @@ class CrossSections {
    * Find all inelastic 2->2 processes for D meson-pion (Dpi) scattering.
    *
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \param[in] charm_rescattering Type of charm rescattering
    *
    * \return List of all possible Dpi reactions with their cross sections
    * */
-  CollisionBranchList Dpi_xx(const ReactionsBitSet& included_2to2) const;
+  CollisionBranchList Dpi_xx(const ReactionsBitSet& included_2to2,
+                             CharmRescattering charm_rescattering) const;
 
   /**
    * Find all inelastic 2->2 processes for Delta-Kaon (DeltaK) Scattering.

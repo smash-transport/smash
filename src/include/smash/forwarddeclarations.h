@@ -269,6 +269,16 @@ enum IncludedMultiParticleReactions {
  */
 typedef std::bitset<4> MultiParticleReactionsBitSet;
 
+/// Possible charm scattering options
+enum class CharmRescattering {
+  /// Disable charm interactions
+  None,
+  /// Charm interactions via resonances
+  Resonances,
+  /// Charm interactions via T-matrix approach
+  T_Matrix,
+};
+
 /// Possible spin interaction types
 enum class SpinInteractionType {
   /// All spin interactions
