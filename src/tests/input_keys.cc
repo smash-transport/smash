@@ -247,7 +247,6 @@ TEST(validators_modi_sphere) {
   const auto& acc_res_widths = InputKeys::modi_sphere_accountResonanceWidths;
   VERIFY(acc_res_widths.validate(true));
   const auto& add_radial_velocity = InputKeys::modi_sphere_addRadialVelocity;
-  VERIFY(add_radial_velocity.validate(-1.0));
   VERIFY(add_radial_velocity.validate(0.0));
   VERIFY(add_radial_velocity.validate(1.0));
   VERIFY(!add_radial_velocity.validate(1.1));

@@ -4630,15 +4630,15 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,-1.0,
-   * \f$0 \le x \le 1 \lor x = -1\f$}
+   * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,0.0,
+   * \f$0 \le x \le 1\f$}
    *
    * This can be used in order to give each particle in the sphere an additional
    * velocity in radial direction of the size \f$u_r = u_0 \,
    * \left(\frac{r}{R}\right)^n\f$ with \f$u_0\f$ being the parameter of this
    * feature, \f$r\f$ the radial coordinate of the particle and \f$R\f$ the
    * total radius of the sphere. \f$u_0\f$ can only take values in \f$[0, 1]\f$
-   * and a value of -1 is equivalent to omitting this key (i.e. not attributing
+   * and a value of 0 is equivalent to omitting this key (i.e. not attributing
    * any additional radial velocity). The exponent \f$n\f$ is set by
    * <tt>\ref key_MS_add_radial_velocity_exponent
    * "Add_Radial_Velocity_Exponent"</tt>.
@@ -4648,11 +4648,9 @@ struct InputKeys {
    */
   inline static const Key<double> modi_sphere_addRadialVelocity{
       InputSections::m_sphere + "Add_Radial_Velocity",
-      -1.0,
+      0.0,
       {"2.2"},
-      [](auto value) noexcept {
-        return (value >= 0.0 && value <= 1.0) || value == -1.0;
-      }};
+      [](auto value) noexcept { return value >= 0.0 && value <= 1.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
