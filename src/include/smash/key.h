@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2024-2025
+ *    Copyright (c) 2024-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -336,6 +336,8 @@ class Key {
       } else if (default_.type_ == DefaultType::Value) {
         value_as_string << default_value();
       }
+    } else {
+      value_as_string << "<not-streamable>";
     }
     return as_yaml(value_as_string.str());
   }

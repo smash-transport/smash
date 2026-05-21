@@ -189,7 +189,7 @@ TEST(as_yaml_with_streamable_value) {
 
 TEST(as_yaml_with_not_streamable_value) {
   const auto key = get_test_key<std::map<int, int>>();
-  const std::string result = "{Test: {Key: }}";
+  const std::string result = "{Test: {Key: <not-streamable>}}";
   COMPARE(key.as_yaml(std::map<int, int>{{42, 666}}), result);
 }
 
