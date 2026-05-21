@@ -1695,7 +1695,7 @@ struct InputKeys {
       1,
       {"0.50"},
       [](const int &value) noexcept {
-        if (value > 100) {
+        if (value >= 150) {
           logg[LogArea::Configuration::id].warn(
               "Number of testparticles is very large, which may lead to long"
               "runtime. Make sure that this is intended.");
