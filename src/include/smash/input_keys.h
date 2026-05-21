@@ -5256,28 +5256,29 @@ struct InputKeys {
    * there is no safety mechanism in place.
    *
    * Available quantities:
-   * - "ID" &rarr; Particle identifier represented by an integer, unique for
-   *    each particle in an event. Even if provided, the IDs will be set
-   *    during the SMASH run in the order the particles are initialized.
-   * - "charge" &rarr; The particle's electric charge in units of the elementary
-   *    charge e. This is only used for a consistency check and the charge will
-   *    be set according to the PDG code data.
-   * - "ncoll" &rarr; Number of collisions the particle already went through.
-   * - "form_time" &rarr;  Formation time. By default it is set to the time
-   *    coordinate (first column in the input).
-   * - "xsecfac" &rarr;  Scaling factor for the cross section, limited between 0
-   *    and 1. By default it is 1.
-   * - "proc_type" &rarr; Type of the last interaction (See
+   * - <tt>"ID"</tt> &rarr; Particle identifier represented by an integer,
+   *    unique for each particle in an event. Even if provided, the IDs will be
+   *    set during the SMASH run in the order the particles are initialized.
+   * - <tt>"charge"</tt> &rarr; The particle's electric charge in units of the
+   *    elementary charge e. This is only used for a consistency check and the
+   *    charge will be set according to the PDG code data.
+   * - <tt>"ncoll"</tt> &rarr; Number of collisions the particle already went
+   *    through.
+   * - <tt>"form_time"</tt> &rarr;  Formation time. By default it is set to the
+   *    time coordinate (first column in the input).
+   * - <tt>"xsecfac"</tt> &rarr;  Scaling factor for the cross section, limited
+   *    between 0 and 1. By default it is 1.
+   * - <tt>"proc_type"</tt> &rarr; Type of the last interaction (See
    *   \ref doxypage_output_process_types)
-   * - "time_last_coll" &rarr; Time when the last interaction happened.
-   * - "pdg_mother1" &rarr; Parent of the particle.
-   * - "pdg_mother2" &rarr; Second parent of the particle.
-   * - "spin0" &rarr; 0-th component of the spin vector.
-   * - "spin1" &rarr; 1-st component of the spin vector.
-   * - "spin2" &rarr; 2-nd component of the spin vector.
-   * - "spin3" &rarr; 3-rd component of the spin vector.
-   * - "perturbative_weight" &rarr; weight for treating heavy flavor hadrons
-   * perturbatively.
+   * - <tt>"time_last_coll"</tt> &rarr; Time when the last interaction happened.
+   * - <tt>"pdg_mother1"</tt> &rarr; Parent of the particle.
+   * - <tt>"pdg_mother2"</tt> &rarr; Second parent of the particle.
+   * - <tt>"spin0"</tt> &rarr; 0-th component of the spin vector.
+   * - <tt>"spinx"</tt> &rarr; 1-st component of the spin vector.
+   * - <tt>"spiny"</tt> &rarr; 2-nd component of the spin vector.
+   * - <tt>"spinz"</tt> &rarr; 3-rd component of the spin vector.
+   * - <tt>"perturbative_weight"</tt> &rarr; weight for treating heavy flavor
+   *    hadrons perturbatively.
    *
    * Be aware that the default setting of this key considers "ID" and "charge",
    * which also have to be set by the user if these quantities are in the
@@ -5315,9 +5316,9 @@ struct InputKeys {
                                                          "pdg_mother1",
                                                          "pdg_mother2",
                                                          "spin0",
-                                                         "spin1",
-                                                         "spin2",
-                                                         "spin3",
+                                                         "spinx",
+                                                         "spiny",
+                                                         "spinz",
                                                          "perturbative_weight"};
             return std::all_of(
                 value.begin(), value.end(),
@@ -5439,9 +5440,9 @@ struct InputKeys {
                                                          "pdg_mother1",
                                                          "pdg_mother2",
                                                          "spin0",
-                                                         "spin1",
-                                                         "spin2",
-                                                         "spin3",
+                                                         "spinx",
+                                                         "spiny",
+                                                         "spinz",
                                                          "perturbative_weight"};
             return std::all_of(
                 value.begin(), value.end(),
