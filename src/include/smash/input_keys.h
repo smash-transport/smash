@@ -4554,9 +4554,9 @@ struct InputKeys {
       modi_sphere_initialMultiplicities{
           InputSections::m_sphere + "Init_Multiplicities",
           {"0.50"},
-          [](auto const &value) noexcept {
+          [](const auto &value) noexcept {
             return !value.empty() && std::all_of(value.begin(), value.end(),
-                                                 [](auto const &entry) {
+                                                 [](const auto &entry) {
                                                    return entry.second > 0;
                                                  });
           }};
@@ -4571,9 +4571,9 @@ struct InputKeys {
    * \see_key{key_MS_radius_}
    */
   inline static const Key<double> modi_sphere_radius{
-      InputSections::m_sphere + "Radius", {"0.50"}, [](auto value) noexcept {
-        return value > 0.0;
-      }};
+      InputSections::m_sphere + "Radius",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4601,7 +4601,7 @@ struct InputKeys {
   inline static const Key<double> modi_sphere_temperature{
       InputSections::m_sphere + "Temperature",
       {"1.5.2"},
-      [](auto value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4651,7 +4651,9 @@ struct InputKeys {
       InputSections::m_sphere + "Add_Radial_Velocity",
       0.0,
       {"2.2"},
-      [](auto value) noexcept { return value >= 0.0 && value <= 1.0; }};
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4668,7 +4670,7 @@ struct InputKeys {
       InputSections::m_sphere + "Add_Radial_Velocity_Exponent",
       1.0,
       {"3.3"},
-      [](auto value) noexcept { return value >= 0.0; }};
+      [](const double &value) noexcept { return value >= 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4845,7 +4847,7 @@ struct InputKeys {
       InputSections::m_s_jet + "Jet_Momentum",
       20.0,
       {"1.5.2"},
-      [](auto value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4898,7 +4900,7 @@ struct InputKeys {
       InputSections::m_s_jet + "Back_To_Back_Separation",
       0.01,
       {"3.3"},
-      [](auto value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4921,9 +4923,9 @@ struct InputKeys {
       modi_box_initialMultiplicities{
           InputSections::m_box + "Init_Multiplicities",
           {"0.50"},
-          [](auto const &value) noexcept {
+          [](const auto &value) noexcept {
             return !value.empty() && std::all_of(value.begin(), value.end(),
-                                                 [](auto const &entry) {
+                                                 [](const auto &entry) {
                                                    return entry.second > 0;
                                                  });
           }};
@@ -4960,9 +4962,9 @@ struct InputKeys {
    * \see_key{key_MB_length_}
    */
   inline static const Key<double> modi_box_length{
-      InputSections::m_box + "Length", {"0.50"}, [](auto value) noexcept {
-        return value > 0.0;
-      }};
+      InputSections::m_box + "Length",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4989,9 +4991,9 @@ struct InputKeys {
    * \see_key{key_MB_temperature_}
    */
   inline static const Key<double> modi_box_temperature{
-      InputSections::m_box + "Temperature", {"0.50"}, [](auto value) noexcept {
-        return value > 0.0;
-      }};
+      InputSections::m_box + "Temperature",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -5142,7 +5144,7 @@ struct InputKeys {
       InputSections::m_b_jet + "Jet_Momentum",
       20.0,
       {"1.7"},
-      [](auto value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -5390,9 +5392,9 @@ struct InputKeys {
    * \see_key{key_MLB_length_}
    */
   inline static const Key<double> modi_listBox_length{
-      InputSections::m_listBox + "Length", {"2.1"}, [](auto value) noexcept {
-        return value > 0.0;
-      }};
+      InputSections::m_listBox + "Length",
+      {"2.1"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
