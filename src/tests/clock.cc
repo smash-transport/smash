@@ -174,6 +174,7 @@ TEST_CATCH(custom_clock_tick_beyond_last, std::out_of_range) {
   ++clock;
   clock.current_time();
 }
+
 TEST_CATCH(custom_clock_tick_till_end_ask_next_time, std::out_of_range) {
   CustomClock clock{{42}};
   ++clock;

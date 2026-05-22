@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2024-2025
+ *    Copyright (c) 2024-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -642,7 +642,7 @@ class OutputFormatter {
   }
 };
 
-namespace details {
+namespace detail {
 
 /**
  * \brief Writes particle data in multiple chunks if the total buffer size
@@ -739,14 +739,14 @@ void write_in_chunk_impl(
     write(buffer);
   }
 }
-}  // namespace details
+}  // namespace detail
 
 /**
  * \brief User-facing wrapper for chunked particle writing.
  *
  * Forwards the call to the internal implementation.
  *
- * \see details::write_in_chunk_impl
+ * \see detail::write_in_chunk_impl
  */
 template <typename Converter, class Range,
           std::enable_if_t<std::is_same_v<Range, Particles> ||
@@ -755,7 +755,7 @@ template <typename Converter, class Range,
 void write_in_chunk(
     const Range& particles, const OutputFormatter<Converter>& formatter,
     std::function<void(const typename Converter::type&)> write) {
-  details::write_in_chunk_impl(particles, formatter, write);
+  detail::write_in_chunk_impl(particles, formatter, write);
 }
 
 }  // namespace smash

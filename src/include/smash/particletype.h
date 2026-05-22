@@ -403,17 +403,26 @@ class ParticleType {
    * distribution).
    *
    * \param[in] energy Maximum energy from which the mass should be sampled.
+   *                   If not given, the mass is sampled from the relevant range
+   *                   of the Breit-Wigner distribution, truncating it at
+   *                   mass_limit_.
    * \return sampled mass
+   *
+   * \note The energy can be larger than mass_limit_, which is set to a high
+   * enough value such that the spectral functions are negligible above it.
    */
-  double sample_breit_wigner_spectral_function(double energy) const;
+  double sample_breit_wigner_spectral_function(
+      double energy = mass_limit_) const;
 
   /**
    * Sample mass from the full spectral function.
    *
    * \param[in] energy Maximum energy from which the mass should be sampled.
+   *                   If not given, the mass is sampled from the relevant range
+   *                   of the spectral function, truncating it at mass_limit_.
    * \return sampled mass
    */
-  double sample_full_spectral_function(double energy) const;
+  double sample_full_spectral_function(double energy = mass_limit_) const;
 
   /**
    * Calculate the ratio between the full spectral function and simple one.
@@ -641,6 +650,11 @@ class ParticleType {
   };
 
  private:
+  /**
+   * Limit for sampling the resonance masses. Implicitly, this assumes that the
+   * spectral functions of all resonances are negligible at this value.
+   */
+  static constexpr double mass_limit_ = 10.0;
   /// name of the particle
   std::string name_;
   /// pole mass of the particle

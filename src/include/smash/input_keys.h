@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022-2025
+ *    Copyright (c) 2022-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -72,6 +72,7 @@ struct InputSections {
   /// Subsection for the hard string transition
   inline static const Section c_hardStringTransition =
       InputSections::collisionTerm + "Hard_String_Transition";
+
   /// Section for the forced thermalization
   inline static const Section forcedThermalization{"Forced_Thermalization"};
 
@@ -2697,17 +2698,17 @@ struct InputKeys {
    * \sigma^{\mathrm{param}}_\mathrm{ref\_process}
    * \f]
    * where "process" refers to a generic process and "ref_process" to a
-   * reference process such as PP for which solid parametrizations exist.
+   * reference process such as \f$pp\f$ for which solid parametrizations exist.
    * The AQM cross-section for a process involving the incoming particles
-   * \f$a\f$ and \f$b\f$ is determined by the following calculation:
+   * \f$1\f$ and \f$2\f$ is determined by the following calculation:
    * \f[
-   * \sigma^{\mathrm{AQM}}_{ab} = 40 \left( \frac{2}{3}
-   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_a) (1 - 0.4 x^s_b) (1 - \kappa^c
-   * x^c_a) (1 - \kappa^c x^c_b) (1 - \kappa^b x^b_a) (1 - \kappa^b x^b_b) \f]
+   * \sigma^{\mathrm{AQM}}_{12} = 40 \left( \frac{2}{3}
+   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) (1 - \kappa^c
+   * x^c_1) (1 - \kappa^c x^c_2) (1 - \kappa^b x^b_1) (1 - \kappa^b x^b_2) \f]
    * with \f$n_\mathrm{meson}\f$ being the number of mesons in the process,
-   * \f$x^s_{a,b}\f$ the fraction of strange quarks, \f$x^c_{a,b}\f$ the
-   * fraction of charm quarks, and \f$x^b_{a,b}\f$ the fraction of bottom quarks
-   * of the hadrons \f$a\f$ and \f$b\f$. \f$ \kappa^c \f$ and \f$ \kappa^b \f$
+   * \f$x^s_{1,2}\f$ the fraction of strange quarks, \f$x^c_{1,2}\f$ the
+   * fraction of charm quarks, and \f$x^b_{1,2}\f$ the fraction of bottom quarks
+   * of the hadrons \f$1\f$ and \f$2\f$. \f$ \kappa^c \f$ and \f$ \kappa^b \f$
    * are the respective suppression factors for interactions involving charm and
    * bottom hadrons (see
    * <tt>\ref key_CT_HF_AQM_c_suppression_ "AQM_Charm_Suppression"</tt> and
@@ -6245,311 +6246,16 @@ struct InputKeys {
       std::reference_wrapper<const Key<HardStringTransitionMode>>,
       std::reference_wrapper<const Key<TotalCrossSectionStrategy>>>;
 
-  /// List of references to all existing SMASH keys.
-  inline static const std::vector<key_references_variant> list = {
-      std::cref(particles),
-      std::cref(decaymodes),
-      std::cref(gen_endTime),
-      std::cref(gen_modus),
-      std::cref(gen_nevents),
-      std::cref(gen_randomseed),
-      std::cref(gen_minNonEmptyEnsembles_maximumEnsembles),
-      std::cref(gen_minNonEmptyEnsembles_number),
-      std::cref(gen_deltaTime),
-      std::cref(gen_derivativesMode),
-      std::cref(gen_smearingDiscreteWeight),
-      std::cref(gen_ensembles),
-      std::cref(gen_expansionRate),
-      std::cref(gen_fieldDerivativesMode),
-      std::cref(gen_smearingGaussCutoffInSigma),
-      std::cref(gen_smearingGaussianSigma),
-      std::cref(gen_metricType),
-      std::cref(gen_restFrameDensityDerivativeMode),
-      std::cref(gen_smearingMode),
-      std::cref(gen_testparticles),
-      std::cref(gen_timeStepMode),
-      std::cref(gen_smearingTriangularRange),
-      std::cref(gen_useGrid),
-      std::cref(log_default),
-      std::cref(log_box),
-      std::cref(log_collider),
-      std::cref(log_yamlConfiguration),
-      std::cref(log_experiment),
-      std::cref(log_grandcanThermalizer),
-      std::cref(log_initialConditions),
-      std::cref(log_list),
-      std::cref(log_main),
-      std::cref(log_output),
-      std::cref(log_sphere),
-      std::cref(log_action),
-      std::cref(log_clock),
-      std::cref(log_crossSections),
-      std::cref(log_decayModes),
-      std::cref(log_density),
-      std::cref(log_distributions),
-      std::cref(log_findScatter),
-      std::cref(log_fpe),
-      std::cref(log_grid),
-      std::cref(log_hyperSurfaceCrossing),
-      std::cref(log_inputParser),
-      std::cref(log_lattice),
-      std::cref(log_nucleus),
-      std::cref(log_particleType),
-      std::cref(log_pauliBlocking),
-      std::cref(log_potentials),
-      std::cref(log_propagation),
-      std::cref(log_pythia),
-      std::cref(log_resonances),
-      std::cref(log_rootsolver),
-      std::cref(log_scatterAction),
-      std::cref(log_scatterActionMulti),
-      std::cref(log_tmn),
-      std::cref(version),
-      std::cref(collTerm_additionalElasticCrossSection),
-      std::cref(collTerm_collisionCriterion),
-      std::cref(collTerm_crossSectionScaling),
-      std::cref(collTerm_elasticCrossSection),
-      std::cref(collTerm_elasticNNCutoffSqrts),
-      std::cref(collTerm_totXsStrategy),
-      std::cref(collTerm_pseudoresonance),
-      std::cref(collTerm_fixedMinCellLength),
-      std::cref(collTerm_forceDecaysAtEnd),
-      std::cref(collTerm_ignoreDecayWidthAtTheEnd),
-      std::cref(collTerm_includeDecaysAtTheEnd),
-      std::cref(collTerm_decayInitial),
-      std::cref(collTerm_includedTwoToTwo),
-      std::cref(collTerm_isotropic),
-      std::cref(collTerm_maximumCrossSection),
-      std::cref(collTerm_multiParticleReactions),
-      std::cref(collTerm_nnbarTreatment),
-      std::cref(collTerm_noCollisions),
-      std::cref(collTerm_onlyWarnForHighProbability),
-      std::cref(collTerm_resonanceLifetimeModifier),
-      std::cref(collTerm_spinInteractions),
-      std::cref(collTerm_strings),
-      std::cref(collTerm_stringsWithProbability),
-      std::cref(collTerm_twoToOne),
-      std::cref(collTerm_useAQM),
-      std::cref(collTerm_pauliBlocking_gaussianCutoff),
-      std::cref(collTerm_pauliBlocking_momentumAveragingRadius),
-      std::cref(collTerm_pauliBlocking_spatialAveragingRadius),
-      std::cref(collTerm_hard_string_transition_mode),
-      std::cref(collTerm_hard_string_transition_start_energy),
-      std::cref(collTerm_hard_string_transition_end_energy),
-      std::cref(collTerm_stringTrans_KNOffset),
-      std::cref(collTerm_stringTrans_pipiOffset),
-      std::cref(collTerm_stringTrans_lower),
-      std::cref(collTerm_stringTrans_rangeNN),
-      std::cref(collTerm_stringTrans_rangeNpi),
-      std::cref(collTerm_stringTrans_range_width),
-      std::cref(collTerm_stringParam_diquarkSuppression),
-      std::cref(collTerm_stringParam_formTimeFactor),
-      std::cref(collTerm_stringParam_formationTime),
-      std::cref(collTerm_stringParam_gluonBeta),
-      std::cref(collTerm_stringParam_gluonPMin),
-      std::cref(collTerm_stringParam_mDependentFormationTimes),
-      std::cref(collTerm_stringParam_quarkAlpha),
-      std::cref(collTerm_stringParam_quarkBeta),
-      std::cref(collTerm_stringParam_popcornRate),
-      std::cref(collTerm_stringParam_powerParticleFormation),
-      std::cref(collTerm_stringParam_probabilityPToDUU),
-      std::cref(collTerm_stringParam_separateFragmentBaryon),
-      std::cref(collTerm_stringParam_sigmaPerp),
-      std::cref(collTerm_stringParam_strangeSuppression),
-      std::cref(collTerm_stringParam_stringSigmaT),
-      std::cref(collTerm_stringParam_stringTension),
-      std::cref(collTerm_stringParam_stringZA),
-      std::cref(collTerm_stringParam_stringZALeading),
-      std::cref(collTerm_stringParam_stringZB),
-      std::cref(collTerm_stringParam_stringZBLeading),
-      std::cref(collTerm_stringParam_useMonashTune),
-      std::cref(collTerm_stringParam_unformedXsecSuppression),
-      std::cref(collTerm_dileptons_decays),
-      std::cref(collTerm_photons_twoToTwoScatterings),
-      std::cref(collTerm_photons_bremsstrahlung),
-      std::cref(collTerm_photons_fractionalPhotons),
-      std::cref(collTerm_HF_AQMbSuppression),
-      std::cref(collTerm_HF_AQMcSuppression),
-      std::cref(modi_collider_eKin),
-      std::cref(modi_collider_eTot),
-      std::cref(modi_collider_pLab),
-      std::cref(modi_collider_sqrtSNN),
-      std::cref(modi_collider_calculationFrame),
-      std::cref(modi_collider_collisionWithinNucleus),
-      std::cref(modi_collider_fermiMotion),
-      std::cref(modi_collider_initialDistance),
-      std::cref(modi_collider_projectile_diffusiveness),
-      std::cref(modi_collider_target_diffusiveness),
-      std::cref(modi_collider_projectile_particles),
-      std::cref(modi_collider_target_particles),
-      std::cref(modi_collider_projectile_radius),
-      std::cref(modi_collider_target_radius),
-      std::cref(modi_collider_projectile_saturationDensity),
-      std::cref(modi_collider_target_saturationDensity),
-      std::cref(modi_collider_projectile_eKin),
-      std::cref(modi_collider_target_eKin),
-      std::cref(modi_collider_projectile_eTot),
-      std::cref(modi_collider_target_eTot),
-      std::cref(modi_collider_projectile_pLab),
-      std::cref(modi_collider_target_pLab),
-      std::cref(modi_collider_projectile_custom_fileDirectory),
-      std::cref(modi_collider_target_custom_fileDirectory),
-      std::cref(modi_collider_projectile_custom_fileName),
-      std::cref(modi_collider_target_custom_fileName),
-      std::cref(modi_collider_projectile_deformed_automatic),
-      std::cref(modi_collider_target_deformed_automatic),
-      std::cref(modi_collider_projectile_deformed_beta2),
-      std::cref(modi_collider_target_deformed_beta2),
-      std::cref(modi_collider_projectile_deformed_beta3),
-      std::cref(modi_collider_target_deformed_beta3),
-      std::cref(modi_collider_projectile_deformed_beta4),
-      std::cref(modi_collider_target_deformed_beta4),
-      std::cref(modi_collider_projectile_deformed_gamma),
-      std::cref(modi_collider_target_deformed_gamma),
-      std::cref(modi_collider_projectile_alphaClustered_automatic),
-      std::cref(modi_collider_target_alphaClustered_automatic),
-      std::cref(modi_collider_projectile_alphaClustered_sideLength),
-      std::cref(modi_collider_target_alphaClustered_sideLength),
-      std::cref(modi_collider_projectile_orientation_phi),
-      std::cref(modi_collider_target_orientation_phi),
-      std::cref(modi_collider_projectile_orientation_psi),
-      std::cref(modi_collider_target_orientation_psi),
-      std::cref(modi_collider_projectile_orientation_randRot),
-      std::cref(modi_collider_target_orientation_randRot),
-      std::cref(modi_collider_projectile_orientation_theta),
-      std::cref(modi_collider_target_orientation_theta),
-      std::cref(modi_collider_impact_max),
-      std::cref(modi_collider_impact_randomReactionPlane),
-      std::cref(modi_collider_impact_range),
-      std::cref(modi_collider_impact_sample),
-      std::cref(modi_collider_impact_value),
-      std::cref(modi_collider_impact_values),
-      std::cref(modi_collider_impact_yields),
-      std::cref(modi_collider_initialConditions_eDenThreshold),
-      std::cref(modi_collider_initialConditions_delayInitialElastic),
-      std::cref(modi_collider_initialConditions_fluidCells),
-      std::cref(modi_collider_initialConditions_formTimeFraction),
-      std::cref(modi_collider_initialConditions_fluidProcesses),
-      std::cref(modi_collider_initialConditions_lowerBound),
-      std::cref(modi_collider_initialConditions_scaling),
-      std::cref(modi_collider_initialConditions_maxTime),
-      std::cref(modi_collider_initialConditions_minTime),
-      std::cref(modi_collider_initialConditions_properTime),
-      std::cref(modi_collider_initialConditions_pTCut),
-      std::cref(modi_collider_initialConditions_rapidityCut),
-      std::cref(modi_collider_initialConditions_type),
-      std::cref(modi_sphere_initialMultiplicities),
-      std::cref(modi_sphere_radius),
-      std::cref(modi_sphere_startTime),
-      std::cref(modi_sphere_temperature),
-      std::cref(modi_sphere_accountResonanceWidths),
-      std::cref(modi_sphere_addRadialVelocity),
-      std::cref(modi_sphere_addRadialVelocityExponent),
-      std::cref(modi_sphere_baryonChemicalPotential),
-      std::cref(modi_sphere_chargeChemicalPotential),
-      std::cref(modi_sphere_initialCondition),
-      std::cref(modi_sphere_strangeChemicalPotential),
-      std::cref(modi_sphere_heavyFlavorMultiplier),
-      std::cref(modi_sphere_useThermalMultiplicities),
-      std::cref(modi_sphere_jet_jetPdg),
-      std::cref(modi_sphere_jet_jetMomentum),
-      std::cref(modi_sphere_jet_jetPosition),
-      std::cref(modi_sphere_jet_backToBack),
-      std::cref(modi_sphere_jet_backToBackSeparation),
-      std::cref(modi_box_initialMultiplicities),
-      std::cref(modi_box_initialCondition),
-      std::cref(modi_box_length),
-      std::cref(modi_box_startTime),
-      std::cref(modi_box_temperature),
-      std::cref(modi_box_accountResonanceWidths),
-      std::cref(modi_box_baryonChemicalPotential),
-      std::cref(modi_box_chargeChemicalPotential),
-      std::cref(modi_box_equilibrationTime),
-      std::cref(modi_box_strangeChemicalPotential),
-      std::cref(modi_box_useThermalMultiplicities),
-      std::cref(modi_box_jet_jetMomentum),
-      std::cref(modi_box_jet_jetPdg),
-      std::cref(modi_list_fileDirectory),
-      std::cref(modi_list_filename),
-      std::cref(modi_list_filePrefix),
-      std::cref(modi_list_shiftId),
-      std::cref(modi_list_optionalQuantities),
-      std::cref(modi_listBox_fileDirectory),
-      std::cref(modi_listBox_filename),
-      std::cref(modi_listBox_filePrefix),
-      std::cref(modi_listBox_length),
-      std::cref(modi_listBox_shiftId),
-      std::cref(modi_listBox_optionalQuantities),
-      std::cref(output_densityType),
-      std::cref(output_outputInterval),
-      std::cref(output_outputTimes),
-      std::cref(output_particles_format),
-      std::cref(output_collisions_format),
-      std::cref(output_dileptons_format),
-      std::cref(output_photons_format),
-      std::cref(output_initialConditions_format),
-      std::cref(output_rivet_format),
-      std::cref(output_coulomb_format),
-      std::cref(output_thermodynamics_format),
-      std::cref(output_particles_extended),
-      std::cref(output_particles_quantities),
-      std::cref(output_particles_onlyFinal),
-      std::cref(output_collisions_extended),
-      std::cref(output_collisions_quantities),
-      std::cref(output_collisions_printStartEnd),
-      std::cref(output_dileptons_extended),
-      std::cref(output_dileptons_quantities),
-      std::cref(output_photons_extended),
-      std::cref(output_photons_quantities),
-      std::cref(output_initialConditions_extended),
-      std::cref(output_initialConditions_quantities),
-      std::cref(output_initialConditions_lowerBound),
-      std::cref(output_initialConditions_properTime),
-      std::cref(output_initialConditions_pTCut),
-      std::cref(output_initialConditions_rapidityCut),
-      std::cref(output_rivet_analyses),
-      std::cref(output_rivet_crossSection),
-      std::cref(output_rivet_ignoreBeams),
-      std::cref(output_rivet_logging),
-      std::cref(output_rivet_paths),
-      std::cref(output_rivet_preloads),
-      std::cref(output_rivet_weights_cap),
-      std::cref(output_rivet_weights_deselect),
-      std::cref(output_rivet_weights_nloSmearing),
-      std::cref(output_rivet_weights_noMulti),
-      std::cref(output_rivet_weights_nominal),
-      std::cref(output_rivet_weights_select),
-      std::cref(output_thermodynamics_onlyParticipants),
-      std::cref(output_thermodynamics_ignoreUnformed),
-      std::cref(output_thermodynamics_position),
-      std::cref(output_thermodynamics_quantites),
-      std::cref(output_thermodynamics_smearing),
-      std::cref(output_thermodynamics_type),
-      std::cref(lattice_automatic),
-      std::cref(lattice_cellNumber),
-      std::cref(lattice_origin),
-      std::cref(lattice_periodic),
-      std::cref(lattice_potentialsAffectThreshold),
-      std::cref(lattice_sizes),
-      std::cref(potentials_use_potentials_outside_lattice),
-      std::cref(potentials_skyrme_skyrmeA),
-      std::cref(potentials_skyrme_skyrmeB),
-      std::cref(potentials_skyrme_skyrmeTau),
-      std::cref(potentials_symmetry_gamma),
-      std::cref(potentials_symmetry_sPot),
-      std::cref(potentials_vdf_coeffs),
-      std::cref(potentials_vdf_powers),
-      std::cref(potentials_vdf_satRhoB),
-      std::cref(potentials_coulomb_rCut),
-      std::cref(potentials_momentum_dependence_C),
-      std::cref(potentials_momentum_dependence_Lambda),
-      std::cref(forcedThermalization_cellNumber),
-      std::cref(forcedThermalization_criticalEDensity),
-      std::cref(forcedThermalization_startTime),
-      std::cref(forcedThermalization_timestep),
-      std::cref(forcedThermalization_algorithm),
-      std::cref(forcedThermalization_latticeSizes),
-      std::cref(forcedThermalization_microcanonical)};
+  /**
+   * Get list of references to all existing SMASH keys.
+   *
+   * \attention Here the Construct-On-First-Use idiom is used to avoid the
+   *            static initialization order fiasco. This means that the list of
+   *            keys is only initialized when this method is called for the
+   *            first time. Therefore, it is guaranteed that all keys are
+   *            already initialized when the list is created.
+   */
+  static const std::vector<key_references_variant> &all_keys();
 
   /**
    * Get the logging Key given a logging area.
@@ -6608,24 +6314,7 @@ struct InputKeys {
    *         \c std::nullopt otherwise.
    */
   static std::optional<key_references_variant> find_key(
-      const KeyLabels &labels) {
-    if (labels.size() == 0)
-      return std::nullopt;
-    auto iterator_to_key_references_variant =
-        std::find_if(smash::InputKeys::list.begin(),
-                     smash::InputKeys::list.end(), [&labels](auto key) {
-                       return std::visit(
-                           [&labels](auto &&arg) {
-                             return arg.get().has_same_labels(labels);
-                           },
-                           key);
-                     });
-    if (iterator_to_key_references_variant == smash::InputKeys::list.end()) {
-      return std::nullopt;
-    } else {
-      return *iterator_to_key_references_variant;
-    }
-  }
+      const KeyLabels &labels);
 };
 
 /*!\Userguide

@@ -2,7 +2,7 @@
 
 #===================================================
 #
-#    Copyright (c) 2018-2019,2021-2024
+#    Copyright (c) 2018-2019,2021-2024,2026
 #      SMASH Team
 #
 #    GNU General Public License (GPLv3 or later)
@@ -33,7 +33,7 @@ function main()
 function do_variables_and_shell_options_setup()
 {
     shopt -s globstar nullglob
-    CHOSEN_LANGUAGES=''
+    CHOSEN_LANGUAGES=()
     declare -gA FORMATTER_COMMAND=(
         ['C++']='clang-format-'${clang_format_required_version%%.*}
         ['CMake']='cmake-format'
@@ -90,7 +90,7 @@ function check_formatter_availability()
             FORMATTER_COMMAND['C++']='clang-format'
             check_formatter_availability 'C++'
         else
-            fail "'${FORMATTER_COMMAND[$1]}' command not found."
+            fail "Formatter for '$1' not found."
         fi
     else
         readonly -A FORMATTER_COMMAND[$1]
@@ -186,7 +186,10 @@ function test_formatting()
 function usage()
 {
     printf '\n\e[96m Helper script to format source files in the codebase.\n\n Usage: '
-    printf "\e[93m${BASH_SOURCE[0]} [C++|CMake|Python] <option>\e[0m\n\n"
+    printf "\e[93m${BASH_SOURCE[0]} [C++|CMake|Python] <option>\e[0m\n"
+    printf "\e[96m        The formatting languages are not matched case-sensitive, i.e. \n"
+    printf "\e[96m        [c++|cmake|python] are possible as well and selecting multiple\n"
+    printf "\e[96m        languages is also available, e.g., 'cmake c++' (without quotes).\n\n"
     printf '\e[96m Possible options:\n\n'
     printf '    \e[93m%-15s\e[0m  ->  \e[96m%s\e[0m\n' \
            '-p | --perform' 'Perform automatic formatting (for developers)' \
@@ -209,11 +212,16 @@ function parse_command_line_arguments()
         usage
         exit 0
     fi
-    if [[ ! $1 =~ ^(C\+\+|CMake|Python)$ ]]; then
-        CHOSEN_LANGUAGES=( 'C++' 'CMake' 'Python' )
-    else
-        CHOSEN_LANGUAGES=( "$1" )
+    local language
+    while [[ ! $1 =~ ^- ]]; do
+        # The user input is adapted to match the names of the languages that are used internally
+        language=${1,,}
+        language=${language/cmake/CMake}
+        CHOSEN_LANGUAGES+=( "${language^}" )
         shift
+    done
+    if [[ ${#CHOSEN_LANGUAGES[@]} -eq 0 ]]; then
+        CHOSEN_LANGUAGES=( 'C++' 'CMake' 'Python' )
     fi
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -227,7 +235,7 @@ function parse_command_line_arguments()
                 VERBOSE='FALSE'
                 ;;
             *)
-                fail "Unrecognized option."
+                fail "Unrecognized option '$1'."
                 ;;
         esac
         shift

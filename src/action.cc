@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -329,7 +329,7 @@ void Action::sample_manybody_phasespace() {
   }
   std::vector<FourVector> p(n);
 
-  details::sample_manybody_phasespace_impl(sqrt_s(), types, p);
+  detail::sample_manybody_phasespace_impl(sqrt_s(), types, p);
   for (size_t i = 0; i < n; i++) {
     outgoing_particles_[i].set_4momentum(p[i]);
   }
@@ -405,7 +405,7 @@ std::ostream &operator<<(std::ostream &out, const ActionList &actions) {
   return out << '}';
 }
 
-namespace details {
+namespace detail {
 
 void sample_manybody_phasespace_impl(double sqrts,
                                      const ParticleTypePtrList &types,
@@ -556,7 +556,7 @@ void sample_manybody_phasespace_MCMC(const ParticleTypePtrList &types,
   const int n = types.size();
   int idx1, idx2;
 
-  assert(sampled_momenta.size() == n);
+  assert(sampled_momenta.size() == static_cast<size_t>(n));
   // It is enough to check that the energy is a positive number
   const bool all_zero =
       std::all_of(sampled_momenta.begin(), sampled_momenta.end(),
@@ -617,6 +617,6 @@ void sample_manybody_phasespace_MCMC(const ParticleTypePtrList &types,
   }
 }
 
-}  // namespace details
+}  // namespace detail
 
 }  // namespace smash

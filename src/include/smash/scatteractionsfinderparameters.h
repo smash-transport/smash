@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2022-2025
+ *    Copyright (c) 2022-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,8 +11,8 @@
 #include <set>
 #include <utility>
 
-#include "input_keys.h"
 #include "smash/forwarddeclarations.h"
+#include "smash/input_keys.h"
 
 namespace smash {
 
