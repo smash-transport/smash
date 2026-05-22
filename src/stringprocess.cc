@@ -15,6 +15,7 @@
 #include <string>
 
 #include "smash/configuration.h"
+#include "smash/forwarddeclarations.h"
 #include "smash/input_keys.h"
 #include "smash/kinematics.h"
 #include "smash/pow.h"
@@ -71,8 +72,20 @@ StringProcess::StringProcess(Configuration& config)
           config.take(InputKeys::collTerm_stringParam_separateFragmentBaryon)),
       use_monash_tune_(
           config.take(InputKeys::collTerm_stringParam_useMonashTune, false)),
-      additional_xsec_supp_(config.take(
-          InputKeys::collTerm_stringParam_unformedXsecSuppression)) {
+      additional_xsec_supp_(
+          config.take(InputKeys::collTerm_stringParam_unformedXsecSuppression)),
+      prob_sq_to_qq_(
+
+          config.take(InputKeys::collTerm_stringParam_probSQtoQQ)),
+      popcorn_spair_(
+
+          config.take(InputKeys::collTerm_stringParam_popcornSpair)),
+      prob_qq1_to_qq0_(
+
+          config.take(InputKeys::collTerm_stringParam_probQQ1toQQ0)),
+
+      popcorn_smeson_(
+          config.take(InputKeys::collTerm_stringParam_popcornSmeson)) {
   // setup and initialize pythia for fragmentation
   pythia_hadron_ = std::make_unique<Pythia8::Pythia>(PYTHIA_XML_DIR, false);
   /* turn off all parton-level processes to implement only hadronization */
@@ -181,7 +194,7 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
   pythia_in->readString("ParticleData:modeBreitWigner = 4");
   /* choose minimum transverse momentum scale
    * involved in partonic interactions */
-  pythia_in->readString("MultipartonInteractions:pTmin = 1.5");
+
   // transverse momentum spread in string fragmentation
   // Global Lund fragmentation
   pythia_in->readString("StringZ:aLund = " + std::to_string(stringz_a));
@@ -203,6 +216,18 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
                         std::to_string(strange_supp));
   pythia_in->readString("StringFlav:popcornRate = " +
                         std::to_string(popcorn_rate));
+  pythia_in->readString("StringFlav:probSQtoQQ = " +
+                        std::to_string(prob_sq_to_qq_));
+
+  pythia_in->readString("StringFlav:popcornSpair = " +
+                        std::to_string(popcorn_spair_));
+
+  pythia_in->readString("StringFlav:popcornSmeson = " +
+                        std::to_string(popcorn_smeson_));
+
+  pythia_in->readString("StringFlav:probQQ1toQQ0 = " +
+                        std::to_string(prob_qq1_to_qq0_));
+
   // parameters for the fragmentation function
   pythia_in->readString("StringZ:aLund = " + std::to_string(stringz_a));
   pythia_in->readString("StringZ:bLund = " + std::to_string(stringz_b));
@@ -247,66 +272,57 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
   }
 }
 
-// compute the formation time and fill the arrays with final-state particles
-int StringProcess::append_final_state(ParticleList& intermediate_particles,
-                                      const FourVector& uString,
-                                      const ThreeVector& evecLong,
-                                      double additional_xsec_supp,
-                                      bool find_and_scale_leading) {
-  int nfrag = 0;
-  int bstring = 0;
-
-  for (ParticleData& data : intermediate_particles) {
-    nfrag += 1;
-    bstring += data.pdgcode().baryon_number();
-  }
+void StringProcess::form_intermediate_particles(
+    ParticleList& intermediate_particles, const FourVector& uString,
+    const ThreeVector& evecLong, double additional_xsec_supp,
+    bool find_and_scale_leading) {
+  const int nfrag = intermediate_particles.size();
   assert(nfrag > 0);
 
-  /* compute the cross section scaling factor for leading hadrons
-   * based on the number of valence quarks. */
-  if (find_and_scale_leading)
+  int bstring = 0;
+  for (const ParticleData& data : intermediate_particles) {
+    bstring += data.pdgcode().baryon_number();
+  }
+
+  if (find_and_scale_leading) {
     assign_all_scaling_factors(bstring, intermediate_particles, evecLong,
                                additional_xsec_supp);
+  }
 
-  // Velocity three-vector to perform Lorentz boost.
   const ThreeVector vstring = uString.velocity();
 
-  // compute the formation times of hadrons
-  for (int i = 0; i < nfrag; i++) {
-    ThreeVector velocity = intermediate_particles[i].momentum().velocity();
-    double gamma = 1. / intermediate_particles[i].inverse_gamma();
-    // boost 4-momentum into the center of mass frame
-    FourVector momentum =
-        intermediate_particles[i].momentum().lorentz_boost(-vstring);
-    intermediate_particles[i].set_4momentum(momentum);
+  for (ParticleData& particle : intermediate_particles) {
+    const FourVector p_string = particle.momentum();
+    const ThreeVector velocity_string = p_string.velocity();
+    const double gamma_string = 1.0 / particle.inverse_gamma();
+
+    const FourVector p_com = p_string.lorentz_boost(-vstring);
+    particle.set_4momentum(p_com);
 
     if (mass_dependent_formation_times_) {
-      // set the formation time and position in the rest frame of string
-      double tau_prod = M_SQRT2 * intermediate_particles[i].effective_mass() /
-                        kappa_tension_string_;
-      double t_prod = tau_prod * gamma;
-      FourVector fragment_position = FourVector(t_prod, t_prod * velocity);
-      /* boost formation position into the center of mass frame
-       * and then into the lab frame */
+      const double tau_prod =
+          M_SQRT2 * particle.effective_mass() / kappa_tension_string_;
+
+      const double t_prod_string = tau_prod * gamma_string;
+
+      FourVector fragment_position(t_prod_string,
+                                   t_prod_string * velocity_string);
+
       fragment_position = fragment_position.lorentz_boost(-vstring);
       fragment_position = fragment_position.lorentz_boost(-vcomAB_);
-      intermediate_particles[i].set_slow_formation_times(
+
+      particle.set_slow_formation_times(
           time_collision_,
           soft_t_form_ * fragment_position.x0() + time_collision_);
     } else {
-      ThreeVector v_calc = momentum.lorentz_boost(-vcomAB_).velocity();
-      double gamma_factor = 1.0 / std::sqrt(1 - (v_calc).sqr());
-      intermediate_particles[i].set_slow_formation_times(
-          time_collision_,
-          time_formation_const_ * gamma_factor + time_collision_);
+      const ThreeVector v_lab = p_com.lorentz_boost(-vcomAB_).velocity();
+      const double gamma_lab = 1.0 / std::sqrt(1.0 - v_lab.sqr());
+
+      particle.set_slow_formation_times(
+          time_collision_, time_formation_const_ * gamma_lab + time_collision_);
     }
-
-    final_state_.push_back(intermediate_particles[i]);
   }
-
-  return nfrag;
 }
-
 void StringProcess::init(const ParticleList& incoming, double tcoll) {
   PDGcodes_[0] = incoming[0].pdgcode();
   PDGcodes_[1] = incoming[1].pdgcode();
@@ -343,16 +359,16 @@ void StringProcess::init(const ParticleList& incoming, double tcoll) {
 bool StringProcess::next(ProcessType type) {
   string_parton_events_.clear();
   final_state_.clear();
+
   bool parton_level_success = false;
+
   switch (type) {
     case ProcessType::StringSoftNonDiffractive:
       parton_level_success = next_NDiffSoft();
       break;
-
     case ProcessType::StringSoftSingleDiffractiveAX:
       parton_level_success = next_SDiff(true);
       break;
-
     case ProcessType::StringSoftSingleDiffractiveXB:
       parton_level_success = next_SDiff(false);
       break;
@@ -373,113 +389,148 @@ bool StringProcess::next(ProcessType type) {
       return false;
   }
 
-  if (!parton_level_success)
+  if (!parton_level_success) {
     return false;
-  return hadronize();
-}
-
-bool StringProcess::hadronize() {
-  for (Pythia8::Event& string_evt : string_parton_events_) {
-    bool has_leading_parton = false;
-
-    for (const Pythia8::Particle& particle : string_evt) {
-      if (is_leading_parton(particle)) {
-        has_leading_parton = true;
-        break;
-      }
-    }
-
-    const bool has_leading_and_is_open =
-        has_leading_parton &&
-        string_evt.sizeJunction() ==
-            0;  // total string 4-momentum in the event (two endpoints)
-    if (string_evt.size() <
-        3) {  // usually 0 is "system", so need at least indices 1 and 2
-      logg[LPythia].error("String event too small to hadronize.");
-      return false;
-    }
-
-    pythia_hadron_->event = string_evt;
-    const Pythia8::Vec4 p_str = string_evt[0].p();
-    Pythia8::RotBstMatrix to_string_rest;
-
-    to_string_rest.bstback(p_str);
-    pythia_hadron_->event.rotbst(to_string_rest);
-
-    if (!pythia_hadron_->forceHadronLevel(false)) {
-      pythia_hadron_->event.list();
-      logg[LPythia].error("Pythia fragmentation failed for one string.");
-      std::exit(0);
-      return false;
-    }
-    if (has_leading_and_is_open) {
-      tag_leading_hadron(pythia_hadron_->event, pythia_hadron_->particleData);
-    }
-    const FourVector pString_smash(
-        p_str.e(), ThreeVector(p_str.px(), p_str.py(), p_str.pz()));
-    const double m2 = pString_smash.sqr();
-
-    if (m2 <= 0.0) {
-      logg[LPythia].error("String has non-positive invariant mass.");
-      return false;
-    }
-    const double m = std::sqrt(m2);
-    const FourVector uString = pString_smash / m;
-
-    // evecLong: unit vector along string momentum (fallback if |p| ~ 0)
-    ThreeVector evecLong(p_str.px(), p_str.py(), p_str.pz());
-    const double pabs = evecLong.abs();
-    if (pabs > 1e-12) {
-      evecLong = evecLong / pabs;
-    } else {
-      evecLong = ThreeVector(0.0, 0.0, 1.0);
-    }
-    //  Build intermediate SMASH particles from final hadrons
-    ParticleList intermediate_particles;
-    intermediate_particles.reserve(pythia_hadron_->event.size());
-    for (int i = 0; i < pythia_hadron_->event.size(); ++i) {
-      const auto& particle = pythia_hadron_->event[i];
-      if (!(particle.isFinal() && particle.isHadron()))
-        continue;
-
-      const FourVector mom_smash = make_smash_4vec(particle.p());
-      int particle_id = particle.id();
-      convert_KaonLS(particle_id);
-      if (!append_intermediate_list(particle_id, mom_smash,
-                                    intermediate_particles)) {
-        logg[LPythia].error(
-            "Unknown hadron in SMASH during hadronization: PDG=",
-            particle.id());
-        return false;  // you can implement rerun logic later if needed
-      }
-      if (is_leading_from_diquark(particle)) {
-        intermediate_particles.back().set_cross_section_scaling_factor(
-            2.0 / 3.0 * additional_xsec_supp_);
-
-      } else if (is_leading_from_quark(particle)) {
-        intermediate_particles.back().set_cross_section_scaling_factor(
-            0.5 * additional_xsec_supp_);
-
-      } else {
-        intermediate_particles.back().set_cross_section_scaling_factor(0.0);
-      }
-    }
-
-    if (intermediate_particles.empty()) {
-      logg[LPythia].error(
-          "No final hadrons produced by Pythia for one string.");
-      return false;
-    }
-    // This computes formation times, scaling factors, boosts, and appends to
-    // final_state_
-    const bool should_assign_scaling = has_leading_and_is_open;
-    append_final_state(intermediate_particles, uString, evecLong,
-                       additional_xsec_supp_, should_assign_scaling);
   }
 
-  return !final_state_.empty();
+  for (const Pythia8::Event& string_event : string_parton_events_) {
+    auto hadrons = hadronize(string_event);
+
+    if (!hadrons) {
+      final_state_.clear();
+      return false;
+    }
+
+    final_state_.insert(final_state_.end(), hadrons->begin(), hadrons->end());
+  }
+
+  return true;
 }
 
+std::optional<ParticleList> StringProcess::hadronize(
+    const Pythia8::Event& string_evt) {
+  ParticleList intermediate_particles;
+
+  bool has_leading_parton = false;
+  bool has_parton = false;
+
+  const bool has_junction = string_evt.sizeJunction() > 0;
+
+  for (const Pythia8::Particle& particle : string_evt) {
+    if (is_leading_parton(particle)) {
+      has_leading_parton = true;
+
+      if (!particle.isGluon()) {
+        has_parton = true;
+      }
+    }
+
+    if (has_leading_parton && has_parton) {
+      break;
+    }
+  }
+
+  const bool has_leading_and_is_open = has_leading_parton && !has_junction;
+
+  // usually 0 is "system", so need at least indices 1 and 2
+  if (string_evt.size() < 3) {
+    logg[LPythia].error("String event too small to hadronize.");
+    return std::nullopt;
+  }
+
+  pythia_hadron_->event = string_evt;
+
+  const Pythia8::Vec4 p_str = string_evt[0].p();
+
+  Pythia8::RotBstMatrix to_string_rest;
+  to_string_rest.bstback(p_str);
+
+  pythia_hadron_->event.rotbst(to_string_rest);
+
+  if (!pythia_hadron_->forceHadronLevel(false)) {
+    logg[LPythia].error("Pythia fragmentation failed for one string.");
+    return std::nullopt;
+  }
+
+  if (has_leading_and_is_open) {
+    tag_leading_hadron(pythia_hadron_->event, pythia_hadron_->particleData);
+  }
+
+  const FourVector pString_smash(
+      p_str.e(), ThreeVector(p_str.px(), p_str.py(), p_str.pz()));
+
+  const double m2 = pString_smash.sqr();
+
+  if (m2 <= 0.0) {
+    logg[LPythia].error("String has non-positive invariant mass.");
+    return std::nullopt;
+  }
+
+  const double m = std::sqrt(m2);
+  const FourVector uString = pString_smash / m;
+
+  // evecLong: unit vector along string momentum
+  // fallback if |p| ~ 0
+  ThreeVector evecLong(p_str.px(), p_str.py(), p_str.pz());
+
+  const double pabs = evecLong.abs();
+
+  if (pabs > 1e-12) {
+    evecLong = evecLong / pabs;
+  } else {
+    evecLong = ThreeVector(0.0, 0.0, 1.0);
+  }
+
+  // Build intermediate SMASH particles from final hadrons
+  intermediate_particles.reserve(pythia_hadron_->event.size());
+
+  for (int i = 0; i < pythia_hadron_->event.size(); ++i) {
+    const auto& particle = pythia_hadron_->event[i];
+
+    if (!(particle.isFinal() && particle.isHadron())) {
+      continue;
+    }
+
+    const FourVector mom_smash = make_smash_4vec(particle.p());
+
+    int particle_id = particle.id();
+    convert_KaonLS(particle_id);
+
+    if (!append_intermediate_list(particle_id, mom_smash,
+                                  intermediate_particles)) {
+      logg[LPythia].error("Unknown hadron in SMASH during hadronization: PDG=",
+                          particle.id());
+
+      return std::nullopt;
+    }
+
+    if (is_leading_from_diquark(particle)) {
+      intermediate_particles.back().set_cross_section_scaling_factor(
+          2.0 / 3.0 * additional_xsec_supp_);
+
+    } else if (is_leading_from_quark(particle)) {
+      intermediate_particles.back().set_cross_section_scaling_factor(
+          (pythia_hadron_->particleData.isBaryon(particle.id()) ? 1.0 / 3.0
+                                                                : 0.5) *
+          additional_xsec_supp_);
+
+    } else {
+      intermediate_particles.back().set_cross_section_scaling_factor(0.0);
+    }
+  }
+
+  if (intermediate_particles.empty()) {
+    logg[LPythia].error("Hadronization produced no final hadrons.");
+    return std::nullopt;
+  }
+
+  const bool should_assign_scaling = has_junction && has_leading_parton;
+
+  form_intermediate_particles(intermediate_particles, uString, evecLong,
+                              additional_xsec_supp_, should_assign_scaling);
+
+  return intermediate_particles;
+}
 bool StringProcess::append_string(const Pythia8::Vec4& p_str,
                                   const std::array<int, 2>& ends, int color_tag,
                                   bool from_projectile) {

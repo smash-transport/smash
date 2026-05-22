@@ -52,8 +52,6 @@ TEST(common_setup) {
 
   // Verify that all parameters were set accordingly
   VERIFY(pythia_interface.settings.mode("ParticleData:modeBreitWigner") == 4);
-  FUZZY_COMPARE(pythia_interface.settings.parm("MultipartonInteractions:pTmin"),
-                1.5);
   VERIFY(pythia_interface.settings.mode("MultipartonInteractions:nSample") ==
          100000);
   FUZZY_COMPARE(pythia_interface.settings.parm("StringPT:sigma"), .9);
@@ -112,23 +110,21 @@ TEST(append_final) {
   const double expected_formation_b =
       time_formation_const * gamma_b + sp->get_tcoll();
   // Call tested function
-  sp->append_final_state(intermediate, uString, evecLong,
-                         /*additional_xsec_supression*/ 1.0);
+  sp->form_intermediate_particles(intermediate, uString, evecLong,
+                                  /*additional_xsec_supression*/ 1.0);
 
   // vx and vy remain 0 even with boosting
   // As vz starts at 1 it simply gets boosted to inverse_gamma
-  COMPARE_ABSOLUTE_ERROR(expected_formation_a,
-                         sp->get_final_state()[0].formation_time(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(expected_formation_b,
-                         sp->get_final_state()[1].formation_time(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].velocity().x1(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[1].velocity().x1(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].velocity().x2(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[1].velocity().x2(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.7071067812, sp->get_final_state()[0].velocity().x3(),
+  COMPARE_ABSOLUTE_ERROR(expected_formation_a, intermediate[0].formation_time(),
                          1e-7);
-  COMPARE_ABSOLUTE_ERROR(-0.7071067812,
-                         sp->get_final_state()[1].velocity().x3(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(expected_formation_b, intermediate[1].formation_time(),
+                         1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, intermediate[0].velocity().x1(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, intermediate[1].velocity().x1(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, intermediate[0].velocity().x2(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, intermediate[1].velocity().x2(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.7071067812, intermediate[0].velocity().x3(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(-0.7071067812, intermediate[1].velocity().x3(), 1e-7);
 }
 TEST(initialization) {
   std::unique_ptr<StringProcess> sp =

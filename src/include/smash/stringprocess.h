@@ -295,6 +295,29 @@ class StringProcess {
   double additional_xsec_supp_;
 
   /**
+   * Suppression factor for strange diquark production relative
+   * to light diquarks.
+   */
+  double prob_sq_to_qq_;
+
+  /**
+   * Suppression factor for strange quark production in
+   * popcorn baryon production.
+   */
+  double popcorn_spair_;
+
+  /**
+   * Suppression of spin-1 diquarks relative to spin-0 diquarks.
+   */
+  double prob_qq1_to_qq0_;
+
+  /**
+   * Suppression factor for strange meson production in
+   * popcorn baryon production.
+   */
+  double popcorn_smeson_;
+
+  /**
    * Tag hadrons in a hadronized Pythia event that originate from leading
    * partons.
    *
@@ -348,6 +371,7 @@ class StringProcess {
     LEADING_PARTON = 202,
 
     /// Status code for leading diquarks which should have beam remnant id
+    /// to be used by Pythias internal machinery
     LEADING_DIQUARK = 63,
 
     /// Status code assigned to hadrons traced back to a leading quark
@@ -632,13 +656,26 @@ class StringProcess {
    * \param[in] color Color tag to assign.
    */
   void set_color_by_type(Pythia8::Particle &p, int color);
-
   /**
-   * Hadronize all currently stored string parton events.
+   * Hadronize a single partonic string configuration using Pythia8 and convert
+   * the produced hadrons into SMASH particles.
    *
-   * \return Whether hadronization was successful.
+   * The input event is interpreted as a single color-singlet string system.
+   * Fragmentation is performed in the string rest frame. The produced hadrons
+   * are converted to SMASH ParticleData objects, assigned formation times and
+   * cross-section scaling factors, and finally boosted out of the string rest
+   * frame.
+   *
+   * Leading hadrons originating from valence quark or diquark endpoints may be
+   * identified and assigned reduced cross sections according to the
+   * leading-hadron prescription.
+   *
+   * \param[in] string_evt Partonic string event to hadronize.
+   *
+   * \return List of fragmented hadrons on success.
+   * \return std::nullopt if fragmentation or particle conversion fails.
    */
-  bool hadronize();
+  std::optional<ParticleList> hadronize(const Pythia8::Event &string_evt);
 
   /// Fragmentation hook used to modify PYTHIA fragmentation parameters.
   std::shared_ptr<SmashFragHook> frag_hook = nullptr;
@@ -1027,39 +1064,32 @@ class StringProcess {
   }
 
   /**
-   * a function to get the final state particle list
-   * which is called after the collision
-   * \return ParticleList filled with the final state particles.
+   * Set formation times and cross-section scaling factors for fragmented
+   * hadrons as described in \iref{Andersson:1983ia}.
+   *
+   * The input particles are expected to be in the string rest frame. This
+   * function modifies them in place: particle momenta and production vertices
+   * are boosted out of the string rest frame, formation times are assigned, and
+   * optionally leading-hadron cross-section scaling factors are recomputed.
+   *
+   * \param[in,out] intermediate_particles Fragmented hadrons to process.
+   * \param[in] uString Velocity four-vector of the string.
+   * \param[in] evecLong Unit 3-vector along which the string is stretched.
+   * \param[in] additional_xsec_supp Additional multiplicative factor applied to
+   * cross-section scaling, e.g. coherence or medium effects.
+   * \param[in] find_and_scale_leading If true, identify leading hadrons from
+   * valence quark or diquark endpoints and assign their cross-section scaling
+   * factors according to the leading-hadron prescription.
+   *
+   * \pre intermediate_particles is not empty.
+   * \pre intermediate_particles contains only hadrons.
    */
-  ParticleList get_final_state() { return final_state_; }
+  void form_intermediate_particles(ParticleList &intermediate_particles,
+                                   const FourVector &uString,
+                                   const ThreeVector &evecLong,
+                                   double additional_xsec_supp = 1.0,
+                                   bool find_and_scale_leading = true);
 
-  /**
-   * a function that clears the final state particle list
-   * which is used for testing mainly
-   */
-  void clear_final_state() { final_state_.clear(); }
-  /**
-   * Compute the formation time and fill the arrays with final-state particles
-   * as described in \iref{Andersson:1983ia}.
-   *
-   * \param[out] intermediate_particles List of fragmented particles to be
-   * appended. \param[in] uString Velocity four-vector of the string. \param[in]
-   * evecLong Unit 3-vector along which the string is stretched. \param[in]
-   * additional_xsec_supp Additional multiplicative factor applied to the cross
-   * section scaling (e.g. coherence or medium effects). \param[in]
-   * find_and_scale_leading If true, leading hadrons originating from valence
-   * quark or diquark endpoints are identified and their cross sections are
-   * rescaled according to the leading-hadron prescription.
-   *
-   * \return Number of hadrons fragmented from the string.
-   *
-   * \throw std::invalid_argument If a fragmented particle is not a hadron.
-   * \throw std::invalid_argument If the string is neither mesonic nor baryonic.
-   */
-  int append_final_state(ParticleList &intermediate_particles,
-                         const FourVector &uString, const ThreeVector &evecLong,
-                         double additional_xsec_supp = 1.0,
-                         bool find_and_scale_leading = true);
   /**
    * append new particle from PYTHIA to a specific particle list
    * \param[in] pdgid PDG id of particle
@@ -1279,6 +1309,12 @@ class StringProcess {
    * \see time_collision_
    */
   double get_tcoll() { return time_collision_; }
+
+  /**
+   * \return final state
+   * \see final_state_
+   */
+  ParticleList get_final_state() { return final_state_; }
 };
 
 }  // namespace smash

@@ -3188,7 +3188,6 @@ struct InputKeys {
    */
   inline static const Key<double> collTerm_stringParam_stringZALeading{
       InputSections::c_stringParameters + "StringZ_A_Leading", 0.2, {"1.6"}};
-
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_damp_popcorn_,Damp_Popcorn,double,1.0}
@@ -3282,6 +3281,76 @@ struct InputKeys {
       InputSections::c_stringParameters + "Unformed_Xsec_Suppression",
       0.7,
       {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_prob_SQ_to_QQ_,Prob_SQ_to_QQ,double,0.915}
+   *
+   * Suppression factor for strange diquark production relative to light
+   * diquark production.
+   *
+   * Increasing this enhances strange baryon production, especially hyperons.
+   *
+   * Corresponds to Pythia's <tt>StringFlav:probSQtoQQ</tt> parameter.
+   */
+  /**
+   * \see_key{key_CT_SP_prob_SQ_to_QQ_}
+   */
+  inline static const Key<double> collTerm_stringParam_probSQtoQQ{
+      InputSections::c_stringParameters + "Prob_SQ_to_QQ", 0.915, {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_popcorn_spair_,Popcorn_Spair,double,0.9}
+   *
+   * Suppression factor for producing strange quarks in popcorn baryon
+   * production.
+   *
+   * Lower values reduce the suppression and can enhance strange baryons.
+   *
+   * Corresponds to Pythia's <tt>StringFlav:popcornSpair</tt> parameter.
+   */
+  /**
+   * \see_key{key_CT_SP_popcorn_spair_}
+   */
+  inline static const Key<double> collTerm_stringParam_popcornSpair{
+      InputSections::c_stringParameters + "Popcorn_Spair", 0.9, {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_popcorn_smeson_,Popcorn_Smeson,double,0.5}
+   *
+   * Suppression factor for strange meson production in popcorn baryon
+   * production.
+   *
+   * Lower values reduce the suppression and can enhance strange meson
+   * production in popcorn chains.
+   *
+   * Corresponds to Pythia's <tt>StringFlav:popcornSmeson</tt> parameter.
+   */
+  /**
+   * \see_key{key_CT_SP_popcorn_smeson_}
+   */
+  inline static const Key<double> collTerm_stringParam_popcornSmeson{
+      InputSections::c_stringParameters + "Popcorn_Smeson", 0.5, {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_prob_QQ1_to_QQ0_,Prob_QQ1_to_QQ0,double,0.0275}
+   *
+   * Suppression of spin-1 diquark production relative to spin-0 diquark
+   * production, apart from the spin-state counting factor.
+   *
+   * Increasing this can enhance spin-1 and identical-flavour diquarks, which
+   * can affect multi-strange baryon production.
+   *
+   * Corresponds to Pythia's <tt>StringFlav:probQQ1toQQ0</tt> parameter.
+   */
+  /**
+   * \see_key{key_CT_SP_prob_QQ1_to_QQ0_}
+   */
+  inline static const Key<double> collTerm_stringParam_probQQ1toQQ0{
+      InputSections::c_stringParameters + "Prob_QQ1_to_QQ0", 0.0275, {"3.4"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -6553,6 +6622,11 @@ struct InputKeys {
       std::cref(collTerm_stringParam_dampPopcorn),
       std::cref(collTerm_stringParam_useMonashTune),
       std::cref(collTerm_stringParam_unformedXsecSuppression),
+      std::cref(collTerm_stringParam_probSQtoQQ),
+      std::cref(collTerm_stringParam_popcornRate),
+      std::cref(collTerm_stringParam_popcornSpair),
+      std::cref(collTerm_stringParam_popcornSmeson),
+      std::cref(collTerm_stringParam_probQQ1toQQ0),
       std::cref(collTerm_stringParam_fragmentationModel),
       std::cref(collTerm_stringParam_thermalTemperature),
       std::cref(collTerm_stringParam_thermalTempPrefactor),
