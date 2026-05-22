@@ -6085,6 +6085,15 @@ struct InputKeys {
    * (see \ref doxypage_input_lattice_default_parameters)
    *
    * Number of cells in x, y, z directions.
+   *
+   * \note Lattice is used to calculate physical quantities like density and the
+   * choice of the number of cells might affect the results. A too small number
+   * of cells may lead to inaccurate results, becuase the size of the cells
+   * enters the physical calculation (quantities at the neigbour lattice sizes
+   * of a given point are considered). This aspect is clearly related to the
+   * choice of the <tt>\ref key_lattice_sizes_ "Sizes"</tt> key and  these two
+   * keys should be chosen together. Make sure to choose the lattice geometry
+   * carefully and check the results for convergence with respect to it.
    */
   /**
    * \see_key{key_lattice_cell_number_}
@@ -6097,7 +6106,8 @@ struct InputKeys {
         if (std::abs(value[0] * value[1] * value[2]) > 15'000'000) {
           logg[LogArea::Configuration::id].warn(
               "Number of total cells for lattice is very large, which may lead "
-              "to long runtime. Make sure this is intended.");
+              "to long runtime and/or large memory usage.\nMake sure this is "
+              "intended (refer to the documentation for more information).");
         }
         return value[0] > 0 && value[1] > 0 && value[2] > 0;
       }};
@@ -6168,6 +6178,16 @@ struct InputKeys {
    * (see \ref doxypage_input_lattice_default_parameters)
    *
    * Sizes of lattice in x, y, z directions \unit{in fm}.
+   *
+   * \note Lattice is used to calculate physical quantities like density and the
+   * choice of its size can have a significant impact on the results. A too
+   * small lattice size may lead to inaccurate results, becuase part of the
+   * system might not be covered, while a too large lattice size may lead to
+   * long runtime and large memory usage. This latter aspect is clearly related
+   * to the choice of the <tt>\ref key_lattice_cell_number_ "Cell_Number"</tt>
+   * key and  these two keys should be chosen together. Make sure to choose the
+   * lattice geometry carefully and check the results for convergence with
+   * respect to it.
    */
   /**
    * \see_key{key_lattice_sizes_}
@@ -6177,11 +6197,14 @@ struct InputKeys {
       DefaultType::Dependent,
       {"0.80"},
       [](const std::array<double, 3> &value) noexcept {
-        const double max = 200.0;
+        const int max = 200;  // as int to print it nicer in warning
         if (value[0] > max || value[1] > max || value[2] > max) {
           logg[LogArea::Configuration::id].warn(
               "Lattice size(s) larger than " + std::to_string(max) +
-              " fm may lead to long runtime. Make sure this is intended.");
+              " fm may lead to long runtime or large memory usage\nor even "
+              "inaccurate results depending on the number of cells chosen.\n"
+              "Make sure this is intended (refer to the documentation for more "
+              "information).");
         }
         return value[0] > 0 && value[1] > 0 && value[2] > 0;
       }};
@@ -6509,7 +6532,7 @@ struct InputKeys {
           InputSections::forcedThermalization + "Lattice_Sizes",
           {"1.1"},
           [](const std::array<double, 3> &value) noexcept {
-            const double max = 200.0;
+            const int max = 200;  // as int to print it nicer in warning
             if (value[0] > max || value[1] > max || value[2] > max) {
               logg[LogArea::Configuration::id].warn(
                   "Lattice size(s) for forced thermalization larger than " +
