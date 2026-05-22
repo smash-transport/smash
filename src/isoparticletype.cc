@@ -223,7 +223,7 @@ static std::filesystem::path generate_tabulation_path(
   return dir / (prefix + res_name + ".bin");
 }
 
-inline void cache_integral(
+static bool cache_integral(
     std::unordered_map<std::string, Tabulation> &tabulations,
     const std::filesystem::path &dir, sha256::Hash hash,
     const IsoParticleType &part, const IsoParticleType &res,
@@ -232,24 +232,17 @@ inline void cache_integral(
   constexpr double spacing2d = 3.0;
   const auto path = generate_tabulation_path(dir, part.name_filtered_prime(),
                                              res.name_filtered_prime());
+  bool loaded_from_file = false;
   Tabulation integral;
   if (!dir.empty() && std::filesystem::exists(path)) {
     std::ifstream file(path.string());
     integral = Tabulation::from_file(file, hash);
-    if (!integral.is_empty()) {
-      // Only print message if the found tabulation was valid.
-      std::cout << "Tabulation found at " << path.filename() << '\r'
-                << std::flush;
-    }
   }
   if (integral.is_empty()) {
-    if (!dir.empty()) {
-      std::cout << "Caching tabulation to " << path.filename() << '\r'
-                << std::flush;
-    } else {
-      std::cout << "Calculating integral for " << part.name_filtered_prime()
-                << res.name_filtered_prime() << '\r' << std::flush;
-    }
+    const auto particle_names =
+        part.name_filtered_prime() + res.name_filtered_prime();
+    std::cout << "Calculating integral for " << particle_names << '\r'
+              << std::flush;
     if (!unstable) {
       integral = spectral_integral_semistable(integrate, *res.get_states()[0],
                                               *part.get_states()[0], spacing);
@@ -257,25 +250,49 @@ inline void cache_integral(
       integral = spectral_integral_unstable(integrate2d, *res.get_states()[0],
                                             *part.get_states()[0], spacing2d);
     }
+
     if (!dir.empty()) {
-      std::ofstream file(path.string());
-      integral.write(file, hash);
+      // To avoid race conditions, make sure that this is the only instance
+      // writing the tabulation to file.
+      FileLock lock(dir / (particle_names + ".lock"));
+      if (lock.acquire()) {
+        std::cout << "Caching tabulation to " << path.filename() << '\r'
+                  << std::flush;
+        std::ofstream file(path.string());
+        integral.write(file, hash);
+      } else {
+        std::cout << "Another instance is caching the tabulation to "
+                  << path.filename() << ", skipping caching for this instance\r"
+                  << std::flush;
+      }
     }
+  } else {
+    // Only print message if the found tabulation was valid.
+    std::cout << "Tabulation found at " << path.filename() << '\r'
+              << std::flush;
+    loaded_from_file = true;
   }
   tabulations.emplace(std::make_pair(res.name(), integral));
   if (antires != nullptr) {
     tabulations.emplace(std::make_pair(antires->name(), integral));
   }
+  return loaded_from_file;
 }
 
-void IsoParticleType::tabulate_integrals(
-    sha256::Hash hash, const std::filesystem::path &tabulations_path) {
-  // To avoid race conditions, make sure we are the only ones currently storing
-  // tabulations. Otherwise, we ignore any stored tabulations and don't store
-  // our results.
-  FileLock lock(tabulations_path / "tabulations.lock");
-  const std::filesystem::path &dir = lock.acquire() ? tabulations_path : "";
-
+void IsoParticleType::tabulate_integrals(sha256::Hash hash,
+                                         const std::filesystem::path &dir) {
+  /**
+   * We avoid race conditions by locking each tabulation file separately. This
+   * allows multiple instances of SMASH to run in parallel and tabulate the same
+   * integrals without interfering with each other. Reading them simultaneously
+   * is not a problem, and writing is protected by the lock. The only downside
+   * is that the same integral might be calculated multiple times if several
+   * instances start at the same time and find that the tabulation file does not
+   * yet exist.
+   */
+  const int num_integrals =
+      4 * IsoParticleType::list_baryon_resonances().size() + 2;
+  int num_loaded_integrals = 0;
   const auto nuc = IsoParticleType::try_find("N");
   const auto pion = IsoParticleType::try_find("π");
   const auto kaon = IsoParticleType::try_find("K");
@@ -285,25 +302,34 @@ void IsoParticleType::tabulate_integrals(
   for (const auto &res : IsoParticleType::list_baryon_resonances()) {
     const auto antires = res->anti_multiplet();
     if (nuc) {
-      cache_integral(NR_tabulations, dir, hash, *nuc, *res, antires, false);
+      num_loaded_integrals +=
+          cache_integral(NR_tabulations, dir, hash, *nuc, *res, antires, false);
     }
     if (pion) {
-      cache_integral(piR_tabulations, dir, hash, *pion, *res, antires, false);
+      num_loaded_integrals += cache_integral(piR_tabulations, dir, hash, *pion,
+                                             *res, antires, false);
     }
     if (kaon) {
-      cache_integral(RK_tabulations, dir, hash, *kaon, *res, antires, false);
+      num_loaded_integrals += cache_integral(RK_tabulations, dir, hash, *kaon,
+                                             *res, antires, false);
     }
     if (delta) {
-      cache_integral(DeltaR_tabulations, dir, hash, *delta, *res, antires,
-                     true);
+      num_loaded_integrals += cache_integral(DeltaR_tabulations, dir, hash,
+                                             *delta, *res, antires, true);
     }
   }
   if (rho) {
-    cache_integral(rhoR_tabulations, dir, hash, *rho, *rho, nullptr, true);
+    num_loaded_integrals +=
+        cache_integral(rhoR_tabulations, dir, hash, *rho, *rho, nullptr, true);
   }
   if (rho && h1) {
-    cache_integral(rhoR_tabulations, dir, hash, *rho, *h1, nullptr, true);
+    num_loaded_integrals +=
+        cache_integral(rhoR_tabulations, dir, hash, *rho, *h1, nullptr, true);
   }
+  logg[LParticleType].info()
+      << "Tabulation of integrals complete: " << num_loaded_integrals << "/"
+      << num_integrals << " integrals loaded from file, "
+      << num_integrals - num_loaded_integrals << " integrals calculated.";
 }
 
 double IsoParticleType::get_integral_NR(double sqrts) {
