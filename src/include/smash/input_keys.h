@@ -3554,7 +3554,7 @@ struct InputKeys {
    *
    * \par Ways to specify incident energies &rarr; Only one can be given!
    *
-   * \required_key_no_line{key_MC_e_kin_,E_Kin,double}
+   * \required_key_no_line{key_MC_e_kin_,E_Kin,double,\f$x>0\f$}
    *
    * Defines the energy of the collision by the kinetic energy per nucleon of
    * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus is
@@ -3566,11 +3566,13 @@ struct InputKeys {
    * \see_key{key_MC_e_kin_}
    */
   inline static const Key<double> modi_collider_eKin{
-      InputSections::m_collider + "E_Kin", {"0.50"}};
+      InputSections::m_collider + "E_Kin",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \required_key_no_line{key_MC_e_tot_,E_Tot,double}
+   * \required_key_no_line{key_MC_e_tot_,E_Tot,double,\f$x>0\f$}
    *
    * Defines the energy of the collision by the total energy per nucleon of
    * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus is
@@ -3582,11 +3584,13 @@ struct InputKeys {
    * \see_key{key_MC_e_tot_}
    */
   inline static const Key<double> modi_collider_eTot{
-      InputSections::m_collider + "E_Tot", {"2.0.2"}};
+      InputSections::m_collider + "E_Tot",
+      {"2.0.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \required_key_no_line{key_MC_p_lab_,P_Lab,double}
+   * \required_key_no_line{key_MC_p_lab_,P_Lab,double,\f$x>0\f$}
    *
    * Defines the energy of the collision by the initial momentum per nucleon
    * of the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus
@@ -3599,11 +3603,13 @@ struct InputKeys {
    * \see_key{key_MC_p_lab_}
    */
   inline static const Key<double> modi_collider_pLab{
-      InputSections::m_collider + "P_Lab", {"0.50"}};
+      InputSections::m_collider + "P_Lab",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \required_key_no_line{key_MC_sqrtsnn_,Sqrtsnn,double}
+   * \required_key_no_line{key_MC_sqrtsnn_,Sqrtsnn,double,\f$x>0\f$}
    *
    * Defines the energy of the collision \unit{in GeV} as center-of-mass energy
    * in the collision of two hadrons, one for each nucleus, having the average
@@ -3614,12 +3620,14 @@ struct InputKeys {
    * \see_key{key_MC_sqrtsnn_}
    */
   inline static const Key<double> modi_collider_sqrtSNN{
-      InputSections::m_collider + "Sqrtsnn", {"0.50"}};
+      InputSections::m_collider + "Sqrtsnn",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \optional_key{key_MC_calc_frame_,Calculation_Frame,string,"center of
-   * velocity"}
+   * \optional_key{key_MC_calc_frame_,Calculation_Frame,string,
+   * "center of velocity",\any_valid}
    *
    * The frame in which the collision is calculated. Possible values are
    * - `"center of velocity"`
@@ -3640,11 +3648,13 @@ struct InputKeys {
   inline static const Key<CalculationFrame> modi_collider_calculationFrame{
       InputSections::m_collider + "Calculation_Frame",
       CalculationFrame::CenterOfVelocity,
-      {"0.50"}};
+      {"0.50"},
+      detail::get_default_validator<CalculationFrame>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \optional_key{key_MC_collision_within_nucleus_,Collisions_Within_Nucleus,bool,false}
+   * \optional_key{key_MC_collision_within_nucleus_,Collisions_Within_Nucleus,
+   * bool,false,\none}
    *
    * Determine whether to allow the first collisions within the same nucleus.
    * - `true` &rarr; First collisions within the same nucleus allowed.
@@ -3654,11 +3664,14 @@ struct InputKeys {
    * \see_key{key_MC_collision_within_nucleus_}
    */
   inline static const Key<bool> modi_collider_collisionWithinNucleus{
-      InputSections::m_collider + "Collisions_Within_Nucleus", false, {"1.0"}};
+      InputSections::m_collider + "Collisions_Within_Nucleus",
+      false,
+      {"1.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \optional_key{key_MC_fermi_motion_,Fermi_Motion,string,"off"}
+   * \optional_key{key_MC_fermi_motion_,Fermi_Motion,string,"off",\any_valid}
    *
    * - `"on"` &rarr; Switch Fermi motion on, it is recommended to also activate
    * potentials.
@@ -3670,11 +3683,15 @@ struct InputKeys {
    * \see_key{key_MC_fermi_motion_}
    */
   inline static const Key<FermiMotion> modi_collider_fermiMotion{
-      InputSections::m_collider + "Fermi_Motion", FermiMotion::Off, {"0.60"}};
+      InputSections::m_collider + "Fermi_Motion",
+      FermiMotion::Off,
+      {"0.60"},
+      detail::get_default_validator<FermiMotion>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \optional_key{key_MC_initial_distance_,Initial_Distance,double,4.0}
+   * \optional_key{key_MC_initial_distance_,Initial_Distance,
+   * double,4.0,\f$x>0\f$}
    *
    * The initial distance of the two nuclei \unit{in fm}:
    * \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
@@ -3686,11 +3703,15 @@ struct InputKeys {
    * \see_key{key_MC_initial_distance_}
    */
   inline static const Key<double> modi_collider_initialDistance{
-      InputSections::m_collider + "Initial_Distance", 4.0, {"0.50"}};
+      InputSections::m_collider + "Initial_Distance",
+      4.0,
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key{key_MC_PT_diffusiveness_,Diffusiveness,double,</tt>\f$d(A)\f$<tt>}
+   * \optional_key{key_MC_PT_diffusiveness_,Diffusiveness,double,
+   * </tt>\f$d(A)\f$<tt>, \f$0<d<1\f$}
    *
    * Diffusiveness of the Woods-Saxon distribution for the nucleus \unit{in fm}.
    * In general, the default value is
@@ -3709,18 +3730,20 @@ struct InputKeys {
   inline static const Key<double> modi_collider_projectile_diffusiveness{
       InputSections::m_c_projectile + "Diffusiveness",
       DefaultType::Dependent,
-      {"0.90"}};
+      {"0.90"},
+      [](const double &value) noexcept { return value > 0 && value < 1; }};
   /**
    * \see_key{key_MC_PT_diffusiveness_}
    */
   inline static const Key<double> modi_collider_target_diffusiveness{
       InputSections::m_c_target + "Diffusiveness",
       DefaultType::Dependent,
-      {"0.90"}};
+      {"0.90"},
+      [](const double &value) noexcept { return value > 0 && value < 1; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \required_key{key_MC_PT_particles_,%Particles,map<int\,int>}
+   * \required_key{key_MC_PT_particles_,%Particles,map<int\,int>,\none}
    *
    * A map in which the keys are PDG codes and the values are number of
    * particles with that PDG code that should be in the current nucleus.
@@ -3735,17 +3758,31 @@ struct InputKeys {
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_collider_projectile_particles{
-          InputSections::m_c_projectile + "Particles", {"0.50"}};
+          InputSections::m_c_projectile + "Particles",
+          {"0.50"},
+          [](const auto &value) noexcept {
+            return !value.empty() && std::all_of(value.begin(), value.end(),
+                                                 [](const auto &entry) {
+                                                   return entry.second > 0;
+                                                 });
+          }};
   /**
    * \see_key{key_MC_PT_particles_}
    */
   inline static const Key<std::map<PdgCode, int>>
-      modi_collider_target_particles{InputSections::m_c_target + "Particles",
-                                     {"0.50"}};
+      modi_collider_target_particles{
+          InputSections::m_c_target + "Particles",
+          {"0.50"},
+          [](const auto &value) noexcept {
+            return !value.empty() && std::all_of(value.begin(), value.end(),
+                                                 [](const auto &entry) {
+                                                   return entry.second > 0;
+                                                 });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key{key_MC_PT_radius_,Radius,double,</tt>\f$r(A)\f$<tt>}
+   * \optional_key{key_MC_PT_radius_,Radius,double,</tt>\f$r(A)\f$<tt>,\f$r>0\f$}
    *
    * Radius of nucleus \unit{in fm}. In general, the default value is
    * \f[
@@ -3763,17 +3800,21 @@ struct InputKeys {
   inline static const Key<double> modi_collider_projectile_radius{
       InputSections::m_c_projectile + "Radius",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
   /**
    * \see_key{key_MC_PT_radius_}
    */
   inline static const Key<double> modi_collider_target_radius{
-      InputSections::m_c_target + "Radius", DefaultType::Dependent, {"0.50"}};
+      InputSections::m_c_target + "Radius",
+      DefaultType::Dependent,
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key{key_MC_PT_saturation_density_,Saturation_Density,double,
-   * </tt>\f$\int\rho(r)\:\mathrm{d}^3r=N_{nucleons}\f$<tt>}
+   * </tt>\f$\int\rho(r)\:\mathrm{d}^3r=N_{nucleons}\f$<tt>,\f$0.1<\rho<0.2\f$}
    *
    * Saturation density of the nucleus \unit{in 1/fm³}.
    * If not any value is specified, the saturation density is calculated such
@@ -3786,21 +3827,23 @@ struct InputKeys {
   inline static const Key<double> modi_collider_projectile_saturationDensity{
       InputSections::m_c_projectile + "Saturation_Density",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0.1 && value < 0.2; }};
   /**
    * \see_key{key_MC_PT_saturation_density_}
    */
   inline static const Key<double> modi_collider_target_saturationDensity{
       InputSections::m_c_target + "Saturation_Density",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0.1 && value < 0.2; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
    * \par Possible incident energies given per beam
    *
-   * \required_key_no_line{key_MC_PT_e_kin_,E_Kin,double}
+   * \required_key_no_line{key_MC_PT_e_kin_,E_Kin,double,\f$x>0\f$}
    *
    * Set the kinetic energy \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
@@ -3810,16 +3853,20 @@ struct InputKeys {
    * \see_key{key_MC_PT_e_kin_}
    */
   inline static const Key<double> modi_collider_projectile_eKin{
-      InputSections::m_c_projectile + "E_Kin", {"0.50"}};
+      InputSections::m_c_projectile + "E_Kin",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
   /**
    * \see_key{key_MC_PT_e_kin_}
    */
   inline static const Key<double> modi_collider_target_eKin{
-      InputSections::m_c_target + "E_Kin", {"0.50"}};
+      InputSections::m_c_target + "E_Kin",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \required_key_no_line{key_MC_PT_e_tot_,E_Tot,double}
+   * \required_key_no_line{key_MC_PT_e_tot_,E_Tot,double,\f$x>0\f$}
    *
    * Set the totat energy \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
@@ -3829,16 +3876,20 @@ struct InputKeys {
    * \see_key{key_MC_PT_e_tot_}
    */
   inline static const Key<double> modi_collider_projectile_eTot{
-      InputSections::m_c_projectile + "E_Tot", {"2.0.2"}};
+      InputSections::m_c_projectile + "E_Tot",
+      {"2.0.2"},
+      [](const double &value) noexcept { return value > 0; }};
   /**
    * \see_key{key_MC_PT_e_tot_}
    */
   inline static const Key<double> modi_collider_target_eTot{
-      InputSections::m_c_target + "E_Tot", {"2.0.2"}};
+      InputSections::m_c_target + "E_Tot",
+      {"2.0.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \required_key_no_line{key_MC_PT_p_lab_,P_Lab,double}
+   * \required_key_no_line{key_MC_PT_p_lab_,P_Lab,double,\f$x>0\f$}
    *
    * Set the momentum \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
@@ -3856,12 +3907,16 @@ struct InputKeys {
    * \see_key{key_MC_PT_p_lab_}
    */
   inline static const Key<double> modi_collider_projectile_pLab{
-      InputSections::m_c_projectile + "P_Lab", {"0.50"}};
+      InputSections::m_c_projectile + "P_Lab",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
   /**
    * \see_key{key_MC_PT_p_lab_}
    */
   inline static const Key<double> modi_collider_target_pLab{
-      InputSections::m_c_target + "P_Lab", {"0.50"}};
+      InputSections::m_c_target + "P_Lab",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3871,7 +3926,8 @@ struct InputKeys {
    * It is possible to further customize the projectile and/or target using the
    * `Custom` section, which should then contain few required keys, if given.
    *
-   * \required_key_no_line{key_MC_PT_custom_file_dir_,File_Directory,string}
+   * \required_key_no_line{key_MC_PT_custom_file_dir_,File_Directory,
+   * string, <b>Existing directory</b>}
    *
    * The directory where the external list with the nucleon configurations
    * is located. <b>Make sure to use an absolute path!</b>
@@ -3881,17 +3937,26 @@ struct InputKeys {
    */
   inline static const Key<std::string>
       modi_collider_projectile_custom_fileDirectory{
-          InputSections::m_c_p_custom + "File_Directory", {"1.6"}};
+          InputSections::m_c_p_custom + "File_Directory",
+          {"1.6"},
+          [](const std::string &value) noexcept {
+            return std::filesystem::is_directory(value);
+          }};
   /**
    * \see_key{key_MC_PT_custom_file_dir_}
    */
   inline static const Key<std::string>
       modi_collider_target_custom_fileDirectory{
-          InputSections::m_c_t_custom + "File_Directory", {"1.6"}};
+          InputSections::m_c_t_custom + "File_Directory",
+          {"1.6"},
+          [](const std::string &value) noexcept {
+            return std::filesystem::is_directory(value);
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \required_key_no_line{key_MC_PT_custom_file_name_,File_Name,string}
+   * \required_key_no_line{key_MC_PT_custom_file_name_,File_Name,string,
+   * <b>Possible filename on Linux OS</b>}
    *
    * The file name of the external list with the nucleon configurations.
    */
@@ -3899,12 +3964,28 @@ struct InputKeys {
    * \see_key{key_MC_PT_custom_file_name_}
    */
   inline static const Key<std::string> modi_collider_projectile_custom_fileName{
-      InputSections::m_c_p_custom + "File_Name", {"1.6"}};
+      InputSections::m_c_p_custom + "File_Name",
+      {"1.6"},
+      [](const std::string &value) noexcept {
+        if (value.empty() || value == "." || value == "..")
+          return false;
+        else
+          return std::none_of(value.begin(), value.end(),
+                              [](auto c) { return c == '/' || c == '\0'; });
+      }};
   /**
    * \see_key{key_MC_PT_custom_file_name_}
    */
   inline static const Key<std::string> modi_collider_target_custom_fileName{
-      InputSections::m_c_t_custom + "File_Name", {"1.6"}};
+      InputSections::m_c_t_custom + "File_Name",
+      {"1.6"},
+      [](const std::string &value) noexcept {
+        if (value.empty() || value == "." || value == "..")
+          return false;
+        else
+          return std::none_of(value.begin(), value.end(),
+                              [](auto c) { return c == '/' || c == '\0'; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3914,7 +3995,7 @@ struct InputKeys {
    * It is possible to deform the projectile and/or target nuclei using the
    * `Deformed` section, which should then contain some configuration, if given.
    *
-   * \required_key_no_line{key_MC_PT_deformed_auto_,Automatic,bool}
+   * \required_key_no_line{key_MC_PT_deformed_auto_,Automatic,bool,\none}
    *
    * - `true` &rarr; Set parameters of spherical deformation based on mass
    *   number of the nucleus. Currently the following deformed nuclei are
@@ -3940,16 +4021,21 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_auto_}
    */
   inline static const Key<bool> modi_collider_projectile_deformed_automatic{
-      InputSections::m_c_p_deformed + "Automatic", {"1.5"}};
+      InputSections::m_c_p_deformed + "Automatic",
+      {"1.5"},
+      detail::get_default_validator<bool>()};
   /**
    * \see_key{key_MC_PT_deformed_auto_}
    */
   inline static const Key<bool> modi_collider_target_deformed_automatic{
-      InputSections::m_c_t_deformed + "Automatic", {"1.5"}};
+      InputSections::m_c_t_deformed + "Automatic",
+      {"1.5"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_betaII_,Beta_2,double,0.0}
+   * \optional_key_no_line{key_MC_PT_deformed_betaII_,Beta_2,double,0.0,
+   * \f$-1<\beta_2<2\f$}
    *
    * The deformation coefficient \f$\beta_2\f$ for the spherical harmonic
    * \f$Y_2^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
@@ -3958,18 +4044,23 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta2{
-      InputSections::m_c_p_deformed + "Beta_2", 0.0, {"1.5"}};
+      InputSections::m_c_p_deformed + "Beta_2",
+      0.0,
+      {"1.5"},
+      [](const double &value) noexcept { return value > -1 && value < 2; }};
   /**
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta2{
       InputSections::m_c_t_deformed + "Beta_2",
       InputKeys::modi_collider_projectile_deformed_beta2.default_value(),
-      {"1.5"}};
+      {"1.5"},
+      [](const double &value) noexcept { return value > -1 && value < 2; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_betaIII_,Beta_3,double,0.0}
+   * \optional_key_no_line{key_MC_PT_deformed_betaIII_,Beta_3,double,0.0,
+   * \f$-1<\beta_3<2\f$}
    *
    * The deformation coefficient \f$\beta_3\f$ for the spherical harmonic
    * \f$Y_3^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
@@ -3978,18 +4069,23 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta3{
-      InputSections::m_c_p_deformed + "Beta_3", 0.0, {"3.0"}};
+      InputSections::m_c_p_deformed + "Beta_3",
+      0.0,
+      {"3.0"},
+      [](const double &value) noexcept { return value > -1 && value < 2; }};
   /**
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta3{
       InputSections::m_c_t_deformed + "Beta_3",
       InputKeys::modi_collider_projectile_deformed_beta3.default_value(),
-      {"3.0"}};
+      {"3.0"},
+      [](const double &value) noexcept { return value > -1 && value < 2; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_betaIV_,Beta_4,double,0.0}
+   * \optional_key_no_line{key_MC_PT_deformed_betaIV_,Beta_4,double,0.0,
+   * \f$-1<\beta_4<2\f$}
    *
    * The deformation coefficient \f$\beta_4\f$ for the spherical harmonic
    * \f$Y_4^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
@@ -3998,18 +4094,23 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta4{
-      InputSections::m_c_p_deformed + "Beta_4", 0.0, {"1.5"}};
+      InputSections::m_c_p_deformed + "Beta_4",
+      0.0,
+      {"1.5"},
+      [](const double &value) noexcept { return value > -1 && value < 2; }};
   /**
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta4{
       InputSections::m_c_t_deformed + "Beta_4",
       InputKeys::modi_collider_projectile_deformed_beta4.default_value(),
-      {"1.5"}};
+      {"1.5"},
+      [](const double &value) noexcept { return value > -1 && value < 2; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_gamma_,Gamma,double,0.0}
+   * \optional_key_no_line{key_MC_PT_deformed_gamma_,Gamma,double,0.0,
+   * \f$0\le\gamma\le\frac{\pi}{3}\f$}
    *
    * The parameter describes triaxiality \f$\gamma\f$ of the nucleus in
    * \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
@@ -4018,14 +4119,22 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_gamma_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_gamma{
-      InputSections::m_c_p_deformed + "Gamma", 0.0, {"3.0"}};
+      InputSections::m_c_p_deformed + "Gamma",
+      0.0,
+      {"3.0"},
+      [](const double &value) noexcept {
+        return value >= 0 && value <= M_PI / 3;
+      }};
   /**
    * \see_key{key_MC_PT_deformed_gamma_}
    */
   inline static const Key<double> modi_collider_target_deformed_gamma{
       InputSections::m_c_t_deformed + "Gamma",
       InputKeys::modi_collider_projectile_deformed_gamma.default_value(),
-      {"3.0"}};
+      {"3.0"},
+      [](const double &value) noexcept {
+        return value >= 0 && value <= M_PI / 3;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -4048,7 +4157,7 @@ struct InputKeys {
    * parallel to the y-z plane. For colliding them with a specific orientation
    * refer to the `Orientation` section.
    *
-   * \required_key_no_line{key_MC_PT_alphaClustered_auto_,Automatic,bool}
+   * \required_key_no_line{key_MC_PT_alphaClustered_auto_,Automatic,bool,\none}
    *
    * - `true` &rarr; Automatically set the side length of the tetrahedron used
    * for alpha-clustering.
@@ -4060,16 +4169,21 @@ struct InputKeys {
    */
   inline static const Key<bool>
       modi_collider_projectile_alphaClustered_automatic{
-          InputSections::m_c_p_alphaClustered + "Automatic", {"3.2"}};
+          InputSections::m_c_p_alphaClustered + "Automatic",
+          {"3.2"},
+          detail::get_default_validator<bool>()};
   /**
    * \see_key{key_MC_PT_alphaClustered_auto_}
    */
   inline static const Key<bool> modi_collider_target_alphaClustered_automatic{
-      InputSections::m_c_t_alphaClustered + "Automatic", {"3.2"}};
+      InputSections::m_c_t_alphaClustered + "Automatic",
+      {"3.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_alphaClustered_sideLength_,Side_Length,double,3.42}
+   * \optional_key_no_line{key_MC_PT_alphaClustered_sideLength_,Side_Length,
+   * double,3.42,\f$x>0\f$}
    *
    * The sidelength \unit{in fm} of the regular tetrahedron used for
    * alpha-clustering. The default value of 3.42 fm was taken from
@@ -4080,7 +4194,10 @@ struct InputKeys {
    */
   inline static const Key<double>
       modi_collider_projectile_alphaClustered_sideLength{
-          InputSections::m_c_p_alphaClustered + "Side_Length", 3.42, {"3.2"}};
+          InputSections::m_c_p_alphaClustered + "Side_Length",
+          3.42,
+          {"3.2"},
+          [](const double &value) noexcept { return value > 0; }};
   /**
    * \see_key{key_MC_PT_alphaClustered_sideLength_}
    */
@@ -4089,7 +4206,8 @@ struct InputKeys {
           InputSections::m_c_t_alphaClustered + "Side_Length",
           InputKeys::modi_collider_projectile_alphaClustered_sideLength
               .default_value(),
-          {"3.2"}};
+          {"3.2"},
+          [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -4104,7 +4222,8 @@ struct InputKeys {
    * around the now rotated x-axis by theta and then around the rotated z-axis
    * by psi.
    *
-   * \optional_key_no_line{key_MC_PT_orientation_phi_,Phi,double,0.0}
+   * \optional_key_no_line{key_MC_PT_orientation_phi_,Phi,double,0.0,
+   * \f$0\le\phi\le 2\pi\f$}
    *
    * The angle by which to rotate the nucleus about the z-axis.
    */
@@ -4112,17 +4231,26 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_phi_}
    */
   inline static const Key<double> modi_collider_projectile_orientation_phi{
-      InputSections::m_c_p_orientation + "Phi", 0.0, {"0.50"}};
+      InputSections::m_c_p_orientation + "Phi",
+      0.0,
+      {"0.50"},
+      [](const double &value) noexcept {
+        return value >= 0 && value <= 2 * M_PI;
+      }};
   /**
    * \see_key{key_MC_PT_orientation_phi_}
    */
   inline static const Key<double> modi_collider_target_orientation_phi{
       InputSections::m_c_t_orientation + "Phi",
       InputKeys::modi_collider_projectile_orientation_phi.default_value(),
-      {"0.50"}};
+      {"0.50"},
+      [](const double &value) noexcept {
+        return value >= 0 && value <= 2 * M_PI;
+      }};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_orientation_theta_,Theta,double,0.0}
+   * \optional_key_no_line{key_MC_PT_orientation_theta_,Theta,double,0.0,
+   * \f$0\le\theta\le\pi\f$}
    *
    * The angle by which to rotate the nucleus about the rotated x-axis.
    */
@@ -4130,17 +4258,22 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_theta_}
    */
   inline static const Key<double> modi_collider_projectile_orientation_theta{
-      InputSections::m_c_p_orientation + "Theta", 0.0, {"0.50"}};
+      InputSections::m_c_p_orientation + "Theta",
+      0.0,
+      {"0.50"},
+      [](const double &value) noexcept { return value >= 0 && value <= M_PI; }};
   /**
    * \see_key{key_MC_PT_orientation_theta_}
    */
   inline static const Key<double> modi_collider_target_orientation_theta{
       InputSections::m_c_t_orientation + "Theta",
       InputKeys::modi_collider_projectile_orientation_theta.default_value(),
-      {"0.50"}};
+      {"0.50"},
+      [](const double &value) noexcept { return value >= 0 && value <= M_PI; }};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_orientation_psi_,Psi,double,0.0}
+   * \optional_key_no_line{key_MC_PT_orientation_psi_,Psi,double,0.0,
+   * \f$0\le\psi\le 2\pi\f$}
    *
    * The angle by which to rotate the nucleus about the rotated z-axis.
    */
@@ -4148,18 +4281,27 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_psi_}
    */
   inline static const Key<double> modi_collider_projectile_orientation_psi{
-      InputSections::m_c_p_orientation + "Psi", 0.0, {"3.0"}};
+      InputSections::m_c_p_orientation + "Psi",
+      0.0,
+      {"3.0"},
+      [](const double &value) noexcept {
+        return value >= 0 && value <= 2 * M_PI;
+      }};
   /**
    * \see_key{key_MC_PT_orientation_psi_}
    */
   inline static const Key<double> modi_collider_target_orientation_psi{
       InputSections::m_c_t_orientation + "Psi",
       InputKeys::modi_collider_projectile_orientation_psi.default_value(),
-      {"3.0"}};
+      {"3.0"},
+      [](const double &value) noexcept {
+        return value >= 0 && value <= 2 * M_PI;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_orientation_random_,Random_Rotation,bool,false}
+   * \optional_key_no_line{key_MC_PT_orientation_random_,Random_Rotation,
+   * bool,false,\none}
    *
    * Whether the created nucleus object should be randomly rotated in space.
    */
@@ -4167,18 +4309,22 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_random_}
    */
   inline static const Key<bool> modi_collider_projectile_orientation_randRot{
-      InputSections::m_c_p_orientation + "Random_Rotation", false, {"1.7"}};
+      InputSections::m_c_p_orientation + "Random_Rotation",
+      false,
+      {"1.7"},
+      detail::get_default_validator<bool>()};
   /**
    * \see_key{key_MC_PT_orientation_random_}
    */
   inline static const Key<bool> modi_collider_target_orientation_randRot{
       InputSections::m_c_t_orientation + "Random_Rotation",
       InputKeys::modi_collider_projectile_orientation_randRot.default_value(),
-      {"1.7"}};
+      {"1.7"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_max_,Max,double,0.0}
+   * \optional_key{key_MC_impact_max_,Max,double,0.0,\f$x\ge0\f$}
    *
    * Like `Range: [0.0, Max]`. Note that if both `Range` and `Max` are
    * specified, `Max` takes precedence (\unit{in fm}).
@@ -4187,11 +4333,15 @@ struct InputKeys {
    * \see_key{key_MC_impact_max_}
    */
   inline static const Key<double> modi_collider_impact_max{
-      InputSections::m_c_impact + "Max", 0.0, {"0.50"}};
+      InputSections::m_c_impact + "Max",
+      0.0,
+      {"0.50"},
+      [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_rnd_reaction_plane_,Random_Reaction_Plane,bool,false}
+   * \optional_key{key_MC_impact_rnd_reaction_plane_,Random_Reaction_Plane,
+   * bool,false,\none}
    *
    * Rotate the direction of the separation of the two nuclei due to the impact
    * parameter with a uniform random angle in the x-y plane.
@@ -4200,11 +4350,15 @@ struct InputKeys {
    * \see_key{key_MC_impact_rnd_reaction_plane_}
    */
   inline static const Key<bool> modi_collider_impact_randomReactionPlane{
-      InputSections::m_c_impact + "Random_Reaction_Plane", false, {"1.8"}};
+      InputSections::m_c_impact + "Random_Reaction_Plane",
+      false,
+      {"1.8"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_range_,Range,list of two doubles,[0.0\,0.0]}
+   * \optional_key{key_MC_impact_range_,Range,list of two doubles,[0.0\,0.0],
+   * \f$x_i>0\f$}
    *
    * A list of minimal and maximal impact parameters \unit{in fm} between which
    * \f$b\f$ should be chosen. The order of these is not important.
@@ -4215,11 +4369,14 @@ struct InputKeys {
   inline static const Key<std::array<double, 2>> modi_collider_impact_range{
       InputSections::m_c_impact + "Range",
       std::array<double, 2>{{0.0, 0.0}},
-      {"0.50"}};
+      {"0.50"},
+      [](const std::array<double, 2> &value) noexcept {
+        return value[0] >= 0 && value[1] >= 0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_sample_,Sample,string,"quadratic"}
+   * \optional_key{key_MC_impact_sample_,Sample,string,"quadratic",\any_valid}
    *
    * Distribution according to which the impact parameter is sampled.
    * Possible alternatives:
@@ -4242,11 +4399,14 @@ struct InputKeys {
    * \see_key{key_MC_impact_sample_}
    */
   inline static const Key<Sampling> modi_collider_impact_sample{
-      InputSections::m_c_impact + "Sample", Sampling::Quadratic, {"0.50"}};
+      InputSections::m_c_impact + "Sample",
+      Sampling::Quadratic,
+      {"0.50"},
+      detail::get_default_validator<Sampling>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_value_,Value,double,0.0}
+   * \optional_key{key_MC_impact_value_,Value,double,0.0,\f$x\ge0\f$}
    *
    * Fixed value for the impact parameter \unit{in fm}.
    * \attention If this value is set, all further `Impact` keys are ignored.
@@ -4255,13 +4415,17 @@ struct InputKeys {
    * \see_key{key_MC_impact_value_}
    */
   inline static const Key<double> modi_collider_impact_value{
-      InputSections::m_c_impact + "Value", 0.0, {"0.50"}};
+      InputSections::m_c_impact + "Value",
+      0.0,
+      {"0.50"},
+      [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
    * <hr>
    * \par Custom sampling
-   * \required_key_no_line{key_MC_impact_values_,Values,list of doubles}
+   * \required_key_no_line{key_MC_impact_values_,Values,list of doubles,
+   * \f$x_i\ge0\f$}
    *
    * Impact parameter `Values` \unit{in fm} used to build the custom
    * distribution. Each element of `Values` corresponds to an element of
@@ -4273,11 +4437,18 @@ struct InputKeys {
    * \see_key{key_MC_impact_values_}
    */
   inline static const Key<std::vector<double>> modi_collider_impact_values{
-      InputSections::m_c_impact + "Values", {"0.80"}};
+      InputSections::m_c_impact + "Values",
+      {"0.80"},
+      [](const std::vector<double> &value) noexcept {
+        return std::all_of(
+            value.begin(), value.end(),
+            [](const double entry) noexcept { return entry >= 0; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \required_key_no_line{key_MC_impact_yields_,Yields,list of doubles}
+   * \required_key_no_line{key_MC_impact_yields_,Yields,list of doubles,
+   * \f$x_i\ge0\f$}
    *
    * Each element of `Yields` indicates the likelihood of sampling the
    * corresponding impact parameter in `Values`. Between the specified points of
@@ -4289,12 +4460,18 @@ struct InputKeys {
    * \see_key{key_MC_impact_sample_}
    */
   inline static const Key<std::vector<double>> modi_collider_impact_yields{
-      InputSections::m_c_impact + "Yields", {"0.80"}};
+      InputSections::m_c_impact + "Yields",
+      {"0.80"},
+      [](const std::vector<double> &value) noexcept {
+        return std::all_of(
+            value.begin(), value.end(),
+            [](const double entry) noexcept { return entry >= 0; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    *
-   * \required_key_no_line{key_MC_IC_type_,Type,string}
+   * \required_key_no_line{key_MC_IC_type_,Type,string,\any_valid}
    *
    * Type of initial conditions provided. Possible values are:
    * - `"Constant_Tau"` &rarr; a hypersurface of constant \f$\tau\f$ is used.
@@ -4309,7 +4486,9 @@ struct InputKeys {
    */
   inline static const Key<FluidizationType>
       modi_collider_initialConditions_type{
-          InputSections::m_c_initialConditions + "Type", {"3.2"}};
+          InputSections::m_c_initialConditions + "Type",
+          {"3.2"},
+          detail::get_default_validator<FluidizationType>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
@@ -4324,12 +4503,15 @@ struct InputKeys {
    * \see_key{key_MC_IC_lower_bound_}
    */
   inline static const Key<double> modi_collider_initialConditions_lowerBound{
-      InputSections::m_c_initialConditions + "Lower_Bound", 0.5, {"3.2"}};
+      InputSections::m_c_initialConditions + "Lower_Bound",
+      0.5,
+      {"3.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_proper_time_,Proper_Time,double,
-   * </tt>\f$f(t_{np})\f$<tt>}
+   * </tt>\f$f(t_{np})\f$<tt>, \f$x>0\f$}
    *
    * Proper time \unit{in fm} at which hypersurface is created. Its default
    * value depends on the nuclei passing time \f$t_{np}\f$ as follows,
@@ -4347,12 +4529,13 @@ struct InputKeys {
   inline static const Key<double> modi_collider_initialConditions_properTime{
       InputSections::m_c_initialConditions + "Proper_Time",
       DefaultType::Dependent,
-      {"3.2"}};
+      {"3.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
-   * \optional_key_no_line{key_MC_IC_proper_time_scaling_,Proper_Time_Scaling,double,
-   * 1.0}
+   * \optional_key_no_line{key_MC_IC_proper_time_scaling_,Proper_Time_Scaling,
+   * double,1.0,\f$x>0\f$}
    *
    * A scaling factor by which the proper time at which the switching
    * hypersurface is created is multiplied. This parameter is used in the
@@ -4366,12 +4549,13 @@ struct InputKeys {
   inline static const Key<double> modi_collider_initialConditions_scaling{
       InputSections::m_c_initialConditions + "Proper_Time_Scaling",
       1.0,
-      {"3.3"}};
+      {"3.3"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_pt_cut_,pT_Cut,double,
-   * </tt>No cut is done<tt>}
+   * </tt>No cut is done<tt>,\f$x\ge0\f$}
    *
    * If set, employ a transverse momentum cut for particles contributing to the
    * initial conditions for hydrodynamics. A positive value \unit{in GeV} is
@@ -4384,12 +4568,15 @@ struct InputKeys {
    * \see_key{key_output_IC_pt_cut_}
    */
   inline static const Key<double> modi_collider_initialConditions_pTCut{
-      InputSections::m_c_initialConditions + "pT_Cut", 0.0, {"3.2"}};
+      InputSections::m_c_initialConditions + "pT_Cut",
+      0.0,
+      {"3.2"},
+      [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_rapidity_cut_,Rapidity_Cut,double,
-   * </tt>No cut is done<tt>}
+   * </tt>No cut is done<tt>,\f$x\ge0\f$}
    *
    * If set, employ a rapidity cut for particles contributing to the initial
    * conditions for hydrodynamics. A positive value is expected and the cut is
@@ -4402,13 +4589,17 @@ struct InputKeys {
    * \see_key{key_MC_IC_rapidity_cut_}
    */
   inline static const Key<double> modi_collider_initialConditions_rapidityCut{
-      InputSections::m_c_initialConditions + "Rapidity_Cut", 0.0, {"3.2"}};
+      InputSections::m_c_initialConditions + "Rapidity_Cut",
+      0.0,
+      {"3.2"},
+      [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * <hr>
    * <h3> Parameters for dynamic fluidization </h3>
-   * \optional_key_no_line{key_MC_IC_eden_threshold_,Energy_Density_Threshold,double,0.5}
+   * \optional_key_no_line{key_MC_IC_eden_threshold_,Energy_Density_Threshold,
+   * double,0.5,\f$x>0\f$}
    *
    * Set the minimum energy density \unit{in GeV/fm³} for a particle to be
    * considered fluid. It is only used if the dynamic initial condition is
@@ -4420,11 +4611,13 @@ struct InputKeys {
   inline static const Key<double> modi_collider_initialConditions_eDenThreshold{
       InputSections::m_c_initialConditions + "Energy_Density_Threshold",
       0.5,
-      {"3.2"}};
+      {"3.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
-   * \optional_key_no_line{key_MC_IC_mintime_,Minimum_Time,double,0}
+   * \optional_key_no_line{key_MC_IC_mintime_,Minimum_Time,double,0.0,
+   * \f$x\ge0\f$}
    *
    * Set the minimum time \unit{in fm} for a particle to be considered fluid.
    * If larger than 10 fm, the initial lattice size also increases. It is only
@@ -4434,11 +4627,14 @@ struct InputKeys {
    * \see_key{key_MC_IC_mintime_}
    */
   inline static const Key<double> modi_collider_initialConditions_minTime{
-      InputSections::m_c_initialConditions + "Minimum_Time", 0, {"3.2"}};
+      InputSections::m_c_initialConditions + "Minimum_Time",
+      0.0,
+      {"3.2"},
+      [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
-   * \optional_key_no_line{key_MC_IC_maxtime_,Maximum_Time,double,100}
+   * \optional_key_no_line{key_MC_IC_maxtime_,Maximum_Time,double,100,\f$x>0\f$}
    *
    * Set the maximum time \unit{in fm} for a particle to be considered fluid.
    * For efficiency in production runs, it is recommended to set to a lower
@@ -4448,14 +4644,18 @@ struct InputKeys {
    * \see_key{key_MC_IC_maxtime_}
    */
   inline static const Key<double> modi_collider_initialConditions_maxTime{
-      InputSections::m_c_initialConditions + "Maximum_Time", 100, {"3.2"}};
+      InputSections::m_c_initialConditions + "Maximum_Time",
+      100,
+      {"3.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
-   * \optional_key_no_line{key_MC_IC_fluid_cells_,Fluidization_Cells,int,80}
+   * \optional_key_no_line{key_MC_IC_fluid_cells_,Fluidization_Cells,int,80,
+   * \f$x>0\f$}
    *
    * Fixed number of cells in each direction to select fluidizing particles.
-   * Ideally the cell should be small enough for a meaningful interpolation,
+   * Ideally the cell should be small enough for a meaningful interpolation.
    */
   /**
    * \see_key{key_MC_IC_fluid_cells_}
@@ -4463,12 +4663,13 @@ struct InputKeys {
   inline static const Key<int> modi_collider_initialConditions_fluidCells{
       InputSections::m_c_initialConditions + "Fluidization_Cells",
       100,
-      {"3.2"}};
+      {"3.2"},
+      [](const int &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_fluidizable_processes,Fluidizable_Processes,
-   * list of strings,"All"}
+   * list of strings,"All",\any_valid}
    *
    * Determines which process types can have outgoing particles as fluidizable.
    * Possible values are:
@@ -4492,12 +4693,13 @@ struct InputKeys {
       modi_collider_initialConditions_fluidProcesses{
           InputSections::m_c_initialConditions + "Fluidizable_Processes",
           FluidizableProcessesBitSet{}.set(),  // all processes
-          {"3.2"}};
+          {"3.2"},
+          detail::get_default_validator<FluidizableProcessesBitSet>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_delay_initial_elastic,Delay_Initial_Elastic,
-   * bool,true}
+   * bool,true,\none}
    *
    * Whether the first elastic scatterings of initial nucleons are excluded from
    * the list of fluidizable processes. Since the core-corona interaction is
@@ -4510,15 +4712,16 @@ struct InputKeys {
       modi_collider_initialConditions_delayInitialElastic{
           InputSections::m_c_initialConditions + "Delay_Initial_Elastic",
           true,
-          {"3.3"}};
+          {"3.3"},
+          detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_form_time_fraction_,Formation_Time_Fraction,
-   * double,1.0}
+   * double,1.0,\f$x\ge0\f$}
    *
    * Fraction of the formation time after which a particle can fluidize. It is
-   * is non-negative, and can assume values above 1. Setting it to 0 corresponds
+   * non-negative, and can assume values above 1. Setting it to 0 corresponds
    * to ignoring formation time. This is only relevant if string fragmentation
    * can produce fluidizable particles.
    */
@@ -4529,7 +4732,8 @@ struct InputKeys {
       modi_collider_initialConditions_formTimeFraction{
           InputSections::m_c_initialConditions + "Formation_Time_Fraction",
           1.0,
-          {"3.2"}};
+          {"3.2"},
+          [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
