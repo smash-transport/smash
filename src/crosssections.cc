@@ -155,10 +155,36 @@ static void append_list(CollisionBranchList& main_list,
  * \param[in] m2_ref mass of the second AQM reference
  * \return the shifted center of mass energy squared
  */
-static double effective_AQM_s(double mandelstam_s, double m1, double m2,
-                              double m1_ref, double m2_ref) {
+static double effective_AQM_s(const double mandelstam_s, const double m1,
+                              const double m2, const double m1_ref,
+                              const double m2_ref) {
   const double eff_sqrt_s = std::sqrt(mandelstam_s) - m1 - m2 + m1_ref + m2_ref;
   return eff_sqrt_s * eff_sqrt_s;
+}
+
+/**
+ * Helper function:
+ * Approximate cross section using AQM based on function `piminusp_high_energy`.
+ *
+ * \param[in] sqrts center of mass energy of incoming particles
+ * \param[in] pdg_a PDG code of incoming particle a
+ * \param[in] pdg_b PDG code of incoming particle b
+ * \param[in] AQM_scaling_factor_a AQM scaling factor of incoming particle a
+ * \param[in] AQM_scaling_factor_b AQM scaling factor of incoming particle b
+ * \return the approximated cross section
+ */
+static double AQM_based_on_piminusp_high_energy(
+    const double sqrts, const PdgCode& pdg_a, const PdgCode& pdg_b,
+    const double AQM_scaling_factor_a, const double AQM_scaling_factor_b) {
+  int n_mesons = 0;
+  if (pdg_a.is_meson()) {
+    n_mesons += 1;
+  }
+  if (pdg_b.is_meson()) {
+    n_mesons += 1;
+  }
+  return std::pow(2. / 3., n_mesons - 1) * piminusp_high_energy(sqrts * sqrts) *
+         AQM_scaling_factor_a * AQM_scaling_factor_b;
 }
 
 CrossSections::CrossSections(const ParticleList& incoming_particles,
@@ -332,9 +358,9 @@ double CrossSections::parametrized_total(
       }
     } else {
       // M*+B* goes to AQM high energy π⁻p
-      total_xs = piminusp_high_energy(sqrt_s_ * sqrt_s_) *
-                 finder_parameters.AQM_scaling_factor(pdg_a) *
-                 finder_parameters.AQM_scaling_factor(pdg_b);
+      total_xs = AQM_based_on_piminusp_high_energy(
+          sqrt_s_, pdg_a, pdg_b, finder_parameters.AQM_scaling_factor(pdg_a),
+          finder_parameters.AQM_scaling_factor(pdg_b));
     }
   } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
     if (pdg_a.is_pion() && pdg_b.is_pion()) {
@@ -374,15 +400,15 @@ double CrossSections::parametrized_total(
          * tmp_elastic_xs has no value, which happens when sqrts is above the
          * upper bound of the energy range of the underlying cross section data
          */
-        total_xs = (2. / 3.) * piminusp_high_energy(sqrt_s_ * sqrt_s_) *
-                   finder_parameters.AQM_scaling_factor(pdg_a) *
-                   finder_parameters.AQM_scaling_factor(pdg_b);
+        total_xs = AQM_based_on_piminusp_high_energy(
+            sqrt_s_, pdg_a, pdg_b, finder_parameters.AQM_scaling_factor(pdg_a),
+            finder_parameters.AQM_scaling_factor(pdg_b));
       }
     } else {
       // M*+M* goes to AQM high energy π⁻p
-      total_xs = (2. / 3.) * piminusp_high_energy(sqrt_s_ * sqrt_s_) *
-                 finder_parameters.AQM_scaling_factor(pdg_a) *
-                 finder_parameters.AQM_scaling_factor(pdg_b);
+      total_xs = AQM_based_on_piminusp_high_energy(
+          sqrt_s_, pdg_a, pdg_b, finder_parameters.AQM_scaling_factor(pdg_a),
+          finder_parameters.AQM_scaling_factor(pdg_b));
     }
   }
   return (total_xs + finder_parameters.additional_el_xs) *
