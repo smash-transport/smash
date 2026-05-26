@@ -38,6 +38,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * `CrossSections::probability_transit_high` has been replaced by `CrossSections::interpolation_at_sqrts`.
 * The interpolations `InterpolateDataLinear`, `InterpolateDataSpline`, and `InterpolateData2DSpline` are restricted to not extrapolate by default and will in this case now throw if out-of-bounds values are tried to access.
   Extrapolation can be enabled by giving an `ExtrapolationType` as an argument during construction.
+* The value `0.0` for the incident energy in collider modus is not accepted anymore.
 
 ### Removed
 * CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally.
