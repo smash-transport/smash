@@ -215,7 +215,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
     if (modus_cfg.has_value(InputKeys::modi_collider_impact_sample)) {
       sampling_ = modus_cfg.take(InputKeys::modi_collider_impact_sample);
       if (sampling_ == Sampling::Custom) {
-        if (!(modus_cfg.has_value(InputKeys::modi_collider_impact_values) ||
+        if (!(modus_cfg.has_value(InputKeys::modi_collider_impact_values) &&
               modus_cfg.has_value(InputKeys::modi_collider_impact_yields))) {
           throw std::invalid_argument(
               "Input Error: Need impact parameter spectrum for custom sampling."
