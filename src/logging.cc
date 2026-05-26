@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2019,2022,2024
+ *    Copyright (c) 2014-2015,2017-2019,2022,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -26,18 +26,13 @@ void set_default_loglevel(einhard::LogLevel level) {
   global_default_loglevel = level;
 }
 
-/**
- * An array that stores all pre-configured Logger objects.
- * To access its elements use `logg[LAreaName]` where AreaName is the respective
- * areas name declared in `loggin.h`.
- * Note that `LAreaName` needs to be declared within the smash namespace of the
- * respective file in a form of (using PauliBlocking as an example area):
- * \code
- * static constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
- * \endcode
- * For further documentation see `logging.h`.
- */
-std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value> logg;
+std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
+    &get_loggers() {
+  static std::array<einhard::Logger<>,
+                    std::tuple_size<LogArea::AreaTuple>::value>
+      logg_instance;
+  return logg_instance;
+}
 
 /**
  * \internal
