@@ -63,9 +63,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
   } else {
     projectile_ = std::make_unique<Nucleus>(proj_cfg, params.testparticles);
   }
-  if (projectile_->size() < 1) {
-    throw ColliderEmpty("Input Error: Projectile nucleus is empty.");
-  }
   projectile_->set_label(BelongsTo::Projectile);
 
   // Set up the target nucleus
@@ -81,9 +78,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
         create_alphaclustered_nucleus(targ_cfg, params.testparticles, "target");
   } else {
     target_ = std::make_unique<Nucleus>(targ_cfg, params.testparticles);
-  }
-  if (target_->size() < 1) {
-    throw ColliderEmpty("Input Error: Target nucleus is empty.");
   }
   target_->set_label(BelongsTo::Target);
 

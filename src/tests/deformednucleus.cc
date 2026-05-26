@@ -166,12 +166,12 @@ TEST(deformation_parameters_from_config) {
           Radius: 2.0
           Deformed:
             Beta_2: 1
-            Beta_4: 2
+            Beta_4: 1.9
   )"};
   // verifies if the beta values have been transcribed correctly
   DeformedNucleus dnucleus(conf, 1, false);
   VERIFY(dnucleus.get_beta2() == 1);
-  VERIFY(dnucleus.get_beta4() == 2);
+  VERIFY(dnucleus.get_beta4() == 1.9);
 }
 
 TEST(set_deformation_parameters_automatic) {
@@ -181,7 +181,7 @@ TEST(set_deformation_parameters_automatic) {
       Collider:
         Projectile:
           Saturation_Density: 0.1968
-          Diffusiveness: 1.0
+          Diffusiveness: 0.99
           Radius: 1.0
           Particles: )"};
     std::string particles{"{2112: " + std::to_string(n1) +
