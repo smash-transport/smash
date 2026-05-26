@@ -4652,7 +4652,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_fluid_cells_,Fluidization_Cells,int,80,
-   * \f$x>0\f$}
+   * \f$x\ge2\f$}
    *
    * Fixed number of cells in each direction to select fluidizing particles.
    * Ideally the cell should be small enough for a meaningful interpolation.
@@ -4664,7 +4664,7 @@ struct InputKeys {
       InputSections::m_c_initialConditions + "Fluidization_Cells",
       100,
       {"3.2"},
-      [](const int &value) noexcept { return value > 0; }};
+      [](const int &value) noexcept { return value >= 2; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions

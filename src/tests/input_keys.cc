@@ -632,8 +632,8 @@ TEST(validators_collider) {
   VERIFY(max_time.validate(1.e6));
   VERIFY(!max_time.validate(0.0));
   const auto& fl_cells = InputKeys::modi_collider_initialConditions_fluidCells;
-  VERIFY(fl_cells.validate(1));
-  VERIFY(!fl_cells.validate(0));
+  VERIFY(fl_cells.validate(2));
+  VERIFY(!fl_cells.validate(1));
   const auto& fl_pr = InputKeys::modi_collider_initialConditions_fluidProcesses;
   VERIFY(fl_pr.validate(FluidizableProcessesBitSet{}.set(0)));
   const auto& delay_initial_elastic =
