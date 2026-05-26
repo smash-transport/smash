@@ -247,12 +247,10 @@ class ColliderModus : public ModusDefault {
   bool same_inputfile(Configuration &proj_config, Configuration &targ_config);
 
   /**
-   * Validate whether the input kinematic range for the Initial Conditions
-   * output is valid and inform the user.
-   *
-   * \throw std::invalid_argument when the cuts are invalid
+   * Print information about the input kinematic range for the Initial
+   * Conditions output.
    */
-  void validate_IC_kinematic_range();
+  void log_IC_kinematic_range() noexcept;
 
   /**
    * Impact parameter.
