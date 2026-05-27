@@ -323,6 +323,13 @@ class Configuration {
   };
   /**
    * \ingroup exception
+   * Thrown if a required Key is taken/read but is missing.
+   */
+  struct RequiredKeyMissing : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+  /**
+   * \ingroup exception
    * Thrown if a Key has an invalid value.
    */
   struct InvalidKeyValue : public std::invalid_argument {
@@ -542,7 +549,7 @@ class Configuration {
            hence we do not validate its default value here. */
         return key.default_value();
       } catch (std::bad_optional_access &) {
-        throw std::invalid_argument(
+        throw RequiredKeyMissing(
             "Key " + std::string{key} +  // NOLINT(whitespace/braces)
             " without default value taken, but missing in configuration.");
       }
@@ -630,7 +637,7 @@ class Configuration {
            hence we do not validate its default value here. */
         return key.default_value();
       } catch (std::bad_optional_access &) {
-        throw std::invalid_argument(
+        throw RequiredKeyMissing(
             "Key " + std::string{key} +  // NOLINT(whitespace/braces)
             " without default value read, but missing in configuration.");
       }

@@ -1464,18 +1464,29 @@ Experiment<Modus>::Experiment(Configuration &config,
   } else {
     output_conf.enclose_into_section(InputSections::output);
   }
-  std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
-  std::transform(
-      output_contents.cbegin(), output_contents.cend(), list_of_formats.begin(),
-      [&output_conf](std::string content) -> std::vector<std::string> {
-        /* Note that the "Format" key has an empty list as default, although it
-         * is a required key, because then here below the error for the user is
-         * more informative, if the key was not given in the input file. */
-        return output_conf.take(InputKeys::get_output_format_key(content));
-      });
   auto abort_because_of_invalid_input_file = []() {
     throw std::invalid_argument("Invalid configuration input file.");
   };
+  std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
+  std::transform(
+      output_contents.cbegin(), output_contents.cend(), list_of_formats.begin(),
+      [&output_conf, &abort_because_of_invalid_input_file](
+          const std::string &content) -> std::vector<std::string> {
+        /* Note that the "Format" key is required and taking it will throw an
+         * exception if not given by the user. We do here a try and catch to
+         * give a more informative error message in this case, instead of just
+         * using the general Configuration::take message.*/
+        try {
+          return output_conf.take(InputKeys::get_output_format_key(content));
+        } catch (const Configuration::RequiredKeyMissing &) {
+          logg[LExperiment].fatal() << "Unspecified list of formats for "
+                                    << std::quoted(content) << " content.";
+          abort_because_of_invalid_input_file();
+          return {}; /* This is never reached, but it is needed to avoid
+                       compiler warnings about missing return statement. In
+                       C++23 the [[noreturn]] attribute can be used on lamdas */
+        }
+      });
   const OutputParameters output_parameters(std::move(output_conf));
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
     if (output_contents[i] == "Particles" ||
@@ -1531,13 +1542,8 @@ Experiment<Modus>::Experiment(Configuration &config,
       }
     }
 
-    if (list_of_formats[i].empty()) {
-      logg[LExperiment].fatal()
-          << "Empty or unspecified list of formats for "
-          << std::quoted(output_contents[i]) << " content.";
-      abort_because_of_invalid_input_file();
-    } else if (std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
-                         "None") != list_of_formats[i].end()) {
+    if (std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
+                  "None") != list_of_formats[i].end()) {
       if (list_of_formats[i].size() > 1) {
         logg[LExperiment].fatal()
             << "Use of \"None\" output format together with other formats is "

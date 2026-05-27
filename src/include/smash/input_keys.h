@@ -6014,12 +6014,11 @@ struct InputKeys {
    * output content and dedicated options are described further below. Refer to
    * \ref output_contents_ "output contents" for the list of possible
    * contents. Independently of the content, i.e. in every subsection, it is
-   * probably desired to provide the format in which the output should be
-   * generated. If this is not specified, no output for the given content is
-   * generated.
+   * always necessary (and probably desired) to provide the format in which the
+   * output should be generated.
    *
-   * \optional_key_no_line{key_output_content_format_,Format,
-   * list of strings,["None"],\any_valid}
+   * \required_key_no_line{key_output_content_format_,Format, list of strings,
+   * \any_valid}
    *
    * List of formats for writing particular content. Available formats for every
    * content are listed and described \ref output_contents_ "here", while
@@ -6043,7 +6042,6 @@ struct InputKeys {
    */
   inline static const Key<std::vector<std::string>> output_particles_format{
       InputSections::o_particles + "Format",
-      std::vector<std::string>{"None"},
       {"1.2"},
       [](const std::vector<std::string> &values) noexcept {
         if (values.empty())
@@ -6067,7 +6065,6 @@ struct InputKeys {
    */
   inline static const Key<std::vector<std::string>> output_collisions_format{
       InputSections::o_collisions + "Format",
-      std::vector<std::string>{"None"},
       {"1.2"},
       [](const std::vector<std::string> &values) noexcept {
         if (values.empty())
@@ -6091,7 +6088,6 @@ struct InputKeys {
    */
   inline static const Key<std::vector<std::string>> output_dileptons_format{
       InputSections::o_dileptons + "Format",
-      std::vector<std::string>{"None"},
       {"0.85"},
       [](const std::vector<std::string> &values) noexcept {
         if (values.empty())
@@ -6114,7 +6110,6 @@ struct InputKeys {
    */
   inline static const Key<std::vector<std::string>> output_photons_format{
       InputSections::o_photons + "Format",
-      std::vector<std::string>{"None"},
       {"1.0"},
       [](const std::vector<std::string> &values) noexcept {
         if (values.empty())
@@ -6138,7 +6133,6 @@ struct InputKeys {
   inline static const Key<std::vector<std::string>>
       output_initialConditions_format{
           InputSections::o_initialConditions + "Format",
-          std::vector<std::string>{"None"},
           {"1.7"},
           [](const std::vector<std::string> &values) noexcept {
             if (values.empty())
@@ -6161,7 +6155,6 @@ struct InputKeys {
    */
   inline static const Key<std::vector<std::string>> output_rivet_format{
       InputSections::o_rivet + "Format",
-      std::vector<std::string>{"None"},
       {"2.0.2"},
       [](const std::vector<std::string> &values) noexcept {
         if (values.empty())
@@ -6182,7 +6175,6 @@ struct InputKeys {
    */
   inline static const Key<std::vector<std::string>> output_coulomb_format{
       InputSections::o_coulomb + "Format",
-      std::vector<std::string>{"None"},
       {"2.1"},
       [](const std::vector<std::string> &values) noexcept {
         if (values.empty())
@@ -6204,7 +6196,6 @@ struct InputKeys {
   inline static const Key<std::vector<std::string>>
       output_thermodynamics_format{
           InputSections::o_thermodynamics + "Format",
-          std::vector<std::string>{"None"},
           {"1.2"},
           [](const std::vector<std::string> &values) noexcept {
             if (values.empty())
