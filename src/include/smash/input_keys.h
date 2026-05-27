@@ -5942,7 +5942,8 @@ struct InputKeys {
    *
    * <h2> General output configuration parameters </h2>
    *
-   * \optional_key_no_line{key_output_density_type_,Density_Type,string,"none"}
+   * \optional_key_no_line{key_output_density_type_,Density_Type,string,
+   * "none",\any_valid}
    *
    * Determines which kind of density is printed into the headers of the
    * collision files. Possible values are:
@@ -5956,12 +5957,15 @@ struct InputKeys {
    * \see_key{key_output_density_type_}
    */
   inline static const Key<DensityType> output_densityType{
-      InputSections::output + "Density_Type", DensityType::None, {"0.60"}};
+      InputSections::output + "Density_Type",
+      DensityType::None,
+      {"0.60"},
+      detail::get_default_validator<DensityType>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key{key_output_out_interval_,Output_Interval,double,
-   * \ref key_gen_end_time_ "End_Time"}
+   * \ref key_gen_end_time_ "End_Time",\f$x>0\f$}
    *
    * Defines the period of intermediate output of the status of the simulated
    * system in Standard Output and other output formats which support this
@@ -5973,12 +5977,13 @@ struct InputKeys {
   inline static const Key<double> output_outputInterval{
       InputSections::output + "Output_Interval",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      [](double x) noexcept { return x > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key{key_output_out_times_,Output_Times,list of doubles,
-   * use \ref key_output_out_interval_ "Output_Interval"}
+   * use \ref key_output_out_interval_ "Output_Interval", \none}
    *
    * Explicitly defines the times \unit{in fm} where output is generated in the
    * form of a list. This cannot be used in combination with `Output_Interval`.
@@ -5995,7 +6000,10 @@ struct InputKeys {
    * \see_key{key_output_out_times_}
    */
   inline static const Key<std::vector<double>> output_outputTimes{
-      InputSections::output + "Output_Times", DefaultType::Dependent, {"1.7"}};
+      InputSections::output + "Output_Times",
+      DefaultType::Dependent,
+      {"1.7"},
+      detail::get_default_validator<std::vector<double>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -6006,10 +6014,12 @@ struct InputKeys {
    * output content and dedicated options are described further below. Refer to
    * \ref output_contents_ "output contents" for the list of possible
    * contents. Independently of the content, i.e. in every subsection, it is
-   * always necessary (i.e. it is probably desired) to provide the format in
-   * which the output should be generated.
+   * probably desired to provide the format in which the output should be
+   * generated. If this is not specified, no output for the given content is
+   * generated.
    *
-   * \required_key_no_line{key_output_content_format_,Format,list of strings}
+   * \optional_key_no_line{key_output_content_format_,Format,
+   * list of strings,["None"],\any_valid}
    *
    * List of formats for writing particular content. Available formats for every
    * content are listed and described \ref output_contents_ "here", while
@@ -6033,52 +6043,184 @@ struct InputKeys {
    */
   inline static const Key<std::vector<std::string>> output_particles_format{
       InputSections::o_particles + "Format",
-      std::vector<std::string>{},
-      {"1.2"}};
+      std::vector<std::string>{"None"},
+      {"1.2"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {
+            "ASCII",         "Oscar1999",     "Oscar2013", "Binary",
+            "Oscar2013_bin", "Root",          "VTK",       "HepMC",
+            "HepMC_asciiv3", "HepMC_treeroot"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_collisions_format{
       InputSections::o_collisions + "Format",
-      std::vector<std::string>{},
-      {"1.2"}};
+      std::vector<std::string>{"None"},
+      {"1.2"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {
+            "ASCII",  "Oscar1999",     "Oscar2013",
+            "Binary", "Oscar2013_bin", "Root",
+            "HepMC",  "HepMC_asciiv3", "HepMC_treeroot"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_dileptons_format{
       InputSections::o_dileptons + "Format",
-      std::vector<std::string>{},
-      {"0.85"}};
+      std::vector<std::string>{"None"},
+      {"0.85"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {"ASCII",         "Oscar1999",
+                                             "Oscar2013",     "Binary",
+                                             "Oscar2013_bin", "Root"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_photons_format{
-      InputSections::o_photons + "Format", std::vector<std::string>{}, {"1.0"}};
+      InputSections::o_photons + "Format",
+      std::vector<std::string>{"None"},
+      {"1.0"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {"ASCII",         "Oscar1999",
+                                             "Oscar2013",     "Binary",
+                                             "Oscar2013_bin", "Root"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>>
       output_initialConditions_format{
           InputSections::o_initialConditions + "Format",
-          std::vector<std::string>{},
-          {"1.7"}};
+          std::vector<std::string>{"None"},
+          {"1.7"},
+          [](const std::vector<std::string> &values) noexcept {
+            if (values.empty())
+              return false;
+            bool has_none =
+                std::any_of(values.begin(), values.end(),
+                            [](const std::string &s) { return s == "None"; });
+            if (has_none)
+              return values.size() == 1;
+            std::set<std::string> allowed_set = {
+                "For_vHLLE", "ASCII",         "Oscar1999", "Oscar2013",
+                "Binary",    "Oscar2013_bin", "Root"};
+            return std::none_of(values.begin(), values.end(),
+                                [&allowed_set](const std::string &s) {
+                                  return allowed_set.count(s) == 0;
+                                });
+          }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_format{
-      InputSections::o_rivet + "Format", std::vector<std::string>{}, {"2.0.2"}};
+      InputSections::o_rivet + "Format",
+      std::vector<std::string>{"None"},
+      {"2.0.2"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {"YODA", "YODA-full"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_coulomb_format{
-      InputSections::o_coulomb + "Format", std::vector<std::string>{}, {"2.1"}};
+      InputSections::o_coulomb + "Format",
+      std::vector<std::string>{"None"},
+      {"2.1"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {"VTK"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>>
-      output_thermodynamics_format{InputSections::o_thermodynamics + "Format",
-                                   std::vector<std::string>{},
-                                   {"1.2"}};
+      output_thermodynamics_format{
+          InputSections::o_thermodynamics + "Format",
+          std::vector<std::string>{"None"},
+          {"1.2"},
+          [](const std::vector<std::string> &values) noexcept {
+            if (values.empty())
+              return false;
+            bool has_none =
+                std::any_of(values.begin(), values.end(),
+                            [](const std::string &s) { return s == "None"; });
+            if (has_none)
+              return values.size() == 1;
+            std::set<std::string> allowed_set = {"Lattice_ASCII",
+                                                 "Lattice_Binary", "VTK"};
+            return std::none_of(values.begin(), values.end(),
+                                [&allowed_set](const std::string &s) {
+                                  return allowed_set.count(s) == 0;
+                                });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -6093,7 +6235,8 @@ struct InputKeys {
    * <hr>
    * <h3> &diams; %Particles </h3>
    *
-   * \optional_key_no_line{key_output_particles_extended_,Extended,bool,false}
+   * \optional_key_no_line{key_output_particles_extended_,Extended,bool,
+   * false,\none}
    *
    * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary`, `VTK`, `HepMC_asciiv3`
    * and `HepMC_treeroot` formats.
@@ -6104,12 +6247,15 @@ struct InputKeys {
    * \see_key{key_output_particles_extended_}
    */
   inline static const Key<bool> output_particles_extended{
-      InputSections::o_particles + "Extended", false, {"1.2"}};
+      InputSections::o_particles + "Extended",
+      false,
+      {"1.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_particles_quantities_,Quantities,list of
-   * strings,</tt><b>empty list</b><tt>}
+   * \optional_key_no_line{key_output_particles_quantities_,Quantities,
+   * list of strings,</tt><b>empty list</b><tt>,\any_valid}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
@@ -6122,11 +6268,22 @@ struct InputKeys {
   inline static const Key<std::vector<std::string>> output_particles_quantities{
       InputSections::o_particles + "Quantities",
       std::vector<std::string>{},
-      {"3.2"}};
+      {"3.2"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return true;
+        const auto &allowed_set =
+            InputKeys::get_list_of_valid_quantity_labels();
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_particles_only_final_,Only_Final,string,"Yes"}
+   * \optional_key_no_line{key_output_particles_only_final_,Only_Final,string,
+   * "Yes",\any_valid}
    *
    * &rArr; Ignored with `VTK`, `HepMC_asciiv3` and `HepMC_treeroot` formats.
    * - `"Yes"` &rarr; Print only final particle list.
@@ -6141,7 +6298,8 @@ struct InputKeys {
   inline static const Key<OutputOnlyFinal> output_particles_onlyFinal{
       InputSections::o_particles + "Only_Final",
       OutputOnlyFinal::Yes,
-      {"0.50"}};
+      {"0.50"},
+      detail::get_default_validator<OutputOnlyFinal>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -6149,7 +6307,8 @@ struct InputKeys {
    * <h3> &diams; Collisions </h3>
    * &rArr; Format `VTK` not available
    *
-   * \optional_key_no_line{key_output_collisions_extended_,Extended,bool,false}
+   * \optional_key_no_line{key_output_collisions_extended_,Extended,bool,
+   * false,\none}
    *
    * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary`, `HepMC_asciiv3` and
    * `HepMC_treeroot` formats.
@@ -6160,13 +6319,15 @@ struct InputKeys {
    * \see_key{key_output_collisions_extended_}
    */
   inline static const Key<bool> output_collisions_extended{
-      InputSections::o_collisions + "Extended", false, {"1.2"}};
+      InputSections::o_collisions + "Extended",
+      false,
+      {"1.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_collisions_quantities_,Quantities,list of
-   * strings,
-   * </tt><b>empty list</b><tt>}
+   * \optional_key_no_line{key_output_collisions_quantities_,Quantities,
+   * list of strings,</tt><b>empty list</b><tt>,\any_valid}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
@@ -6177,13 +6338,25 @@ struct InputKeys {
    * \see_key{key_output_collisions_quantities_}
    */
   inline static const Key<std::vector<std::string>>
-      output_collisions_quantities{InputSections::o_collisions + "Quantities",
-                                   std::vector<std::string>{},
-                                   {"3.2"}};
+      output_collisions_quantities{
+          InputSections::o_collisions + "Quantities",
+          std::vector<std::string>{},
+          {"3.2"},
+          [](const std::vector<std::string> &values) noexcept {
+            if (values.empty())
+              return true;
+            const auto &allowed_set =
+                InputKeys::get_list_of_valid_quantity_labels();
+            return std::none_of(values.begin(), values.end(),
+                                [&allowed_set](const std::string &s) {
+                                  return allowed_set.count(s) == 0;
+                                });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_collisions_print_start_end_,Print_Start_End,bool,false}
+   * \optional_key_no_line{key_output_collisions_print_start_end_,
+   * Print_Start_End,bool,false,\none}
    *
    * &rArr; Ignored with `Root`, `HepMC_asciiv3` and `HepMC_treeroot` formats.
    * - `true` &rarr; Initial and final particle list is printed out
@@ -6193,7 +6366,10 @@ struct InputKeys {
    * \see_key{key_output_collisions_print_start_end_}
    */
   inline static const Key<bool> output_collisions_printStartEnd{
-      InputSections::o_collisions + "Print_Start_End", false, {"0.50"}};
+      InputSections::o_collisions + "Print_Start_End",
+      false,
+      {"0.50"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -6201,7 +6377,8 @@ struct InputKeys {
    * <h3> &diams; Dileptons </h3>
    * &rArr; Only `ASCII`, `Binary` and `Root` formats.
    *
-   * \optional_key_no_line{key_output_dileptons_extended_,Extended,bool,false}
+   * \optional_key_no_line{key_output_dileptons_extended_,Extended,bool,
+   * false,\none}
    *
    * &rArr; Ignored with `Oscar1999`, `ASCII` and `Binary` formats.
    * - `true` &rarr; Print extended information for each particle
@@ -6211,13 +6388,15 @@ struct InputKeys {
    * \see_key{key_output_dileptons_extended_}
    */
   inline static const Key<bool> output_dileptons_extended{
-      InputSections::o_dileptons + "Extended", false, {"1.2"}};
+      InputSections::o_dileptons + "Extended",
+      false,
+      {"1.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_dileptons_quantities_,Quantities,list of
-   * strings,
-   * </tt><b>empty list</b><tt>}
+   * \optional_key_no_line{key_output_dileptons_quantities_,Quantities,
+   * list of strings,</tt><b>empty list</b><tt>,\any_valid}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
@@ -6230,7 +6409,17 @@ struct InputKeys {
   inline static const Key<std::vector<std::string>> output_dileptons_quantities{
       InputSections::o_dileptons + "Quantities",
       std::vector<std::string>{},
-      {"3.3"}};
+      {"3.3"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return true;
+        const auto &allowed_set =
+            InputKeys::get_list_of_valid_quantity_labels();
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -6238,7 +6427,8 @@ struct InputKeys {
    * <h3> &diams; Photons </h3>
    * &rArr; Only `ASCII`, `Binary` and `Root` formats.
    *
-   * \optional_key_no_line{key_output_photons_extended_,Extended,bool,false}
+   * \optional_key_no_line{key_output_photons_extended_,Extended,bool,
+   * false,\none}
    *
    * &rArr; Ignored with `Oscar1999`, `ASCII` and `Binary` formats.
    * - `true` &rarr; Print extended information for each particle
@@ -6248,13 +6438,15 @@ struct InputKeys {
    * \see_key{key_output_photons_extended_}
    */
   inline static const Key<bool> output_photons_extended{
-      InputSections::o_photons + "Extended", false, {"1.5"}};
+      InputSections::o_photons + "Extended",
+      false,
+      {"1.5"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_photons_quantities_,Quantities,list of
-   * strings,
-   * </tt><b>empty list</b><tt>}
+   * \optional_key_no_line{key_output_photons_quantities_,Quantities,
+   * list of strings,</tt><b>empty list</b><tt>,\any_valid}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
@@ -6267,7 +6459,17 @@ struct InputKeys {
   inline static const Key<std::vector<std::string>> output_photons_quantities{
       InputSections::o_photons + "Quantities",
       std::vector<std::string>{},
-      {"3.3"}};
+      {"3.3"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return true;
+        const auto &allowed_set =
+            InputKeys::get_list_of_valid_quantity_labels();
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -6275,7 +6477,7 @@ struct InputKeys {
    * <h3> &diams; Initial_Conditions </h3>
    * &rArr; Only `ASCII`, `Binary` and `Root`.
    *
-   * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
+   * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false,\none}
    *
    * &rArr; Ignored with `Oscar1999`, `ASCII`, and `Binary` formats.
    * - `true` &rarr; Print extended information for each particle
@@ -6285,13 +6487,15 @@ struct InputKeys {
    * \see_key{key_output_IC_extended_}
    */
   inline static const Key<bool> output_initialConditions_extended{
-      InputSections::o_initialConditions + "Extended", false, {"1.7"}};
+      InputSections::o_initialConditions + "Extended",
+      false,
+      {"1.7"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_quantities_,Quantities,list of
-   * strings,
-   * </tt><b>empty list</b><tt>}
+   * \optional_key_no_line{key_output_IC_quantities_,Quantities,
+   * list of strings,</tt><b>empty list</b><tt>,\any_valid}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
@@ -6305,7 +6509,17 @@ struct InputKeys {
       output_initialConditions_quantities{
           InputSections::o_initialConditions + "Quantities",
           std::vector<std::string>{},
-          {"3.3"}};
+          {"3.3"},
+          [](const std::vector<std::string> &values) noexcept {
+            if (values.empty())
+              return true;
+            const auto &allowed_set =
+                InputKeys::get_list_of_valid_quantity_labels();
+            return std::none_of(values.begin(), values.end(),
+                                [&allowed_set](const std::string &s) {
+                                  return allowed_set.count(s) == 0;
+                                });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -6320,7 +6534,8 @@ struct InputKeys {
   inline static const Key<double> output_initialConditions_lowerBound{
       InputSections::o_initialConditions + "Lower_Bound",
       0.5,
-      {"1.8", "3.2", "3.3"}};
+      {"1.8", "3.2", "3.3"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -6335,7 +6550,8 @@ struct InputKeys {
   inline static const Key<double> output_initialConditions_properTime{
       InputSections::o_initialConditions + "Proper_Time",
       DefaultType::Dependent,
-      {"1.7", "3.2", "3.3"}};
+      {"1.7", "3.2", "3.3"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -6350,7 +6566,8 @@ struct InputKeys {
   inline static const Key<double> output_initialConditions_pTCut{
       InputSections::o_initialConditions + "pT_Cut",
       DefaultType::Dependent,
-      {"2.2", "3.2", "3.3"}};
+      {"2.2", "3.2", "3.3"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -6365,7 +6582,8 @@ struct InputKeys {
   inline static const Key<double> output_initialConditions_rapidityCut{
       InputSections::o_initialConditions + "Rapidity_Cut",
       DefaultType::Dependent,
-      {"2.2", "3.2", "3.3"}};
+      {"2.2", "3.2", "3.3"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -6378,7 +6596,7 @@ struct InputKeys {
    *       omitted, Rivet default behavior will be used.
    *
    * \optional_key_no_line{key_output_rivet_analyses_,Analyses,list of strings,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * This key specifies the analyses (including possible options) to add to the
    * Rivet analysis.
@@ -6387,12 +6605,15 @@ struct InputKeys {
    * \see_key{key_output_rivet_analyses_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_analyses{
-      InputSections::o_rivet + "Analyses", DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_rivet + "Analyses",
+      DefaultType::Dependent,
+      {"2.0.2"},
+      detail::get_default_validator<std::vector<std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_cross_sections_,Cross_Section,
-   * list of two doubles,</tt><b>no default</b><tt>}
+   * list of two doubles,</tt><b>no default</b><tt>,\none}
    *
    * Set the cross-section \unit{in pb}.
    */
@@ -6402,11 +6623,13 @@ struct InputKeys {
   inline static const Key<std::array<double, 2>> output_rivet_crossSection{
       InputSections::o_rivet + "Cross_Section",
       DefaultType::Dependent,
-      {"2.0.2"}};
+      {"2.0.2"},
+      detail::get_default_validator<std::array<double, 2>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_rivet_ignore_beams_,Ignore_Beams,bool,true}
+   * \optional_key_no_line{key_output_rivet_ignore_beams_,Ignore_Beams,bool,
+   * true,\none}
    *
    * Ask Rivet to not validate beams before running analyses. This is needed if
    * you use the <tt>\ref key_MC_fermi_motion_ "Fermi_Motion"</tt> option that
@@ -6416,12 +6639,15 @@ struct InputKeys {
    * \see_key{key_output_rivet_ignore_beams_}
    */
   inline static const Key<bool> output_rivet_ignoreBeams{
-      InputSections::o_rivet + "Ignore_Beams", true, {"2.0.2"}};
+      InputSections::o_rivet + "Ignore_Beams",
+      true,
+      {"2.0.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_logging_,Logging,map<string\,string>,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * Specifies log levels for various parts of Rivet, including analyses. Each
    * entry is a log name followed by a log level (one among `"TRACE"`,
@@ -6432,12 +6658,15 @@ struct InputKeys {
    */
   inline static const Key<std::map<std::string, std::string>>
       output_rivet_logging{
-          InputSections::o_rivet + "Logging", DefaultType::Dependent, {"0.50"}};
+          InputSections::o_rivet + "Logging",
+          DefaultType::Dependent,
+          {"0.50"},
+          detail::get_default_validator<std::map<std::string, std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_paths_,Paths,list of strings,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * This key specifies the directories that Rivet will search for analyses
    * and data files related to the analyses.
@@ -6446,12 +6675,15 @@ struct InputKeys {
    * \see_key{key_output_rivet_paths_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_paths{
-      InputSections::o_rivet + "Paths", DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_rivet + "Paths",
+      DefaultType::Dependent,
+      {"2.0.2"},
+      detail::get_default_validator<std::vector<std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_preloads_,Preloads,list of strings,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * Specify data files to read into Rivet (e.g., centrality calibrations) at
    * start-up.
@@ -6460,7 +6692,10 @@ struct InputKeys {
    * \see_key{key_output_rivet_preloads_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_preloads{
-      InputSections::o_rivet + "Preloads", DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_rivet + "Preloads",
+      DefaultType::Dependent,
+      {"2.0.2"},
+      detail::get_default_validator<std::vector<std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -6470,7 +6705,7 @@ struct InputKeys {
    * Some operations about weights can be customized in the `Weights` section.
    *
    * \optional_key_no_line{key_output_rivet_weights_cap_,Cap,double,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * Cap weights to this value.
    */
@@ -6478,12 +6713,15 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_cap_}
    */
   inline static const Key<double> output_rivet_weights_cap{
-      InputSections::o_r_weights + "Cap", DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_r_weights + "Cap",
+      DefaultType::Dependent,
+      {"2.0.2"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_deselect_,Deselect,
-   * list of strings, </tt><b>no default</b><tt>}
+   * list of strings, </tt><b>no default</b><tt>,\none}
    *
    * De-select these weights for processing.
    */
@@ -6491,14 +6729,16 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_deselect_}
    */
   inline static const Key<std::vector<std::string>>
-      output_rivet_weights_deselect{InputSections::o_r_weights + "Deselect",
-                                    DefaultType::Dependent,
-                                    {"2.0.2"}};
+      output_rivet_weights_deselect{
+          InputSections::o_r_weights + "Deselect",
+          DefaultType::Dependent,
+          {"2.0.2"},
+          detail::get_default_validator<std::vector<std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_nlo_smearing_,NLO_Smearing,
-   * double, </tt><b>no default</b><tt>}
+   * double, </tt><b>no default</b><tt>,\none}
    *
    * Smearing histogram binning by given fraction of bin widths to avoid NLO
    * counter events to flow into neighboring bin.
@@ -6509,12 +6749,13 @@ struct InputKeys {
   inline static const Key<double> output_rivet_weights_nloSmearing{
       InputSections::o_r_weights + "NLO_Smearing",
       DefaultType::Dependent,
-      {"2.0.2"}};
+      {"2.0.2"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_no_multi_,No_Multi,bool,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * Ask Rivet not to do multi-weight processing.
    */
@@ -6524,12 +6765,13 @@ struct InputKeys {
   inline static const Key<bool> output_rivet_weights_noMulti{
       InputSections::o_r_weights + "No_Multi",
       DefaultType::Dependent,
-      {"2.0.2"}};
+      {"2.0.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_nominal_,Nominal,string,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * The nominal weight name.
    */
@@ -6539,12 +6781,13 @@ struct InputKeys {
   inline static const Key<std::string> output_rivet_weights_nominal{
       InputSections::o_r_weights + "Nominal",
       DefaultType::Dependent,
-      {"2.0.2"}};
+      {"2.0.2"},
+      detail::get_default_validator<std::string>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_select_,Select,
-   * list of strings, </tt><b>no default</b><tt>}
+   * list of strings, </tt><b>no default</b><tt>,\none}
    *
    * Select these weights for processing.
    */
@@ -6552,7 +6795,10 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_select_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_weights_select{
-      InputSections::o_r_weights + "Select", DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_r_weights + "Select",
+      DefaultType::Dependent,
+      {"2.0.2"},
+      detail::get_default_validator<std::vector<std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -6587,7 +6833,8 @@ struct InputKeys {
    * <b>About 3 and 4:</b> See \ref doxypage_output_thermodyn for
    * further information.
    *
-   * \optional_key_no_line{key_output_thermo_only_part_,Only_Participants,bool,false}
+   * \optional_key_no_line{key_output_thermo_only_part_,Only_Participants,bool,
+   * false,\none}
    *
    * If set to `true`, only participants are included in the computation of the
    * energy momentum tensor and of the Eckart currents. In this context, a
@@ -6601,12 +6848,15 @@ struct InputKeys {
    * \see_key{key_output_thermo_only_part_}
    */
   inline static const Key<bool> output_thermodynamics_onlyParticipants{
-      InputSections::o_thermodynamics + "Only_Participants", false, {"2.1"}};
+      InputSections::o_thermodynamics + "Only_Participants",
+      false,
+      {"2.1"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_ignore_unformed_,Ignore_Unformed,
-   * bool, false}
+   * bool, false,\none}
    *
    * Whether the thermodynamic calculation should consider unformed (or
    * preformed) particles or not.
@@ -6622,12 +6872,15 @@ struct InputKeys {
    * \see_key{key_output_thermo_ignore_unformed_}
    */
   inline static const Key<bool> output_thermodynamics_ignoreUnformed{
-      InputSections::o_thermodynamics + "Ignore_Unformed", false, {"3.4"}};
+      InputSections::o_thermodynamics + "Ignore_Unformed",
+      false,
+      {"3.4"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_position_,Position,
-   * list of 3 doubles,[0.0\, 0.0\, 0.0]}
+   * list of 3 doubles,[0.0\, 0.0\, 0.0],\none}
    *
    * Point at which thermodynamic quantities are computed (\unit{in fm}).
    */
@@ -6637,12 +6890,13 @@ struct InputKeys {
   inline static const Key<std::array<double, 3>> output_thermodynamics_position{
       InputSections::o_thermodynamics + "Position",
       std::array<double, 3>{{0.0, 0.0, 0.0}},
-      {"1.0"}};
+      {"1.0"},
+      detail::get_default_validator<std::array<double, 3>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_quantities_,Quantities,
-   * list of strings,[]}
+   * list of strings,[],\any_valid}
    *
    * List of thermodynamic quantities that are printed to the output.
    * Possible quantities are:
@@ -6667,11 +6921,12 @@ struct InputKeys {
       output_thermodynamics_quantites{
           InputSections::o_thermodynamics + "Quantities",
           std::set<ThermodynamicQuantity>{},
-          {"1.0"}};
+          {"1.0"},
+          detail::get_default_validator<std::set<ThermodynamicQuantity>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_thermo_smearing_,Smearing,bool,true}
+   * \optional_key_no_line{key_output_thermo_smearing_,Smearing,bool,true,\none}
    *
    * Using Gaussian smearing for computing thermodynamic quantities or not. This
    * triggers whether thermodynamic quantities are evaluated at a fixed point
@@ -6704,11 +6959,15 @@ struct InputKeys {
    * \see_key{key_output_thermo_smearing_}
    */
   inline static const Key<bool> output_thermodynamics_smearing{
-      InputSections::o_thermodynamics + "Smearing", true, {"1.0"}};
+      InputSections::o_thermodynamics + "Smearing",
+      true,
+      {"1.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_thermo_type_,Type,string,"baryon"}
+   * \optional_key_no_line{key_output_thermo_type_,Type,string,
+   * "baryon",\any_valid}
    *
    * Particle type taken into consideration, one among
    * - `"hadron"`
@@ -6722,7 +6981,10 @@ struct InputKeys {
    * \see_key{key_output_thermo_type_}
    */
   inline static const Key<DensityType> output_thermodynamics_type{
-      InputSections::o_thermodynamics + "Type", DensityType::Baryon, {"1.0"}};
+      InputSections::o_thermodynamics + "Type",
+      DensityType::Baryon,
+      {"1.0"},
+      detail::get_default_validator<DensityType>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
