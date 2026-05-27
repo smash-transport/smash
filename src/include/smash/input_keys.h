@@ -6149,7 +6149,7 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * <hr>
    * <h3> &diams; Dileptons </h3>
-   * &rArr; Only `ASCII` and `Binary` formats.
+   * &rArr; Only `ASCII`, `Binary` and `Root` formats.
    *
    * \optional_key_no_line{key_output_dileptons_extended_,Extended,bool,false}
    *
@@ -6186,7 +6186,7 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * <hr>
    * <h3> &diams; Photons </h3>
-   * &rArr; Only `ASCII` and `Binary` formats.
+   * &rArr; Only `ASCII`, `Binary` and `Root` formats.
    *
    * \optional_key_no_line{key_output_photons_extended_,Extended,bool,false}
    *
@@ -6227,7 +6227,7 @@ struct InputKeys {
    *
    * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
    *
-   * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary` and `Root` formats.
+   * &rArr; Ignored with `Oscar1999`, `ASCII`, and `Binary` formats.
    * - `true` &rarr; Print extended information for each particle
    * - `false` &rarr; Regular output for each particle
    */
