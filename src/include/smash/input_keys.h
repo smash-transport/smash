@@ -1235,6 +1235,56 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  */
 struct InputKeys {
   /**
+   * Get the list of valid quantity labels object.
+   *
+   * \note This function uses the construct-on-first-use idiom to create the
+   * list of valid quantity labels as a function-local static variable. This
+   * makes it possible to use the list at static storage initialization time.
+   *
+   * \return A constant reference to the list of valid quantity labels, which is
+   *         a \c std::set of <tt>std::string_view</tt>.
+   */
+  static const std::set<std::string_view>
+      &get_list_of_valid_quantity_labels() noexcept {
+    static const std::set<std::string_view> valid_labels{"t",
+                                                         "x",
+                                                         "y",
+                                                         "z",
+                                                         "mass",
+                                                         "p0",
+                                                         "px",
+                                                         "py",
+                                                         "pz",
+                                                         "pdg",
+                                                         "ID",
+                                                         "id",
+                                                         "charge",
+                                                         "ncoll",
+                                                         "form_time",
+                                                         "xsecfac",
+                                                         "proc_id_origin",
+                                                         "proc_type_origin",
+                                                         "time_last_coll",
+                                                         "pdg_mother1",
+                                                         "pdg_mother2",
+                                                         "baryon_number",
+                                                         "strangeness",
+                                                         "0",
+                                                         "tau",
+                                                         "eta",
+                                                         "eta_s",
+                                                         "mt",
+                                                         "Rap",
+                                                         "y_rap",
+                                                         "spin0",
+                                                         "spinx",
+                                                         "spiny",
+                                                         "spinz",
+                                                         "perturbative_weight"};
+    return valid_labels;
+  }
+
+  /**
    * \see_key{input_configuration_copy_mechanism_}
    */
   inline static const Key<std::string> particles{
