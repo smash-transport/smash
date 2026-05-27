@@ -27,128 +27,6 @@ namespace smash {
 static constexpr int LPythia = LogArea::Pythia::id;
 
 /**
- * \brief Custom PYTHIA fragmentation hook used by SMASH.
- *
- * This class provides a SMASH-specific implementation of the
- * Pythia8::UserHooks interface to dynamically modify string
- * fragmentation parameters during hadronization.
- *
- * The hook is currently used to apply separate Lund fragmentation
- * parameters for leading baryons originating from valence diquark
- * string endpoints. In particular, the parameters
- * StringZ:aLund and StringZ:bLund may be changed on a
- * hadron-by-hadron basis during fragmentation.
- *
- * The identification of leading baryons relies on custom status
- * codes assigned to string endpoint partons in the Pythia event
- * record before fragmentation.
- *
- * This infrastructure is intended to be extensible and may later
- * be used for:
- * - rope fragmentation,
- * - density-dependent string fragmentation,
- * - modified strangeness production,
- * - medium-dependent fragmentation functions,
- * - color-rope or junction-based effects.
- *
- * \see Pythia8::UserHooks
- * \see Pythia8::StringZ
- */
-class SmashFragHook : public Pythia8::UserHooks {
- public:
-  /**
-   * Construct fragmentation hook with fragmentation parameters.
-   *
-   * \param[in,out] pythia_hadron Pointer to the PYTHIA hadronization instance.
-   * \param[in] special_status Custom status code identifying leading
-   *            partons in the event record.
-   * \param[in] a_default Default value of StringZ:aLund used for ordinary
-   *            string fragmentation.
-   * \param[in] b_default Default value of StringZ:bLund used for ordinary
-   *            string fragmentation.
-   * \param[in] a_leading Value of StringZ:aLund used for leading baryons.
-   * \param[in] b_leading Value of StringZ:bLund used for leading baryons.
-   */
-  SmashFragHook(Pythia8::Pythia *pythia_hadron, int special_status,
-                double a_default, double b_default, double a_leading,
-                double b_leading, double popcorn_rate)
-      : pythia_hadron_(pythia_hadron),
-        specialStatus_(std::abs(special_status)),
-        a_default_(a_default),
-        b_default_(b_default),
-        a_leading_(a_leading),
-        b_leading_(b_leading),
-        popcorn_rate_(popcorn_rate) {}
-
-  bool canVetoFragmentation() override { return true; }
-  bool doVetoFragmentation(const Pythia8::Particle had,
-
-                           const Pythia8::StringEnd *) override;
-
-  bool should_be_meson;
-  /**
-   * Inform PYTHIA that fragmentation parameters may be modified dynamically.
-   *
-   * \return Always true.
-   */
-  bool canChangeFragPar() override { return true; }
-
-  /**
-   * Dynamically modify fragmentation parameters during string fragmentation.
-   *
-   * This hook is called internally by PYTHIA during hadron production from
-   * strings. If the currently fragmenting endpoint corresponds to a leading
-   * diquark remnant and no hadron has yet been produced from that endpoint,
-   * separate Lund fragmentation parameters are applied.
-   *
-   * Otherwise the default fragmentation parameters are restored.
-   *
-   * The function updates:
-   * - StringZ:aLund
-   * - StringZ:bLund
-   *
-   * and reinitializes the Pythia8::StringZ object accordingly.
-   *
-   * \param[in] flavSelPtr Pointer to flavor-selection object.
-   * \param[in,out] zSelPtr Pointer to Lund z-fragmentation object.
-   * \param[in] pTSelPtr Pointer to transverse-momentum selection object.
-   * \param[in] idEnd Endpoint flavor identifier.
-   * \param[in] m2Had Squared hadron mass.
-   * \param[in] iParton Indices of partons belonging to the current string.
-   * \param[in] nowEnd Information about the currently fragmenting string end.
-   *
-   * \return Always true.
-   */
-  bool doChangeFragPar([[maybe_unused]] Pythia8::StringFlav *flavSelPtr,
-                       Pythia8::StringZ *zSelPtr,
-                       [[maybe_unused]] Pythia8::StringPT *pTSelPtr,
-                       [[maybe_unused]] int idEnd,
-                       [[maybe_unused]] double m2Had, std::vector<int> iParton,
-                       const Pythia8::StringEnd *nowEnd) override;
-
- private:
-  /// Pointer to the PYTHIA hadronization instance.
-  Pythia8::Pythia *pythia_hadron_ = nullptr;
-
-  /// Status code identifying leading partons in the event record.
-  int specialStatus_;
-
-  /// Default StringZ:aLund parameter.
-  double a_default_;
-
-  /// Default StringZ:bLund parameter.
-  double b_default_;
-
-  /// StringZ:aLund parameter used for leading baryons.
-  double a_leading_;
-
-  /// StringZ:bLund parameter used for leading baryons.
-  double b_leading_;
-
-  double popcorn_rate_;
-};
-
-/**
  * \brief String excitation processes used in SMASH
  *
  * Only one instance of this class should be created.
@@ -318,21 +196,6 @@ class StringProcess {
   double popcorn_smeson_;
 
   /**
-   * Tag hadrons in a hadronized Pythia event that originate from leading
-   * partons.
-   *
-   * This function annotates the given Pythia event by setting custom status
-   * codes (see LeadingStatus) for hadrons that can be traced back to the
-   * leading (valence) quark or diquark endpoints of the initial strings.
-   *
-   * \param[in,out] event  Pythia event to be tagged (modified in-place).
-   * \param[in]     pd     Particle data table used for quark/diquark
-   * identification.
-   */
-  void tag_leading_hadron(Pythia8::Event &event,
-                          const Pythia8::ParticleData &pd);
-
-  /**
    * Compute flags identifying beam valence partons (quarks or diquarks)
    * that act as leading partons after the initial interaction.
    *
@@ -351,36 +214,6 @@ class StringProcess {
    * \return Per-particle flags for beam valence (leading) partons.
    */
   std::vector<bool> compute_beam_valence_flags(Pythia8::Pythia &pythia);
-
-  /**
-   * Custom Pythia status codes used to mark leading/valence
-   * ancestry.
-   *
-   * Pythia uses integer status codes to classify particles in
-   * the event record. SMASH adds a small set of reserved,
-   * non-standard codes to tag particles according to whether
-   * they are leading partons or hadrons originating from
-   * leading quark/diquark endpoints.
-   *
-   * The values are chosen to avoid collisions with commonly
-   * used Pythia internal codes and are treated here as
-   * implementation detail.
-   */
-  enum class LeadingStatus : int {
-    /// Status code assigned to leading (valence) partons in the event record.
-    LEADING_PARTON = 202,
-
-    /// Status code for leading diquarks which should have beam remnant id
-    /// to be used by Pythias internal machinery
-    LEADING_DIQUARK = 63,
-
-    /// Status code assigned to hadrons traced back to a leading quark
-    /// endpoint.
-    FROM_LEADING_QUARK = 203,
-    /// Status code assigned to hadrons traced back to a leading diquark
-    /// endpoint.
-    FROM_LEADING_DIQUARK = 204
-  };
 
   /**
    * Determine the custom leading-hadron status code from a string endpoint.
@@ -402,10 +235,12 @@ class StringProcess {
    * Check whether a particle is tagged as a leading parton.
    *
    * \param[in] p  Pythia particle.
-   * \return True if p has statusAbs() equal to LeadingStatus::LEADING_PARTON.
+   * \return True if p has statusAbs() equal to LeadingStatus::LEADING_QUARK or
+   * LeadingStatus::LEADING_DIQUARK.
    */
   inline bool is_leading_parton(const Pythia8::Particle &p) {
-    return p.statusAbs() == static_cast<int>(LeadingStatus::LEADING_PARTON);
+    return p.statusAbs() == static_cast<int>(LeadingStatus::LEADING_QUARK) ||
+           p.statusAbs() == static_cast<int>(LeadingStatus::LEADING_DIQUARK);
   }
 
   /**
@@ -598,6 +433,48 @@ class StringProcess {
   }
 
   /**
+   * Custom Pythia status codes used to mark leading/valence
+   * ancestry.
+   *
+   * Pythia uses integer status codes to classify particles in
+   * the event record. SMASH adds a small set of reserved,
+   * non-standard codes to tag particles according to whether
+   * they are leading partons or hadrons originating from
+   * leading quark/diquark endpoints.
+   *
+   * The values are chosen to avoid collisions with commonly
+   * used Pythia internal codes and are treated here as
+   * implementation detail.
+   */
+  enum class LeadingStatus : int {
+    /// Status code assigned to leading (valence) quarks in the event record.
+    LEADING_QUARK = 202,
+
+    /// Status code for leading diquarks which should have beam remnant id
+    /// to be used by Pythias internal machinery
+    LEADING_DIQUARK = 63,
+
+    /// Status code assigned to hadrons traced back to a leading quark
+    /// endpoint.
+    FROM_LEADING_QUARK = 203,
+    /// Status code assigned to hadrons traced back to a leading diquark
+    /// endpoint.
+    FROM_LEADING_DIQUARK = 204
+  };
+  /**
+   * Tag hadrons in a hadronized Pythia event that originate from leading
+   * partons.
+   *
+   * This function annotates the given Pythia event by setting custom status
+   * codes (see LeadingStatus) for hadrons that can be traced back to the
+   * leading (valence) quark or diquark endpoints of the initial strings.
+   *
+   * \param[in,out] event  Pythia event to be tagged (modified in-place).
+   * identification.
+   */
+  void tag_leading_hadrons(Pythia8::Event &event);
+
+  /**
    * Convert a PYTHIA four-vector into a SMASH four-vector.
    *
    * \param[in] p PYTHIA four-vector.
@@ -676,9 +553,6 @@ class StringProcess {
    * \return std::nullopt if fragmentation or particle conversion fails.
    */
   std::optional<ParticleList> hadronize(const Pythia8::Event &string_evt);
-
-  /// Fragmentation hook used to modify PYTHIA fragmentation parameters.
-  std::shared_ptr<SmashFragHook> frag_hook = nullptr;
 
   /**
    * Interface to pythia_sigmatot_ to compute cross-sections of A+B->

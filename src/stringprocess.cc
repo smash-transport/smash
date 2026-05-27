@@ -14,6 +14,8 @@
 #include <limits>
 #include <string>
 
+#include <Pythia8/ParticleData.h>
+
 #include "smash/configuration.h"
 #include "smash/forwarddeclarations.h"
 #include "smash/input_keys.h"
@@ -23,19 +25,6 @@
 #include "smash/random.h"
 
 namespace smash {
-
-bool SmashFragHook::doChangeFragPar(
-    [[maybe_unused]] Pythia8::StringFlav* flavSelPtr, Pythia8::StringZ* zSelPtr,
-    [[maybe_unused]] Pythia8::StringPT* pTSelPtr, [[maybe_unused]] int idEnd,
-    [[maybe_unused]] double m2Had, std::vector<int> iParton,
-    const Pythia8::StringEnd* nowEnd) {
-  return true;
-}
-
-bool SmashFragHook::doVetoFragmentation(const Pythia8::Particle had,
-                                        const Pythia8::StringEnd* sEnd) {
-  return false;
-}
 
 StringProcess::StringProcess(Configuration& config)
     : pmin_gluon_lightcone_(
@@ -94,15 +83,6 @@ StringProcess::StringProcess(Configuration& config)
                       popcorn_rate_, stringz_a_produce_, stringz_b_produce_,
                       string_sigma_T_);
 
-  if (separate_fragment_baryon_) {
-    frag_hook = std::make_shared<SmashFragHook>(
-        pythia_hadron_.get(),
-        static_cast<int>(StringProcess::LeadingStatus::LEADING_PARTON),
-        stringz_a_produce_, stringz_b_produce_, stringz_a_leading_,
-        stringz_b_leading_, popcorn_rate_);
-    pythia_hadron_->addUserHooksPtr(frag_hook);
-  }
-
   if (config.take(InputKeys::collTerm_stringParam_fragmentationModel) ==
       PythiaFragmentationModel::Thermal) {
     pythia_hadron_->readString("Fragmentation:model = 1");
@@ -139,22 +119,11 @@ StringProcess::StringProcess(Configuration& config)
              : "off"));
 
     logg[LPythia].warn(
-        "Using Pythia thermal fragmentation model.\n"
-        "Please cite: https://inspirehep.net/literature/1495274\n"
-        "\n"
-        "This model uses thermal fragmentation settings that differ\n"
-        "partially from the standard tuning employed in SMASH.\n"
-        "\n"
-        "While the model itself is implemented in PYTHIA, its behaviour\n"
-        "within the SMASH framework has not yet been systematically\n"
-        "tuned or validated.\n"
-        "\n"
-        "The thermal fragmentation model may significantly modify\n"
-        "hadronization observables such as particle yields, spectra,\n"
-        "and strangeness production.\n"
-        "\n"
-        "Please validate carefully before drawing quantitative\n"
-        "physics conclusions.");
+        "Using Pythia thermal fragmentation model "
+        "(https://inspirehep.net/literature/1495274).\n"
+        "This model is not yet tuned or validated within SMASH and may "
+        "significantly modify hadronization observables. "
+        "Please validate results carefully.");
   }
   pythia_hadron_->init();
 
@@ -276,8 +245,7 @@ void StringProcess::form_intermediate_particles(
     ParticleList& intermediate_particles, const FourVector& uString,
     const ThreeVector& evecLong, double additional_xsec_supp,
     bool find_and_scale_leading) {
-  const int nfrag = intermediate_particles.size();
-  assert(nfrag > 0);
+  assert(intermediate_particles.size() > 0);
 
   int bstring = 0;
   for (const ParticleData& data : intermediate_particles) {
@@ -453,7 +421,7 @@ std::optional<ParticleList> StringProcess::hadronize(
   }
 
   if (has_leading_and_is_open) {
-    tag_leading_hadron(pythia_hadron_->event, pythia_hadron_->particleData);
+    tag_leading_hadrons(pythia_hadron_->event);
   }
 
   const FourVector pString_smash(
@@ -483,7 +451,6 @@ std::optional<ParticleList> StringProcess::hadronize(
 
   // Build intermediate SMASH particles from final hadrons
   intermediate_particles.reserve(pythia_hadron_->event.size());
-
   for (int i = 0; i < pythia_hadron_->event.size(); ++i) {
     const auto& particle = pythia_hadron_->event[i];
 
@@ -513,8 +480,9 @@ std::optional<ParticleList> StringProcess::hadronize(
           (pythia_hadron_->particleData.isBaryon(particle.id()) ? 1.0 / 3.0
                                                                 : 0.5) *
           additional_xsec_supp_);
+    }
 
-    } else {
+    else {
       intermediate_particles.back().set_cross_section_scaling_factor(0.0);
     }
   }
@@ -593,7 +561,7 @@ bool StringProcess::append_string(const Pythia8::Vec4& p_str,
 
   evt.append(90, -11, 0, 0, p1_cm + p2_cm, (p1_cm + p2_cm).mCalc());
 
-  const int status_quark = static_cast<int>(LeadingStatus::LEADING_PARTON);
+  const int status_quark = static_cast<int>(LeadingStatus::LEADING_QUARK);
   const int status_diquark = static_cast<int>(LeadingStatus::LEADING_DIQUARK);
 
   const bool id1_is_quark = pythia_hadron_->particleData.isQuark(id1);
@@ -916,23 +884,16 @@ std::vector<bool> StringProcess::compute_beam_valence_flags(
   tag_from_beam(pythia.beamB, isValenceFinal);
   return isValenceFinal;
 }
-
-void StringProcess::tag_leading_hadron(Pythia8::Event& event,
-                                       const Pythia8::ParticleData& pd) {
-  // 1) Find the first two (di)quark endpoints in the event record
-  int idx1 = -1, idx2 = -1;
-  bool is_leading1 = false, is_leading2 = false;
-
+void StringProcess::tag_leading_hadrons(Pythia8::Event& event) {
+  int idx1 = -1;
+  int idx2 = -1;
+  const Pythia8::ParticleData& pd = pythia_hadron_->particleData;
   for (const auto& part : event) {
     if (part.isQuark() || part.isDiquark()) {
-      if (idx1 == -1) {
+      if (idx1 < 0) {
         idx1 = part.index();
-        is_leading1 = (part.statusAbs() ==
-                       static_cast<int>(LeadingStatus::LEADING_PARTON));
       } else {
         idx2 = part.index();
-        is_leading2 = (part.statusAbs() ==
-                       static_cast<int>(LeadingStatus::LEADING_PARTON));
         break;
       }
     }
@@ -942,93 +903,99 @@ void StringProcess::tag_leading_hadron(Pythia8::Event& event,
     return;
   }
 
-  // 2) Boost to the CM frame of the two endpoints
   Pythia8::RotBstMatrix toRest;
   toRest.toCMframe(event[idx1].p(), event[idx2].p());
   event.rotbst(toRest);
 
-  // Helper: pick final hadron with pz closest to endpoint pz.
-  // If endpoint is diquark -> require baryon.
-  auto endpoint_required_flavours =
-      [&](const Pythia8::Particle& end) -> std::pair<std::array<int, 2>, int> {
-    std::array<int, 2> flavours{{0, 0}};
+  std::vector<int> hadrons;
+  hadrons.reserve(event.size());
+
+  for (int i = 0; i < event.size(); ++i) {
+    if (event[i].isFinal() && event[i].isHadron()) {
+      hadrons.push_back(i);
+    }
+  }
+
+  std::sort(hadrons.begin(), hadrons.end(),
+            [&](int a, int b) { return event[a].pz() < event[b].pz(); });
+
+  const int forward_endpoint =
+      event[idx1].pz() > event[idx2].pz() ? idx1 : idx2;
+  const int backward_endpoint = forward_endpoint == idx1 ? idx2 : idx1;
+
+  auto accept = [&](int endpoint, int hadron) {
+    const auto& end = event[endpoint];
+    const auto& h = event[hadron];
+
+    if (is_leading(h)) {
+      return false;
+    }
 
     if (end.isDiquark()) {
-      int q1 = 0, q2 = 0, degeneracy = 0;
-      StringProcess::quarks_from_diquark(end.id(), q1, q2, degeneracy);
-
-      flavours[0] = std::abs(q1);
-      flavours[1] = std::abs(q2);
-      return {flavours, 2};
+      return pd.isBaryon(h.id()) && h.id() * end.id() > 0;
     }
 
-    // single (anti)quark endpoint
-    flavours[0] = std::abs(end.id());
-    return {flavours, 1};
+    if (pd.isBaryon(h.id())) {
+      return h.id() * end.id() > 0;
+    }
+
+    return true;
   };
 
-  auto find_best_hadron = [&](int iEnd) -> int {
-    const auto& end = event[iEnd];
-    const double pzEnd = end.pz();
-    const bool endIsDiquark = end.isDiquark();
-
-    auto [req, nreq] = endpoint_required_flavours(end);
-
-    int bestIdx = -1;
-    double bestScore = std::numeric_limits<double>::infinity();
-
-    for (int i = 0; i < event.size(); ++i) {
-      const auto& p = event[i];
-
-      if (!p.isFinal() || !p.isHadron())
-        continue;
-
-      if (endIsDiquark && !pd.isBaryon(p.id()))
-        continue;
-
-      // Flavour containment check (ignore sign)
-      const PdgCode had = PdgCode::from_decimal(p.id());
-      bool ok = true;
-      for (int k = 0; k < nreq; ++k) {
-        if (!had.contains_quark(req[k])) {
-          ok = false;
-          break;
+  auto find_edge_hadron = [&](int endpoint, bool forward) -> int {
+    if (forward) {
+      for (auto it = hadrons.rbegin(); it != hadrons.rend(); ++it) {
+        if (accept(endpoint, *it)) {
+          return *it;
         }
       }
-      if (!ok)
-        continue;
-
-      const double score = std::abs(p.pz() - pzEnd);
-      if (score < bestScore) {
-        bestScore = score;
-        bestIdx = i;
+    } else {
+      for (int h : hadrons) {
+        if (accept(endpoint, h)) {
+          return h;
+        }
       }
     }
-    return bestIdx;
+
+    return -1;
   };
 
-  // 3) Tag matching hadrons (still in CM frame, but indices/status are the
-  // same)
-
-  if (is_leading1) {
-    const int h1 = find_best_hadron(idx1);
-    if (h1 >= 0) {
-      event[h1].status(leading_hadron_status_from_endpoint(event[idx1]));
+  auto tag_endpoint = [&](int endpoint, bool forward) {
+    if (!is_leading_parton(event[endpoint])) {
+      return;
     }
-  }
 
-  if (is_leading2) {
-    const int h2 = find_best_hadron(idx2);
-    if (h2 >= 0) {
-      event[h2].status(leading_hadron_status_from_endpoint(event[idx2]));
+    const int hadron = find_edge_hadron(endpoint, forward);
+
+    if (hadron >= 0) {
+      event[hadron].status(
+          leading_hadron_status_from_endpoint(event[endpoint]));
     }
-  }
+  };
 
-  // 4) Boost back
+  auto tag_if_diquark = [&](int endpoint, bool forward) {
+    if (event[endpoint].isDiquark()) {
+      tag_endpoint(endpoint, forward);
+    }
+  };
+
+  auto tag_if_quark = [&](int endpoint, bool forward) {
+    if (!event[endpoint].isDiquark()) {
+      tag_endpoint(endpoint, forward);
+    }
+  };
+
+  tag_if_diquark(backward_endpoint, false);
+  tag_if_diquark(forward_endpoint, true);
+
+  tag_if_quark(backward_endpoint, false);
+  tag_if_quark(forward_endpoint, true);
+
   event.rotbst(toRest.inverse());
 }
 
 // hard non-diffractive
+
 bool StringProcess::next_Hard(ProcessType type) {
   logg[LPythia].debug("Hard non-diff. with ", PDGcodes_[0], " + ", PDGcodes_[1],
                       " at CM energy [GeV] ", sqrtsAB_);
@@ -1142,7 +1109,7 @@ bool StringProcess::next_Hard(ProcessType type) {
     if (valance_tags[p.index()] && p.isFinal()) {
       p.statusCode(static_cast<int>(p.isDiquark()
                                         ? LeadingStatus::LEADING_DIQUARK
-                                        : LeadingStatus::LEADING_PARTON));
+                                        : LeadingStatus::LEADING_QUARK));
     }
   }
 

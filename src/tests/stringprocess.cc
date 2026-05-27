@@ -9,6 +9,8 @@
 
 #include "vir/test.h"  // This include has to be first
 
+#include "smash/stringprocess.h"
+
 #include <iostream>
 
 #include "Pythia8/Pythia.h"
@@ -716,4 +718,129 @@ TEST(string_scaling_factors) {
   COMPARE(outgoing[2].initial_xsec_scaling_factor(), 0.);
   COMPARE(outgoing[3].initial_xsec_scaling_factor(), coherence_factor / 3.);
   VERIFY(outgoing[3] == c);
+}
+
+TEST(string_tag_leading_hadrons) {
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
+
+  Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
+  pythia.readString("Print:quiet = on");
+  pythia.readString("ProcessLevel:all = off");
+  pythia.init();
+
+  Pythia8::Event event;
+  event.init("test event", &pythia.particleData);
+
+  const int leading_quark =
+      static_cast<int>(StringProcess::LeadingStatus::LEADING_QUARK);
+  const int leading_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::LEADING_DIQUARK);
+  const int from_quark =
+      static_cast<int>(StringProcess::LeadingStatus::FROM_LEADING_QUARK);
+  const int from_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::FROM_LEADING_DIQUARK);
+
+  event.append(90, -11, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 3.0, 3.0);
+
+  const int diquark = event.append(2203, -leading_diquark, 0, 0, 0, 0, 0, 101,
+                                   0.0, 0.0, 1.0, 1.3, 0.771);
+
+  const int quark = event.append(1, -leading_quark, 0, 0, 0, 0, 101, 0, 0.0,
+                                 0.0, -1.0, 1.1, 0.330);
+
+  const int forward_meson = event.append(113, 83, diquark, quark, 0, 0, 0, 0,
+                                         0.0, 0.0, 0.80, 0.90, 0.775);
+
+  const int forward_baryon = event.append(2214, 83, diquark, quark, 0, 0, 0, 0,
+                                          0.0, 0.0, 0.40, 1.30, 1.232);
+
+  const int backward_baryon = event.append(2112, 83, diquark, quark, 0, 0, 0, 0,
+                                           0.0, 0.0, -0.50, 1.10, 0.938);
+
+  sp->tag_leading_hadrons(event);
+
+  VERIFY(event[forward_meson].statusAbs() != from_diquark);
+  VERIFY(event[forward_baryon].statusAbs() == from_diquark);
+  VERIFY(event[backward_baryon].statusAbs() == from_quark);
+}
+
+TEST(string_tag_leading_hadrons_antidiquark) {
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
+
+  Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
+  pythia.readString("Print:quiet = on");
+  pythia.readString("ProcessLevel:all = off");
+  pythia.init();
+
+  Pythia8::Event event;
+  event.init("test event", &pythia.particleData);
+
+  const int leading_quark =
+      static_cast<int>(StringProcess::LeadingStatus::LEADING_QUARK);
+  const int leading_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::LEADING_DIQUARK);
+  const int from_quark =
+      static_cast<int>(StringProcess::LeadingStatus::FROM_LEADING_QUARK);
+  const int from_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::FROM_LEADING_DIQUARK);
+
+  event.append(90, -11, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 3.0, 3.0);
+
+  const int quark = event.append(-1, -leading_quark, 0, 0, 0, 0, 0, 101, 0.0,
+                                 0.0, -1.0, 1.1, 0.330);
+
+  const int antidiquark = event.append(-2103, -leading_diquark, 0, 0, 0, 0, 101,
+                                       0, 0.0, 0.0, 1.0, 1.3, 0.771);
+
+  const int forward_baryon_wrong_sign = event.append(
+      2214, 83, quark, antidiquark, 0, 0, 0, 0, 0.0, 0.0, 0.80, 1.30, 1.232);
+
+  const int forward_antibaryon = event.append(
+      -2112, 83, quark, antidiquark, 0, 0, 0, 0, 0.0, 0.0, 0.40, 1.10, 0.938);
+
+  const int backward_meson = event.append(111, 83, quark, antidiquark, 0, 0, 0,
+                                          0, 0.0, 0.0, -0.50, 0.20, 0.138);
+
+  sp->tag_leading_hadrons(event);
+
+  VERIFY(event[forward_baryon_wrong_sign].statusAbs() != from_diquark);
+  VERIFY(event[forward_antibaryon].statusAbs() == from_diquark);
+  VERIFY(event[backward_meson].statusAbs() == from_quark);
+}
+
+TEST(string_tag_leading_hadrons_no_overwrite) {
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
+
+  Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
+  pythia.readString("Print:quiet = on");
+  pythia.readString("ProcessLevel:all = off");
+  pythia.init();
+
+  Pythia8::Event event;
+  event.init("test event", &pythia.particleData);
+
+  const int leading_quark =
+      static_cast<int>(StringProcess::LeadingStatus::LEADING_QUARK);
+  const int leading_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::LEADING_DIQUARK);
+  const int from_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::FROM_LEADING_DIQUARK);
+
+  event.append(90, -11, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 2.0, 2.0);
+
+  const int diquark = event.append(2103, -leading_diquark, 0, 0, 0, 0, 0, 101,
+                                   0.0, 0.0, 1.0, 1.2, 0.771);
+
+  const int quark = event.append(1, -leading_quark, 0, 0, 0, 0, 101, 0, 0.0,
+                                 0.0, -1.0, 1.0, 0.330);
+
+  const int only_baryon = event.append(2112, 83, diquark, quark, 0, 0, 0, 0,
+                                       0.0, 0.0, 0.20, 1.10, 0.938);
+
+  sp->tag_leading_hadrons(event);
+
+  VERIFY(event[only_baryon].statusAbs() == from_diquark);
 }
