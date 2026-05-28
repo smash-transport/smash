@@ -24,6 +24,10 @@ add_executable(example_rate_equations example_rate_equations.cc)
 add_executable(example_smash_wrapper example_smash_wrapper.cc)
 
 find_package(SMASH 3.3 REQUIRED COMPONENTS Core) # Possible components: Core, ROOT, HepMC3, Rivet
+
+# Using REQUIRED here above the if-else here is unnecessary, but we keep it for demonstration
+# purposes. If you want to handle the case where SMASH is not found, you can remove the REQUIRED
+# keyword and keep the if-else block to check for SMASH_FOUND.
 if(SMASH_FOUND)
     # Finding SMASH sets SMASH_INPUT_FILES_DIR CMake variable
     target_compile_definitions(project_requirements

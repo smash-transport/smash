@@ -261,7 +261,7 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
 endif()
 
 option(TRY_USE_RIVET "Turn this off to disable Rivet output support in SMASH." ON)
-set(SMASH_USE_Rivet OFF) # For SMASHCONFIG.cmake file
+set(SMASH_USE_Rivet OFF) # For SMASHConfig.cmake file
 if(TRY_USE_RIVET AND HepMC3_FOUND)
     find_package(Rivet QUIET) # Min version not handled here but after to better inform user
     set(Rivet_MINIMUM_VERSION "3.1") # Also for SMASHConfig.cmake file
@@ -519,7 +519,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SMASHConfig.cmake DESTINATION share/cm
 
 # Install targets and files. Note that we do not only install the shared library target, but also
 # the API interface and the usage requirements interface, since this chain of dependencies will be
-# needed by clients using the smash libraries in a CMake proect.
+# needed by clients using the smash libraries in a CMake project.
 install(TARGETS smash_shared smash_api smash_project_usage_requirements
         EXPORT SMASH-targets-core
         LIBRARY DESTINATION lib
@@ -528,7 +528,8 @@ install(TARGETS smash_shared smash_api smash_project_usage_requirements
 # Note that the absent trailing slash in the DIRECTORY argument is crucial to create an additional
 # "smash" folder at destination!
 install(FILES ${generated_headers} DESTINATION "include/smash")
-install(DIRECTORY include/smash DESTINATION include PATTERN "*.h.in" EXCLUDE)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/smash" DESTINATION include PATTERN "*.h.in"
+                                                                                          EXCLUDE)
 install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION include)
 # Copy SMASH executable to installation bin folder
 install(PROGRAMS $<TARGET_FILE_NAME:smash> DESTINATION bin)

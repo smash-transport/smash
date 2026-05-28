@@ -16,7 +16,7 @@ include(CMakeFindDependencyMacro)
 # the information about installed input files. Keep dependencies names as they are in variable names
 # to be able to use functions later. Note that according to the official CMake documentation
 # (https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html) it should be fine
-# using PACKAGE_PREFIX_DIR here, because there has been no find_dependency() call so far. Thus is
+# using PACKAGE_PREFIX_DIR here, because there has been no find_dependency() call so far. This is
 # relevant in CMake versions before 3.30 and it is worth remarking it because we now require 3.28
 # only.
 set(SMASH_INPUT_FILES_DIR "${PACKAGE_PREFIX_DIR}/share/input_files")
@@ -69,16 +69,16 @@ endif()
 # This is what SMASH is supposed to provide and how the components are handled in this file:
 #
 #    Component    Targets-file                  Provides
-#   ---------------------------------------------------------------
+#   -----------------------------------------------------------------
 #      Core       SMASH-targets-core.cmake      SMASH::smash
-#   ---------------------------------------------------------------
+#   -----------------------------------------------------------------
 #      ROOT       SMASH-targets-root.cmake      SMASH::smash_root
-#   ---------------------------------------------------------------
-#      HepMC3     SMASH-targets-hepmc.cmake     SMASH::smash_hepmc
-#   ---------------------------------------------------------------
-#      Rivet      SMASH-targets-hepmc.cmake     SMASH::smash_hepmc
+#   -----------------------------------------------------------------
+#      HepMC3     SMASH-targets-hepmc3.cmake    SMASH::smash_hepmc3
+#   -----------------------------------------------------------------
+#      Rivet      SMASH-targets-hepmc3.cmake    SMASH::smash_hepmc3
 #                 SMASH-targets-rivet.cmake     SMASH::smash_rivet
-#   ---------------------------------------------------------------
+#   -----------------------------------------------------------------
 #
 # where Core component is the default one and it is always shipped when installing SMASH.
 #
