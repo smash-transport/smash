@@ -149,12 +149,12 @@ static std::string join_impl(const std::vector<StringLike> &v,
   return result;
 }
 
-std::string join(const std::vector<std::string> &v, const std::string &delim) {
+std::string join(const std::vector<std::string> &v, std::string_view delim) {
   return join_impl(v, delim);
 }
 
 std::string join(const std::vector<std::string_view> &v,
-                 const std::string &delim) {
+                 std::string_view delim) {
   return join_impl(v, delim);
 }
 
