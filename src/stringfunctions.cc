@@ -124,20 +124,38 @@ std::vector<std::string> split(const std::string &s, char delim) {
   return elems;
 }
 
+template <typename StringLike>
+static std::string join_impl(const std::vector<StringLike> &v,
+                             std::string_view delim) {
+  /* Here this is not really needed as the developer calls this function with
+   * the appropriate types, but it is ready to be moved to the header one day */
+  static_assert(
+      std::is_convertible_v<StringLike, std::string_view>,
+      "join() requires string-like objects convertible to std::string_view!");
+  if (v.empty()) {
+    return {};
+  }
+  std::size_t total_size = delim.size() * (v.size() - 1);
+  for (const auto &s : v) {
+    total_size += std::string_view{s}.size();
+  }
+  std::string result{};
+  result.reserve(total_size);
+  result.append(std::string_view{v.front()});
+  for (std::size_t i = 1u; i < v.size(); ++i) {
+    result.append(delim);
+    result.append(std::string_view{v[i]});
+  }
+  return result;
+}
+
 std::string join(const std::vector<std::string> &v, const std::string &delim) {
-  return std::accumulate(std::begin(v), std::end(v), std::string{},
-                         [&delim](const std::string &ss, const std::string &s) {
-                           return ss.empty() ? s : ss + delim + s;
-                         });
+  return join_impl(v, delim);
 }
 
 std::string join(const std::vector<std::string_view> &v,
                  const std::string &delim) {
-  return std::accumulate(
-      std::begin(v), std::end(v), std::string{},
-      [&delim](const std::string &ss, const std::string_view &s) {
-        return ss.empty() ? std::string{s} : ss + delim + std::string{s};
-      });
+  return join_impl(v, delim);
 }
 
 std::string quote(const std::string &s) { return "\"" + s + "\""; }
