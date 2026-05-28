@@ -2347,7 +2347,7 @@ struct InputKeys {
       InputSections::c_heavyFlavor + "AQM_Bottom_Suppression",
       0.93,
       {"3.2"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value >= 0.0 && value <= 1.0;
       }};
 
@@ -2366,7 +2366,7 @@ struct InputKeys {
       InputSections::c_heavyFlavor + "AQM_Charm_Suppression",
       0.8,
       {"3.2"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value >= 0.0 && value <= 1.0;
       }};
 
@@ -2388,7 +2388,7 @@ struct InputKeys {
       InputSections::collisionTerm + "Additional_Elastic_Cross_Section",
       0.0,
       {"2.0"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         if (value < 0.0 || value > 300.0) {
           logg[LogArea::Configuration::id].warn(
               "The additional elastic cross section is set to a value that is "
@@ -2465,7 +2465,7 @@ struct InputKeys {
       InputSections::collisionTerm + "Cross_Section_Scaling",
       1.0,
       {"2.0"},
-      [](const double& value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2484,7 +2484,7 @@ struct InputKeys {
       InputSections::collisionTerm + "Elastic_Cross_Section",
       -1.0,
       {"1.2"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value > 0.0 || value == -1.0;
       }};
 
@@ -2508,7 +2508,7 @@ struct InputKeys {
       InputSections::collisionTerm + "Elastic_NN_Cutoff_Sqrts",
       1.98,
       {"1.0"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value >= 2 * nucleon_mass &&
                value <= 2 * nucleon_mass + pion_mass;
       }};
@@ -2530,7 +2530,7 @@ struct InputKeys {
       InputSections::collisionTerm + "Fixed_Min_Cell_Length",
       2.5,
       {"2.1"},
-      [](const double& value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
@@ -2694,7 +2694,7 @@ struct InputKeys {
       InputSections::collisionTerm + "Maximum_Cross_Section",
       DefaultType::Dependent,
       {"2.0"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         if ((value < 200 && value > 0) || value > 2000) {
           logg[LogArea::Configuration::id].warn(
               "The maximum cross section is set to a value that is either "
@@ -2878,15 +2878,7 @@ struct InputKeys {
       InputSections::collisionTerm + "Resonance_Lifetime_Modifier",
       1.0,
       {"1.8"},
-      [](const double& value) noexcept {
-        if (value > 0.0 && value < really_small) {
-          logg[LogArea::Configuration::id].warn(
-              "The resonance lifetime modifier is set to a value that is very "
-              "small, which may lead SMASH to hang.\nMake sure that this is "
-              "intended.");
-        }
-        return value > 0.0;
-      }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_spin_interactions
@@ -3142,7 +3134,7 @@ struct InputKeys {
       InputSections::c_pauliBlocking + "Gaussian_Cutoff",
       2.2,
       {"0.7.1"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value >= 1.0 && value <= 10.0;
       }};
 
@@ -3161,7 +3153,7 @@ struct InputKeys {
           InputSections::c_pauliBlocking + "Momentum_Averaging_Radius",
           0.08,
           {"0.7.1"},
-          [](const double& value) noexcept { return value > 0.0; }};
+          [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
@@ -3178,7 +3170,7 @@ struct InputKeys {
       InputSections::c_pauliBlocking + "Spatial_Averaging_Radius",
       1.86,
       {"0.7.1"},
-      [](const double& value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
@@ -3248,7 +3240,7 @@ struct InputKeys {
           InputSections::c_stringTransition + "Sqrts_Range_NN",
           std::make_pair(3.5, 4.5),
           {"3.0"},
-          [](const std::pair<double, double>& value) noexcept {
+          [](const std::pair<double, double> &value) noexcept {
             const bool valid =
                 value.first >= 2 * nucleon_mass && value.first < value.second;
             if (valid && std::abs(value.second - value.first) != 1.0) {
@@ -3276,7 +3268,7 @@ struct InputKeys {
           InputSections::c_stringTransition + "Sqrts_Range_Npi",
           std::make_pair(1.9, 2.2),
           {"3.0"},
-          [](const std::pair<double, double>& value) noexcept {
+          [](const std::pair<double, double> &value) noexcept {
             return value.first >= nucleon_mass + pion_mass &&
                    value.first < value.second;
           }};
@@ -3313,7 +3305,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "Diquark_Supp",
       0.036,
       {"1.3"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value >= 0.0 && value <= 1.0;
       }};
 
@@ -3332,7 +3324,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "Form_Time_Factor",
       1.0,
       {"1.4"},
-      [](const double& value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3347,7 +3339,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "Formation_Time",
       1.0,
       {"1.0"},
-      [](const double& value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3363,7 +3355,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "Gluon_Beta",
       0.5,
       {"1.3"},
-      [](const double& value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3380,7 +3372,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "Gluon_Pmin",
       0.001,
       {"1.3"},
-      [](const double& value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3414,7 +3406,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "Quark_Alpha",
       2.0,
       {"1.3"},
-      [](const double& value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3430,7 +3422,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "Quark_Beta",
       7.0,
       {"1.3"},
-      [](const double& value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3449,7 +3441,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "Popcorn_Rate",
       0.15,
       {"1.6"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value >= 0.0 && value <= 1.0;
       }};
 
@@ -3489,7 +3481,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "Prob_proton_to_d_uu",
       1.0 / 3,
       {"1.5"},
-      [](const double& value) noexcept { return value > 0.0 && value <= 1.0; }};
+      [](const double &value) noexcept { return value > 0.0 && value <= 1.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3527,7 +3519,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "Sigma_Perp",
       0.42,
       {"1.3"},
-      [](const double& value) noexcept { return value > 0.0; }};
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3549,7 +3541,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "Strange_Supp",
       0.16,
       {"1.3"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value >= 0.0 && value <= 1.0;
       }};
 
@@ -3568,7 +3560,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "String_Sigma_T",
       0.5,
       {"1.3"},
-      [](const double& value) noexcept { return value > 0.0 && value < 1.0; }};
+      [](const double &value) noexcept { return value > 0.0 && value < 1.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3587,7 +3579,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "String_Tension",
       1.0,
       {"1.3"},
-      [](const double& value) noexcept { return value >= 0.0; }};
+      [](const double &value) noexcept { return value >= 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3604,7 +3596,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "StringZ_A",
       2.0,
       {"1.3"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value >= 0.0 && value <= 2.0;
       }};
 
@@ -3624,7 +3616,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "StringZ_A_Leading",
       0.2,
       {"1.6"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value >= 0.0 && value <= 2.0;
       }};
 
@@ -3643,7 +3635,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "StringZ_B",
       0.55,
       {"1.3"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value >= 0.0 && value <= 2.0;
       }};
 
@@ -3664,7 +3656,7 @@ struct InputKeys {
       InputSections::c_stringParameters + "StringZ_B_Leading",
       2.0,
       {"1.6"},
-      [](const double& value) noexcept {
+      [](const double &value) noexcept {
         return value >= 0.0 && value <= 2.0;
       }};
 
@@ -3776,8 +3768,8 @@ struct InputKeys {
   inline static const Key<int> collTerm_photons_fractionalPhotons{
       InputSections::c_photons + "Fractional_Photons",
       {"1.8"},
-      [](const int& value) noexcept {
-        if (value > 10'000) {
+      [](const int &value) noexcept {
+        if (value > 100'000) {
           logg[LogArea::Configuration::id].warn(
               "The number of fractional photons per perturbatively produced "
               "photon is set to a very large value, which may lead to long\n"
