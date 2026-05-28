@@ -68,12 +68,12 @@ struct Section {
   /**
    * Construct a new section
    *
-   * \param name The name of the section
-   * \param parent A pointer to the parent section
+   * \param name_in The name of the section
+   * \param parent_in A pointer to the parent section
    */
-  explicit constexpr Section(std::string_view name,
-                             const Section *parent = nullptr)
-      : parent{parent}, name{name} {}
+  explicit constexpr Section(std::string_view name_in,
+                             const Section *parent_in = nullptr)
+      : parent{parent_in}, name{name_in} {}
 
   /**
    * Convert the section to a list of labels
