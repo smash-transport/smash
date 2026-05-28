@@ -56,7 +56,7 @@ TEST(split) {
   COMPARE(storage[2], "_is_pion_");
 }
 
-TEST(join) {
+TEST(join_vector) {
   const std::vector<std::string> v = {"Hello", "my", "SMASHies!"};
   const std::string j1 = "Hello my SMASHies!";
   const std::string j2 = "Hello__my__SMASHies!";
@@ -64,7 +64,17 @@ TEST(join) {
   COMPARE(join(v, "__"), j2);
 }
 
-TEST(join_from_views) {
+TEST(join_set) {
+  /* Remember that std::set is ordered with std::less by default, so the strings
+   * will be sorted in lexicographical order. */
+  const std::set<std::string> s = {"Hello", "my", "SMASHies!"};
+  const std::string j1 = "Hello SMASHies! my";
+  const std::string j2 = "Hello__SMASHies!__my";
+  COMPARE(join(s, " "), j1);
+  COMPARE(join(s, "__"), j2);
+}
+
+TEST(join_vector_from_views) {
   const std::vector<std::string_view> v = {"Hello", "my", "SMASHies!"};
   const std::string j1 = "Hello my SMASHies!";
   const std::string j2 = "Hello__my__SMASHies!";
@@ -72,7 +82,7 @@ TEST(join_from_views) {
   COMPARE(join(v, "__"), j2);
 }
 
-TEST(join_from_views_in_local_scope) {
+TEST(join_vector_from_views_in_local_scope) {
   std::vector<std::string_view> v{};
   {
     v.emplace_back("Hello");

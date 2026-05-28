@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_STRINGFUNCTIONS_H_
 
 #include <cstdint>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -58,14 +59,23 @@ std::vector<std::string> split(const std::string &s, char delim);
 std::string join(const std::vector<std::string> &v, std::string_view delim);
 
 /**
- * Join strings using delimiter.
+ * Join string views using delimiter.
  *
- * \param[in] v Strings to be joint.
+ * \param[in] v String views to be joint.
  * \param[in] delim Joining delimiter.
  * \return Joint string.
  */
 std::string join(const std::vector<std::string_view> &v,
                  std::string_view delim);
+
+/**
+ * Join strings using delimiter.
+ *
+ * \param[in] s Strings to be joint.
+ * \param[in] delim Joining delimiter.
+ * \return Joint string.
+ */
+std::string join(const std::set<std::string> &s, std::string_view delim);
 
 /**
  * Add quotes around string.
