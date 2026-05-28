@@ -1482,9 +1482,10 @@ Experiment<Modus>::Experiment(Configuration &config,
           logg[LExperiment].fatal() << "Unspecified list of formats for "
                                     << std::quoted(content) << " content.";
           abort_because_of_invalid_input_file();
-          return {}; /* This is never reached, but it is needed to avoid
-                       compiler warnings about missing return statement. In
-                       C++23 the [[noreturn]] attribute can be used on lamdas */
+          /* This is never reached, but it is needed to avoid compiler warnings
+           * about missing return statement. In C++23 the [[noreturn]] attribute
+           * can be used on lambda functions after the capturing brackets. */
+          return {};
         }
       });
   const OutputParameters output_parameters(std::move(output_conf));
