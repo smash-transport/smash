@@ -6086,14 +6086,24 @@ struct InputKeys {
    *
    * Number of cells in x, y, z directions.
    *
-   * \note Lattice is used to calculate physical quantities like density and the
-   * choice of the number of cells might affect the results. A too small number
-   * of cells may lead to inaccurate results, becuase the size of the cells
-   * enters the physical calculation (quantities at the neigbour lattice sizes
-   * of a given point are considered). This aspect is clearly related to the
-   * choice of the <tt>\ref key_lattice_sizes_ "Sizes"</tt> key and  these two
-   * keys should be chosen together. Make sure to choose the lattice geometry
-   * carefully and check the results for convergence with respect to it.
+   * \attention Lattice is used to calculate bulk quantities such as baryon
+   * density or energy density. The choice of the number of cells, together with
+   * the chosen lattice size, affects the results: too coarse of a lattice will
+   * average over large volumes of space (which may yield dubious results),
+   * while too fine of a lattice may lead the calculation toward Poisson-like
+   * noise (because there is not enough particles to provide the necessary
+   * statistics). As guidance, one can argue that microscopic hadronic transport
+   * should resolve structures on the order of about 1 fm, so that one should
+   * choose lattice cell number and lattice size that result in cell size of
+   * about 1 fm. Using lattices corresponding to larger cell sizes can be fine
+   * if this is what is intended. Using lattices with cell sizes of about 0.5 fm
+   * may be risky, and smaller lattice sizes are not not advised.
+   *
+   * \note A too large number of cells can lead to long runtime and/or large
+   * memory usage. This aspect is clearly related to the choice of the <tt>\ref
+   * key_lattice_sizes_ "Sizes"</tt> key and these two keys should be chosen
+   * together. Make sure to choose the lattice geometry carefully and check the
+   * results for convergence with respect to it.
    */
   /**
    * \see_key{key_lattice_cell_number_}
@@ -6179,15 +6189,15 @@ struct InputKeys {
    *
    * Sizes of lattice in x, y, z directions \unit{in fm}.
    *
-   * \note Lattice is used to calculate physical quantities like density and the
-   * choice of its size can have a significant impact on the results. A too
-   * small lattice size may lead to inaccurate results, becuase part of the
-   * system might not be covered, while a too large lattice size may lead to
-   * long runtime and large memory usage. This latter aspect is clearly related
-   * to the choice of the <tt>\ref key_lattice_cell_number_ "Cell_Number"</tt>
-   * key and  these two keys should be chosen together. Make sure to choose the
-   * lattice geometry carefully and check the results for convergence with
-   * respect to it.
+   * \note Lattice is used to calculate bulk quantities such as baryon
+   * density or energy density and the choice of its size can have a significant
+   * impact on the results. A too small lattice size may lead to inaccurate
+   * results, becuase part of the system might not be covered, while a too large
+   * lattice size may lead to long runtime and large memory usage, depending on
+   * the value of the <tt>\ref key_lattice_cell_number_ "Cell_Number"</tt> key.
+   * These two keys should be chosen together. Make sure to choose the lattice
+   * geometry carefully and check the results for convergence with respect to
+   * it.
    */
   /**
    * \see_key{key_lattice_sizes_}
