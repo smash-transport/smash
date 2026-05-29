@@ -3711,7 +3711,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key{key_MC_PT_diffusiveness_,Diffusiveness,double,
-   * </tt>\f$d(A)\f$<tt>, \f$0<d<1\f$}
+   * </tt>\f$d(A)\f$<tt>, \f$0\le d \le1\f$}
    *
    * Diffusiveness of the Woods-Saxon distribution for the nucleus \unit{in fm}.
    * In general, the default value is
@@ -3731,7 +3731,7 @@ struct InputKeys {
       InputSections::m_c_projectile + "Diffusiveness",
       DefaultType::Dependent,
       {"0.90"},
-      [](const double &value) noexcept { return value > 0 && value < 1; }};
+      [](const double &value) noexcept { return value >= 0 && value <= 1; }};
   /**
    * \see_key{key_MC_PT_diffusiveness_}
    */
@@ -3739,7 +3739,7 @@ struct InputKeys {
       InputSections::m_c_target + "Diffusiveness",
       DefaultType::Dependent,
       {"0.90"},
-      [](const double &value) noexcept { return value > 0 && value < 1; }};
+      [](const double &value) noexcept { return value >= 0 && value <= 1; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3814,7 +3814,8 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key{key_MC_PT_saturation_density_,Saturation_Density,double,
-   * </tt>\f$\int\rho(r)\:\mathrm{d}^3r=N_{nucleons}\f$<tt>,\f$0.1<\rho<0.2\f$}
+   * </tt>\f$\int\rho(r)\:\mathrm{d}^3r=N_{nucleons}\f$<tt>,
+   * \f$0.1\le\rho\le0.2\f$}
    *
    * Saturation density of the nucleus \unit{in 1/fm³}.
    * If not any value is specified, the saturation density is calculated such
@@ -3828,7 +3829,9 @@ struct InputKeys {
       InputSections::m_c_projectile + "Saturation_Density",
       DefaultType::Dependent,
       {"0.50"},
-      [](const double &value) noexcept { return value > 0.1 && value < 0.2; }};
+      [](const double &value) noexcept {
+        return value >= 0.1 && value <= 0.2;
+      }};
   /**
    * \see_key{key_MC_PT_saturation_density_}
    */
@@ -3836,7 +3839,9 @@ struct InputKeys {
       InputSections::m_c_target + "Saturation_Density",
       DefaultType::Dependent,
       {"0.50"},
-      [](const double &value) noexcept { return value > 0.1 && value < 0.2; }};
+      [](const double &value) noexcept {
+        return value >= 0.1 && value <= 0.2;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -4035,7 +4040,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_betaII_,Beta_2,double,0.0,
-   * \f$-1<\beta_2<2\f$}
+   * \f$-1\le\beta_2\le1\f$}
    *
    * The deformation coefficient \f$\beta_2\f$ for the spherical harmonic
    * \f$Y_2^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
@@ -4047,7 +4052,7 @@ struct InputKeys {
       InputSections::m_c_p_deformed + "Beta_2",
       0.0,
       {"1.5"},
-      [](const double &value) noexcept { return value > -1 && value < 2; }};
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
   /**
    * \see_key{key_MC_PT_deformed_betaII_}
    */
@@ -4055,12 +4060,12 @@ struct InputKeys {
       InputSections::m_c_t_deformed + "Beta_2",
       InputKeys::modi_collider_projectile_deformed_beta2.default_value(),
       {"1.5"},
-      [](const double &value) noexcept { return value > -1 && value < 2; }};
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_betaIII_,Beta_3,double,0.0,
-   * \f$-1<\beta_3<2\f$}
+   * \f$-1\le\beta_3\le1\f$}
    *
    * The deformation coefficient \f$\beta_3\f$ for the spherical harmonic
    * \f$Y_3^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
@@ -4072,7 +4077,7 @@ struct InputKeys {
       InputSections::m_c_p_deformed + "Beta_3",
       0.0,
       {"3.0"},
-      [](const double &value) noexcept { return value > -1 && value < 2; }};
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
   /**
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
@@ -4080,12 +4085,12 @@ struct InputKeys {
       InputSections::m_c_t_deformed + "Beta_3",
       InputKeys::modi_collider_projectile_deformed_beta3.default_value(),
       {"3.0"},
-      [](const double &value) noexcept { return value > -1 && value < 2; }};
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_betaIV_,Beta_4,double,0.0,
-   * \f$-1<\beta_4<2\f$}
+   * \f$-1\le\beta_4\le1\f$}
    *
    * The deformation coefficient \f$\beta_4\f$ for the spherical harmonic
    * \f$Y_4^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
@@ -4097,7 +4102,7 @@ struct InputKeys {
       InputSections::m_c_p_deformed + "Beta_4",
       0.0,
       {"1.5"},
-      [](const double &value) noexcept { return value > -1 && value < 2; }};
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
   /**
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
@@ -4105,12 +4110,12 @@ struct InputKeys {
       InputSections::m_c_t_deformed + "Beta_4",
       InputKeys::modi_collider_projectile_deformed_beta4.default_value(),
       {"1.5"},
-      [](const double &value) noexcept { return value > -1 && value < 2; }};
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key_no_line{key_MC_PT_deformed_gamma_,Gamma,double,0.0,
-   * \f$0\le\gamma\le\frac{\pi}{3}\f$}
+   * \f$0\le\gamma\le\pi\f$}
    *
    * The parameter describes triaxiality \f$\gamma\f$ of the nucleus in
    * \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
@@ -4122,9 +4127,7 @@ struct InputKeys {
       InputSections::m_c_p_deformed + "Gamma",
       0.0,
       {"3.0"},
-      [](const double &value) noexcept {
-        return value >= 0 && value <= M_PI / 3;
-      }};
+      [](const double &value) noexcept { return value >= 0 && value <= M_PI; }};
   /**
    * \see_key{key_MC_PT_deformed_gamma_}
    */
@@ -4132,9 +4135,7 @@ struct InputKeys {
       InputSections::m_c_t_deformed + "Gamma",
       InputKeys::modi_collider_projectile_deformed_gamma.default_value(),
       {"3.0"},
-      [](const double &value) noexcept {
-        return value >= 0 && value <= M_PI / 3;
-      }};
+      [](const double &value) noexcept { return value >= 0 && value <= M_PI; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -4358,7 +4359,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
    * \optional_key{key_MC_impact_range_,Range,list of two doubles,[0.0\,0.0],
-   * \f$x_i>0\f$}
+   * \f$x_i\ge0\f$}
    *
    * A list of minimal and maximal impact parameters \unit{in fm} between which
    * \f$b\f$ should be chosen. The order of these is not important.

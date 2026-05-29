@@ -166,12 +166,12 @@ TEST(deformation_parameters_from_config) {
           Radius: 2.0
           Deformed:
             Beta_2: 1
-            Beta_4: 1.9
+            Beta_4: 0.9
   )"};
   // verifies if the beta values have been transcribed correctly
   DeformedNucleus dnucleus(conf, 1, false);
   VERIFY(dnucleus.get_beta2() == 1);
-  VERIFY(dnucleus.get_beta4() == 1.9);
+  VERIFY(dnucleus.get_beta4() == 0.9);
 }
 
 TEST(set_deformation_parameters_automatic) {

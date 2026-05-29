@@ -23,7 +23,7 @@ Modi:
             Radius: 2.0
             Deformed:
                 Automatic: False
-                Beta_2: 1.5
+                Beta_2: -0.5
                 Beta_4: 0.5
             Orientation:
                 Theta: 0.8
@@ -36,7 +36,7 @@ Modi:
             Radius: 2.0
             Deformed:
                 Automatic: False
-                Beta_2: 1.5
+                Beta_2: -0.5
                 Beta_4: 0.5
             Orientation:
                 Random_Rotation: True
