@@ -1397,7 +1397,7 @@ class Configuration {
         return SpinInteractionType::Off;
       throw IncorrectTypeInAssignment("The value for key \"" +
                                       std::string(key_) + "\" should be " +
-                                      "\"On\", \"Off\" " + "or \"Elastic\".");
+                                      "\"On\" or \"Off\".");
     }
 
     /**

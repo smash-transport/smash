@@ -80,12 +80,12 @@ void ScatterAction::generate_final_state() {
     case ProcessType::TwoToOne:
       /* resonance formation */
       resonance_formation();
+      spin_interaction();
       break;
     case ProcessType::TwoToTwo:
       /* 2->2 inelastic scattering */
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
-      spin_interaction();
       break;
     case ProcessType::TwoToThree:
     case ProcessType::TwoToFour:
