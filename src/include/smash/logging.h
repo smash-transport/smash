@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2023
+ *    Copyright (c) 2014-2023,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -220,11 +220,30 @@ FormattingHelper<T> format(const T &value, const char *unit, int width = -1,
 }
 
 /**
- * An array that stores all pre-configured Logger objects. The objects can be
- * accessed via the logger function.
+ * Return the globally shared logger array.
+ *
+ * The array is initialized on first use to avoid static initialization order
+ * issues across translation units.
  */
-extern std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
-    logg;
+std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
+    &get_loggers();
+
+/**
+ * An array that stores all pre-configured Logger objects.
+ *
+ * To access its elements use `logg[LAreaName]` where `LAreaName` is the
+ * respective area identifier declared in the smash namespace of the file
+ * containing the log statement.
+ *
+ * Note that `LAreaName` needs to be declared within the smash namespace of
+ * the respective file in a form of (using PauliBlocking as an example area):
+ * \code
+ * static constexpr int LPauliBlocking = LogArea::PauliBlocking::id;
+ * \endcode
+ */
+inline std::array<einhard::Logger<>, std::tuple_size<LogArea::AreaTuple>::value>
+    &logg = get_loggers();
+
 }  // namespace smash
 
 namespace YAML {

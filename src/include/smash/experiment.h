@@ -1283,10 +1283,10 @@ Experiment<Modus>::Experiment(Configuration &config,
    *   - There are many different programs that can open a VTK file, although
    *     their functionality varies.
    *   - This output can be for example visualized with
-   *     <a href="http://paraview.org/">Paraview</a>. Alternatives are e.g.
+   *     <a href="http://paraview.org/">ParaView</a>. Alternatives are, e.g.,
    *     <a href=https://docs.enthought.com/mayavi/mayavi/data.html>Mayavi</a>
-   *     or <a
-   *     href=https://reference.wolfram.com/language/ref/format/VTK.html>Mathematica</a>.
+   *     or <a href=https://reference.wolfram.com/language/ref/format/VTK.html>
+   *     Mathematica</a>.
    *   - Visit \ref doxypage_output_vtk for further information
    * - \b "HepMC_asciiv3", \b "HepMC_treeroot" - HepMC3 human-readble asciiv3 or
    *   Tree ROOT format see \ref doxypage_output_hepmc for details
@@ -1565,16 +1565,8 @@ Experiment<Modus>::Experiment(Configuration &config,
     } else if (std::set<std::string> tmp_set(list_of_formats[i].begin(),
                                              list_of_formats[i].end());
                list_of_formats[i].size() != tmp_set.size()) {
-      auto join_container = [](const auto &container) {
-        std::string result{};
-        std::for_each(container.cbegin(), container.cend(),
-                      [&result](const std::string s) {
-                        result += (result == "") ? s : ", " + s;
-                      });
-        return result;
-      };
-      const std::string old_formats = join_container(list_of_formats[i]),
-                        new_formats = join_container(tmp_set);
+      const std::string old_formats = join(list_of_formats[i], ", "),
+                        new_formats = join(tmp_set, ", ");
       logg[LExperiment].warn()
           << "Found the same output format multiple times for "
           << std::quoted(output_contents[i])

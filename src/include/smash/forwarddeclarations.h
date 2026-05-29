@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -388,6 +388,18 @@ enum class DensityType {
   Isospin3_tot = 5,
   Charge = 6,
   Strangeness = 7,
+};
+
+/// Allows to specify the desired extrapolation type.
+enum class ExtrapolationType {
+  /// No extrapolation is done.
+  None = -1,
+  /// Extrapolate with zero.
+  Zero = 0,
+  /// Extrapolate using a constant value.
+  Constant = 1,
+  /// Extrapolate using a linear approach.
+  Linear = 2,
 };
 
 /// @cond
