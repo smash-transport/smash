@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -553,7 +553,7 @@ inline std::ostream &operator<<(std::ostream &out, const ActionPtr &action) {
  */
 std::ostream &operator<<(std::ostream &out, const ActionList &actions);
 
-namespace details {
+namespace detail {
 /**
  * \brief Implementation of the full n-body phase-space sampling (masses,
  * momenta, angles) in the center-of-mass frame for the final state particles,
@@ -617,7 +617,7 @@ void sample_manybody_phasespace_impl(double sqrts,
  */
 void sample_manybody_phasespace_MCMC(const ParticleTypePtrList &types,
                                      std::vector<FourVector> &sampled_momenta);
-}  // namespace details
+}  // namespace detail
 
 }  // namespace smash
 

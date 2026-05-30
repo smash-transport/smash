@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2024-2025
+ *    Copyright (c) 2024-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -246,7 +246,7 @@ static bool write_in_chunks_produces_same_output(
       formatter.particles_data_chunk(particles);
 
   typename Converter::type multi_chunk;
-  details::write_in_chunk_impl<Converter>(
+  smash::detail::write_in_chunk_impl<Converter>(
       particles, formatter,
       [&](const typename Converter::type& buf) {
         multi_chunk.insert(multi_chunk.end(), buf.begin(), buf.end());

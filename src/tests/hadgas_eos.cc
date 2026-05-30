@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2020,2022,2024-2025
+ *    Copyright (c) 2016-2020,2022,2024-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -15,6 +15,44 @@
 #include "smash/constants.h"
 
 using namespace smash;
+
+TEST(trilinear_interpolation) {
+  const double ax = 0.2;
+  const double ay = 0.3;
+  const double az = 0.4;
+  // Same constant value at every corner
+  FUZZY_COMPARE(smash::detail::interpolate_trilinear(ax, ay, az, 1., 1., 1., 1.,
+                                                     1., 1., 1., 1.),
+                1.);
+  // Linear increase in x-direction
+  FUZZY_COMPARE(smash::detail::interpolate_trilinear(ax, 0., 0., 0., 1., 0., 0.,
+                                                     0., 0., 0., 0.),
+                ax);
+  // Linear increase in y-direction
+  FUZZY_COMPARE(smash::detail::interpolate_trilinear(0., ay, 0., 0., 0., 1., 0.,
+                                                     0., 0., 0., 0.),
+                ay);
+  // Linear increase in z-direction
+  FUZZY_COMPARE(smash::detail::interpolate_trilinear(0., 0., az, 0., 0., 0., 0.,
+                                                     1., 0., 0., 0.),
+                az);
+  // Linear increase in x- and y-direction
+  FUZZY_COMPARE(smash::detail::interpolate_trilinear(ax, ay, 0., 0., 1., 1., 2.,
+                                                     0., 0., 0., 0.),
+                ax + ay);
+  // Linear increase in x- and z-direction
+  FUZZY_COMPARE(smash::detail::interpolate_trilinear(ax, 0., az, 0., 1., 0., 0.,
+                                                     1., 2., 0., 0.),
+                ax + az);
+  // Linear increase in y- and z-direction
+  FUZZY_COMPARE(smash::detail::interpolate_trilinear(0., ay, az, 0., 0., 1., 0.,
+                                                     1., 0., 2., 0.),
+                ay + az);
+  // Cube with linear increase in every direction
+  FUZZY_COMPARE(smash::detail::interpolate_trilinear(ax, ay, az, 0., 1., 1., 2.,
+                                                     1., 2., 2., 3.),
+                ax + ay + az);
+}
 
 TEST(create_particles_table) {
   Test::create_actual_particletypes();

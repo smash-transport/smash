@@ -100,20 +100,19 @@ static void append_list(CollisionBranchList& main_list,
 
 /**
  * Helper function:
- * Throw if elastic cross section between two particles is not implemented.
+ * Throw if cross section between two particles is not implemented.
  *
  * \param[in] data_a incoming particle a
  * \param[in] data_b incoming particle b
  * \param[in] func_name name of the function that encountered the throw
  */
-[[noreturn]] static void throw_elastic_xsec_is_not_implemented(
+[[noreturn]] static void throw_xsec_is_not_implemented(
     const ParticleData& data_a, const ParticleData& data_b,
     const std::string func_name) {
   std::stringstream ss{};
   const ParticleType& a = data_a.type();
   const ParticleType& b = data_b.type();
-  ss << "Elastic cross section for scattering of " << a.name() << " and "
-     << b.name()
+  ss << "Cross section for scattering of " << a.name() << " and " << b.name()
      << " is not implemented in function 'CrossSections::" << func_name << "'.";
   throw std::runtime_error(ss.str());
 }
@@ -573,8 +572,8 @@ double CrossSections::npi_el() const {
       }
       break;
     default:
-      throw_elastic_xsec_is_not_implemented(incoming_particles_[0],
-                                            incoming_particles_[1], __func__);
+      throw_xsec_is_not_implemented(incoming_particles_[0],
+                                    incoming_particles_[1], __func__);
   }
 
   if (sig_el > 0) {
@@ -892,8 +891,8 @@ double CrossSections::nk_el() const {
       }
       break;
     default:
-      throw_elastic_xsec_is_not_implemented(incoming_particles_[0],
-                                            incoming_particles_[1], __func__);
+      throw_xsec_is_not_implemented(incoming_particles_[0],
+                                    incoming_particles_[1], __func__);
   }
 
   if (sig_el > 0) {
@@ -3193,24 +3192,20 @@ double CrossSections::string_probability(
                      finder_parameters.transition_high_energy.sqrts_range_width;
     }
 
-    if (sqrt_s_ > region_upper) {
-      return 1.;
-    } else if (sqrt_s_ < region_lower) {
-      return 0.;
-    } else {
-      // Rescale transition region to [-1, 1]
-      return interpolation_at_sqrts(region_lower, region_upper);
-    }
+    return interpolation_at_sqrts(region_lower, region_upper);
   }
 }
 
 double CrossSections::interpolation_at_sqrts(double region_lower,
                                              double region_upper) const {
-  if (sqrt_s_ < region_lower)
-    return 0.0;
-  if (sqrt_s_ > region_upper)
-    return 1.0;
+  if (sqrt_s_ < region_lower) {
+    return 0.;
+  } else if (sqrt_s_ > region_upper) {
+    return 1.;
+  }
 
+  /* Map sqrt_s_ from [region_lower, region_upper] to [-0.5, 0.5] that
+   * sin(pi * x) goes from -1 to 1 leading to a probability within 0 and 1. */
   const double x = (sqrt_s_ - 0.5 * (region_lower + region_upper)) /
                    (region_upper - region_lower);
   assert(x >= -0.5 && x <= 0.5);

@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015-2019,2024
+ *    Copyright (c) 2015-2019,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -37,22 +37,29 @@ double Tabulation::get_value_step(double x) const {
   }
 }
 
-double Tabulation::get_value_linear(double x, Extrapolation extrapol) const {
+double Tabulation::get_value_linear(
+    double x, ExtrapolationType extrapolation_type_for_x_beyond_xmax) const {
   if (x < x_min_) {
     return 0.;
   }
-  if (extrapol == Extrapolation::Zero && x > x_max_) {
-    return 0.0;
+  switch (extrapolation_type_for_x_beyond_xmax) {
+    case ExtrapolationType::Zero:
+      if (x > x_max_) {
+        return 0.;
+      }
+      [[fallthrough]];
+    case ExtrapolationType::Constant:
+      if (x > x_max_) {
+        return values_.back();
+      }
+      [[fallthrough]];
+    case ExtrapolationType::Linear:
+      return linear_approximation_(x);
+    default:
+      throw std::invalid_argument(
+          "The provided extrapolation type is not supported. Valid types are "
+          "'Zero', 'Constant', and 'Linear'.");
   }
-  if (extrapol == Extrapolation::Const && x > x_max_) {
-    return values_.back();
-  }
-  const double index_double = (x - x_min_) * inv_dx_;
-  // here n is the lower index
-  const size_t n =
-      std::min(static_cast<size_t>(index_double), values_.size() - 2);
-  const double r = index_double - n;
-  return values_[n] + (values_[n + 1] - values_[n]) * r;
 }
 
 /**

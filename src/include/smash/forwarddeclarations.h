@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -399,6 +399,18 @@ enum class DensityType {
 enum class PythiaFragmentationModel {
   Default = 0,
   Thermal = 1,
+};
+
+/// Allows to specify the desired extrapolation type.
+enum class ExtrapolationType {
+  /// No extrapolation is done.
+  None = -1,
+  /// Extrapolate with zero.
+  Zero = 0,
+  /// Extrapolate using a constant value.
+  Constant = 1,
+  /// Extrapolate using a linear approach.
+  Linear = 2,
 };
 
 /// @cond

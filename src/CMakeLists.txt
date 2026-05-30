@@ -300,6 +300,7 @@ target_sources(smash_objlib
                        hadgas_eos.cc
                        hypersurfacecrossingfinder.cc
                        icoutput.cc
+                       input_keys.cc
                        inputfunctions.cc
                        interpolation.cc
                        interpolation2D.cc
