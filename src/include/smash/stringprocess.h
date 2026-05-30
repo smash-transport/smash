@@ -947,7 +947,7 @@ class StringProcess {
    * optionally leading-hadron cross-section scaling factors are recomputed.
    *
    * \param[in,out] intermediate_particles Fragmented hadrons to process.
-   * \param[in] uString Velocity four-vector of the string.
+   * \param[in] pString Four-momentum of the string.
    * \param[in] evecLong Unit 3-vector along which the string is stretched.
    * \param[in] additional_xsec_supp Additional multiplicative factor applied to
    * cross-section scaling, e.g. coherence or medium effects.
@@ -959,7 +959,7 @@ class StringProcess {
    * \pre intermediate_particles contains only hadrons.
    */
   void form_intermediate_particles(ParticleList &intermediate_particles,
-                                   const FourVector &uString,
+                                   const FourVector &pString,
                                    const ThreeVector &evecLong,
                                    double additional_xsec_supp = 1.0,
                                    bool find_and_scale_leading = true);

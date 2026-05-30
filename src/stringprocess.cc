@@ -14,8 +14,6 @@
 #include <limits>
 #include <string>
 
-#include <Pythia8/ParticleData.h>
-
 #include "smash/configuration.h"
 #include "smash/forwarddeclarations.h"
 #include "smash/input_keys.h"
@@ -242,7 +240,7 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
 }
 
 void StringProcess::form_intermediate_particles(
-    ParticleList& intermediate_particles, const FourVector& uString,
+    ParticleList& intermediate_particles, const FourVector& pString,
     const ThreeVector& evecLong, double additional_xsec_supp,
     bool find_and_scale_leading) {
   assert(intermediate_particles.size() > 0);
@@ -252,43 +250,35 @@ void StringProcess::form_intermediate_particles(
     bstring += data.pdgcode().baryon_number();
   }
 
+  const ThreeVector vstring = pString.velocity();
   if (find_and_scale_leading) {
     assign_all_scaling_factors(bstring, intermediate_particles, evecLong,
                                additional_xsec_supp);
   }
 
-  const ThreeVector vstring = uString.velocity();
-
   for (ParticleData& particle : intermediate_particles) {
-    const FourVector p_string = particle.momentum();
-    const ThreeVector velocity_string = p_string.velocity();
+    const FourVector mom_in_string_restframe = particle.momentum();
+    const ThreeVector velocity_in_string_restframe =
+        mom_in_string_restframe.velocity();
     const double gamma_string = 1.0 / particle.inverse_gamma();
 
-    const FourVector p_com = p_string.lorentz_boost(-vstring);
+    const FourVector p_com = mom_in_string_restframe.lorentz_boost(-vstring);
     particle.set_4momentum(p_com);
+    const double tau_prod =
+        mass_dependent_formation_times_
+            ? M_SQRT2 * particle.effective_mass() / kappa_tension_string_
+            : time_formation_const_;
 
-    if (mass_dependent_formation_times_) {
-      const double tau_prod =
-          M_SQRT2 * particle.effective_mass() / kappa_tension_string_;
+    const double t_prod_string = tau_prod * gamma_string;
 
-      const double t_prod_string = tau_prod * gamma_string;
+    FourVector fragment_position(t_prod_string,
+                                 t_prod_string * velocity_in_string_restframe);
 
-      FourVector fragment_position(t_prod_string,
-                                   t_prod_string * velocity_string);
+    fragment_position = fragment_position.lorentz_boost(-vstring);
 
-      fragment_position = fragment_position.lorentz_boost(-vstring);
-      fragment_position = fragment_position.lorentz_boost(-vcomAB_);
-
-      particle.set_slow_formation_times(
-          time_collision_,
-          soft_t_form_ * fragment_position.x0() + time_collision_);
-    } else {
-      const ThreeVector v_lab = p_com.lorentz_boost(-vcomAB_).velocity();
-      const double gamma_lab = 1.0 / std::sqrt(1.0 - v_lab.sqr());
-
-      particle.set_slow_formation_times(
-          time_collision_, time_formation_const_ * gamma_lab + time_collision_);
-    }
+    particle.set_slow_formation_times(
+        time_collision_,
+        soft_t_form_ * fragment_position.x0() + time_collision_);
   }
 }
 void StringProcess::init(const ParticleList& incoming, double tcoll) {
@@ -434,9 +424,6 @@ std::optional<ParticleList> StringProcess::hadronize(
     return std::nullopt;
   }
 
-  const double m = std::sqrt(m2);
-  const FourVector uString = pString_smash / m;
-
   // evecLong: unit vector along string momentum
   // fallback if |p| ~ 0
   ThreeVector evecLong(p_str.px(), p_str.py(), p_str.pz());
@@ -480,9 +467,7 @@ std::optional<ParticleList> StringProcess::hadronize(
           (pythia_hadron_->particleData.isBaryon(particle.id()) ? 1.0 / 3.0
                                                                 : 0.5) *
           additional_xsec_supp_);
-    }
-
-    else {
+    } else {
       intermediate_particles.back().set_cross_section_scaling_factor(0.0);
     }
   }
@@ -494,7 +479,7 @@ std::optional<ParticleList> StringProcess::hadronize(
 
   const bool should_assign_scaling = has_junction && has_leading_parton;
 
-  form_intermediate_particles(intermediate_particles, uString, evecLong,
+  form_intermediate_particles(intermediate_particles, pString_smash, evecLong,
                               additional_xsec_supp_, should_assign_scaling);
 
   return intermediate_particles;
@@ -1158,8 +1143,8 @@ bool StringProcess::next_Hard(ProcessType type) {
     logg[LPythia].debug("failed to find correct partonic constituents.");
     return false;
   }
-  // Boost after the constituents have been corrected!
   event_intermediate_.rotbst(to_cm_.inverse());
+
   int npart = event_intermediate_.size();
   int ipart = 0;
   while (ipart < npart) {
