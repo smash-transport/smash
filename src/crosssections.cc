@@ -1090,7 +1090,9 @@ CollisionBranchList CrossSections::two_to_one(
 
   if (!(charm_rescattering == CharmRescattering::Resonances) &&
       ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
-       (pdg_b.is_Dmeson() && pdg_a.is_pion()))) {
+       (pdg_a.is_pion() && pdg_b.is_Dmeson()) ||
+       (pdg_a.is_Dmeson() && pdg_b.is_eta()) ||
+       (pdg_a.is_eta() && pdg_b.is_Dmeson()))) {
     return resonance_process_list;
   }
 
@@ -1187,6 +1189,10 @@ CollisionBranchList CrossSections::two_to_two(
         (pdg_b.is_Dmeson() && pdg_a.is_pion())) {
       // D Meson Pion Scattering
       process_list = Dpi_xx(included_2to2, charm_rescattering);
+    } else if ((pdg_a.is_Dmeson() && pdg_b.is_eta()) ||
+               (pdg_b.is_Dmeson() && pdg_a.is_eta())) {
+      // D Meson Eta Scattering (inelastic) not existent in T-matrix method
+      return process_list;
     }
   } else if (type_a.is_nucleus() || type_b.is_nucleus()) {
     if ((type_a.is_nucleon() && type_b.is_nucleus()) ||
