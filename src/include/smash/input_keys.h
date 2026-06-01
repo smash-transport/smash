@@ -2930,7 +2930,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_diquark_supp_,Diquark_Supp,double,0.036}
+   * \optional_key{key_CT_SP_diquark_supp_,Diquark_Supp,double,0.039}
    *
    * Diquark suppression factor. Defines the probability to produce a diquark
    * antidiquark pair relative to producing a qurk antiquark pair.
@@ -2939,7 +2939,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_diquark_supp_}
    */
   inline static const Key<double> collTerm_stringParam_diquarkSuppression{
-      InputSections::c_stringParameters + "Diquark_Supp", 0.036, {"1.3"}};
+      InputSections::c_stringParameters + "Diquark_Supp", 0.039, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3037,7 +3037,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_popcorn_rate_,Popcorn_Rate,double,0.15}
+   * \optional_key{key_CT_SP_popcorn_rate_,Popcorn_Rate,double,0.5}
    *
    * Parameter StringFlav:popcornRate, which determines production rate of
    * popcorn mesons in string fragmentation. It is possible to produce a popcorn
@@ -3048,7 +3048,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_popcorn_rate_}
    */
   inline static const Key<double> collTerm_stringParam_popcornRate{
-      InputSections::c_stringParameters + "Popcorn_Rate", 0.15, {"1.6"}};
+      InputSections::c_stringParameters + "Popcorn_Rate", 0.5, {"1.6"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3119,7 +3119,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_strange_supp_,Strange_Supp,double,0.16}
+   * \optional_key{key_CT_SP_strange_supp_,Strange_Supp,double,0.164}
    *
    * Strangeness suppression factor \f$\lambda\f$,
    * \f[\lambda=
@@ -3133,7 +3133,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_strange_supp_}
    */
   inline static const Key<double> collTerm_stringParam_strangeSuppression{
-      InputSections::c_stringParameters + "Strange_Supp", 0.16, {"1.3"}};
+      InputSections::c_stringParameters + "Strange_Supp", 0.164, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
@@ -3165,7 +3165,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_a_,StringZ_A,double,2.0}
+   * \optional_key{key_CT_SP_stringz_a_,StringZ_A,double,1.0}
    *
    * Parameter \f$a\f$ in Pythia fragmentation function \f$f(z)\f$,
    * \f[f(z) = \frac{1}{z} (1-z)^a \exp\left(-b\frac{m_T^2}{z}\right)\;.\f]
@@ -3174,11 +3174,11 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_a_}
    */
   inline static const Key<double> collTerm_stringParam_stringZA{
-      InputSections::c_stringParameters + "StringZ_A", 2.0, {"1.3"}};
+      InputSections::c_stringParameters + "StringZ_A", 1.0, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.2}
+   * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.0}
    *
    * Parameter \f$a\f$ in Lund fragmentation function (see <tt>\ref
    * key_CT_SP_stringz_a_ "StringZ_A"</tt>) used to sample the light cone
@@ -3188,10 +3188,10 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_a_leading_}
    */
   inline static const Key<double> collTerm_stringParam_stringZALeading{
-      InputSections::c_stringParameters + "StringZ_A_Leading", 0.2, {"1.6"}};
+      InputSections::c_stringParameters + "StringZ_A_Leading", 0.0, {"1.6"}};
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_damp_popcorn_,Damp_Popcorn,double,1.0}
+   * \optional_key{key_CT_SP_damp_popcorn_,Damp_Popcorn,double,0.5}
    *
    * Controls whether a diquark endpoint may hadronize via the popcorn
    * mechanism into a leading meson before producing the baryon.
@@ -3208,11 +3208,11 @@ struct InputKeys {
    * \see_key{key_CT_SP_damp_popcorn_}
    */
   inline static const Key<double> collTerm_stringParam_dampPopcorn{
-      InputSections::c_stringParameters + "Damp_Popcorn", 1.0, {"3.4"}};
+      InputSections::c_stringParameters + "Damp_Popcorn", 0.5, {"3.4"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.55}
+   * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.3}
    *
    * Parameter \f$b\f$ \unit{in 1/GeV²} in Pythia fragmentation function shown
    * in <tt>\ref key_CT_SP_stringz_a_ "StringZ_A"</tt>.
@@ -3221,11 +3221,11 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_b_}
    */
   inline static const Key<double> collTerm_stringParam_stringZB{
-      InputSections::c_stringParameters + "StringZ_B", 0.55, {"1.3"}};
+      InputSections::c_stringParameters + "StringZ_B", 0.3, {"1.3"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_b_leading_,StringZ_B_Leading,double,2.0}
+   * \optional_key{key_CT_SP_stringz_b_leading_,StringZ_B_Leading,double,3.0}
    *
    * Parameter \f$b\f$ \unit{in 1/GeV²} in Lund fraghmentation function (see
    * <tt>\ref key_CT_SP_stringz_a_ "StringZ_B"</tt>) used to sample the light
@@ -3236,7 +3236,7 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_b_leading_}
    */
   inline static const Key<double> collTerm_stringParam_stringZBLeading{
-      InputSections::c_stringParameters + "StringZ_B_Leading", 2.0, {"1.6"}};
+      InputSections::c_stringParameters + "StringZ_B_Leading", 3.0, {"1.6"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters

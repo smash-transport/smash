@@ -128,6 +128,7 @@ class StringProcess {
   double diquark_supp_;
   /// popcorn rate
   double popcorn_rate_;
+  /// damp popcorn meson from diquark remnant endpoint rate
   double damp_popcorn_;
   /// transverse momentum spread in string fragmentation
   double string_sigma_T_;

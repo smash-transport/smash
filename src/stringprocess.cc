@@ -159,8 +159,6 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
                                         double string_sigma_T) {
   // choose parametrization for mass-dependent width
   pythia_in->readString("ParticleData:modeBreitWigner = 4");
-  /* choose minimum transverse momentum scale
-   * involved in partonic interactions */
 
   // transverse momentum spread in string fragmentation
   // Global Lund fragmentation
@@ -169,11 +167,14 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
 
   pythia_in->readString("BeamRemnants:dampPopcorn = " +
                         std::to_string(damp_popcorn_));
-  pythia_in->readString("BeamRemnants:hardRemnantBaryon = on");
-  pythia_in->readString("BeamRemnants:aRemnantBaryon = " +
-                        std::to_string(stringz_a_leading_));
-  pythia_in->readString("BeamRemnants:bRemnantBaryon = " +
-                        std::to_string(stringz_b_leading_));
+  if (separate_fragment_baryon_) {
+    pythia_in->readString("BeamRemnants:hardRemnantBaryon = on");
+    pythia_in->readString("BeamRemnants:aRemnantBaryon = " +
+                          std::to_string(stringz_a_leading_));
+    pythia_in->readString("BeamRemnants:bRemnantBaryon = " +
+                          std::to_string(stringz_b_leading_));
+  }
+
   pythia_in->readString("StringPT:sigma = " + std::to_string(string_sigma_T));
   // diquark suppression factor in string fragmentation
   pythia_in->readString("StringFlav:probQQtoQ = " +
