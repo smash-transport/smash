@@ -4455,7 +4455,7 @@ struct InputKeys {
    * corresponding impact parameter in `Values`. Between the specified points of
    * `Values` and `Yields`, linear interpolation is used to build the custom
    * distribution. `Yields` must be same length as `Values`. It does not need to
-   * be normed. This key can be omitted if `Sample` is not set to `"custom"`.
+   * be normed. This key is needed if and only if `Sample` is set to `"custom"`.
    */
   /**
    * \see_key{key_MC_impact_sample_}

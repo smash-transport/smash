@@ -293,7 +293,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
         logg[LInitialConditions].fatal()
             << "Bad parameters chosen for dynamic initial conditions:\n"
             << "  Maximum_Time = " << max_time << " > " << min_time
-            << " = Minimum_Time > 0";
+            << " = Minimum_Time";
         throw std::invalid_argument("Please adjust the configuration file.");
       }
 
