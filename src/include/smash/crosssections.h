@@ -412,7 +412,7 @@ class CrossSections {
    * \return Elastic cross section for Dpi
    *
    * \throw std::runtime_error if incoming particles are not D meson+pion.
-   * \throw std::runtime_error if positive cross section cannot be specified.
+   * \throw std::runtime_error if cross section is negative.
    */
   std::optional<double> Dpi_elastic() const;
 
@@ -422,9 +422,23 @@ class CrossSections {
    * \return Inlastic cross section for Dpi
    *
    * \throw std::runtime_error if incoming particles are not D meson+pion.
-   * \throw std::runtime_error if positive cross section cannot be specified.
+   * \throw std::runtime_error if cross section is negative.
    */
   double Dpi_inelastic_xsec() const;
+
+  /**
+   * Determine the elastic cross section for a D meson-eta (Deta) collision.
+   * If the center-of-mass energy for the collision is below the lower bound of
+   * the energy range of the underlying cross section data, the return value
+   * will be 0. If it is above the upper bound, the return value will be
+   * `std::nullopt`.
+   *
+   * \return Elastic cross section for Deta
+   *
+   * \throw std::runtime_error if incoming particles are not D meson+eta.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  std::optional<double> Deta_elastic() const;
 
   /**
    * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.

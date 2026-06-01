@@ -484,20 +484,26 @@ double CrossSections::elastic_parametrization(
       // Elastic (Anti-)deuteron (Anti-)Nucleon Scattering
       elastic_xs = deuteron_nucleon_elastic(sqrt_s_ * sqrt_s_);
     }
-  } else if ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
-             (pdg_a.is_pion() && pdg_b.is_Dmeson())) {
+  } else if (pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) {
     const CharmRescattering& charm_rescattering =
         finder_parameters.charm_rescattering;
-    std::optional<double> tmp_elastic_xs = Dpi_elastic();
     if (charm_rescattering == CharmRescattering::None) {
       return 0.;
-    } else if ((charm_rescattering == CharmRescattering::T_Matrix) &&
-               tmp_elastic_xs.has_value()) {
+    }
+    std::optional<double> tmp_elastic_xs = std::nullopt;
+    if (pdg_a.is_pion() || pdg_b.is_pion()) {
+      tmp_elastic_xs = Dpi_elastic();
+    } else if (pdg_a.is_eta() || pdg_b.is_eta()) {
+      tmp_elastic_xs = Deta_elastic();
+    }
+    if ((charm_rescattering == CharmRescattering::T_Matrix) &&
+        tmp_elastic_xs.has_value()) {
       elastic_xs = tmp_elastic_xs.value();
     } else if (use_AQM) {
-      /* use AQM if charm_rescattering == CharmRescattering::Resonances or
-       * if tmp_elastic_xs has no value, which happens when sqrts is above the
-       * upper bound of the energy range of the underlying cross section data */
+      /* use AQM if charm_rescattering == CharmRescattering::Resonances or if
+       * tmp_elastic_xs has no value, which happens either when sqrts is above
+       * the upper bound of the energy range of the underlying cross section
+       * data or there is no underlying data for the two colliding particles */
       const double m1 = incoming_particles_[0].effective_mass();
       const double m2 = incoming_particles_[1].effective_mass();
       const double s = sqrt_s_ * sqrt_s_;
@@ -513,7 +519,6 @@ double CrossSections::elastic_parametrization(
       if (charm_rescattering == CharmRescattering::T_Matrix) {
         warn_msg << "'T-matrix' and sqrt(s) = " << sqrt_s_
                  << " GeV is out of bounds of the underlying data";
-
       } else if (charm_rescattering == CharmRescattering::Resonances) {
         warn_msg << "'resonances'";
       }
@@ -997,7 +1002,6 @@ std::optional<double> CrossSections::Dpi_elastic() const {
 
   const auto pdg_D = type_D.pdgcode().code();
   const auto pdg_pion = type_pion.pdgcode().code();
-  assert(pdg_pion != pdg_D);
 
   std::optional<double> sig_el = std::nullopt;
   switch (pack(pdg_D, pdg_pion)) {
@@ -1029,6 +1033,38 @@ std::optional<double> CrossSections::Dpi_elastic() const {
     case pack(pdg::D_p, pdg::pi_z):
     case pack(pdg::D_m, pdg::pi_z): {  // Same xsec for charge conjugation.
       sig_el = Dpluspizero_elastic(sqrt_s_);
+      break;
+    }
+    default:
+      throw_xsec_is_not_implemented(incoming_particles_[0],
+                                    incoming_particles_[1], __func__);
+  }
+
+  if (sig_el.has_value() && sig_el.value() < 0.) {
+    throw_xsec_is_negative(sqrt_s_, sig_el.value(), incoming_particles_[0],
+                           incoming_particles_[1], __func__);
+  } else {
+    return sig_el;
+  }
+}
+
+std::optional<double> CrossSections::Deta_elastic() const {
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+
+  const auto pdgcode_D = pdg_a.is_Dmeson() ? pdg_a.code() : pdg_b.code();
+  const auto pdgcode_eta = pdg_a.is_Dmeson() ? pdg_b.code() : pdg_a.code();
+
+  std::optional<double> sig_el = std::nullopt;
+  switch (pack(pdgcode_D, pdgcode_eta)) {
+    case pack(pdg::D_p, pdg::eta):
+    case pack(pdg::D_m, pdg::eta): {  // Same xsec for charge conjugation.
+      sig_el = Dpluseta_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::eta):
+    case pack(pdg::Dbar_z, pdg::eta): {  // Same xsec for charge conjugation.
+      sig_el = Dzeroeta_elastic(sqrt_s_);
       break;
     }
     default:
@@ -2667,7 +2703,6 @@ double CrossSections::Dpi_inelastic_xsec() const {
 
   const auto pdg_D = type_D.pdgcode().code();
   const auto pdg_pion = type_pion.pdgcode().code();
-  assert(pdg_pion != pdg_D);
 
   double sig_inel = -1.;
   switch (pack(pdg_D, pdg_pion)) {

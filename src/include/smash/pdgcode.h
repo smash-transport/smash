@@ -473,11 +473,11 @@ class PdgCode {
     return (c == pdg::pi_z) || (c == pdg::pi_p) || (c == pdg::pi_m);
   }
 
+  /// \return whether this is an eta meson
+  inline bool is_eta() const { return code() == pdg::eta; }
+
   /// \return whether this is an omega meson
-  inline bool is_omega() const {
-    const auto c = code();
-    return c == pdg::omega;
-  }
+  inline bool is_omega() const { return code() == pdg::omega; }
 
   /// \return whether this is a rho meson (rho+/rho0/rho-)
   inline bool is_rho() const {
