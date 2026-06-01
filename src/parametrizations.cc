@@ -1110,4 +1110,212 @@ std::optional<double> Dzeroeta_elastic(double sqrts) {
   }
 }
 
+std::optional<double> DplusKplus_elastic(double sqrts) {
+  if (DplusKplus_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DPLUSKPLUS_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DplusKplus_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DKAON_SQRTS.begin());
+  const double last = *(DKAON_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*DplusKplus_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> DplusKzero_elastic(double sqrts) {
+  if (DplusKzero_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DPLUSKZERO_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DplusKzero_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DKAON_SQRTS.begin());
+  const double last = *(DKAON_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*DplusKzero_elastic_interpolation)(sqrts);
+  }
+}
+
+double DplusKzero_DzeroKplus(double sqrts) {
+  if (DplusKzero_DzeroKplus_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DPLUSKZERO_DZEROKPLUS_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DplusKzero_DzeroKplus_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*DplusKzero_DzeroKplus_interpolation)(sqrts);
+}
+
+double DzeroKplus_DplusKzero(double sqrts) {
+  if (DzeroKplus_DplusKzero_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DZEROKPLUS_DPLUSKZERO_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DzeroKplus_DplusKzero_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*DzeroKplus_DplusKzero_interpolation)(sqrts);
+}
+
+std::optional<double> DzeroKplus_elastic(double sqrts) {
+  if (DzeroKplus_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DZEROKPLUS_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DzeroKplus_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DKAON_SQRTS.begin());
+  const double last = *(DKAON_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*DzeroKplus_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> DzeroKzero_elastic(double sqrts) {
+  if (DzeroKzero_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DZEROKZERO_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DzeroKzero_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DKAON_SQRTS.begin());
+  const double last = *(DKAON_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*DzeroKzero_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> DplusKbarzero_elastic(double sqrts) {
+  if (DplusKbarzero_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DPLUSKBARZERO_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DplusKbarzero_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DKAON_SQRTS.begin());
+  const double last = *(DKAON_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*DplusKbarzero_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> DplusKminus_elastic(double sqrts) {
+  if (DplusKminus_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DPLUSKMINUS_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DplusKminus_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DKAON_SQRTS.begin());
+  const double last = *(DKAON_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*DplusKminus_elastic_interpolation)(sqrts);
+  }
+}
+
+double DplusKminus_DzeroKbarzero(double sqrts) {
+  if (DplusKminus_DzeroKbarzero_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DPLUSKMINUS_DZEROKBARZERO_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DplusKminus_DzeroKbarzero_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*DplusKminus_DzeroKbarzero_interpolation)(sqrts);
+}
+
+double DzeroKbarzero_DplusKminus(double sqrts) {
+  if (DzeroKbarzero_DplusKminus_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DZEROKBARZERO_DPLUSKMINUS_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DzeroKbarzero_DplusKminus_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*DzeroKbarzero_DplusKminus_interpolation)(sqrts);
+}
+
+std::optional<double> DzeroKbarzero_elastic(double sqrts) {
+  if (DzeroKbarzero_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DZEROKBARZERO_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DzeroKbarzero_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DKAON_SQRTS.begin());
+  const double last = *(DKAON_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*DzeroKbarzero_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> DzeroKminus_elastic(double sqrts) {
+  if (DzeroKminus_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DKAON_SQRTS, DZEROKMINUS_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    DzeroKminus_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DKAON_SQRTS.begin());
+  const double last = *(DKAON_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*DzeroKminus_elastic_interpolation)(sqrts);
+  }
+}
+
 }  // namespace smash

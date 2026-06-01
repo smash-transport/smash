@@ -917,6 +917,114 @@ std::optional<double> Dpluseta_elastic(double sqrts);
  */
 std::optional<double> Dzeroeta_elastic(double sqrts);
 
+/**
+ * D⁺K⁺ elastic cross section \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D⁻K⁻ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DplusKplus_elastic(double sqrts);
+
+/**
+ * D⁺K⁰ elastic cross section \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D⁻K̄⁰ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DplusKzero_elastic(double sqrts);
+
+/**
+ * D⁺K⁰ -> D⁰K⁺ cross section from \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D⁻K̄⁰ -> D̄⁰K⁻ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DplusKzero_DzeroKplus(double sqrts);
+
+/**
+ * D⁰K⁺ -> D⁺K⁰ cross section from \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D̄⁰K⁻ -> D⁻K̄⁰ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DzeroKplus_DplusKzero(double sqrts);
+
+/**
+ * D⁰K⁺ elastic cross section \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D̄⁰K⁻ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DzeroKplus_elastic(double sqrts);
+
+/**
+ * D⁰K⁰ elastic cross section \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D̄⁰K̄⁰ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DzeroKzero_elastic(double sqrts);
+
+/**
+ * D⁺K̄⁰ elastic cross section \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D⁻K⁰ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DplusKbarzero_elastic(double sqrts);
+
+/**
+ * D⁺K⁻ elastic cross section \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D⁻K⁺ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DplusKminus_elastic(double sqrts);
+
+/**
+ * D⁺K⁻ -> D⁰K̄⁰ cross section from \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D⁻K⁺ -> D̄⁰K⁰ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DplusKminus_DzeroKbarzero(double sqrts);
+
+/**
+ * D⁰K̄⁰ -> D⁺K⁻ cross section from \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D̄⁰K⁰ -> D⁻K⁺ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DzeroKbarzero_DplusKminus(double sqrts);
+
+/**
+ * D⁰K̄⁰ elastic cross section \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D̄⁰K⁰ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DzeroKbarzero_elastic(double sqrts);
+
+/**
+ * D⁰K⁻ elastic cross section \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D̄⁰K⁺ is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DzeroKminus_elastic(double sqrts);
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_PARAMETRIZATIONS_H_
