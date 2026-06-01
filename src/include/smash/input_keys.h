@@ -2481,15 +2481,16 @@ struct InputKeys {
    * - `"T-matrix"` &rarr; Tabulated cross sections (\iref{Abreu:2011ic},
    *    \iref{Tolos:2013kva}, \iref{Torres-Rincon:2014ffa}) are used, which
    *    handle elastic and inelastic binary collisions.
-   *    \note Currently, only \f$ D\pi \leftrightarrow D\pi \f$ channels are
-   *    implemented and all other interactions including charmed hadrons are
-   *    treated via intermediate resonances.
+   *    \note Currently, only \f$ D\pi \leftrightarrow D\pi \f$ and
+   *    \f$ D\eta \leftrightarrow D\eta \f$ channels are implemented. All other
+   *    interactions including charmed hadrons are treated via intermediate
+   *    resonances.
    * - `"none"` &rarr; Interactions of charmed hadrons will not be taken into
    *    account, i.e. their cross sections are set to zero.
    *    This option facilitates disabling the two to two interactions of charmed
-   *    hadrons that would otherwise be included via `"Dpi_to_Dpi"` in
+   *    hadrons that would otherwise be included via `"Charm_T-matrix"` in
    *    <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>, without listing
-   *    every possible value except `"Dpi_to_Dpi"`.
+   *    every possible value except `"Charm_T-matrix"`.
    */
   /**
    * \see_key{key_CT_charm_rescattering_}
@@ -2687,7 +2688,12 @@ struct InputKeys {
    * - `"PiDeuteron_to_pidprime"` &rarr; deuteron + pion &harr; d' + pion
    * - `"NDeuteron_to_Ndprime"` &rarr; deuteron + (anti-)nucleon &harr;
    *   d' + (anti-)nucleon, and their CPT-conjugates
-   * - `"Dpi_to_Dpi"` &rarr; D meson + pion &harr; D meson + pion
+   * - `"Charm_T-matrix"` &rarr; D meson + light meson &harr; D meson +
+   *    light meson; currently, included light mesons are pions, etas, and their
+   *    corresponding antiparticles. Only taken into account if
+   *    <tt>\ref key_CT_charm_rescattering_ "Charm_Rescattering_Method"</tt> is
+   *    set to `T-matrix`. Otherwise, collisions including charmed hadrons are
+   *    treated via intermediate resonances.
    * - `"All"` &rarr; include all binary processes, no necessity to list each
    *   single category
    *

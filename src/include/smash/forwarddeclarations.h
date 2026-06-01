@@ -239,7 +239,7 @@ enum IncludedReactions {
   PiDeuteron_to_NN = 7,
   PiDeuteron_to_pidprime = 8,
   NDeuteron_to_Ndprime = 9,
-  Dpi_to_Dpi = 10,
+  Charm_T_matrix = 10,
 };
 
 /**

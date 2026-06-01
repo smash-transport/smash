@@ -2715,7 +2715,7 @@ CollisionBranchList CrossSections::Dpi_xx(
     const ReactionsBitSet& included_2to2,
     const CharmRescattering charm_rescattering) const {
   CollisionBranchList process_list;
-  if ((included_2to2[IncludedReactions::Dpi_to_Dpi] == 0) ||
+  if ((included_2to2[IncludedReactions::Charm_T_matrix] == 0) ||
       !(charm_rescattering == CharmRescattering::T_Matrix)) {
     return process_list;
   }

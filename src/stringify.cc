@@ -339,8 +339,8 @@ std::vector<std::string> to_string(const ReactionsBitSet &s) {
     result.push_back("PiDeuteron_to_pidprime");
   if (s.test(IncludedReactions::NDeuteron_to_Ndprime))
     result.push_back("NDeuteron_to_Ndprime");
-  if (s.test(IncludedReactions::Dpi_to_Dpi))
-    result.push_back("Dpi_to_Dpi");
+  if (s.test(IncludedReactions::Charm_T_matrix))
+    result.push_back("Charm_T-matrix");
   return result;
 }
 
