@@ -1070,4 +1070,44 @@ double Dpluspizero_Dzeropiplus(double sqrts) {
   return (*Dpluspizero_Dzeropiplus_interpolation)(sqrts);
 }
 
+std::optional<double> Dpluseta_elastic(double sqrts) {
+  if (Dpluseta_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DETA_SQRTS, DPLUSETA_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    Dpluseta_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DETA_SQRTS.begin());
+  const double last = *(DETA_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*Dpluseta_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> Dzeroeta_elastic(double sqrts) {
+  if (Dzeroeta_elastic_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DETA_SQRTS, DZEROETA_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
+    Dzeroeta_elastic_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::None);
+  }
+  const double first = *(DETA_SQRTS.begin());
+  const double last = *(DETA_SQRTS.end() - 1);
+  if (sqrts < first) {
+    return 0.;
+  } else if (sqrts > last) {
+    return std::nullopt;
+  } else {
+    return (*Dzeroeta_elastic_interpolation)(sqrts);
+  }
+}
+
 }  // namespace smash

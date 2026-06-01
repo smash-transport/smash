@@ -15,7 +15,7 @@
 
 #include "particletype.h"
 
-/* All quantities in this file use they same units as the rest of SMASH.
+/* All quantities in this file use the same units as the rest of SMASH.
  * That is: GeV for energies and momenta, fm for distances and time, and mb for
  * cross-sections. */
 
@@ -30,6 +30,7 @@ namespace smash {
  * \return Whether the parametrization exists
  */
 bool parametrization_exists(const PdgCode& pdg_a, const PdgCode& pdg_b);
+
 /**
  * total hadronic cross sections at high energies parametrized in the 2016 PDG
  * book(http://pdg.lbl.gov/2016/reviews/rpp2016-rev-cross-section-plots.pdf)
@@ -897,6 +898,24 @@ std::optional<double> Dpluspizero_elastic(double sqrts);
  * \return the parametrized cross-section [mb]
  */
 double Dpluspizero_Dzeropiplus(double sqrts);
+
+/**
+ * D⁺η elastic cross section \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D⁻η is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dpluseta_elastic(double sqrts);
+
+/**
+ * D⁰η elastic cross section \iref{Tolos:2013kva}. Charge conjugated cross
+ * section D̄⁰η is also handled with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dzeroeta_elastic(double sqrts);
 
 }  // namespace smash
 
