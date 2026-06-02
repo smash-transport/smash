@@ -164,7 +164,7 @@ class CrossSections {
    * \return List of all possible inelastic 2->2 processes.
    */
   CollisionBranchList two_to_two(const ReactionsBitSet& included_2to2,
-                                 const double KN_offset,
+                                 double KN_offset,
                                  CharmRescattering charm_rescattering) const;
 
   /**
@@ -441,6 +441,20 @@ class CrossSections {
   std::optional<double> Deta_elastic() const;
 
   /**
+   * Determine the elastic cross section for a D meson-kaon (DK) collision.
+   * If the center-of-mass energy for the collision is below the lower bound of
+   * the energy range of the underlying cross section data, the return value
+   * will be 0. If it is above the upper bound, the return value will be
+   * `std::nullopt`.
+   *
+   * \return Elastic cross section for DK
+   *
+   * \throw std::runtime_error if incoming particles are not D meson+kaon.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  std::optional<double> DK_elastic() const;
+
+  /**
    * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.
    * These scatterings are suppressed at high energies when strings are
    * turned on with probabilities, so they need to be added back manually.
@@ -579,7 +593,7 @@ class CrossSections {
    * the list contains the types of the final-state particles and the cross
    * section for that particular process.
    */
-  CollisionBranchList bar_bar_to_nuc_nuc(const bool is_anti_particles) const;
+  CollisionBranchList bar_bar_to_nuc_nuc(bool is_anti_particles) const;
 
   /**
    * Scattering matrix amplitude squared (divided by 16π) for resonance
@@ -596,7 +610,7 @@ class CrossSections {
   static double nn_to_resonance_matrix_element(double sqrts,
                                                const ParticleType& type_a,
                                                const ParticleType& type_b,
-                                               const int twoI);
+                                               int twoI);
 
   /**
    * Utility function to avoid code replication in nn_xx().
