@@ -20,6 +20,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## Unreleased
 
 ### Added
+* Implemented 2 -> 2 cross sections for D meson-pion scatterings as an additional option beside the treatment via intermediate resonances.
 * Processes with more than two outgoing particles (e.g. Dalitz decays and multiparticle reactions) can now produce resonances, with masses sampled from the appropriate spectral function.
 * Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams.
   This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
