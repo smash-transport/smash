@@ -424,7 +424,7 @@ class CrossSections {
    * \throw std::runtime_error if incoming particles are not D meson+pion.
    * \throw std::runtime_error if cross section is negative.
    */
-  double Dpi_inelastic_xsec() const;
+  double Dpi_inelastic() const;
 
   /**
    * Determine the elastic cross section for a D meson-eta (Deta) collision.
@@ -453,6 +453,16 @@ class CrossSections {
    * \throw std::runtime_error if cross section is negative.
    */
   std::optional<double> DK_elastic() const;
+
+  /**
+   * Determine the inelastic cross section for a D meson-kaon (DK) collision.
+   *
+   * \return Inlastic cross section for DK
+   *
+   * \throw std::runtime_error if incoming particles are not D meson+kaon.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  double DK_inelastic() const;
 
   /**
    * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.

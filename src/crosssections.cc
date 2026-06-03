@@ -395,10 +395,13 @@ double CrossSections::parametrized_total(
       double inelastic_xs = 0.;
       if (pdg_a.is_pion() || pdg_b.is_pion()) {
         elastic_xs = Dpi_elastic();
-        inelastic_xs = Dpi_inelastic_xsec();
+        inelastic_xs = Dpi_inelastic();
       } else if (pdg_a.is_eta() || pdg_b.is_eta()) {
         elastic_xs = Deta_elastic();
         // no inelastic scattering for D+eta
+      } else if (pdg_a.is_kaon() || pdg_b.is_kaon()) {
+        elastic_xs = DK_elastic();
+        inelastic_xs = DK_inelastic();
       }
       if ((charm_rescattering == CharmRescattering::T_Matrix) &&
           elastic_xs.has_value()) {
@@ -2778,7 +2781,7 @@ CollisionBranchList CrossSections::dn_xx(
   return process_list;
 }
 
-double CrossSections::Dpi_inelastic_xsec() const {
+double CrossSections::Dpi_inelastic() const {
   const ParticleType& a = incoming_particles_[0].type();
   const ParticleType& b = incoming_particles_[1].type();
   const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
@@ -2815,6 +2818,62 @@ double CrossSections::Dpi_inelastic_xsec() const {
     case pack(pdg::D_m, pdg::pi_m): {
       // These combinations can only scatter elastically.
       return 0.;
+    }
+    default:
+      throw_xsec_is_not_implemented(incoming_particles_[0],
+                                    incoming_particles_[1], __func__);
+  }
+
+  if (sig_inel < 0.) {
+    throw_xsec_is_negative(sqrt_s_, sig_inel, incoming_particles_[0],
+                           incoming_particles_[1], __func__);
+  } else {
+    return sig_inel;
+  }
+}
+
+double CrossSections::DK_inelastic() const {
+  const ParticleType& a = incoming_particles_[0].type();
+  const ParticleType& b = incoming_particles_[1].type();
+  const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
+  const ParticleType& type_kaon = a.pdgcode().is_Dmeson() ? b : a;
+
+  const auto pdg_D = type_D.pdgcode().code();
+  const auto pdg_kaon = type_kaon.pdgcode().code();
+
+  double sig_inel = -1.;
+  switch (pack(pdg_D, pdg_kaon)) {
+    case pack(pdg::D_p, pdg::K_z):
+    case pack(pdg::D_m, pdg::Kbar_z): {  // Same xsec for charge conjugation.
+      sig_inel = DplusKzero_DzeroKplus(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::K_p):
+    case pack(pdg::Dbar_z, pdg::K_m): {  // Same xsec for charge conjugation.
+      sig_inel = DzeroKplus_DplusKzero(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, pdg::K_m):
+    case pack(pdg::D_m, pdg::K_p): {  // Same xsec for charge conjugation.
+      sig_inel = DplusKminus_DzeroKbarzero(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::Kbar_z):
+    case pack(pdg::Dbar_z, pdg::K_z): {  // Same xsec for charge conjugation.
+      sig_inel = DzeroKbarzero_DplusKminus(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, pdg::K_p):
+    case pack(pdg::D_p, pdg::Kbar_z):
+    case pack(pdg::D_z, pdg::K_z):
+    case pack(pdg::D_z, pdg::K_m):
+    case pack(pdg::D_m, pdg::K_z):
+    case pack(pdg::D_m, pdg::K_m):
+    case pack(pdg::Dbar_z, pdg::K_p):
+    case pack(pdg::Dbar_z, pdg::Kbar_z): {
+      // These combinations can only scatter elastically.
+      return 0.;
+      break;
     }
     default:
       throw_xsec_is_not_implemented(incoming_particles_[0],
