@@ -385,20 +385,29 @@ double CrossSections::parametrized_total(
         default:
           throw std::runtime_error("wrong isospin in ππ scattering");
       }
-    } else if ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
-               (pdg_b.is_Dmeson() && pdg_a.is_pion())) {
+    } else if (pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) {
       const CharmRescattering& charm_rescattering =
           finder_parameters.charm_rescattering;
-      std::optional<double> elastic_xs = Dpi_elastic();
       if (charm_rescattering == CharmRescattering::None) {
         return 0.;
-      } else if ((charm_rescattering == CharmRescattering::T_Matrix) &&
-                 elastic_xs.has_value()) {
-        total_xs = elastic_xs.value() + Dpi_inelastic_xsec();
+      }
+      std::optional<double> elastic_xs = std::nullopt;
+      double inelastic_xs = 0.;
+      if (pdg_a.is_pion() || pdg_b.is_pion()) {
+        elastic_xs = Dpi_elastic();
+        inelastic_xs = Dpi_inelastic_xsec();
+      } else if (pdg_a.is_eta() || pdg_b.is_eta()) {
+        elastic_xs = Deta_elastic();
+        // no inelastic scattering for D+eta
+      }
+      if ((charm_rescattering == CharmRescattering::T_Matrix) &&
+          elastic_xs.has_value()) {
+        total_xs = elastic_xs.value() + inelastic_xs;
       } else {
         /* use AQM if charm_rescattering == CharmRescattering::Resonances or if
-         * tmp_elastic_xs has no value, which happens when sqrts is above the
-         * upper bound of the energy range of the underlying cross section data
+         * tmp_elastic_xs has no value, which happens either when sqrts is above
+         * the upper bound of the energy range of the underlying cross section
+         * data or there is no underlying data for the two colliding particles
          */
         total_xs = AQM_based_on_piminusp_high_energy(
             sqrt_s_, pdg_a, pdg_b, finder_parameters.AQM_scaling_factor(pdg_a),
