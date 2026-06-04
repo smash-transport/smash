@@ -81,11 +81,11 @@ InterpolateData2DSpline::~InterpolateData2DSpline() {
 double InterpolateData2DSpline::operator()(double xi, double yi) const {
   if ((xi < first_x_ || xi > last_x_) || (yi < first_y_ || yi > last_y_)) {
     if (extrapolation_type_ == ExtrapolationType::None) {
-      std::stringstream error_msg{};
-      error_msg << "InterpolateData2DSpline only accepts x and y values within "
-                   "the range of the underlying data when extrapolation is not "
-                   "specified."
-                << "\nx value " << xi << " or y value " << yi
+      std::ostringstream error_msg{
+          "InterpolateData2DSpline only accepts x and y values within the "
+          "range of the underlying data\nwhen extrapolation is not specified. ",
+          std::ios::ate};
+      error_msg << "x value " << xi << " or y value " << yi
                 << " are out of bounds.";
       throw std::out_of_range(error_msg.str());
     } else if (extrapolation_type_ == ExtrapolationType::Zero) {
