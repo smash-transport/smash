@@ -505,9 +505,23 @@ double CrossSections::elastic_parametrization(
                    finder_parameters.AQM_scaling_factor(pdg_a) *
                    finder_parameters.AQM_scaling_factor(pdg_b);
     } else {
-      logg[LCrossSections].warn(
-          "Neither charm rescattering nor AQM are enabled, i.e. Dpi to Dpi "
-          "interactions are disabled.");
+      const ParticleType& a = incoming_particles_[0].type();
+      const ParticleType& b = incoming_particles_[1].type();
+      std::ostringstream warn_msg{
+          "AQM is not enabled and 'Charm_Rescattering_Method' is set to ",
+          std::ios::ate};
+      if (charm_rescattering == CharmRescattering::T_Matrix) {
+        warn_msg << "'T-matrix' and sqrt(s) = " << sqrt_s_
+                 << " GeV is out of bounds of the underlying data";
+
+      } else if (charm_rescattering == CharmRescattering::Resonances) {
+        warn_msg << "'resonances'";
+      }
+      warn_msg << ".\nElastic interactions of " << a.name() << " and "
+               << b.name()
+               << " are disabled under these circumstances.\nPlease enable AQM "
+                  "if these interactions should occur.";
+      logg[LCrossSections].warn(warn_msg.str());
       return 0.;
     }
   } else if (use_AQM) {
