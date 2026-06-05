@@ -108,29 +108,30 @@ namespace smash {
  * <tr><td>`-r <pdg>` <td>`--resonance <pdg>`
  * <td>Prints the width(m) and m * spectral function(m^2) versus resonance
  *     mass m.
- * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2]`
+ * <tr><td>`-s <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
  * <td>`--cross-sections <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
  * <td>Prints all the partial cross-sections of `<pdg1> + <pdg2>` with
  *     masses `mass1` and `mass2`. Masses are optional, default values are
  *     pole masses. Optionally, the lab frame momenta (fixed target) in GeV
- *     can be specified. The value of `plab1` depends on the order of the
- *     particles. The first particle is considered to be the projectile,
- *     the second one the target. These cross sections are not rescaled to
- *     match the parametrized total.
- * <tr><td>`-S <pdg1>,<pdg2>[,mass1,mass2]`
+ *     can be specified. Multiple momenta can be provided. The values of `plab`
+ *     depend on the order of the particles. The first particle is considered
+ *     to be the projectile, the second one the target. These cross sections are
+ *     not rescaled to match the parametrized total.
+ * <tr><td>`-S <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
  * <td>`--cross-sections-fs <pdg1>,<pdg2>[,mass1,mass2[,plab1,...]]`
  * <td>Prints an approximation of the final-state cross-sections of `<pdg1> +
  *     <pdg2>` with masses `mass1` and `mass2`. Masses are optional, default
- *     values are pole masses. Optionally, the lab frame momenta (fixed
- *     target) in GeV can be specified. The value of `plab1` depends on the
- *     order of the particles. The first is considered to be the projectile,
- *     the second one the target. After the initial collision, only decays are
- *     considered and all resonances are assumed to have their pole mass. This
- *     may yield different results than a full simulation with SMASH, where
- *     the resonances masses are sampled from the spectral function.
- *     Typically, this results in errors of less than 1 mb in the worst case.
- *     Also, contributions from strings are not considered, and the values are
- *     not rescaled to match the parametrized total cross section.
+ *     values are pole masses. Optionally, the lab frame momenta (fixed target)
+ *     in GeV can be specified. Multiple momenta can be provided. The values of
+ *     `plab` depend on the order of the particles. The first is considered to
+ *     be the projectile, the second one the target. After the initial
+ *     collision, only decays are considered and all resonances are assumed to
+ *     have their pole mass. This may yield different results than a full
+ *     simulation with SMASH, where the resonances masses are sampled from the
+ *     spectral function. Typically, this results in errors of less than 1 mb in
+ *     the worst case. Also, contributions from strings are not considered, and
+ *     the values are not rescaled to match the parametrized total cross
+ *     section.
  * <tr><td>`-x` <td> `--dump_iSS`
  * <td>Prints a particles table in iSS format. This format is used in MUSIC and
  *     CLVisc relativistic hydro codes.
@@ -675,7 +676,7 @@ int main(int argc, char *argv[]) {
       std::vector<std::string> args = split(arg_string, ',');
       const unsigned int n_arg = args.size();
       if (n_arg != 2 && n_arg != 4 && n_arg < 5) {
-        throw std::invalid_argument("-s usage: pdg1,pdg2[,m1,m2[,sqrts1,...]]");
+        throw std::invalid_argument("-s usage: pdg1,pdg2[,m1,m2[,plab1,...]]");
       }
       PdgCode pdg_a(args[0]), pdg_b(args[1]);
       const ParticleType &a = ParticleType::find(pdg_a);
@@ -689,13 +690,17 @@ int main(int argc, char *argv[]) {
       double mb = (args[3] == "") ? b.mass() : std::stod(args[3]);
       if (a.is_stable() && args[2] != "" && std::stod(args[2]) != a.mass()) {
         ma = a.mass();
-        std::cerr << "Warning: pole mass is used for stable particle "
-                  << a.name() << " instead of " << args[2] << std::endl;
+        std::ostringstream warn_msg{"Pole mass ", std::ios::ate};
+        warn_msg << a.mass() << " GeV is used for stable particle " << a.name()
+                 << " instead of the provided " << args[2] << " GeV.\n";
+        logg[LMain].warn(warn_msg.str());
       }
       if (b.is_stable() && args[3] != "" && std::stod(args[3]) != b.mass()) {
         mb = b.mass();
-        std::cerr << "Warning: pole mass is used for stable particle "
-                  << b.name() << " instead of " << args[3] << std::endl;
+        std::ostringstream warn_msg{"Pole mass ", std::ios::ate};
+        warn_msg << b.mass() << " GeV is used for stable particle " << b.name()
+                 << " instead of the provided " << args[3] << " GeV.\n";
+        logg[LMain].warn(warn_msg.str());
       }
       const size_t plab_size = n_arg <= 4 ? 0 : n_arg - 4;
       std::vector<double> plab;
