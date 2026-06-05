@@ -2774,6 +2774,12 @@ struct InputKeys {
    * default values and how to specify alternate values in the configuration
    * file). See \iref{Bass:1998ca} for AQM only considering strangeness and
    * \iref{Bierlich:2022pfr} for the charm and bottom suppression factors.
+   *
+   * @attention
+   * If <tt>\ref key_CT_totXsStrategy_ "Total_Cross_Section_Strategy"</tt> is
+   * set to `TopDown` or `TopDownMeasured` it is not possible to turn AQM off
+   * completely. It is necessary for the total parametrizations of cross
+   * sections.
    */
   /**
    * \see_key{key_CT_use_aqm_}
