@@ -49,7 +49,7 @@ However, it is crucial to be aware of the following needed steps.
    ```
    Alternatively, you can inform CMake about where the modules are at run time, e.g. via
    ```bash
-   cmake -DCMAKE_MODULE_PATH=${HOME}/.cmak/modules ...
+   cmake -DCMAKE_MODULE_PATH=${HOME}/.cmake/modules ...
    ```
    or simply by permanently aliasing the `cmake` command, e.g. `alias cmake='cmake -DCMAKE_MODULE_PATH=~/.cmake/modules'`.
 
