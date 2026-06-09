@@ -1009,8 +1009,8 @@ std::optional<double> Dpluspiplus_elastic(double sqrts) {
 std::optional<double> Dpluspiminus_elastic(double sqrts) {
   if (Dpluspiminus_elastic_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
-        dedup_avg<double>(DPI_SQRTS, DPLUSPIMINUS_DZEROPIZERO_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.5, 5);
+        dedup_avg<double>(DPI_SQRTS, DPLUSPIMINUS_ELASTIC_SIG);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
     Dpluspiminus_elastic_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(
             dedup_x, dedup_y, ExtrapolationType::None);
@@ -1030,7 +1030,7 @@ double Dpluspiminus_Dzeropizero(double sqrts) {
   if (Dpluspiminus_Dzeropizero_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(DPI_SQRTS, DPLUSPIMINUS_DZEROPIZERO_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.5, 5);
+    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
     Dpluspiminus_Dzeropizero_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(
             dedup_x, dedup_y, ExtrapolationType::Constant);
