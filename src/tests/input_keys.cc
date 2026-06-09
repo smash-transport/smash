@@ -796,9 +796,9 @@ TEST(validators_collision_term) {
   VERIFY(!strange_supp.validate(-1e-12));
   VERIFY(!strange_supp.validate(1.1));
   const auto& string_sigma_t = InputKeys::collTerm_stringParam_stringSigmaT;
-  VERIFY(string_sigma_t.validate(0.999999));
-  VERIFY(!string_sigma_t.validate(0.0));
-  VERIFY(!string_sigma_t.validate(1.0));
+  VERIFY(string_sigma_t.validate(0.0));
+  VERIFY(string_sigma_t.validate(1.0));
+  VERIFY(!string_sigma_t.validate(1.0000000001));
   const auto& string_tension = InputKeys::collTerm_stringParam_stringTension;
   VERIFY(string_tension.validate(0.0));
   VERIFY(!string_tension.validate(-1e-12));

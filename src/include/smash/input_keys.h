@@ -3548,7 +3548,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_string_sigma_t_,String_Sigma_T,double,
-   * 0.5,\f$0<x<1\f$}
+   * 0.5,\f$0\le x\le 1\f$}
    *
    * Standard deviation \unit{in GeV} in Gaussian for transverse momentum
    * distributed to string fragments during fragmentation.
@@ -3560,7 +3560,9 @@ struct InputKeys {
       InputSections::c_stringParameters + "String_Sigma_T",
       0.5,
       {"1.3"},
-      [](const double &value) noexcept { return value > 0.0 && value < 1.0; }};
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
