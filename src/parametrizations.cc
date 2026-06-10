@@ -1230,4 +1230,138 @@ std::optional<double> DzeroKminus_elastic(double sqrts) {
   }
 }
 
+std::optional<double> Dstarpluspiplus_elastic(double sqrts) {
+  if (sqrts > *(DSTARPI_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dstarpluspiplus_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DSTARPI_SQRTS, DSTARPLUSPIPLUS_ELASTIC_SIG);
+      Dstarpluspiplus_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Constant);
+    }
+    return (*Dstarpluspiplus_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> Dstarpluspiminus_elastic(double sqrts) {
+  if (sqrts > *(DSTARPI_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dstarpluspiminus_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DSTARPI_SQRTS, DSTARPLUSPIMINUS_ELASTIC_SIG);
+      Dstarpluspiminus_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Constant);
+    }
+    return (*Dstarpluspiminus_elastic_interpolation)(sqrts);
+  }
+}
+
+double Dstarpluspiminus_Dstarzeropizero(double sqrts) {
+  if (Dstarpluspiminus_Dstarzeropizero_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DSTARPI_SQRTS, DSTARPLUSPIMINUS_DSTARZEROPIZERO_SIG);
+    Dstarpluspiminus_Dstarzeropizero_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dstarpluspiminus_Dstarzeropizero_interpolation)(sqrts);
+}
+
+std::optional<double> Dstarpluspizero_elastic(double sqrts) {
+  if (sqrts > *(DSTARPI_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dstarpluspizero_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DSTARPI_SQRTS, DSTARPLUSPIZERO_ELASTIC_SIG);
+      Dstarpluspizero_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Constant);
+    }
+    return (*Dstarpluspizero_elastic_interpolation)(sqrts);
+  }
+}
+
+double Dstarpluspizero_Dstarzeropiplus(double sqrts) {
+  if (Dstarpluspizero_Dstarzeropiplus_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DSTARPI_SQRTS, DSTARPLUSPIZERO_DSTARZEROPIPLUS_SIG);
+    Dstarpluspizero_Dstarzeropiplus_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dstarpluspizero_Dstarzeropiplus_interpolation)(sqrts);
+}
+
+double Dstarzeropiplus_Dstarpluspizero(double sqrts) {
+  if (Dstarzeropiplus_Dstarpluspizero_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DSTARPI_SQRTS, DSTARZEROPIPLUS_DSTARPLUSPIZERO_SIG);
+    Dstarzeropiplus_Dstarpluspizero_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dstarzeropiplus_Dstarpluspizero_interpolation)(sqrts);
+}
+
+std::optional<double> Dstarzeropiplus_elastic(double sqrts) {
+  if (sqrts > *(DSTARPI_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dstarzeropiplus_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DSTARPI_SQRTS, DSTARZEROPIPLUS_ELASTIC_SIG);
+      Dstarzeropiplus_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Constant);
+    }
+    return (*Dstarzeropiplus_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> Dstarzeropiminus_elastic(double sqrts) {
+  if (sqrts > *(DSTARPI_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dstarzeropiminus_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DSTARPI_SQRTS, DSTARZEROPIMINUS_ELASTIC_SIG);
+      Dstarzeropiminus_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Constant);
+    }
+    return (*Dstarzeropiminus_elastic_interpolation)(sqrts);
+  }
+}
+
+double Dstarzeropizero_Dstarpluspiminus(double sqrts) {
+  if (Dstarzeropizero_Dstarpluspiminus_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DSTARPI_SQRTS, DSTARZEROPIZERO_DSTARPLUSPIMINUS_SIG);
+    Dstarzeropizero_Dstarpluspiminus_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dstarzeropizero_Dstarpluspiminus_interpolation)(sqrts);
+}
+
+std::optional<double> Dstarzeropizero_elastic(double sqrts) {
+  if (sqrts > *(DSTARPI_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dstarzeropizero_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DSTARPI_SQRTS, DSTARZEROPIZERO_ELASTIC_SIG);
+      Dstarzeropizero_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Constant);
+    }
+    return (*Dstarzeropizero_elastic_interpolation)(sqrts);
+  }
+}
+
 }  // namespace smash
