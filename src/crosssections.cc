@@ -1165,11 +1165,12 @@ CollisionBranchList CrossSections::two_to_one(
   const PdgCode& pdg_b = type_particle_b.pdgcode();
 
   if (!(charm_rescattering == CharmRescattering::Resonances) &&
-      ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
-       (pdg_a.is_pion() && pdg_b.is_Dmeson()) ||
-       (pdg_a.is_Dmeson() && pdg_b.is_eta()) ||
-       (pdg_a.is_eta() && pdg_b.is_Dmeson()))) {
-    return resonance_process_list;
+      (pdg_a.is_Dmeson() || pdg_b.is_Dmeson())) {
+    if ((pdg_a.is_pion() || pdg_b.is_pion()) ||
+        (pdg_a.is_eta() || pdg_b.is_eta()) ||
+        (pdg_a.is_kaon() || pdg_b.is_kaon())) {
+      return resonance_process_list;
+    }
   }
 
   const double m1 = incoming_particles_[0].effective_mass();
