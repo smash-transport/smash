@@ -491,6 +491,15 @@ class PdgCode {
     return (abs_code == pdg::D_p) || (abs_code == pdg::D_z);
   }
 
+  /**
+   * \return whether this is a D* meson
+   * (D*(2010)⁺, D*(2010)⁻, D*(2007)⁰, D̄*(2007)⁰)
+   */
+  inline bool is_Dstar2007() const {
+    const auto abs_code = std::abs(code());
+    return (abs_code == pdg::Dstar_p) || (abs_code == pdg::Dstar_z);
+  }
+
   /// \return whether this is (anti-)deuteron
   inline bool is_deuteron() const {
     return is_nucleus() && nucleus_.A_ == 2 && nucleus_.Z_ == 1 &&

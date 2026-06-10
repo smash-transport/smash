@@ -106,6 +106,15 @@ constexpr int D_m = -0x411;
 /// D̄⁰.
 constexpr int Dbar_z = -0x421;
 
+/// D*(2010)⁺.
+constexpr int Dstar_p = 0x413;
+/// D*(2010)⁻.
+constexpr int Dstar_m = -0x413;
+/// D*(2007)⁰.
+constexpr int Dstar_z = 0x423;
+/// D̄*(2007)⁰.
+constexpr int Dstarbar_z = -0x423;
+
 /// h₁(1170).
 constexpr int h1 = 0x10223;
 
