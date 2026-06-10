@@ -2481,10 +2481,10 @@ struct InputKeys {
    * - `"T-matrix"` &rarr; Tabulated cross sections (\iref{Abreu:2011ic},
    *    \iref{Tolos:2013kva}, \iref{Torres-Rincon:2014ffa}) are used, which
    *    handle elastic and inelastic binary collisions.
-   *    \note Currently, only \f$ D\pi \leftrightarrow D\pi \f$ and
-   *    \f$ D\eta \leftrightarrow D\eta \f$ channels are implemented. All other
-   *    interactions including charmed hadrons are treated via intermediate
-   *    resonances.
+   *    \note Currently, only \f$ D\pi \leftrightarrow D\pi \f$,
+   *    \f$ D\eta \leftrightarrow D\eta \f$, and \f$ DK \leftrightarrow DK \f$
+   *    channels are implemented. All other interactions including charmed
+   *    hadrons are treated via intermediate resonances.
    * - `"none"` &rarr; Interactions of charmed hadrons will not be taken into
    *    account, i.e. their cross sections are set to zero.
    *    This option facilitates disabling the two to two interactions of charmed
@@ -2689,8 +2689,8 @@ struct InputKeys {
    * - `"NDeuteron_to_Ndprime"` &rarr; deuteron + (anti-)nucleon &harr;
    *   d' + (anti-)nucleon, and their CPT-conjugates
    * - `"Charm_T-matrix"` &rarr; D meson + light meson &harr; D meson +
-   *    light meson; currently, included light mesons are pions, etas, and their
-   *    corresponding antiparticles. Only taken into account if
+   *    light meson; currently, included light mesons are pions, etas, kaons,
+   *    and their corresponding antiparticles. Only taken into account if
    *    <tt>\ref key_CT_charm_rescattering_ "Charm_Rescattering_Method"</tt> is
    *    set to `T-matrix`. Otherwise, collisions including charmed hadrons are
    *    treated via intermediate resonances.
