@@ -1495,7 +1495,10 @@ const std::initializer_list<double> DPI_SQRTS = {
     2.7785746, 2.7809770, 2.7833794, 2.7857818, 2.7881842, 2.7905866, 2.7929890,
     2.7953914, 2.7977938, 2.8001962, 2.8025986, 2.8050010};
 
-/// Elastic D⁺π⁺ cross section \iref{Abreu:2011ic}.
+/**
+ * Elastic D⁺π⁺ cross section \iref{Abreu:2011ic}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSPIPLUS_ELASTIC_SIG = {
     0.0000000, 0.0000000, 2.3035081, 2.3659911, 2.4287911, 2.4918847, 2.5552485,
     2.6188597, 2.6826953, 2.7467329, 2.8109501, 2.8753247, 2.9398349, 3.0044591,
@@ -1550,7 +1553,10 @@ const std::initializer_list<double> DPLUSPIPLUS_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     Dpluspiplus_elastic_interpolation = nullptr;
 
-/// Elastic D⁺π⁻ cross section \iref{Abreu:2011ic}.
+/**
+ * Elastic D⁺π⁻ cross section \iref{Abreu:2011ic}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSPIMINUS_ELASTIC_SIG = {
     0.0000000,  0.0000000,  2.3740238,  2.4856580,  2.6009986,  2.7201247,
     2.8431148,  2.9700461,  3.1009947,  3.2360349,  3.3752392,  3.5186775,
@@ -1616,7 +1622,10 @@ const std::initializer_list<double> DPLUSPIMINUS_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     Dpluspiminus_elastic_interpolation = nullptr;
 
-/// D⁺π⁻ -> D⁰π⁰ cross section \iref{Abreu:2011ic}.
+/**
+ * D⁺π⁻ -> D⁰π⁰ cross section \iref{Abreu:2011ic}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSPIMINUS_DZEROPIZERO_SIG = {
     0.0000000,  0.0000000,  18.7547184, 9.7748018,  8.2505498,  7.6604426,
     7.3956972,  7.2858502,  7.2631043,  7.2948358,  7.3632930,  7.4579361,
@@ -1682,7 +1691,10 @@ const std::initializer_list<double> DPLUSPIMINUS_DZEROPIZERO_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     Dpluspiminus_Dzeropizero_interpolation = nullptr;
 
-/// Elastic D⁺π⁰ cross section \iref{Abreu:2011ic}.
+/**
+ * Elastic D⁺π⁰ cross section \iref{Abreu:2011ic}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSPIZERO_ELASTIC_SIG = {
     0.0000104,  0.0025914,  0.0056859,  0.0093420,  0.0136104,  0.0185441,
     0.0241989,  0.0306331,  0.0379073,  0.0460849,  0.0552317,  0.0654159,
@@ -1745,7 +1757,10 @@ const std::initializer_list<double> DPLUSPIZERO_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     Dpluspizero_elastic_interpolation = nullptr;
 
-/// D⁺π⁰ -> D⁰π⁺ cross section \iref{Abreu:2011ic}.
+/**
+ * D⁺π⁰ -> D⁰π⁺ cross section \iref{Abreu:2011ic}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSPIZERO_DZEROPIPLUS_SIG = {
     5.2623277,  4.7095041,  4.8154990,  4.9619764,  5.1219082,  5.2890804,
     5.4612593,  5.6374168,  5.8169903,  5.9996252,  6.1850696,  6.3731250,
@@ -1811,7 +1826,10 @@ const std::initializer_list<double> DPLUSPIZERO_DZEROPIPLUS_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     Dpluspizero_Dzeropiplus_interpolation = nullptr;
 
-/// Elastic D⁰π⁺ cross section \iref{Abreu:2011ic}.
+/**
+ * Elastic D⁰π⁺ cross section \iref{Abreu:2011ic}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROPIPLUS_ELASTIC_SIG = {
     2.1615563,  2.2660165,  2.3740238,  2.4856580,  2.6009986,  2.7201247,
     2.8431148,  2.9700461,  3.1009947,  3.2360349,  3.3752392,  3.5186775,
@@ -1874,7 +1892,10 @@ const std::initializer_list<double> DZEROPIPLUS_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     Dzeropiplus_elastic_interpolation = nullptr;
 
-/// D⁰π⁺ -> D⁺π⁰ cross section \iref{Abreu:2011ic}.
+/**
+ * D⁰π⁺ -> D⁺π⁰ cross section \iref{Abreu:2011ic}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROPIPLUS_DPLUSPIZERO_SIG = {
     3.5811809,  4.3040194,  4.5214523,  4.7073080,  4.8860103,  5.0632259,
     5.2409396,  5.4200000,  5.6008072,  5.7835519,  5.9683150,  6.1551127,
@@ -1940,7 +1961,10 @@ const std::initializer_list<double> DZEROPIPLUS_DPLUSPIZERO_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     Dzeropiplus_Dpluspizero_interpolation = nullptr;
 
-/// Elastic D⁰π⁻ cross section \iref{Abreu:2011ic}.
+/**
+ * Elastic D⁰π⁻ cross section \iref{Abreu:2011ic}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROPIMINUS_ELASTIC_SIG = {
     2.1795872, 2.2413655, 2.3035081, 2.3659911, 2.4287911, 2.4918847, 2.5552485,
     2.6188597, 2.6826953, 2.7467329, 2.8109501, 2.8753247, 2.9398349, 3.0044591,
@@ -1998,7 +2022,10 @@ const std::initializer_list<double> DZEROPIMINUS_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     Dzeropiminus_elastic_interpolation = nullptr;
 
-/// D⁰π⁰ -> D⁺π⁻ cross section \iref{Abreu:2011ic}.
+/**
+ * D⁰π⁰ -> D⁺π⁻ cross section \iref{Abreu:2011ic}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROPIZERO_DPLUSPIMINUS_SIG = {
     0.0000000,  0.0000000,  1.1609371,  2.3895677,  3.0332156,  3.4958566,
     3.8701057,  4.1937177,  4.4856633,  4.7566724,  5.0133064,  5.2598067,
@@ -2064,7 +2091,10 @@ const std::initializer_list<double> DZEROPIZERO_DPLUSPIMINUS_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     Dzeropizero_Dpluspiminus_interpolation = nullptr;
 
-/// Elastic D⁰π⁰ cross section \iref{Abreu:2011ic}.
+/**
+ * Elastic D⁰π⁰ cross section \iref{Abreu:2011ic}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROPIZERO_ELASTIC_SIG = {
     0.0000104,  0.0025914,  0.0056859,  0.0093420,  0.0136104,  0.0185441,
     0.0241989,  0.0306331,  0.0379073,  0.0460849,  0.0552317,  0.0654159,
@@ -2178,7 +2208,10 @@ const std::initializer_list<double> DETA_SQRTS = {
     3.1885746, 3.1909770, 3.1933794, 3.1957818, 3.1981842, 3.2005866, 3.2029890,
     3.2053914, 3.2077938, 3.2101962, 3.2125986, 3.2150010};
 
-/// Elastic D⁺η cross section \iref{Tolos:2013kva}.
+/**
+ * Elastic D⁺η cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSETA_ELASTIC_SIG = {
     0.0000000,  0.0000000,  6.7437668,  7.2738254,  7.9538737,  8.7989657,
     9.8333381,  11.0881500, 12.6008254, 14.4145068, 16.5768787, 19.1376227,
@@ -2241,7 +2274,10 @@ const std::initializer_list<double> DPLUSETA_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     Dpluseta_elastic_interpolation = nullptr;
 
-/// Elastic D⁰η cross section \iref{Tolos:2013kva}.
+/**
+ * Elastic D⁰η cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROETA_ELASTIC_SIG = {
     6.4243488,  6.3686692,  6.7437668,  7.2738254,  7.9538737,  8.7989657,
     9.8333381,  11.0881500, 12.6008254, 14.4145068, 16.5768787, 19.1376227,
@@ -2355,7 +2391,10 @@ const std::initializer_list<double> DKAON_SQRTS = {
     3.1355746, 3.1379770, 3.1403794, 3.1427818, 3.1451842, 3.1475866, 3.1499890,
     3.1523914, 3.1547938, 3.1571962, 3.1595986, 3.1620010};
 
-/// Elastic D⁺K⁺ cross section \iref{Tolos:2013kva}.
+/**
+ * Elastic D⁺K⁺ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSKPLUS_ELASTIC_SIG = {
     0.0000000,  38.3848698, 36.1405658, 34.4766901, 33.1228501, 31.9711267,
     30.9648071, 30.0695092, 29.2624454, 28.5275589, 27.8530184, 27.2298030,
@@ -2418,7 +2457,10 @@ const std::initializer_list<double> DPLUSKPLUS_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     DplusKplus_elastic_interpolation = nullptr;
 
-/// Elastic D⁺K⁰ cross section \iref{Tolos:2013kva}.
+/**
+ * Elastic D⁺K⁰ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSKZERO_ELASTIC_SIG = {
     0.0000000,  0.0000000,  0.0000000,  14.7783179, 14.2970190, 13.8868771,
     13.5275287, 13.2066689, 12.9161682, 12.6503159, 12.4049157, 12.1767770,
@@ -2481,7 +2523,10 @@ const std::initializer_list<double> DPLUSKZERO_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     DplusKzero_elastic_interpolation = nullptr;
 
-/// D⁺K⁰ -> D⁰K⁺ cross section \iref{Tolos:2013kva}.
+/**
+ * D⁺K⁰ -> D⁰K⁺ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSKZERO_DZEROKPLUS_SIG = {
     0.0000000, 0.0000000, 0.0000000, 10.7057500, 7.6100660, 6.3899314,
     5.6882039, 5.2133209, 4.8611065, 4.5841604,  4.3574955, 4.1665456,
@@ -2547,7 +2592,10 @@ const std::initializer_list<double> DPLUSKZERO_DZEROKPLUS_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     DplusKzero_DzeroKplus_interpolation = nullptr;
 
-/// D⁰K⁺ -> D⁺K⁰ cross section \iref{Tolos:2013kva}.
+/**
+ * D⁰K⁺ -> D⁺K⁰ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROKPLUS_DPLUSKZERO_SIG = {
     0.0000000, 0.0000000, 0.0000000, 1.9876047, 2.5536425, 2.8046411, 2.9265204,
     2.9828337, 3.0022507, 2.9996475, 2.9834517, 2.9587375, 2.9286985, 2.8954131,
@@ -2605,7 +2653,10 @@ const std::initializer_list<double> DZEROKPLUS_DPLUSKZERO_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     DzeroKplus_DplusKzero_interpolation = nullptr;
 
-/// Elastic D⁰K⁺ cross section \iref{Tolos:2013kva}.
+/**
+ * Elastic D⁰K⁺ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROKPLUS_ELASTIC_SIG = {
     18.1173323, 16.1688010, 15.3696563, 14.7783179, 14.2970190, 13.8868771,
     13.5275287, 13.2066689, 12.9161682, 12.6503159, 12.4049157, 12.1767770,
@@ -2668,7 +2719,10 @@ const std::initializer_list<double> DZEROKPLUS_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     DzeroKplus_elastic_interpolation = nullptr;
 
-/// Elastic D⁰K⁰ cross section \iref{Tolos:2013kva}.
+/**
+ * Elastic D⁰K⁰ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROKZERO_ELASTIC_SIG = {
     0.0000000,  38.3848698, 36.1405658, 34.4766901, 33.1228501, 31.9711267,
     30.9648071, 30.0695092, 29.2624454, 28.5275589, 27.8530184, 27.2298030,
@@ -2731,7 +2785,10 @@ const std::initializer_list<double> DZEROKZERO_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     DzeroKzero_elastic_interpolation = nullptr;
 
-/// Elastic D⁺K⁻ cross section \iref{Tolos:2013kva}.
+/**
+ * Elastic D⁺K⁻ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSKMINUS_ELASTIC_SIG = {
     0.0000000,  44.4327782, 42.9165643, 41.5167577, 40.2203330, 39.0161348,
     37.8945544, 36.8472705, 35.8670409, 34.9475327, 34.0831846, 33.2690924,
@@ -2794,7 +2851,10 @@ const std::initializer_list<double> DPLUSKMINUS_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     DplusKminus_elastic_interpolation = nullptr;
 
-/// D⁺K⁻ -> D⁰K̄⁰ cross section \iref{Tolos:2013kva}.
+/**
+ * D⁺K⁻ -> D⁰K̄⁰ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSKMINUS_DZEROKBARZERO_SIG = {
     0.0000000,  16.8956128, 13.5301812, 12.4050007, 11.6484261, 11.0395134,
     10.5144107, 10.0465029, 9.6219644,  9.2324543,  8.8723767,  8.5376789,
@@ -2860,7 +2920,10 @@ const std::initializer_list<double> DPLUSKMINUS_DZEROKBARZERO_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     DplusKminus_DzeroKbarzero_interpolation = nullptr;
 
-/// Elastic D⁺K̄⁰ cross section \iref{Tolos:2013kva}.
+/**
+ * Elastic D⁺K̄⁰ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DPLUSKBARZERO_ELASTIC_SIG = {
     0.0000000, 0.0000000, 0.0000000, 9.8272816, 9.8331703, 9.8385077, 9.8433005,
     9.8475552, 9.8512784, 9.8544768, 9.8571568, 9.8593250, 9.8609882, 9.8621527,
@@ -2918,7 +2981,10 @@ const std::initializer_list<double> DPLUSKBARZERO_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     DplusKbarzero_elastic_interpolation = nullptr;
 
-/// Elastic D⁰K⁻ cross section \iref{Tolos:2013kva}.
+/**
+ * Elastic D⁰K⁻ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROKMINUS_ELASTIC_SIG = {
     9.8062429, 9.8138244, 9.8208352, 9.8272816, 9.8331703, 9.8385077, 9.8433005,
     9.8475552, 9.8512784, 9.8544768, 9.8571568, 9.8593250, 9.8609882, 9.8621527,
@@ -2973,7 +3039,10 @@ const std::initializer_list<double> DZEROKMINUS_ELASTIC_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     DzeroKminus_elastic_interpolation = nullptr;
 
-/// D⁰K̄⁰ -> D⁺K⁻ cross section \iref{Tolos:2013kva}.
+/**
+ * D⁰K̄⁰ -> D⁺K⁻ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROKBARZERO_DPLUSKMINUS_SIG = {
     0.0000000, 9.5823200, 10.8721431, 10.8096126, 10.5253211, 10.1826571,
     9.8279422, 9.4780961, 9.1399597,  8.8162614,  8.5078668,  8.2147475,
@@ -3039,7 +3108,10 @@ const std::initializer_list<double> DZEROKBARZERO_DPLUSKMINUS_SIG = {
 static std::unique_ptr<InterpolateDataLinear<double>>
     DzeroKbarzero_DplusKminus_interpolation = nullptr;
 
-/// Elastic D⁰K̄⁰ cross section \iref{Tolos:2013kva}.
+/**
+ * Elastic D⁰K̄⁰ cross section \iref{Tolos:2013kva}.
+ * Data provided by Juan Torres-Rincon.
+ */
 const std::initializer_list<double> DZEROKBARZERO_ELASTIC_SIG = {
     0.0000000,  44.4327782, 42.9165643, 41.5167577, 40.2203330, 39.0161348,
     37.8945544, 36.8472705, 35.8670409, 34.9475327, 34.0831846, 33.2690924,
