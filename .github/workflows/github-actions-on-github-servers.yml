@@ -118,7 +118,7 @@ jobs:
         # now we build SMASH
         cd $SMASH_ROOT && mkdir build && cd build
         cmake -DPythia_CONFIG_EXECUTABLE=${SMASH_ROOT}/pythia8316/bin/pythia8-config ..
-        make -j$(nproc)
+        make -j$(nproc) all tests
         # we check the building of the documentation for the current and the past Ubuntu LTS releases
         if [ ${SITE} == "ubuntu-24.04-default-gcc" ] || [ ${SITE} == "ubuntu-22.04-oldest-supported-gcc" ]; then make undocumented_test && make user; fi
         # we run the tests, excluding potentials* tests

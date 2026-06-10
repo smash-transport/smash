@@ -1,29 +1,43 @@
-cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.28 FATAL_ERROR)
 project(SMASH_as_a_library_example)
 
-# Tell cmake where to find modules (also append ../../cmake for testing)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake"
-     "${CMAKE_CURRENT_LIST_DIR}/../../cmake")
+add_library(project_requirements INTERFACE)
+target_compile_features(project_requirements INTERFACE cxx_std_17)
+target_compile_options(project_requirements
+                       INTERFACE -W
+                                 -Wall
+                                 -Wextra
+                                 -Wmissing-declarations
+                                 -Wpointer-arith
+                                 -Wshadow
+                                 -Wuninitialized
+                                 -Winit-self
+                                 -Wundef
+                                 -Wcast-align
+                                 -Wformat=2
+                                 -Wold-style-cast
+                                 -Werror=switch
+                                 -fno-math-errno)
 
 add_executable(example example.cc)
 add_executable(example_rate_equations example_rate_equations.cc)
 add_executable(example_smash_wrapper example_smash_wrapper.cc)
 
-# Set the relevant generic compiler flags, trying to be close to what SMASH uses
-set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -W -Wall -Wextra -Wmissing-declarations -Wpointer-arith -Wshadow -Wuninitialized -Winit-self -Wundef -Wcast-align -Wformat=2 -Wold-style-cast -Werror=switch"
-)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno -std=c++17")
-message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS})
+find_package(SMASH 3.3 REQUIRED COMPONENTS Core) # Possible components: Core, ROOT, HepMC3, Rivet
 
-find_package(SMASH)
+# Using REQUIRED here above the if-else here is unnecessary, but we keep it for demonstration
+# purposes. If you want to handle the case where SMASH is not found, you can remove the REQUIRED
+# keyword and keep the if-else block to check for SMASH_FOUND.
 if(SMASH_FOUND)
-    message(STATUS "SMASH libraries = ${SMASH_LIBRARIES}")
-    include_directories(SYSTEM ${SMASH_INCLUDE_DIR})
-    target_link_libraries(example ${SMASH_LIBRARIES})
-    target_link_libraries(example_rate_equations ${SMASH_LIBRARIES})
-    target_link_libraries(example_smash_wrapper ${SMASH_LIBRARIES})
-    add_definitions("-DSMASH_INPUT_DIR=\"${SMASH_INPUT_FILES_DIR}\"")
+    # Finding SMASH sets SMASH_INPUT_FILES_DIR CMake variable
+    target_compile_definitions(project_requirements
+                               INTERFACE SMASH_INPUT_DIR=\"${SMASH_INPUT_FILES_DIR}\")
+    target_link_libraries(example project_requirements SMASH::smash)
+    target_link_libraries(example_rate_equations project_requirements SMASH::smash)
+    target_link_libraries(example_smash_wrapper project_requirements SMASH::smash)
+    # If you need to use the optional components, you can link to them as well. For example, if you
+    # want to use ROOT and HepMC3, you can do: target_link_libraries(example project_requirements
+    # SMASH::smash_root SMASH::smash_hepmc)
 else()
-    message(FATAL_ERROR "SMASH libraries not found!")
+    message(FATAL_ERROR "SMASH library not found!")
 endif()

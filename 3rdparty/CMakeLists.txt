@@ -50,23 +50,17 @@ target_include_directories(vir-test SYSTEM INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
 # targets for Cuba and Einhard and therefore we can refer to that. YAML library is a "vendored
 # dependency" and it needs to be installed here as well and it would be wrong to use their shipped
 # installation because we want that users using SMASH as a library link to the frozen YAML library
-# shipped with SMASH. Note that since at the top level the dependency of the install target on the
-# all target was disabled, it is needed to now build the vendored libraries targets here before
-# installing them.
-install(CODE "execute_process(COMMAND ${CMAKE_COMMAND}
-                                      --build ${CMAKE_BINARY_DIR}
-                                      --target cuhre divonne suave vegas einhard yaml-cpp)")
+# shipped with SMASH.
 install(DIRECTORY yaml-cpp-0.9.0/include/yaml-cpp
         DESTINATION "include"
         FILES_MATCHING
         PATTERN "*.h")
-install(TARGETS yaml-cpp EXPORT SMASH-targets)
+install(TARGETS yaml-cpp EXPORT SMASH-targets-core)
 install(TARGETS cuhre divonne suave vegas
-        EXPORT SMASH-targets
+        EXPORT SMASH-targets-core
         FILE_SET HEADERS
         DESTINATION include/cuba)
 install(TARGETS einhard
-        EXPORT SMASH-targets
+        EXPORT SMASH-targets-core
         FILE_SET HEADERS
         DESTINATION include/einhard)
-install(EXPORT SMASH-targets NAMESPACE SMASH:: DESTINATION lib/cmake)
