@@ -33,7 +33,7 @@ namespace smash {
  * \f$|F_\pi(M^2)|^2\f$. The form factor accounts for the internal charged
  * pion propagator.
  *
- * Kinematic variables sampled (analogous to BremsstrahlungAction):
+ * Kinematic variables sampled for the dilepton pair are:
  *   - m_inv:        invariant mass of the dilepton pair [2m_e, m_inv_max]
  *   - q:            3-momentum of dilepton in pn-CM frame
  *   - \f$\theta\f$: polar angle of dilepton in pn-CM frame \f$[0, \pi]\f$
@@ -63,8 +63,8 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    *
    * \return The constructed object.
    */
-  BremsstrahlungActionDilepton(const ParticleList &in, const double time,
-                               const double hadronic_cross_section_input,
+  BremsstrahlungActionDilepton(const ParticleList &in, double time,
+                               double hadronic_cross_section_input,
                                DileptonBremsPionFormFactor ff_type);
 
   /**

@@ -151,12 +151,11 @@ inline double form_factor_delta([[maybe_unused]] double m) { return 3.12; }
  * for the internal pion propagator in \f$ pn \rightarrow pn e^+ e^- \f$
  * bremsstrahlung.
  *
- * FF1: pure vector-meson dominance, direct \f$\rho0\f$ coupling
- * FF2: mixed direct-quark + \f$\rho0\f$ coupling (\iref{Shyam:2010vr}, FF2)
+ * FF1: pure vector-meson dominance, direct \f$\rho^0\f$ coupling
  *
  * \param m_inv_sqr  Invariant dilepton mass squared m_{inv}^2 [GeV²]
- * \param m_rho      \f$\rho0\f$ pole mass [GeV]
- * \param gamma_rho  Energy-dependent \f$\rho0\f$ width
+ * \param m_rho      \f$\rho^0\f$ pole mass [GeV]
+ * \param gamma_rho  Energy-dependent \f$\rho^0\f$ width
  *                   \f$\Gamma_\rho(m_{inv}^2)\f$ [GeV]
  */
 inline double pion_em_form_factor_sqr_FF1(double m_inv_sqr, double m_rho,
@@ -167,10 +166,22 @@ inline double pion_em_form_factor_sqr_FF1(double m_inv_sqr, double m_rho,
   return std::norm(m_rho_sq / denom);
 }
 
+/**
+ * \return Squared pion electromagnetic form factor \f$|F_\pi(m_{inv}^2)|^2\f$
+ * for the internal pion propagator in \f$ pn \rightarrow pn e^+ e^- \f$
+ * bremsstrahlung.
+ *
+ * FF2: mixed direct-quark + \f$\rho^0\f$ coupling (\iref{Shyam:2010vr}, FF2)
+ *
+ * \param m_inv_sqr  Invariant dilepton mass squared m_{inv}^2 [GeV²]
+ * \param m_rho      \f$\rho^0\f$ pole mass [GeV]
+ * \param gamma_rho  Energy-dependent \f$\rho^0\f$ width
+ *                   \f$\Gamma_\rho(m_{inv}^2)\f$ [GeV]
+ */
 inline double pion_em_form_factor_sqr_FF2(double m_inv_sqr, double m_rho,
                                           double gamma_rho) {
   assert(gamma_rho > 0.0);
-  /// Lambda² constant (\iref{Shyam:2010vr}, FF2) in GeV².
+  // Lambda² constant (\iref{Shyam:2010vr}, FF2) in GeV².
   constexpr double lambda_sq_FF2 = 1.9;
   const double m_rho_sq = m_rho * m_rho;
   const std::complex<double> denom(m_rho_sq - m_inv_sqr, -m_rho * gamma_rho);

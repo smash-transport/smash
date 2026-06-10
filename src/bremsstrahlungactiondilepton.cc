@@ -34,7 +34,6 @@ BremsstrahlungActionDilepton::BremsstrahlungActionDilepton(
 BremsstrahlungActionDilepton::ReactionType
 BremsstrahlungActionDilepton::dilepton_brems_reaction_type_(
     const ParticleList &in) {
-  /// Currently, only n+p dilepton bremsstrahlung is implemented.
   if (in.size() != 2) {
     return ReactionType::no_reaction;
   }
@@ -188,7 +187,7 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   const double dsigma_dM_dq_dOmega = diff_xs_pn_dilepton_(m_inv_, q_, sqrt_s());
   const double W_M = dsigma_dM_dq_dOmega * delta_M;
   const double W_q = delta_q;
-  const double W_Omega = twopi * M_PI;
+  const double W_Omega = twopi * M_PI * std::sin(theta_);
 
   weight_ = W_M * W_q * W_Omega / hadronic_cross_section_;
 
