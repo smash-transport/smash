@@ -3896,7 +3896,7 @@ struct InputKeys {
    * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_bremsstrahlung_,Bremsstrahlung,bool,false}
    *
-   * Whether or not to enable dilepton production from np bremsstrahlung.
+   * Whether or not to enable dilepton production via bremsstrahlung in neutron-proton interactions.
    * The approach follows the meson-exchange approximation depicted in
    * \iref{Shyam:2010vr}.
    */
