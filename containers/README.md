@@ -141,3 +141,28 @@ singularity build mycontainer-image.sif docker-archive://abcd1234.tar
 ```
 
 This kind of operation does not require root privileges.
+
+#### Selecting the SMASH source
+
+The Dockerfile supports two different source stages that determine where the SMASH source code is obtained from during the build.
+
+| Source stage | Description |
+|--------------|-------------|
+| public-source | Clone the SMASH repository from GitHub. |
+| local-source | Use a local SMASH checkout supplied via a Docker BuildKit build context. |
+
+The source stage is selected with the build argument SOURCE_STAGE:
+
+console docker buildx build \   --build-arg SOURCE_STAGE=public-source \   -f Dockerfile . 
+
+To build from local development sources, a BuildKit build context must be provided:
+
+console docker buildx build \   --build-context local_smash=/path/to/smash-devel \   --build-arg SOURCE_STAGE=local-source \   -f Dockerfile . 
+
+The local_smash build context is mounted during the Docker build and copied into the image as the SMASH source tree. This allows local modifications to be tested without committing them to a remote repository.
+
+When SOURCE_STAGE=local-source is selected, the --build-context local_smash=... option is mandatory. Conversely, when SOURCE_STAGE=public-source is selected, no local source tree is required and the repository is cloned directly from GitHub.
+
+For example, a typical development build can be performed with
+
+console docker buildx build \   --platform=linux/amd64 \   --build-context local_smash=$HOME/Phd/smash-devel \   --build-arg SOURCE_STAGE=local-source \   -t smash-dev:latest \   --load \   . 

@@ -1,6 +1,29 @@
 # syntax=docker/dockerfile:1.4
 
-FROM ubuntu:22.04
+# Select the source of the SMASH repository.
+#
+# The final stage is chosen via:
+#
+#   FROM ${SOURCE_STAGE} AS final
+#
+# rather than using shell conditionals. Docker BuildKit resolves the
+# stage name during parsing, allowing us to select between cloning the
+# public repository ("public-source") and using local development sources
+# ("local-source") supplied through a build context.
+#
+# Example:
+#
+#   docker buildx build .
+#
+#   docker buildx build \
+#     --build-context local_smash=/path/to/smash-devel \
+#     --build-arg SOURCE_STAGE=local-source .
+#
+# Discussion:
+# https://stackoverflow.com/a/60820156
+ARG SOURCE_STAGE=public-source
+
+FROM ubuntu:24.04 AS base
 
 # Set bash as the default shell in this Dockerfile
 
@@ -74,41 +97,48 @@ RUN mkdir /MNT
 ARG SMASH_TAG="latest"
 ENV PYTHIA8=/SMASH/pythia_install/
 
-# Select between cloning SMASH publicly or using local development sources
-
-ARG USE_LOCAL_SOURCE=false
-
-# syntax=docker/dockerfile:1
-
-ARG SMASH_TAG=latest
-ARG USE_LOCAL_SOURCE=false
-
-ENV PYTHIA8=/SMASH/pythia_install/
-# syntax=docker/dockerfile:1
-
-ENV PYTHIA8=/SMASH/pythia_install/
-
-RUN --mount=from=local_smash,target=/__local_smash <<'EOF'
+FROM base AS public-source
+RUN <<'EOF'
   set -euxo pipefail
   mkdir -p /SMASH
   cd /SMASH
 
-  if [[ "${USE_LOCAL_SOURCE}" == "true" ]]; then
-    echo "Using local SMASH development sources..."
-    cp -a /__local_smash /SMASH/smash
+  echo "Cloning public SMASH repository..."
+  git clone https://github.com/smash-transport/smash.git smash
+  cd smash
+
+  if [[ "${SMASH_TAG}" == "latest" ]]; then
+    latest_tag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
+    git switch --detach "${latest_tag}"
   else
-    echo "Cloning public SMASH repository..."
-    git clone https://github.com/smash-transport/smash.git smash
-    cd smash
-
-    if [[ "${SMASH_TAG}" == "latest" ]]; then
-      latest_tag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
-      git switch --detach "${latest_tag}"
-    else
-      git checkout "${SMASH_TAG}"
-    fi
+    git checkout "${SMASH_TAG}"
   fi
+EOF
 
+FROM base AS local-source
+# The build context "local_smash" is provided with:
+
+#
+
+#   docker buildx build \
+
+#     --build-context local_smash=/path/to/smash-devel \
+
+#     --build-arg SOURCE_STAGE=local-source .
+
+#
+
+# and mounted into this stage using BuildKit.
+RUN --mount=from=local_smash,target=/__local_smash <<'EOF'
+  set -euxo pipefail
+  mkdir -p /SMASH
+  echo "Using local SMASH development sources..."
+  cp -a /__local_smash /SMASH/smash
+EOF
+
+FROM ${SOURCE_STAGE} AS final
+RUN <<'EOF'
+  set -euxo pipefail
   cd /SMASH/smash
 
   find_pythia_strings=($(grep 'find_package(Pythia' src/CMakeLists.txt | grep -Eo '[1-9]?[0-9]\.[0-9]{3}'))
@@ -162,6 +192,9 @@ RUN --mount=from=local_smash,target=/__local_smash <<'EOF'
     exit 1
   fi
 EOF
+
+
+
 
 ENV PYTHIA8DATA=${PYTHIA8}/share/Pythia8/xmldoc
 ENV PYTHIA_LIBRARY=${PYTHIA8}/lib
