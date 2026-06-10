@@ -514,8 +514,8 @@ endif()
 # Configure and install CMake configuration files for find_package.
 configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/SMASHConfig.cmake.in
                               ${CMAKE_CURRENT_BINARY_DIR}/SMASHConfig.cmake
-                              INSTALL_DESTINATION share/cmake/SMASH)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SMASHConfig.cmake DESTINATION share/cmake/SMASH)
+                              INSTALL_DESTINATION lib/cmake/SMASH)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SMASHConfig.cmake DESTINATION lib/cmake/SMASH)
 
 # Install targets and files. Note that we do not only install the shared library target, but also
 # the API interface and the usage requirements interface, since this chain of dependencies will be
@@ -543,13 +543,13 @@ foreach(_dependency IN ITEMS ROOT HepMC3 Rivet)
         install(EXPORT SMASH-targets-${_dependency_lower}
                 FILE SMASH-targets-${_dependency_lower}.cmake
                 NAMESPACE SMASH::
-                DESTINATION share/cmake/SMASH)
+                DESTINATION lib/cmake/SMASH)
         install(TARGETS smash_${_dependency_lower}
                 EXPORT SMASH-targets-${_dependency_lower}
                 INCLUDES
                 DESTINATION include)
         if(_dependency STREQUAL "Rivet")
-            install(FILES ${CMAKE_SOURCE_DIR}/cmake/FindRivet.cmake DESTINATION share/cmake/SMASH)
+            install(FILES ${CMAKE_SOURCE_DIR}/cmake/FindRivet.cmake DESTINATION lib/cmake/SMASH)
         endif()
     endif()
 endforeach()

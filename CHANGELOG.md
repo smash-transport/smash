@@ -41,7 +41,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Removed
 * CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally.
-* CMake module `FindSMASH.cmake` is not any more needed and has been removed.
+* ⚠️ CMake module `FindSMASH.cmake` is not any more needed and has been removed.
 
 
 ## SMASH-3.3

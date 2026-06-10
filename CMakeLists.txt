@@ -295,7 +295,7 @@ add_subdirectory(doc)
 # Start setting up installation of SMASH components as well as CMake configuration version file for
 # find_package. Note that we install the non-standard modules to find dependencies as well, since
 # they are needed by users of SMASH as a library. All CMake related files are installed in
-# share/cmake/SMASH, which is a common practice for CMake configuration files. We also install the
+# lib/cmake/SMASH, which is a common practice for CMake configuration files. We also install the
 # default input files, since they might be needed by users running SMASH. The SMASHConfig.cmake
 # configuration file will be configured and installed in the src/CMakeLists.txt file, which is the
 # place where all information will be available. For the moment we use AnyNewerVersion compatibility
@@ -309,9 +309,9 @@ write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/SMASHConfigVersion.
 install(EXPORT SMASH-targets-core
         FILE SMASH-targets-core.cmake
         NAMESPACE SMASH::
-        DESTINATION share/cmake/SMASH)
+        DESTINATION lib/cmake/SMASH)
 install(FILES ${CMAKE_SOURCE_DIR}/cmake/FindPythia.cmake ${CMAKE_SOURCE_DIR}/cmake/FindEigen3.cmake
-              ${CMAKE_CURRENT_BINARY_DIR}/SMASHConfigVersion.cmake DESTINATION share/cmake/SMASH)
+              ${CMAKE_CURRENT_BINARY_DIR}/SMASHConfigVersion.cmake DESTINATION lib/cmake/SMASH)
 
 # Copy the default input files to the installation directory
 install(DIRECTORY input/ DESTINATION "share/input_files")
