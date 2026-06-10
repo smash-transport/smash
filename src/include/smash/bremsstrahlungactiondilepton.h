@@ -34,13 +34,15 @@ namespace smash {
  * pion propagator.
  *
  * Kinematic variables sampled for the dilepton pair are:
- *   - m_inv:        invariant mass of the dilepton pair [2m_e, m_inv_max]
+ *   - m_inv:        invariant mass of the dilepton pair
+ *                   [\f$2m_e,\sqrt{s}-2m_N\f$]
  *   - q:            3-momentum of dilepton in pn-CM frame
- *   - \f$\theta\f$: polar angle of dilepton in pn-CM frame \f$[0, \pi]\f$
+ *   - \f$\cos\theta\f$: Cosine of polar angle of dilepton in pn-CM frame
+ *                      \f$[-1, 1]\f$
  *   - \f$\phi\f$:   azimuthal angle of dilepton in pn-CM frame \f$[0, 2\pi]\f$
  *
  * The dilepton 4-momentum is constructed directly from
- * (m_inv, q, \f$\theta\f$, \f$\phi\f$) to enable event-by-event acceptance
+ * (m_inv, q, \f$\cos\theta\f$, \f$\phi\f$) to enable event-by-event acceptance
  * cuts. The e⁺e⁻ pair is subsequently produced isotropically in the virtual
  * photon's rest frame.
  *
@@ -182,15 +184,6 @@ class BremsstrahlungActionDilepton : public ScatterAction {
   double gamma_rho_(double m_inv_sqr) const;
 
   /**
-   * Helper function for calculating R_2 as defined in \iref{Weil:2013mya},
-   * eq. (42).
-   *
-   * \param[in] s Mandelstam variable s [GeV²]
-   *
-   * \return R_2(m_{inv}^2) (dimensionless)
-   */
-  double R_2_helper_(const double s) const;
-  /**
    * Holds the bremsstrahlung branch. As of now, this will hold only one branch.
    */
   CollisionBranchList collision_processes_dilepton_bremsstrahlung_;
@@ -212,9 +205,6 @@ class BremsstrahlungActionDilepton : public ScatterAction {
 
   /// Sampled 3-momentum of dilepton pair in pn-CM frame
   double q_;
-
-  /// Sampled value of dilepton polar angle in pn-CM frame
-  double theta_;
 
   /// Sampled invariant mass of the dilepton pair
   double m_inv_;

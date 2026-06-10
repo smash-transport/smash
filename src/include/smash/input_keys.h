@@ -3897,7 +3897,7 @@ struct InputKeys {
    * \optional_key{key_CT_dileptons_bremsstrahlung_,Bremsstrahlung,bool,false}
    *
    * Whether or not to enable dilepton production via bremsstrahlung in
-   * neutron-proton interactions. The approach follows the meson-exchange 
+   * neutron-proton interactions. The approach follows the meson-exchange
    * approximation depicted in \iref{Shyam:2010vr}.
    */
   /**
@@ -3915,7 +3915,7 @@ struct InputKeys {
    * - `"FF1"` &rarr; Photon couples to pion direclty via \f$\rho_0\f$ meson.
    * - `"FF2"` &rarr; Photon couples 40% directly to intrinsic quark structure
    * of pion and 60% indirectly via \f$\rho_0\f$ meson.
-   * 
+   *
    * This key is only relevant if \key Bremsstrahlung is `true`.
    */
   /**

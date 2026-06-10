@@ -9,6 +9,7 @@
 
 #include "smash/bremsstrahlungactiondilepton.h"
 
+#include "smash/constants.h"
 #include "smash/formfactors.h"
 #include "smash/outputinterface.h"
 #include "smash/parametrizations.h"
@@ -20,6 +21,24 @@
 #include "smash/random.h"
 
 namespace smash {
+
+namespace {
+
+/**
+ * Helper function for calculating R_2 as defined in \iref{Weil:2013mya},
+ * eq. (42).
+ *
+ * \param[in] s Mandelstam variable s [GeV²]
+ *
+ * \return R_2(m_{inv}^2) (dimensionless)
+ */
+double R_2_helper(const double s) {
+  const double m_pn = 2 * nucleon_mass;
+  return (s < (m_pn * m_pn)) ? 0.0 : std::sqrt(1.0 - (m_pn * m_pn) / s);
+}
+
+}  // namespace
+
 static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
 BremsstrahlungActionDilepton::BremsstrahlungActionDilepton(
@@ -120,9 +139,9 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   FourVector interaction_point = get_interaction_point();
 
   assert(outgoing_particles_.size() == 4);
-  const double m_p = outgoing_particles_[0].type().mass();
-  const double m_n = outgoing_particles_[1].type().mass();
-  const double m_e = outgoing_particles_[2].type().mass();
+  constexpr double m_p = nucleon_mass;
+  constexpr double m_n = nucleon_mass;
+  constexpr double m_e = electron_mass;
 
   double delta_M = std::numeric_limits<double>::quiet_NaN();
   const double M_min = 2.0 * m_e;
@@ -153,12 +172,11 @@ void BremsstrahlungActionDilepton::generate_final_state() {
     return;
   }
 
-  theta_ = random::uniform(0.0, M_PI);
-  const double phi = random::uniform(0.0, twopi);
-
   // The virtual photon carries 4-momentum p_ll with direction (theta, phi)
   const double E_ll = std::sqrt(q_ * q_ + m_inv_ * m_inv_);
-  const Angles phitheta(phi, std::cos(theta_));
+
+  Angles phitheta;
+  phitheta.distribute_isotropically();
   const FourVector p_ll(E_ll, q_ * phitheta.threevec());
 
   // Calculate the recoil for the (pn)' subsystem after the collision.
@@ -187,7 +205,7 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   const double dsigma_dM_dq_dOmega = diff_xs_pn_dilepton_(m_inv_, q_, sqrt_s());
   const double W_M = dsigma_dM_dq_dOmega * delta_M;
   const double W_q = delta_q;
-  const double W_Omega = twopi * M_PI * std::sin(theta_);
+  const double W_Omega = 4 * M_PI;
 
   weight_ = W_M * W_q * W_Omega / hadronic_cross_section_;
 
@@ -231,8 +249,8 @@ bool BremsstrahlungActionDilepton::sample_2body_isotropic_(
 double BremsstrahlungActionDilepton::diff_xs_pn_dilepton_(
     const double M, const double q, const double sqrts) const {
   const double s = sqrts * sqrts;
-  const double m_p = outgoing_particles_[0].type().mass();
-  const double m_n = outgoing_particles_[1].type().mass();
+  constexpr double m_p = nucleon_mass;
+  constexpr double m_n = nucleon_mass;
   const double m_pn = m_p + m_n;
   const double E = std::sqrt(q * q + M * M);
 
@@ -242,25 +260,18 @@ double BremsstrahlungActionDilepton::diff_xs_pn_dilepton_(
 
   const double sigma_bar =
       (s - (m_pn) * (m_pn)) / (2.0 * (m_p * m_p)) * np_elastic(s);
-  const double R2_s = R_2_helper_(s);
+  const double R2_s = R_2_helper(s);
   if (R2_s <= 0.0)
     return 0.0;
 
   const double s2 = s + M * M - 2.0 * E * sqrts;
-  const double R2_s2 = R_2_helper_(s2);
+  const double R2_s2 = R_2_helper(s2);
   const double prefactor =
       fine_structure * fine_structure / (6.0 * M_PI * M_PI * M_PI);
 
   // Factor q²/(ME³) after dE->dq substitution in diff. cross section formula.
   return prefactor * (q * q) / (M * E * E * E) * sigma_bar * (R2_s2 / R2_s) *
          pion_em_form_factor_sq_(M * M);
-}
-
-double BremsstrahlungActionDilepton::R_2_helper_(const double s) const {
-  const double m_p = outgoing_particles_[0].type().mass();
-  const double m_n = outgoing_particles_[1].type().mass();
-  const double m_pn = m_p + m_n;
-  return (s < (m_pn * m_pn)) ? 0.0 : std::sqrt(1.0 - (m_pn * m_pn) / s);
 }
 
 double BremsstrahlungActionDilepton::pion_em_form_factor_sq_(
@@ -277,17 +288,16 @@ double BremsstrahlungActionDilepton::pion_em_form_factor_sq_(
       return 1.0;
     default:
       using namespace std::string_literals;  // NOLINT(build/namespaces)
-      throw std::runtime_error("Problem in "s + __func__ +
-                               ". Looks like an unknown form factor "
-                               "type is used. Please check your config file.");
+      throw std::logic_error("Problem in "s + __func__ +
+                             ". Unknown pion form factor.");
   }
 }
 
 double BremsstrahlungActionDilepton::gamma_rho_(double M_sq) const {
   // The energy-dependent width as provided in \iref{Brown:1985gu}.
   const double m_rho = ParticleType::find(pdg::rho_z).mass();
-  const double m_rho_sq = ParticleType::find(pdg::rho_z).mass_sqr();
-  const double m_pi_sq = ParticleType::find(pdg::pi_z).mass_sqr();
+  const double m_rho_sq = m_rho * m_rho;
+  const double m_pi_sq = pion_mass * pion_mass;
   const double gamma0_rho = ParticleType::find(pdg::rho_z).width_at_pole();
 
   /* Check if M² is above the 2-pion threshold.
