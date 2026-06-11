@@ -1,0 +1,38 @@
+Logging:
+    default: INFO
+
+General:
+    Modus:          Collider
+    Time_Step_Mode: Fixed
+    Delta_Time:     0.05
+    End_Time:       25.0
+    Randomseed:     -1
+    Nevents:        1
+    Gaussian_Sigma: 0.7
+
+Output:
+    Initial_Conditions:
+        Format: ["Oscar2013"]
+        Extended: True
+    Particles:
+        Format: ["Oscar2013"]
+        Extended: True
+        Only_Final: "Yes"
+
+Modi:
+    Collider:
+        Projectile:
+            Particles: {2212: 79, 2112: 118} #Gold197
+        Target:
+            Particles: {2212: 79, 2112: 118} #Gold197
+
+        Sqrtsnn: 4.3
+        Fermi_Motion: frozen
+
+        Initial_Conditions:
+            Type: "Dynamic"
+            Energy_Density_Threshold: 0.5
+            Formation_Time_Fraction: 0.2
+
+Collision_Term:
+    Force_Decays_At_End: false
