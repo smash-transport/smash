@@ -15,18 +15,18 @@
 
 namespace smash {
 
-bool is_string_soft_process(ProcessType p) {
-  return p == ProcessType::StringSoftSingleDiffractiveAX ||
-         p == ProcessType::StringSoftSingleDiffractiveXB ||
-         p == ProcessType::StringSoftDoubleDiffractive ||
-         p == ProcessType::StringSoftAnnihilation ||
-         p == ProcessType::StringSoftNonDiffractive;
+bool is_string_soft_process(ProcessType type) {
+  return type == ProcessType::StringSoftSingleDiffractiveAX ||
+         type == ProcessType::StringSoftSingleDiffractiveXB ||
+         type == ProcessType::StringSoftDoubleDiffractive ||
+         type == ProcessType::StringSoftAnnihilation ||
+         type == ProcessType::StringSoftNonDiffractive;
 }
-bool is_string_hard_process(ProcessType p) {
-  return p == ProcessType::StringHardSingleDiffractiveAX ||
-         p == ProcessType::StringHardSingleDiffractiveXB ||
-         p == ProcessType::StringHardDoubleDiffractive ||
-         p == ProcessType::StringHardNonDiffractive;
+bool is_string_hard_process(ProcessType type) {
+  return type == ProcessType::StringHardSingleDiffractiveAX ||
+         type == ProcessType::StringHardSingleDiffractiveXB ||
+         type == ProcessType::StringHardDoubleDiffractive ||
+         type == ProcessType::StringHardNonDiffractive;
 }
 
 bool is_string_process(ProcessType type) {
@@ -65,20 +65,20 @@ std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
   ProcessType ptype = cbranch.get_type();
   if (ptype == ProcessType::StringSoftSingleDiffractiveAX ||
       ptype == ProcessType::StringSoftSingleDiffractiveXB) {
-    os << "1-diff";
+    os << "soft 1-diff";
   } else if (ptype == ProcessType::StringSoftDoubleDiffractive) {
-    os << "2-diff";
+    os << "soft 2-diff";
   } else if (ptype == ProcessType::StringSoftAnnihilation) {
-    os << "BBbar";
+    os << "soft BBbar";
   } else if (ptype == ProcessType::StringSoftNonDiffractive) {
-    os << "non-diff";
+    os << "soft non-diff";
   } else if (ptype == ProcessType::StringHardNonDiffractive) {
     os << "hard non-diff";
   } else if (ptype == ProcessType::StringHardSingleDiffractiveXB ||
              ptype == ProcessType::StringHardSingleDiffractiveAX) {
     os << "hard 1-diff";
   } else if (ptype == ProcessType::StringHardDoubleDiffractive) {
-    os << "hard double-diff";
+    os << "hard 2-diff";
   } else if (ptype == ProcessType::TwoToOne || ptype == ProcessType::TwoToTwo ||
              ptype == ProcessType::TwoToThree ||
              ptype == ProcessType::TwoToFour ||

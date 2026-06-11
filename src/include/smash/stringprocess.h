@@ -174,29 +174,6 @@ class StringProcess {
   double additional_xsec_supp_;
 
   /**
-   * Suppression factor for strange diquark production relative
-   * to light diquarks.
-   */
-  double prob_sq_to_qq_;
-
-  /**
-   * Suppression factor for strange quark production in
-   * popcorn baryon production.
-   */
-  double popcorn_spair_;
-
-  /**
-   * Suppression of spin-1 diquarks relative to spin-0 diquarks.
-   */
-  double prob_qq1_to_qq0_;
-
-  /**
-   * Suppression factor for strange meson production in
-   * popcorn baryon production.
-   */
-  double popcorn_smeson_;
-
-  /**
    * Compute flags identifying beam valence partons (quarks or diquarks)
    * that act as leading partons after the initial interaction.
    *
@@ -219,29 +196,28 @@ class StringProcess {
   /**
    * Determine the custom leading-hadron status code from a string endpoint.
    * For a string endpoint particle, return the appropriate SMASH leading
-   * status: diquark endpoints map to FROM_LEADING_DIQUARK, otherwise
-   * FROM_LEADING_QUARK.
+   * status: diquark endpoints map to FROM_Leading_Diquark, otherwise
+   * FROM_Leading_Quark.
    *
    * \param[in] end  String endpoint particle (quark or diquark).
    * \return Integer status code corresponding to the appropriate
    * LeadingStatus.
    */
   inline int leading_hadron_status_from_endpoint(const Pythia8::Particle &end) {
-    return static_cast<int>(end.isDiquark()
-                                ? LeadingStatus::FROM_LEADING_DIQUARK
-                                : LeadingStatus::FROM_LEADING_QUARK);
+    return static_cast<int>(end.isDiquark() ? LeadingStatus::FromLeadingDiquark
+                                            : LeadingStatus::FromLeadingQuark);
   }
 
   /**
    * Check whether a particle is tagged as a leading parton.
    *
    * \param[in] p  Pythia particle.
-   * \return True if p has statusAbs() equal to LeadingStatus::LEADING_QUARK or
-   * LeadingStatus::LEADING_DIQUARK.
+   * \return True if p has statusAbs() equal to LeadingStatus::Leading_Quark or
+   * LeadingStatus::Leading_Diquark.
    */
   inline bool is_leading_parton(const Pythia8::Particle &p) {
-    return p.statusAbs() == static_cast<int>(LeadingStatus::LEADING_QUARK) ||
-           p.statusAbs() == static_cast<int>(LeadingStatus::LEADING_DIQUARK);
+    return p.statusAbs() == static_cast<int>(LeadingStatus::LeadingQuark) ||
+           p.statusAbs() == static_cast<int>(LeadingStatus::LeadingDiquark);
   }
 
   /**
@@ -249,10 +225,10 @@ class StringProcess {
    *
    * \param[in] p  Pythia particle.
    * \return True if p has statusAbs() equal to
-   * LeadingStatus::FROM_LEADING_QUARK.
+   * LeadingStatus::FROM_Leading_Quark.
    */
   inline bool is_leading_from_quark(const Pythia8::Particle &p) {
-    return p.statusAbs() == static_cast<int>(LeadingStatus::FROM_LEADING_QUARK);
+    return p.statusAbs() == static_cast<int>(LeadingStatus::FromLeadingQuark);
   }
 
   /**
@@ -260,11 +236,10 @@ class StringProcess {
    *
    * \param[in] p  Pythia particle.
    * \return True if p has statusAbs() equal to
-   * LeadingStatus::FROM_LEADING_DIQUARK.
+   * LeadingStatus::FROM_Leading_Diquark.
    */
   inline bool is_leading_from_diquark(const Pythia8::Particle &p) {
-    return p.statusAbs() ==
-           static_cast<int>(LeadingStatus::FROM_LEADING_DIQUARK);
+    return p.statusAbs() == static_cast<int>(LeadingStatus::FromLeadingDiquark);
   }
 
   /**
@@ -320,14 +295,30 @@ class StringProcess {
   /**
    * Append a single two-endpoint string as an independent PYTHIA event.
    *
+   * A minimal partonic event is constructed containing a string with the
+   * specified endpoint flavors and total four-momentum. The endpoint momenta
+   * are determined from two-body kinematics in the string rest frame and are
+   * aligned with either the projectile or target beam direction before being
+   * boosted back to the collision frame.
+   *
+   * Strings whose invariant mass is below the estimated fragmentation threshold
+   * are rejected.
+   *
    * \param[in] p_str Four-momentum of the string.
    * \param[in] ends PDG ids of the two string endpoints.
    * \param[in] color_tag Color tag used to connect the string endpoints.
-   * \param[in] flip Whether to reverse the order of the string endpoints.
-   * \return Whether the string was successfully appended.
+   * \param[in] use_projectile_axis Whether to align the string with the
+   *                                projectile beam direction. If false, the
+   *                                target beam direction is used.
+   * \param[in] random_flip_of_endpoints Whether to randomly reverse the order
+   *                                     of the two string endpoints before
+   *                                     assigning endpoint momenta.
+   * \return True if a valid string event was created and appended, false
+   *         otherwise.
    */
   bool append_string(const Pythia8::Vec4 &p_str, const std::array<int, 2> &ends,
-                     int color_tag, bool flip = false);
+                     int color_tag, bool use_projectile_axis,
+                     bool random_flip_of_endpoints = false);
 
   /// PYTHIA event records containing string partons to be hadronized.
   std::vector<Pythia8::Event> string_parton_events_;
@@ -432,46 +423,90 @@ class StringProcess {
     logg[LPythia].debug("pythia_hadron_ : rndm is initialized with seed ",
                         seed_new);
   }
-
   /**
-   * Custom Pythia status codes used to mark leading/valence
-   * ancestry.
+   * PYTHIA status codes used to track leading/valence ancestry.
    *
-   * Pythia uses integer status codes to classify particles in
-   * the event record. SMASH adds a small set of reserved,
-   * non-standard codes to tag particles according to whether
-   * they are leading partons or hadrons originating from
+   * PYTHIA uses integer status codes to classify particles in the event
+   * record. SMASH uses a combination of standard PYTHIA codes and custom
+   * internal codes to tag leading partons and hadrons originating from
    * leading quark/diquark endpoints.
    *
-   * The values are chosen to avoid collisions with commonly
-   * used Pythia internal codes and are treated here as
-   * implementation detail.
+   * Custom values are chosen to avoid collisions with commonly used PYTHIA
+   * internal codes. Standard PYTHIA values are used deliberately where they
+   * activate specific hadronization machinery.
    */
   enum class LeadingStatus : int {
-    /// Status code assigned to leading (valence) quarks in the event record.
-    LEADING_QUARK = 202,
+    /// Custom status assigned to leading (valence) quarks.
+    LeadingQuark = 202,
 
-    /// Status code for leading diquarks which should have beam remnant id
-    /// to be used by Pythias internal machinery
-    LEADING_DIQUARK = 63,
+    /// Standard PYTHIA beam-remnant status used for leading diquarks.
+    ///
+    /// Leading diquarks are assigned status 63 so that PYTHIA treats them
+    /// as beam remnants during hadronization. This allows PYTHIA's beam
+    /// remnant machinery to be used for leading baryon production, including
+    /// popcorn suppression and the optional hard-remnant-baryon treatment.
+    ///
+    /// In particular, when BeamRemnants:hardRemnantBaryon is enabled,
+    /// PYTHIA replaces the standard Lund symmetric fragmentation function
+    /// for the leading baryon by a dedicated remnant-baryon fragmentation
+    /// function controlled by BeamRemnants:aRemnantBaryon and
+    /// BeamRemnants:bRemnantBaryon. This produces harder leading baryons
+    /// than ordinary string fragmentation.
+    ///
+    /// Therefore status 63 is intentionally used here rather than a custom
+    /// status code.
+    LeadingDiquark = 63,
 
-    /// Status code assigned to hadrons traced back to a leading quark
-    /// endpoint.
-    FROM_LEADING_QUARK = 203,
-    /// Status code assigned to hadrons traced back to a leading diquark
-    /// endpoint.
-    FROM_LEADING_DIQUARK = 204
+    /// Standard PYTHIA status for non-leading partons that should be
+    /// hadronized.
+    ///
+    /// The PYTHIA manual recommends status 23 for particles provided as
+    /// input to standalone hadronization. The precise value is not
+    /// physically important here, but using the recommended status keeps
+    /// the event record conventional.
+    ///
+    /// See:
+    /// https://pythia.org/latest-manual/HadronLevelStandalone.html
+    NonLeadingParton = 23,
+
+    /// Custom status assigned to hadrons containing a leading quark.
+    FromLeadingQuark = 203,
+
+    /// Custom status assigned to hadrons containing a leading diquark.
+    FromLeadingDiquark = 204,
   };
+
   /**
-   * Tag hadrons in a hadronized Pythia event that originate from leading
-   * partons.
+   * Tag leading hadrons in a hadronized string.
    *
-   * This function annotates the given Pythia event by setting custom status
-   * codes (see LeadingStatus) for hadrons that can be traced back to the
-   * leading (valence) quark or diquark endpoints of the initial strings.
+   * After string fragmentation, this function identifies the hadrons that
+   * originate from the leading string endpoints and assigns them a custom
+   * status code (see LeadingStatus).
    *
-   * \param[in,out] event  Pythia event to be tagged (modified in-place).
-   * identification.
+   * The procedure is:
+   *  - identify the two string endpoint partons (quarks or diquarks),
+   *  - boost the event into the string rest frame,
+   *  - sort all final-state hadrons by longitudinal momentum,
+   *  - associate each endpoint with the hadron closest to its end of the
+   *    string,
+   *  - assign a leading-hadron status based on the flavor content of the
+   *    endpoint parton.
+   *
+   * Diquark endpoints are processed before quark endpoints to ensure that
+   * leading baryons are preferentially associated with beam-remnant diquarks.
+   * A hadron can only be tagged once.
+   *
+   * For diquark endpoints, only baryons with matching baryon-number sign are
+   * considered. Quark endpoints may tag either mesons or baryons, but baryons
+   * must again have a compatible baryon-number sign.
+   *
+   * The event is temporarily transformed into the string rest frame during the
+   * identification procedure and restored to its original frame before
+   * returning.
+   *
+   * \param[in,out] event
+   *   Hadronized Pythia event. The event is modified in-place by assigning
+   *   custom status codes to identified leading hadrons.
    */
   void tag_leading_hadrons(Pythia8::Event &event);
 
@@ -629,7 +664,7 @@ class StringProcess {
    */
   void set_sigma_qperp_(double sigma_qperp) { sigma_qperp_ = sigma_qperp; }
   /**
-   * set the string tension, which is used in append_final_state.
+   * set the string tension, which is used in form_intermediate_particles.
    * \param kappa_string is a value that we want to use for string tension.
    */
   void set_tension_string(double kappa_string) {
@@ -1028,16 +1063,6 @@ class StringProcess {
                                double xi);
 
   /**
-   * Easy setter of Pythia Vec4 from SMASH
-   * \param[in] energy time component
-   * \param[in] mom spatial three-vector
-   * \return Pythia Vec4 from energy and ThreeVector
-   */
-  static Pythia8::Vec4 set_Vec4(double energy, const ThreeVector &mom) {
-    return Pythia8::Vec4(mom.x1(), mom.x2(), mom.x3(), energy);
-  }
-
-  /**
    * Assign a cross section scaling factor to all outgoing particles.
    *
    * The factor is only non-zero, when the outgoing particle carries
@@ -1066,7 +1091,7 @@ class StringProcess {
    *
    * \param[in] nq1 number of valence quarks from excited hadron at forward
    *                end of the string
-   * \param[in] nq2 number of valance quarks from excited hadron at backward
+   * \param[in] nq2 number of valence quarks from excited hadron at backward
    *                end of the string
    * \param[in] list list of string fragments
    * \return indices of the leading hadrons in \p list

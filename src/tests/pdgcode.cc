@@ -87,7 +87,9 @@ PdgCode omega_c_bar(-0x4332);
 PdgCode xi_cc_bar(-0x4422);
 
 PdgCode omega_bc(0x5432);
-PdgCode omega_bb(0x5532);  // nuclei
+PdgCode omega_bb(0x5532);
+
+// nuclei
 PdgCode deuteron("1000010020");
 PdgCode antideutron("-1000010020");
 PdgCode triton("1000010030");

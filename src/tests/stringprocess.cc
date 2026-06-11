@@ -76,7 +76,7 @@ TEST(common_setup) {
   VERIFY(pythia_interface.settings.parm("Check:epTolWarn") == 1e-8);
 }
 
-TEST(append_final) {
+TEST(form_intermediate_particles) {
   // Create StringProcess to work with
   std::unique_ptr<StringProcess> sp =
       smash::Test::default_string_process_interface();
@@ -733,13 +733,13 @@ TEST(string_tag_leading_hadrons) {
   event.init("test event", &pythia.particleData);
 
   const int leading_quark =
-      static_cast<int>(StringProcess::LeadingStatus::LEADING_QUARK);
+      static_cast<int>(StringProcess::LeadingStatus::LeadingQuark);
   const int leading_diquark =
-      static_cast<int>(StringProcess::LeadingStatus::LEADING_DIQUARK);
+      static_cast<int>(StringProcess::LeadingStatus::LeadingDiquark);
   const int from_quark =
-      static_cast<int>(StringProcess::LeadingStatus::FROM_LEADING_QUARK);
+      static_cast<int>(StringProcess::LeadingStatus::FromLeadingQuark);
   const int from_diquark =
-      static_cast<int>(StringProcess::LeadingStatus::FROM_LEADING_DIQUARK);
+      static_cast<int>(StringProcess::LeadingStatus::FromLeadingDiquark);
 
   event.append(90, -11, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 3.0, 3.0);
 
@@ -778,13 +778,13 @@ TEST(string_tag_leading_hadrons_antidiquark) {
   event.init("test event", &pythia.particleData);
 
   const int leading_quark =
-      static_cast<int>(StringProcess::LeadingStatus::LEADING_QUARK);
+      static_cast<int>(StringProcess::LeadingStatus::LeadingQuark);
   const int leading_diquark =
-      static_cast<int>(StringProcess::LeadingStatus::LEADING_DIQUARK);
+      static_cast<int>(StringProcess::LeadingStatus::LeadingDiquark);
   const int from_quark =
-      static_cast<int>(StringProcess::LeadingStatus::FROM_LEADING_QUARK);
+      static_cast<int>(StringProcess::LeadingStatus::FromLeadingQuark);
   const int from_diquark =
-      static_cast<int>(StringProcess::LeadingStatus::FROM_LEADING_DIQUARK);
+      static_cast<int>(StringProcess::LeadingStatus::FromLeadingDiquark);
 
   event.append(90, -11, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 3.0, 3.0);
 
@@ -823,11 +823,11 @@ TEST(string_tag_leading_hadrons_no_overwrite) {
   event.init("test event", &pythia.particleData);
 
   const int leading_quark =
-      static_cast<int>(StringProcess::LeadingStatus::LEADING_QUARK);
+      static_cast<int>(StringProcess::LeadingStatus::LeadingQuark);
   const int leading_diquark =
-      static_cast<int>(StringProcess::LeadingStatus::LEADING_DIQUARK);
+      static_cast<int>(StringProcess::LeadingStatus::LeadingDiquark);
   const int from_diquark =
-      static_cast<int>(StringProcess::LeadingStatus::FROM_LEADING_DIQUARK);
+      static_cast<int>(StringProcess::LeadingStatus::FromLeadingDiquark);
 
   event.append(90, -11, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 2.0, 2.0);
 

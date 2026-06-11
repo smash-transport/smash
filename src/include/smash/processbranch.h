@@ -83,14 +83,14 @@ enum class ProcessType {
   StringSoftNonDiffractive = 45,
   /// \see_process_type{46}
   StringHardNonDiffractive = 46,
+  /// \see_process_type{47}
+  StringHardSingleDiffractiveAX = 47,
   /// \see_process_type{48}
-  StringHardSingleDiffractiveAX = 48,
+  StringHardSingleDiffractiveXB = 48,
   /// \see_process_type{49}
-  StringHardSingleDiffractiveXB = 49,
+  StringHardDoubleDiffractive = 49,
   /// \see_process_type{50}
-  StringHardDoubleDiffractive = 50,
-  /// \see_process_type{51}
-  FailedString = 51,
+  FailedString = 50,
   /// \see_process_type{90}
   Freeforall = 90
 };

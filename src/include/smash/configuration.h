@@ -1422,29 +1422,6 @@ class Configuration {
                                       "\" should be "
                                       "\"Exponential\" or \"Custom_Range\".");
     }
-
-    /**
-     * Set Pythia fragmentation model from configuration values.
-     *
-     * \return PythiaFragmentationModel.
-     * \throw IncorrectTypeInAssignment in case a fragmentation model that is
-     * not available is provided as a configuration value.
-     */
-    operator PythiaFragmentationModel() const {
-      const std::string s = operator std::string();
-
-      if (s == "Default") {
-        return PythiaFragmentationModel::Default;
-      }
-      if (s == "Thermal") {
-        return PythiaFragmentationModel::Thermal;
-      }
-
-      throw IncorrectTypeInAssignment("The value for key \"" +
-                                      std::string(key_) + "\" should be " +
-                                      "\"Default\" or \"Thermal\".");
-    }
-
     /**
      * Set total cross section strategy from configuration values.
      *

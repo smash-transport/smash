@@ -390,17 +390,6 @@ enum class DensityType {
   Strangeness = 7,
 };
 
-/**
- * Allows choosing which of Pythia's fragmentation models to use.
- * Currently, only the default model used by Pythia and the thermal model
- * (https://www.pythia.org/latest-manual/ThermalFragmentation.html)
- * are available.
- */
-enum class PythiaFragmentationModel {
-  Default = 0,
-  Thermal = 1,
-};
-
 /// Allows to specify the desired extrapolation type.
 enum class ExtrapolationType {
   /// No extrapolation is done.
