@@ -44,9 +44,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       finder_parameters_.coll_crit != CollisionCriterion::Stochastic) {
     throw std::invalid_argument(
         "Multi-body reactions (like e.g. 3->1 or 3->2) are only possible with "
-        "the stochastic "
-        "collision "
-        "criterion. Change your config accordingly.");
+        "the stochastic collision criterion. Change your config accordingly.");
   }
 
   if (finder_parameters_

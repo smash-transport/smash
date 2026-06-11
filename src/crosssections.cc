@@ -132,11 +132,11 @@ static void append_list(CollisionBranchList& main_list,
                                                 const ParticleData& data_a,
                                                 const ParticleData& data_b,
                                                 std::string func_name) {
-  std::stringstream ss{};
   const ParticleType& a = data_a.type();
   const ParticleType& b = data_b.type();
   const PdgCode& pdg_a = a.pdgcode();
   const PdgCode& pdg_b = b.pdgcode();
+  std::stringstream ss{};
   ss << "Negative cross section encountered in function 'CrossSections::"
      << func_name << "':\na=" << a.name() << " b=" << b.name()
      << " j_a=" << pdg_a.spin() << " j_b=" << pdg_b.spin() << " sigma=" << xsec
@@ -388,9 +388,6 @@ double CrossSections::parametrized_total(
     } else if (pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) {
       const CharmRescattering& charm_rescattering =
           finder_parameters.charm_rescattering;
-      if (charm_rescattering == CharmRescattering::None) {
-        return 0.;
-      }
       std::optional<double> elastic_xs = std::nullopt;
       double inelastic_xs = 0.;
       if (pdg_a.is_pion() || pdg_b.is_pion()) {
@@ -499,9 +496,6 @@ double CrossSections::elastic_parametrization(
   } else if (pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) {
     const CharmRescattering& charm_rescattering =
         finder_parameters.charm_rescattering;
-    if (charm_rescattering == CharmRescattering::None) {
-      return 0.;
-    }
     std::optional<double> tmp_elastic_xs = std::nullopt;
     if (pdg_a.is_pion() || pdg_b.is_pion()) {
       tmp_elastic_xs = Dpi_elastic();
@@ -1013,7 +1007,6 @@ std::optional<double> CrossSections::Dpi_elastic() const {
   const ParticleType& b = incoming_particles_[1].type();
   const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
   const ParticleType& type_pion = a.pdgcode().is_Dmeson() ? b : a;
-
   const auto pdg_D = type_D.pdgcode().code();
   const auto pdg_pion = type_pion.pdgcode().code();
 
@@ -1065,7 +1058,6 @@ std::optional<double> CrossSections::Dpi_elastic() const {
 std::optional<double> CrossSections::Deta_elastic() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
-
   const auto pdgcode_D = pdg_a.is_Dmeson() ? pdg_a.code() : pdg_b.code();
   const auto pdgcode_eta = pdg_a.is_Dmeson() ? pdg_b.code() : pdg_a.code();
 
@@ -1097,7 +1089,6 @@ std::optional<double> CrossSections::Deta_elastic() const {
 std::optional<double> CrossSections::DK_elastic() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
-
   const auto pdgcode_D = pdg_a.is_Dmeson() ? pdg_a.code() : pdg_b.code();
   const auto pdgcode_kaon = pdg_a.is_Dmeson() ? pdg_b.code() : pdg_a.code();
 
@@ -1164,7 +1155,7 @@ CollisionBranchList CrossSections::two_to_one(
   const PdgCode& pdg_a = type_particle_a.pdgcode();
   const PdgCode& pdg_b = type_particle_b.pdgcode();
 
-  if (!(charm_rescattering == CharmRescattering::Resonances) &&
+  if (charm_rescattering == CharmRescattering::T_Matrix &&
       (pdg_a.is_Dmeson() || pdg_b.is_Dmeson())) {
     if ((pdg_a.is_pion() || pdg_b.is_pion()) ||
         (pdg_a.is_eta() || pdg_b.is_eta()) ||
@@ -2787,7 +2778,6 @@ double CrossSections::Dpi_inelastic() const {
   const ParticleType& b = incoming_particles_[1].type();
   const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
   const ParticleType& type_pion = a.pdgcode().is_Dmeson() ? b : a;
-
   const auto pdg_D = type_D.pdgcode().code();
   const auto pdg_pion = type_pion.pdgcode().code();
 
@@ -2999,7 +2989,6 @@ CollisionBranchList CrossSections::DK_xx(
   const ParticleType& b = incoming_particles_[1].type();
   const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
   const ParticleType& type_kaon = a.pdgcode().is_Dmeson() ? b : a;
-
   const auto pdg_D = type_D.pdgcode().code();
   const auto pdg_kaon = type_kaon.pdgcode().code();
 

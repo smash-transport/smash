@@ -152,12 +152,21 @@ void ScatterAction::add_all_scatterings(
   } else {
     were_processes_added_ = true;
   }
+
+  // Prevent charm interactions if CharmRescattering::None is set
+  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
+  if (finder_parameters.charm_rescattering == CharmRescattering::None &&
+      (pdg_a.frac_charm() != 0 || pdg_b.frac_charm() != 0)) {
+    return;
+  }
+
   CrossSections xs(incoming_particles_, sqrt_s(),
                    get_potential_at_interaction_point());
   CollisionBranchList processes =
       xs.generate_collision_list(finder_parameters, string_process_);
 
-  /* Add various subprocesses.*/
+  // Add various subprocesses.
   add_collisions(std::move(processes));
 
   /* If the string processes are not triggered by a probability, then they

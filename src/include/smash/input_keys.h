@@ -2487,10 +2487,12 @@ struct InputKeys {
    *    hadrons are treated via intermediate resonances.
    * - `"none"` &rarr; Interactions of charmed hadrons will not be taken into
    *    account, i.e. their cross sections are set to zero.
-   *    This option facilitates disabling the two to two interactions of charmed
-   *    hadrons that would otherwise be included via `"Charm_T-matrix"` in
-   *    <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>, without listing
-   *    every possible value except `"Charm_T-matrix"`.
+   *
+   * @note
+   * This option facilitates disabling the two to two interactions of charmed
+   * hadrons that would otherwise be included via `"Charm_T-matrix"` in
+   * <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>, without listing
+   * every possible value except `"Charm_T-matrix"`.
    */
   /**
    * \see_key{key_CT_charm_rescattering_}
