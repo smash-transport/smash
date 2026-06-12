@@ -55,8 +55,17 @@ set_target_properties(smash_objlib smash smash_shared PROPERTIES CXX_EXTENSIONS 
 set_target_properties(smash_shared
                       PROPERTIES OUTPUT_NAME smash
                                  EXPORT_NAME smash
-                                 INSTALL_RPATH "${ORIGIN}"
-                                 INSTALL_RPATH_USE_LINK_PATH TRUE)
+                                 INSTALL_RPATH_USE_LINK_PATH TRUE
+                                 INSTALL_RPATH "$<IF:$<PLATFORM_ID:Darwin>,@loader_path,$ORIGIN>")
+# For the executable, we set the RPATH to be the same as the shared library one, but with an
+# additional "../lib" to look for the shared library in the installation lib folder. Note that
+# INSTALL_RPATH_USE_LINK_PATH is set to TRUE for the executable as well, since it is needed to find
+# at runtime the shared library dependencies of the executable (e.g. Pythia) as smash executable
+# directly depends on e.g. Pythia and not only through the smash shared library.
+set_target_properties(smash
+                      PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE
+                                 INSTALL_RPATH
+                                 "$<IF:$<PLATFORM_ID:Darwin>,@loader_path/../lib,$ORIGIN/../lib>")
 
 # Set up compilation include paths for given target. Note that we need to set both BUILD_INTERFACE
 # and INSTALL_INTERFACE to be sure that the include directories are correctly set both when using
@@ -531,8 +540,8 @@ install(FILES ${generated_headers} DESTINATION "include/smash")
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/smash" DESTINATION include PATTERN "*.h.in"
                                                                                           EXCLUDE)
 install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION include)
-# Copy SMASH executable to installation bin folder
-install(PROGRAMS $<TARGET_FILE_NAME:smash> DESTINATION bin)
+# Install SMASH executable to installation bin folder
+install(TARGETS smash RUNTIME DESTINATION bin)
 # If optional dependencies are found, install them into dedicated targets files in order to split
 # the installed SMASH into CMake components. This allows users in their project to e.g. use
 # find_package(SMASH COMPONENTS Core ROOT) to get only the core and ROOT support without the need to
