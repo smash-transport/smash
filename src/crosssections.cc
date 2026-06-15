@@ -395,8 +395,8 @@ double CrossSections::parametrized_total(
         elastic_xs = Dpi_and_Dstarpi_elastic();
         inelastic_xs = Dpi_and_Dstarpi_inelastic();
       } else if (pdg_a.is_eta() || pdg_b.is_eta()) {
-        elastic_xs = Deta_elastic();
-        // no inelastic scattering for D+eta
+        elastic_xs = Deta_and_Dstareta_elastic();
+        // no inelastic scattering for Deta or D*eta
       } else if (pdg_a.is_kaon() || pdg_b.is_kaon()) {
         elastic_xs = DK_elastic();
         inelastic_xs = DK_inelastic();
@@ -502,7 +502,7 @@ double CrossSections::elastic_parametrization(
     if (pdg_a.is_pion() || pdg_b.is_pion()) {
       tmp_elastic_xs = Dpi_and_Dstarpi_elastic();
     } else if (pdg_a.is_eta() || pdg_b.is_eta()) {
-      tmp_elastic_xs = Deta_elastic();
+      tmp_elastic_xs = Deta_and_Dstareta_elastic();
     } else if (pdg_a.is_kaon() || pdg_b.is_kaon()) {
       tmp_elastic_xs = DK_elastic();
     }
@@ -1089,14 +1089,17 @@ std::optional<double> CrossSections::Dpi_and_Dstarpi_elastic() const {
   }
 }
 
-std::optional<double> CrossSections::Deta_elastic() const {
+std::optional<double> CrossSections::Deta_and_Dstareta_elastic() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
-  const auto pdgcode_D = pdg_a.is_Dmeson() ? pdg_a.code() : pdg_b.code();
-  const auto pdgcode_eta = pdg_a.is_Dmeson() ? pdg_b.code() : pdg_a.code();
+  const auto pdg_D =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_a.code() : pdg_b.code();
+  const auto pdg_eta =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_b.code() : pdg_a.code();
 
   std::optional<double> sig_el = std::nullopt;
-  switch (pack(pdgcode_D, pdgcode_eta)) {
+  switch (pack(pdg_D, pdg_eta)) {
+    // Checks for D mesons scatterings
     case pack(pdg::D_p, pdg::eta):
     case pack(pdg::D_m, pdg::eta): {  // Same xsec for charge conjugation.
       sig_el = Dpluseta_elastic(sqrt_s_);
@@ -1105,6 +1108,17 @@ std::optional<double> CrossSections::Deta_elastic() const {
     case pack(pdg::D_z, pdg::eta):
     case pack(pdg::Dbar_z, pdg::eta): {  // Same xsec for charge conjugation.
       sig_el = Dzeroeta_elastic(sqrt_s_);
+      break;
+    }
+    // Checks for D* mesons scatterings
+    case pack(pdg::Dstar_p, pdg::eta):
+    case pack(pdg::Dstar_m, pdg::eta): {  // Same xsec for charge conjugation.
+      sig_el = Dstarpluseta_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::eta):
+    case pack(pdg::Dstarbar_z, pdg::eta): {  // Same xs for charge conjugation.
+      sig_el = Dstarzeroeta_elastic(sqrt_s_);
       break;
     }
     default:

@@ -428,18 +428,18 @@ class CrossSections {
   double Dpi_and_Dstarpi_inelastic() const;
 
   /**
-   * Determine the elastic cross section for a D meson-eta (Deta) collision.
-   * If the center-of-mass energy for the collision is below the lower bound of
-   * the energy range of the underlying cross section data, the return value
-   * will be 0. If it is above the upper bound, the return value will be
-   * `std::nullopt`.
+   * Determine the elastic cross section for a D meson-eta (Deta) or a D*-eta
+   * (D*eta) collision. If the center-of-mass energy for the collision is below
+   * the lower bound of the energy range of the underlying cross section data,
+   * the return value will be 0. If it is above the upper bound, the return
+   * value will be `std::nullopt`.
    *
-   * \return Elastic cross section for Deta
+   * \return Elastic cross section for Deta or D*eta.
    *
-   * \throw std::runtime_error if incoming particles are not D meson+eta.
+   * \throw std::runtime_error if incoming particles are not Deta or D*eta.
    * \throw std::runtime_error if cross section is negative.
    */
-  std::optional<double> Deta_elastic() const;
+  std::optional<double> Deta_and_Dstareta_elastic() const;
 
   /**
    * Determine the elastic cross section for a D meson-kaon (DK) collision.
