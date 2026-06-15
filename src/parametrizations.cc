@@ -1364,4 +1364,34 @@ std::optional<double> Dstarzeropizero_elastic(double sqrts) {
   }
 }
 
+std::optional<double> Dstarpluseta_elastic(double sqrts) {
+  if (sqrts > *(DSTARETA_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dstarpluseta_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DSTARETA_SQRTS, DSTARPLUSETA_ELASTIC_SIG);
+      Dstarpluseta_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Constant);
+    }
+    return (*Dstarpluseta_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> Dstarzeroeta_elastic(double sqrts) {
+  if (sqrts > *(DSTARETA_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dstarzeroeta_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DSTARETA_SQRTS, DSTARZEROETA_ELASTIC_SIG);
+      Dstarzeroeta_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Constant);
+    }
+    return (*Dstarzeroeta_elastic_interpolation)(sqrts);
+  }
+}
+
 }  // namespace smash

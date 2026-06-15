@@ -1149,6 +1149,26 @@ double Dstarzeropizero_Dstarpluspiminus(double sqrts);
  */
 std::optional<double> Dstarzeropizero_elastic(double sqrts);
 
+/**
+ * D*(2010)⁺η elastic cross section (data provided by Juan Torres-Rincon).
+ * Charge conjugated cross section D*(2010)⁻η is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dstarpluseta_elastic(double sqrts);
+
+/**
+ * D*(2007)⁰η elastic cross section (data provided by Juan Torres-Rincon).
+ * Charge conjugated cross section D̄*(2007)⁰η is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dstarzeroeta_elastic(double sqrts);
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_PARAMETRIZATIONS_H_
