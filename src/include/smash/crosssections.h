@@ -515,15 +515,18 @@ class CrossSections {
                             double KN_offset) const;
 
   /**
-   * Find all inelastic 2->2 processes for D meson-pion (Dpi) scattering.
+   * Find all inelastic 2->2 processes for D meson-pion (Dpi) and D*-pion (D*pi)
+   * scattering.
    *
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \param[in] charm_rescattering Type of charm rescattering
    *
-   * \return List of all possible Dpi reactions with their cross sections
-   * */
-  CollisionBranchList Dpi_xx(const ReactionsBitSet& included_2to2,
-                             CharmRescattering charm_rescattering) const;
+   * \return List of all possible Dpi or D*pi reactions with their cross
+   * sections
+   */
+  CollisionBranchList Dpi_and_Dstarpi_xx(
+      const ReactionsBitSet& included_2to2,
+      CharmRescattering charm_rescattering) const;
 
   /**
    * Find all inelastic 2->2 processes for D meson-kaon (DK) scattering.
@@ -532,7 +535,7 @@ class CrossSections {
    * \param[in] charm_rescattering Type of charm rescattering
    *
    * \return List of all possible DK reactions with their cross sections
-   * */
+   */
   CollisionBranchList DK_xx(const ReactionsBitSet& included_2to2,
                             CharmRescattering charm_rescattering) const;
 
@@ -540,7 +543,7 @@ class CrossSections {
    * Find all inelastic 2->2 processes for Delta-Kaon (DeltaK) Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible DeltaK reactions with their cross sections
-   * */
+   */
   CollisionBranchList deltak_xx(const ReactionsBitSet& included_2to2) const;
 
   /**

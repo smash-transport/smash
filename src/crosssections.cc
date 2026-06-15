@@ -1287,18 +1287,18 @@ CollisionBranchList CrossSections::two_to_two(
       process_list = deltak_xx(included_2to2);
     }
   } else if (type_a.is_meson() && type_b.is_meson()) {
-    if ((pdg_a.is_Dmeson() && pdg_b.is_pion()) ||
-        (pdg_b.is_Dmeson() && pdg_a.is_pion())) {
-      // D Meson Pion Scattering
-      process_list = Dpi_xx(included_2to2, charm_rescattering);
-    } else if ((pdg_a.is_Dmeson() && pdg_b.is_eta()) ||
-               (pdg_b.is_Dmeson() && pdg_a.is_eta())) {
-      // D Meson Eta Scattering (inelastic) not existent in T-matrix method
-      return process_list;
-    } else if ((pdg_a.is_Dmeson() && pdg_b.is_kaon()) ||
-               (pdg_b.is_Dmeson() && pdg_a.is_kaon())) {
-      // D Meson Kaon Scattering
-      process_list = DK_xx(included_2to2, charm_rescattering);
+    if ((pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) ||
+        (pdg_a.is_Dstar2007() || pdg_b.is_Dstar2007())) {
+      if (pdg_a.is_pion() || pdg_b.is_pion()) {
+        // D or D* - Pion Scattering
+        process_list = Dpi_and_Dstarpi_xx(included_2to2, charm_rescattering);
+      } else if (pdg_a.is_eta() || pdg_b.is_eta()) {
+        // D or D* - Eta Scattering (inelastic) not existent in T-matrix method
+        return process_list;
+      } else if (pdg_a.is_kaon() || pdg_b.is_kaon()) {
+        // D or D* - Kaon Scattering
+        process_list = DK_xx(included_2to2, charm_rescattering);
+      }
     }
   } else if (type_a.is_nucleus() || type_b.is_nucleus()) {
     if ((type_a.is_nucleon() && type_b.is_nucleus()) ||
@@ -2939,7 +2939,7 @@ double CrossSections::DK_inelastic() const {
   }
 }
 
-CollisionBranchList CrossSections::Dpi_xx(
+CollisionBranchList CrossSections::Dpi_and_Dstarpi_xx(
     const ReactionsBitSet& included_2to2,
     const CharmRescattering charm_rescattering) const {
   CollisionBranchList process_list;
@@ -2947,17 +2947,17 @@ CollisionBranchList CrossSections::Dpi_xx(
       !(charm_rescattering == CharmRescattering::T_Matrix)) {
     return process_list;
   }
-  const ParticleType& a = incoming_particles_[0].type();
-  const ParticleType& b = incoming_particles_[1].type();
-  const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
-  const ParticleType& type_pion = a.pdgcode().is_Dmeson() ? b : a;
-
-  const auto pdg_D = type_D.pdgcode().code();
-  const auto pdg_pion = type_pion.pdgcode().code();
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+  const auto pdg_D =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_a.code() : pdg_b.code();
+  const auto pdg_pion =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_b.code() : pdg_a.code();
 
   /* Adding the following channels, a check for detailed balance is not needed
    * because the parametrization is explicit. */
   switch (pack(pdg_D, pdg_pion)) {
+    // Channels for Dpi scatterings
     case pack(pdg::D_z, pdg::pi_p): {
       const auto& type_D_p = ParticleType::find(pdg::D_p);
       const auto& type_pi_z = ParticleType::find(pdg::pi_z);
@@ -2988,7 +2988,7 @@ CollisionBranchList CrossSections::Dpi_xx(
     case pack(pdg::Dbar_z, pdg::pi_z): {
       const auto& type_D_m = ParticleType::find(pdg::D_m);
       const auto& type_pi_p = ParticleType::find(pdg::pi_p);
-      // D0barpi0 -> D-pi+ (charge conjugation of D0pi0 -> D+pi-)
+      // Dbar0pi0 -> D-pi+ (charge conjugation of D0pi0 -> D+pi-)
       add_channel(
           process_list, [&] { return Dzeropizero_Dpluspiminus(sqrt_s_); },
           sqrt_s_, type_D_m, type_pi_p);
@@ -3006,7 +3006,7 @@ CollisionBranchList CrossSections::Dpi_xx(
     case pack(pdg::D_m, pdg::pi_p): {
       const auto& type_Dbar_z = ParticleType::find(pdg::Dbar_z);
       const auto& type_pi_z = ParticleType::find(pdg::pi_z);
-      // D-pi+ -> D0barpi0 (charge conjugation of D+pi- -> D0pi0)
+      // D-pi+ -> Dbar0pi0 (charge conjugation of D+pi- -> D0pi0)
       add_channel(
           process_list, [&] { return Dpluspiminus_Dzeropizero(sqrt_s_); },
           sqrt_s_, type_Dbar_z, type_pi_z);
@@ -3024,10 +3024,95 @@ CollisionBranchList CrossSections::Dpi_xx(
     case pack(pdg::D_m, pdg::pi_z): {
       const auto& type_Dbar_z = ParticleType::find(pdg::Dbar_z);
       const auto& type_pi_m = ParticleType::find(pdg::pi_m);
-      // D-pi0 -> D0barpi- (charge conjugation of D+pi0 -> D0pi+)
+      // D-pi0 -> Dbar0pi- (charge conjugation of D+pi0 -> D0pi+)
       add_channel(
           process_list, [&] { return Dpluspizero_Dzeropiplus(sqrt_s_); },
           sqrt_s_, type_Dbar_z, type_pi_m);
+      break;
+    }
+    // Channels for D*pi scatterings
+    case pack(pdg::Dstar_z, pdg::pi_p): {
+      const auto& type_Dstar_p = ParticleType::find(pdg::Dstar_p);
+      const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+      // D*(2007)0pi+ -> D*(2010)+pi0
+      add_channel(
+          process_list,
+          [&] { return Dstarzeropiplus_Dstarpluspizero(sqrt_s_); }, sqrt_s_,
+          type_Dstar_p, type_pi_z);
+      break;
+    }
+    case pack(pdg::Dstarbar_z, pdg::pi_m): {
+      const auto& type_Dstar_m = ParticleType::find(pdg::Dstar_m);
+      const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+      /* D*(2007)bar0pi- -> D*(2010)-pi0
+       * (charge conjugation of D*(2007)0pi+ -> D*(2010)+pi0) */
+      add_channel(
+          process_list,
+          [&] { return Dstarzeropiplus_Dstarpluspizero(sqrt_s_); }, sqrt_s_,
+          type_Dstar_m, type_pi_z);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::pi_z): {
+      const auto& type_Dstar_p = ParticleType::find(pdg::Dstar_p);
+      const auto& type_pi_m = ParticleType::find(pdg::pi_m);
+      // D*(2007)0pi0 -> D*(2010)+pi-
+      add_channel(
+          process_list,
+          [&] { return Dstarzeropizero_Dstarpluspiminus(sqrt_s_); }, sqrt_s_,
+          type_Dstar_p, type_pi_m);
+      break;
+    }
+    case pack(pdg::Dstarbar_z, pdg::pi_z): {
+      const auto& type_Dstar_m = ParticleType::find(pdg::Dstar_m);
+      const auto& type_pi_p = ParticleType::find(pdg::pi_p);
+      /* D*(2007)bar0pi0 -> D*(2010)-pi+
+       * (charge conjugation of D*(2007)0pi0 -> D*(2010)+pi-) */
+      add_channel(
+          process_list,
+          [&] { return Dstarzeropizero_Dstarpluspiminus(sqrt_s_); }, sqrt_s_,
+          type_Dstar_m, type_pi_p);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::pi_m): {
+      const auto& type_Dstar_z = ParticleType::find(pdg::Dstar_z);
+      const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+      // D*(2010)+pi- -> D*(2007)0pi0
+      add_channel(
+          process_list,
+          [&] { return Dstarpluspiminus_Dstarzeropizero(sqrt_s_); }, sqrt_s_,
+          type_Dstar_z, type_pi_z);
+      break;
+    }
+    case pack(pdg::Dstar_m, pdg::pi_p): {
+      const auto& type_Dstarbar_z = ParticleType::find(pdg::Dstarbar_z);
+      const auto& type_pi_z = ParticleType::find(pdg::pi_z);
+      /* D*(2010)-pi+ -> D*(2007)bar0pi0
+       * (charge conjugation of D*(2010)+pi- -> D*(2007)0pi0) */
+      add_channel(
+          process_list,
+          [&] { return Dstarpluspiminus_Dstarzeropizero(sqrt_s_); }, sqrt_s_,
+          type_Dstarbar_z, type_pi_z);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::pi_z): {
+      const auto& type_Dstar_z = ParticleType::find(pdg::Dstar_z);
+      const auto& type_pi_p = ParticleType::find(pdg::pi_p);
+      // D*(2010)+pi0 -> D*(2007)0pi+
+      add_channel(
+          process_list,
+          [&] { return Dstarpluspizero_Dstarzeropiplus(sqrt_s_); }, sqrt_s_,
+          type_Dstar_z, type_pi_p);
+      break;
+    }
+    case pack(pdg::Dstar_m, pdg::pi_z): {
+      const auto& type_Dstarbar_z = ParticleType::find(pdg::Dstarbar_z);
+      const auto& type_pi_m = ParticleType::find(pdg::pi_m);
+      /* D*(2010)-pi0 -> D*(2007)bar0pi-
+       * (charge conjugation of D*(2010)+pi0 -> D*(2007)0pi+) */
+      add_channel(
+          process_list,
+          [&] { return Dstarpluspizero_Dstarzeropiplus(sqrt_s_); }, sqrt_s_,
+          type_Dstarbar_z, type_pi_m);
       break;
     }
     default:
