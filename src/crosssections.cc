@@ -393,7 +393,7 @@ double CrossSections::parametrized_total(
       double inelastic_xs = 0.;
       if (pdg_a.is_pion() || pdg_b.is_pion()) {
         elastic_xs = Dpi_and_Dstarpi_elastic();
-        inelastic_xs = Dpi_inelastic();
+        inelastic_xs = Dpi_and_Dstarpi_inelastic();
       } else if (pdg_a.is_eta() || pdg_b.is_eta()) {
         elastic_xs = Deta_elastic();
         // no inelastic scattering for D+eta
@@ -2807,16 +2807,17 @@ CollisionBranchList CrossSections::dn_xx(
   return process_list;
 }
 
-double CrossSections::Dpi_inelastic() const {
-  const ParticleType& a = incoming_particles_[0].type();
-  const ParticleType& b = incoming_particles_[1].type();
-  const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
-  const ParticleType& type_pion = a.pdgcode().is_Dmeson() ? b : a;
-  const auto pdg_D = type_D.pdgcode().code();
-  const auto pdg_pion = type_pion.pdgcode().code();
+double CrossSections::Dpi_and_Dstarpi_inelastic() const {
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+  const auto pdg_D =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_a.code() : pdg_b.code();
+  const auto pdg_pion =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_b.code() : pdg_a.code();
 
   double sig_inel = -1.;
   switch (pack(pdg_D, pdg_pion)) {
+    // Checks for D mesons scatterings
     case pack(pdg::D_z, pdg::pi_p):
     case pack(pdg::Dbar_z, pdg::pi_m): {  // Same xsec for charge conjugation.
       sig_inel = Dzeropiplus_Dpluspizero(sqrt_s_);
@@ -2837,10 +2838,35 @@ double CrossSections::Dpi_inelastic() const {
       sig_inel = Dpluspizero_Dzeropiplus(sqrt_s_);
       break;
     }
+    // Checks for D* mesons scatterings
+    case pack(pdg::Dstar_z, pdg::pi_p):
+    case pack(pdg::Dstarbar_z, pdg::pi_m): {  // Same xs for charge conjugation.
+      sig_inel = Dstarzeropiplus_Dstarpluspizero(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::pi_z):
+    case pack(pdg::Dstarbar_z, pdg::pi_z): {  // Same xs for charge conjugation.
+      sig_inel = Dstarzeropizero_Dstarpluspiminus(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::pi_m):
+    case pack(pdg::Dstar_m, pdg::pi_p): {  // Same xsec for charge conjugation.
+      sig_inel = Dstarpluspiminus_Dstarzeropizero(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::pi_z):
+    case pack(pdg::Dstar_m, pdg::pi_z): {  // Same xsec for charge conjugation.
+      sig_inel = Dstarpluspizero_Dstarzeropiplus(sqrt_s_);
+      break;
+    }
     case pack(pdg::D_z, pdg::pi_m):
     case pack(pdg::Dbar_z, pdg::pi_p):
     case pack(pdg::D_p, pdg::pi_p):
-    case pack(pdg::D_m, pdg::pi_m): {
+    case pack(pdg::D_m, pdg::pi_m):
+    case pack(pdg::Dstar_z, pdg::pi_m):
+    case pack(pdg::Dstarbar_z, pdg::pi_p):
+    case pack(pdg::Dstar_p, pdg::pi_p):
+    case pack(pdg::Dstar_m, pdg::pi_m): {
       // These combinations can only scatter elastically.
       return 0.;
     }

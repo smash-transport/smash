@@ -417,14 +417,15 @@ class CrossSections {
   std::optional<double> Dpi_and_Dstarpi_elastic() const;
 
   /**
-   * Determine the inelastic cross section for a D meson-pion (Dpi) collision.
+   * Determine the inelastic cross section for a D meson-pion (Dpi) or a D*-pion
+   * (D*pi) collision.
    *
-   * \return Inlastic cross section for Dpi
+   * \return Inlastic cross section for Dpi or D*pi.
    *
-   * \throw std::runtime_error if incoming particles are not D meson+pion.
+   * \throw std::runtime_error if incoming particles are not Dpi or D*pi.
    * \throw std::runtime_error if cross section is negative.
    */
-  double Dpi_inelastic() const;
+  double Dpi_and_Dstarpi_inelastic() const;
 
   /**
    * Determine the elastic cross section for a D meson-eta (Deta) collision.
