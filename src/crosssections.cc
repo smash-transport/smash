@@ -385,13 +385,14 @@ double CrossSections::parametrized_total(
         default:
           throw std::runtime_error("wrong isospin in ππ scattering");
       }
-    } else if (pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) {
+    } else if ((pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) ||
+               (pdg_a.is_Dstar2007() || pdg_b.is_Dstar2007())) {
       const CharmRescattering& charm_rescattering =
           finder_parameters.charm_rescattering;
       std::optional<double> elastic_xs = std::nullopt;
       double inelastic_xs = 0.;
       if (pdg_a.is_pion() || pdg_b.is_pion()) {
-        elastic_xs = Dpi_elastic();
+        elastic_xs = Dpi_and_Dstarpi_elastic();
         inelastic_xs = Dpi_inelastic();
       } else if (pdg_a.is_eta() || pdg_b.is_eta()) {
         elastic_xs = Deta_elastic();
@@ -493,12 +494,13 @@ double CrossSections::elastic_parametrization(
       // Elastic (Anti-)deuteron (Anti-)Nucleon Scattering
       elastic_xs = deuteron_nucleon_elastic(sqrt_s_ * sqrt_s_);
     }
-  } else if (pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) {
+  } else if ((pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) ||
+             (pdg_a.is_Dstar2007() || pdg_b.is_Dstar2007())) {
     const CharmRescattering& charm_rescattering =
         finder_parameters.charm_rescattering;
     std::optional<double> tmp_elastic_xs = std::nullopt;
     if (pdg_a.is_pion() || pdg_b.is_pion()) {
-      tmp_elastic_xs = Dpi_elastic();
+      tmp_elastic_xs = Dpi_and_Dstarpi_elastic();
     } else if (pdg_a.is_eta() || pdg_b.is_eta()) {
       tmp_elastic_xs = Deta_elastic();
     } else if (pdg_a.is_kaon() || pdg_b.is_kaon()) {
@@ -1002,16 +1004,17 @@ double CrossSections::nk_el() const {
   }
 }
 
-std::optional<double> CrossSections::Dpi_elastic() const {
-  const ParticleType& a = incoming_particles_[0].type();
-  const ParticleType& b = incoming_particles_[1].type();
-  const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
-  const ParticleType& type_pion = a.pdgcode().is_Dmeson() ? b : a;
-  const auto pdg_D = type_D.pdgcode().code();
-  const auto pdg_pion = type_pion.pdgcode().code();
+std::optional<double> CrossSections::Dpi_and_Dstarpi_elastic() const {
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+  const auto pdg_D =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_a.code() : pdg_b.code();
+  const auto pdg_pion =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_b.code() : pdg_a.code();
 
   std::optional<double> sig_el = std::nullopt;
   switch (pack(pdg_D, pdg_pion)) {
+    // Checks for D mesons scatterings
     case pack(pdg::D_z, pdg::pi_p):
     case pack(pdg::Dbar_z, pdg::pi_m): {  // Same xsec for charge conjugation.
       sig_el = Dzeropiplus_elastic(sqrt_s_);
@@ -1040,6 +1043,37 @@ std::optional<double> CrossSections::Dpi_elastic() const {
     case pack(pdg::D_p, pdg::pi_z):
     case pack(pdg::D_m, pdg::pi_z): {  // Same xsec for charge conjugation.
       sig_el = Dpluspizero_elastic(sqrt_s_);
+      break;
+    }
+    // Checks for D* mesons scatterings
+    case pack(pdg::Dstar_z, pdg::pi_p):
+    case pack(pdg::Dstarbar_z, pdg::pi_m): {  // Same xs for charge conjugation.
+      sig_el = Dstarzeropiplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::pi_m):
+    case pack(pdg::Dstarbar_z, pdg::pi_p): {  // Same xs for charge conjugation.
+      sig_el = Dstarzeropiminus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::pi_z):
+    case pack(pdg::Dstarbar_z, pdg::pi_z): {  // Same xs for charge conjugation.
+      sig_el = Dstarzeropizero_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::pi_p):
+    case pack(pdg::Dstar_m, pdg::pi_m): {  // Same xsec for charge conjugation.
+      sig_el = Dstarpluspiplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::pi_m):
+    case pack(pdg::Dstar_m, pdg::pi_p): {  // Same xsec for charge conjugation.
+      sig_el = Dstarpluspiminus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::pi_z):
+    case pack(pdg::Dstar_m, pdg::pi_z): {  // Same xsec for charge conjugation.
+      sig_el = Dstarpluspizero_elastic(sqrt_s_);
       break;
     }
     default:
