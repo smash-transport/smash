@@ -442,18 +442,18 @@ class CrossSections {
   std::optional<double> Deta_and_Dstareta_elastic() const;
 
   /**
-   * Determine the elastic cross section for a D meson-kaon (DK) collision.
-   * If the center-of-mass energy for the collision is below the lower bound of
-   * the energy range of the underlying cross section data, the return value
-   * will be 0. If it is above the upper bound, the return value will be
-   * `std::nullopt`.
+   * Determine the elastic cross section for a D meson-kaon (DK) or a D*-kaon
+   * (D*K) collision. If the center-of-mass energy for the collision is below
+   * the lower bound of the energy range of the underlying cross section data,
+   * the return value will be 0. If it is above the upper bound, the return
+   * value will be `std::nullopt`.
    *
-   * \return Elastic cross section for DK
+   * \return Elastic cross section for DK or D*K.
    *
-   * \throw std::runtime_error if incoming particles are not D meson+kaon.
+   * \throw std::runtime_error if incoming particles are not DK or D*K.
    * \throw std::runtime_error if cross section is negative.
    */
-  std::optional<double> DK_elastic() const;
+  std::optional<double> DK_and_DstarK_elastic() const;
 
   /**
    * Determine the inelastic cross section for a D meson-kaon (DK) collision.

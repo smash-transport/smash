@@ -398,7 +398,7 @@ double CrossSections::parametrized_total(
         elastic_xs = Deta_and_Dstareta_elastic();
         // no inelastic scattering for Deta or D*eta
       } else if (pdg_a.is_kaon() || pdg_b.is_kaon()) {
-        elastic_xs = DK_elastic();
+        elastic_xs = DK_and_DstarK_elastic();
         inelastic_xs = DK_inelastic();
       }
       if ((charm_rescattering == CharmRescattering::T_Matrix) &&
@@ -504,7 +504,7 @@ double CrossSections::elastic_parametrization(
     } else if (pdg_a.is_eta() || pdg_b.is_eta()) {
       tmp_elastic_xs = Deta_and_Dstareta_elastic();
     } else if (pdg_a.is_kaon() || pdg_b.is_kaon()) {
-      tmp_elastic_xs = DK_elastic();
+      tmp_elastic_xs = DK_and_DstarK_elastic();
     }
     if ((charm_rescattering == CharmRescattering::T_Matrix) &&
         tmp_elastic_xs.has_value()) {
@@ -1134,14 +1134,17 @@ std::optional<double> CrossSections::Deta_and_Dstareta_elastic() const {
   }
 }
 
-std::optional<double> CrossSections::DK_elastic() const {
+std::optional<double> CrossSections::DK_and_DstarK_elastic() const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
   const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
-  const auto pdgcode_D = pdg_a.is_Dmeson() ? pdg_a.code() : pdg_b.code();
-  const auto pdgcode_kaon = pdg_a.is_Dmeson() ? pdg_b.code() : pdg_a.code();
+  const auto pdg_D =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_a.code() : pdg_b.code();
+  const auto pdg_kaon =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_b.code() : pdg_a.code();
 
   std::optional<double> sig_el = std::nullopt;
-  switch (pack(pdgcode_D, pdgcode_kaon)) {
+  switch (pack(pdg_D, pdg_kaon)) {
+    // Checks for D mesons scatterings
     case pack(pdg::D_p, pdg::K_p):
     case pack(pdg::D_m, pdg::K_m): {  // Same xsec for charge conjugation.
       sig_el = DplusKplus_elastic(sqrt_s_);
@@ -1180,6 +1183,47 @@ std::optional<double> CrossSections::DK_elastic() const {
     case pack(pdg::D_z, pdg::K_m):
     case pack(pdg::Dbar_z, pdg::K_p): {  // Same xsec for charge conjugation.
       sig_el = DzeroKminus_elastic(sqrt_s_);
+      break;
+    }
+    // Checks for D* mesons scatterings
+    case pack(pdg::Dstar_p, pdg::K_p):
+    case pack(pdg::Dstar_m, pdg::K_m): {  // Same xsec for charge conjugation.
+      sig_el = DstarplusKplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::K_z):
+    case pack(pdg::Dstar_m, pdg::Kbar_z): {  // Same xs for charge conjugation.
+      sig_el = DstarplusKzero_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::K_p):
+    case pack(pdg::Dstarbar_z, pdg::K_m): {  // Same xs for charge conjugation.
+      sig_el = DstarzeroKplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::K_z):
+    case pack(pdg::Dstarbar_z, pdg::Kbar_z): {  // Same xs for charge conjugat.
+      sig_el = DstarzeroKzero_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::Kbar_z):
+    case pack(pdg::Dstar_m, pdg::K_z): {  // Same xsec for charge conjugation.
+      sig_el = DstarplusKbarzero_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::K_m):
+    case pack(pdg::Dstar_m, pdg::K_p): {  // Same xsec for charge conjugation.
+      sig_el = DstarplusKminus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::Kbar_z):
+    case pack(pdg::Dstarbar_z, pdg::K_z): {  // Same xs for charge conjugation.
+      sig_el = DstarzeroKbarzero_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::K_m):
+    case pack(pdg::Dstarbar_z, pdg::K_p): {  // Same xs for charge conjugation.
+      sig_el = DstarzeroKminus_elastic(sqrt_s_);
       break;
     }
     default:
