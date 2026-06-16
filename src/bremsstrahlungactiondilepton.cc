@@ -143,7 +143,6 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   constexpr double m_n = nucleon_mass;
   constexpr double m_e = electron_mass;
 
-  double delta_M = std::numeric_limits<double>::quiet_NaN();
   const double M_min = 2.0 * m_e;
   const double M_max = sqrt_s() - m_p - m_n;
   // Check if it is possible to create a dilepton pair, i.e. M_min < M_max.
@@ -152,7 +151,6 @@ void BremsstrahlungActionDilepton::generate_final_state() {
     return;
   } else {
     m_inv_ = random::uniform(M_min, M_max);
-    delta_M = M_max - M_min;
   }
 
   /* After fixing M, the momentum q depends on the CM energy sqrt_s.
@@ -163,10 +161,8 @@ void BremsstrahlungActionDilepton::generate_final_state() {
   const double q_max = pCM(sqrt_s(), m_inv_, m_p + m_n);
 
   // Sample q_ uniformly in [q_min, q_max] if kinematically allowed.
-  double delta_q;
   if (q_max > q_min) {
     q_ = random::uniform(q_min, q_max);
-    delta_q = q_max - q_min;
   } else {
     weight_ = 0.0;
     return;
@@ -201,13 +197,8 @@ void BremsstrahlungActionDilepton::generate_final_state() {
     return;
   }
 
-  // Integrand is dsigma/(dM dq dtheta dphi) evaluated at the sampled point.
-  const double dsigma_dM_dq_dOmega = diff_xs_pn_dilepton_(m_inv_, q_, sqrt_s());
-  const double W_M = dsigma_dM_dq_dOmega * delta_M;
-  const double W_q = delta_q;
-  const double W_Omega = 4 * M_PI;
-
-  weight_ = W_M * W_q * W_Omega / hadronic_cross_section_;
+  weight_ =
+      diff_xs_pn_dilepton_(m_inv_, q_, sqrt_s()) / hadronic_cross_section_;
 
   weight_ *= incoming_particles_[0].xsec_scaling_factor() *
              incoming_particles_[1].xsec_scaling_factor();
@@ -271,19 +262,19 @@ double BremsstrahlungActionDilepton::diff_xs_pn_dilepton_(
 
   // Factor q²/(ME³) after dE->dq substitution in diff. cross section formula.
   return prefactor * (q * q) / (M * E * E * E) * sigma_bar * (R2_s2 / R2_s) *
-         pion_em_form_factor_sq_(M * M);
+         pion_em_form_factor_sq_(M);
 }
 
 double BremsstrahlungActionDilepton::pion_em_form_factor_sq_(
-    const double M_sq) const {
-  const double m_rho = ParticleType::find(pdg::rho_z).mass();
-  const double Gamma = gamma_rho_(M_sq);
+    const double M) const {
+  const double rho_mass = ParticleType::find(pdg::rho_z).mass();
+  const double rho_width = ParticleType::find(pdg::rho_z).total_width(M);
 
   switch (form_factor_type_) {
     case DileptonBremsPionFormFactor::FF1:
-      return pion_em_form_factor_sqr_FF1(M_sq, m_rho, Gamma);
+      return pion_em_form_factor_sqr_FF1(M * M, rho_mass, rho_width);
     case DileptonBremsPionFormFactor::FF2:
-      return pion_em_form_factor_sqr_FF2(M_sq, m_rho, Gamma);
+      return pion_em_form_factor_sqr_FF2(M * M, rho_mass, rho_width);
     case DileptonBremsPionFormFactor::Off:
       return 1.0;
     default:
@@ -291,26 +282,6 @@ double BremsstrahlungActionDilepton::pion_em_form_factor_sq_(
       throw std::logic_error("Problem in "s + __func__ +
                              ". Unknown pion form factor.");
   }
-}
-
-double BremsstrahlungActionDilepton::gamma_rho_(double M_sq) const {
-  const double m_rho = ParticleType::find(pdg::rho_z).mass();
-  const double m_rho_sq = m_rho * m_rho;
-  const double m_pi_sq = pion_mass * pion_mass;
-  const double gamma0_rho = ParticleType::find(pdg::rho_z).width_at_pole();
-
-  /* Check if M² is above the 2-pion threshold.
-   * If not, return width at pole mass.
-   */
-  const double num = M_sq - 4.0 * m_pi_sq;
-  if (num <= 0)
-    return gamma0_rho;
-
-  // If M² is above the 2-pion threshold, calculate the energy-dependent width
-  const double M = std::sqrt(M_sq);
-
-  return gamma0_rho * (m_rho / M) *
-         std::pow(num / (m_rho_sq - 4.0 * m_pi_sq), 1.5);
 }
 
 }  // namespace smash

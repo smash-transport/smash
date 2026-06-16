@@ -168,20 +168,11 @@ class BremsstrahlungActionDilepton : public ScatterAction {
    * Returns \f$|F_\pi(m_{inv}^2)|^2\f$, the squared pion electromagnetic form
    * factor.
    *
-   * \param[in] m_inv_sqr  Invariant mass squared of dilepton pair [GeV²]
+   * \param[in] m_inv  Invariant mass of dilepton pair [GeV]
    *
    * \return \f$|F_\pi(m_{inv}^2)|^2\f$ (dimensionless)
    */
-  double pion_em_form_factor_sq_(double m_inv_sqr) const;
-
-  /**
-   * Energy-dependent \f$\Gamma_\rho(m_{inv}^2)\f$ used in the form factor.
-   *
-   * \param[in] m_inv_sqr  Invariant mass squared [GeV²]
-   *
-   * \return \f$\Gamma_\rho(m_{inv}^2)\f$ [GeV]
-   */
-  double gamma_rho_(double m_inv_sqr) const;
+  double pion_em_form_factor_sq_(double m_inv) const;
 
   /**
    * Holds the bremsstrahlung branch. As of now, this will hold only one branch.
