@@ -530,15 +530,17 @@ class CrossSections {
       CharmRescattering charm_rescattering) const;
 
   /**
-   * Find all inelastic 2->2 processes for D meson-kaon (DK) scattering.
+   * Find all inelastic 2->2 processes for D meson-kaon (DK) and D*-kaon (D*K)
+   * scattering.
    *
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \param[in] charm_rescattering Type of charm rescattering
    *
-   * \return List of all possible DK reactions with their cross sections
+   * \return List of all possible DK or D*K reactions with their cross sections
    */
-  CollisionBranchList DK_xx(const ReactionsBitSet& included_2to2,
-                            CharmRescattering charm_rescattering) const;
+  CollisionBranchList DK_and_DstarK_xx(
+      const ReactionsBitSet& included_2to2,
+      CharmRescattering charm_rescattering) const;
 
   /**
    * Find all inelastic 2->2 processes for Delta-Kaon (DeltaK) Scattering.

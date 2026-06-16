@@ -1355,7 +1355,7 @@ CollisionBranchList CrossSections::two_to_two(
         return process_list;
       } else if (pdg_a.is_kaon() || pdg_b.is_kaon()) {
         // D or D* - Kaon Scattering
-        process_list = DK_xx(included_2to2, charm_rescattering);
+        process_list = DK_and_DstarK_xx(included_2to2, charm_rescattering);
       }
     }
   } else if (type_a.is_nucleus() || type_b.is_nucleus()) {
@@ -3209,7 +3209,7 @@ CollisionBranchList CrossSections::Dpi_and_Dstarpi_xx(
   return process_list;
 }
 
-CollisionBranchList CrossSections::DK_xx(
+CollisionBranchList CrossSections::DK_and_DstarK_xx(
     const ReactionsBitSet& included_2to2,
     const CharmRescattering charm_rescattering) const {
   CollisionBranchList process_list;
@@ -3217,16 +3217,17 @@ CollisionBranchList CrossSections::DK_xx(
       !(charm_rescattering == CharmRescattering::T_Matrix)) {
     return process_list;
   }
-  const ParticleType& a = incoming_particles_[0].type();
-  const ParticleType& b = incoming_particles_[1].type();
-  const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
-  const ParticleType& type_kaon = a.pdgcode().is_Dmeson() ? b : a;
-  const auto pdg_D = type_D.pdgcode().code();
-  const auto pdg_kaon = type_kaon.pdgcode().code();
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+  const auto pdg_D =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_a.code() : pdg_b.code();
+  const auto pdg_kaon =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_b.code() : pdg_a.code();
 
   /* Adding the following channels, a check for detailed balance is not needed
    * because the parametrization is explicit. */
   switch (pack(pdg_D, pdg_kaon)) {
+    // Channels for DK scatterings
     case pack(pdg::D_p, pdg::K_z): {
       const auto& type_D_z = ParticleType::find(pdg::D_z);
       const auto& type_K_p = ParticleType::find(pdg::K_p);
@@ -3297,6 +3298,87 @@ CollisionBranchList CrossSections::DK_xx(
       add_channel(
           process_list, [&] { return DzeroKbarzero_DplusKminus(sqrt_s_); },
           sqrt_s_, type_D_m, type_K_p);
+      break;
+    }
+    // Channels for D*K scatterings
+    case pack(pdg::Dstar_p, pdg::K_z): {
+      const auto& type_Dstar_z = ParticleType::find(pdg::Dstar_z);
+      const auto& type_K_p = ParticleType::find(pdg::K_p);
+      // D*(2010)+K0 -> D*(2007)0K+
+      add_channel(
+          process_list, [&] { return DstarplusKzero_DstarzeroKplus(sqrt_s_); },
+          sqrt_s_, type_Dstar_z, type_K_p);
+      break;
+    }
+    case pack(pdg::Dstar_m, pdg::Kbar_z): {
+      const auto& type_Dstarbar_z = ParticleType::find(pdg::Dstarbar_z);
+      const auto& type_K_m = ParticleType::find(pdg::K_m);
+      /* D*(2010)-Kbar0 -> D*(2007)bar0K-
+       * (charge conjugation of D*(2010)+K0 -> D*(2007)0K+) */
+      add_channel(
+          process_list, [&] { return DstarplusKzero_DstarzeroKplus(sqrt_s_); },
+          sqrt_s_, type_Dstarbar_z, type_K_m);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::K_p): {
+      const auto& type_Dstar_p = ParticleType::find(pdg::Dstar_p);
+      const auto& type_K_z = ParticleType::find(pdg::K_z);
+      // D*(2007)0K+ -> D*(2010)+K0
+      add_channel(
+          process_list, [&] { return DstarzeroKplus_DstarplusKzero(sqrt_s_); },
+          sqrt_s_, type_Dstar_p, type_K_z);
+      break;
+    }
+    case pack(pdg::Dstarbar_z, pdg::K_m): {
+      const auto& type_Dstar_m = ParticleType::find(pdg::Dstar_m);
+      const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+      /* D*(2007)bar0K- -> D*(2010)-Kbar0
+       * (charge conjugation of D*(2007)0K+ -> D*(2010)+K0) */
+      add_channel(
+          process_list, [&] { return DstarzeroKplus_DstarplusKzero(sqrt_s_); },
+          sqrt_s_, type_Dstar_m, type_Kbar_z);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::K_m): {
+      const auto& type_Dstar_z = ParticleType::find(pdg::Dstar_z);
+      const auto& type_Kbar_z = ParticleType::find(pdg::Kbar_z);
+      // D*(2010)+K- -> D*(2007)0Kbar0
+      add_channel(
+          process_list,
+          [&] { return DstarplusKminus_DstarzeroKbarzero(sqrt_s_); }, sqrt_s_,
+          type_Dstar_z, type_Kbar_z);
+      break;
+    }
+    case pack(pdg::Dstar_m, pdg::K_p): {
+      const auto& type_Dstarbar_z = ParticleType::find(pdg::Dstarbar_z);
+      const auto& type_K_z = ParticleType::find(pdg::K_z);
+      /* D*(2010)-K+ -> D*(2007)bar0K0
+       * (charge conjugation of D*(2010)+K- -> D*(2007)0Kbar0) */
+      add_channel(
+          process_list,
+          [&] { return DstarplusKminus_DstarzeroKbarzero(sqrt_s_); }, sqrt_s_,
+          type_Dstarbar_z, type_K_z);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::Kbar_z): {
+      const auto& type_Dstar_p = ParticleType::find(pdg::Dstar_p);
+      const auto& type_K_m = ParticleType::find(pdg::K_m);
+      // D*(2007)0Kbar0 -> D*(2010)+K-
+      add_channel(
+          process_list,
+          [&] { return DstarzeroKbarzero_DstarplusKminus(sqrt_s_); }, sqrt_s_,
+          type_Dstar_p, type_K_m);
+      break;
+    }
+    case pack(pdg::Dstarbar_z, pdg::K_z): {
+      const auto& type_Dstar_m = ParticleType::find(pdg::Dstar_m);
+      const auto& type_K_p = ParticleType::find(pdg::K_p);
+      /* D*(2007)bar0K0 -> D*(2010)-K+
+       * (charge conjugation of D*(2007)0Kbar0 -> D*(2010)+K-) */
+      add_channel(
+          process_list,
+          [&] { return DstarzeroKbarzero_DstarplusKminus(sqrt_s_); }, sqrt_s_,
+          type_Dstar_m, type_K_p);
       break;
     }
     default:
