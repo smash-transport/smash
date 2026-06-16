@@ -456,14 +456,15 @@ class CrossSections {
   std::optional<double> DK_and_DstarK_elastic() const;
 
   /**
-   * Determine the inelastic cross section for a D meson-kaon (DK) collision.
+   * Determine the inelastic cross section for a D meson-kaon (DK) or a D*-kaon
+   * (D*K) collision.
    *
-   * \return Inlastic cross section for DK
+   * \return Inlastic cross section for DK or D*K.
    *
-   * \throw std::runtime_error if incoming particles are not D meson+kaon.
+   * \throw std::runtime_error if incoming particles are not DK or D*K.
    * \throw std::runtime_error if cross section is negative.
    */
-  double DK_inelastic() const;
+  double DK_and_DstarK_inelastic() const;
 
   /**
    * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.

@@ -399,7 +399,7 @@ double CrossSections::parametrized_total(
         // no inelastic scattering for Deta or D*eta
       } else if (pdg_a.is_kaon() || pdg_b.is_kaon()) {
         elastic_xs = DK_and_DstarK_elastic();
-        inelastic_xs = DK_inelastic();
+        inelastic_xs = DK_and_DstarK_inelastic();
       }
       if ((charm_rescattering == CharmRescattering::T_Matrix) &&
           elastic_xs.has_value()) {
@@ -2941,17 +2941,17 @@ double CrossSections::Dpi_and_Dstarpi_inelastic() const {
   }
 }
 
-double CrossSections::DK_inelastic() const {
-  const ParticleType& a = incoming_particles_[0].type();
-  const ParticleType& b = incoming_particles_[1].type();
-  const ParticleType& type_D = a.pdgcode().is_Dmeson() ? a : b;
-  const ParticleType& type_kaon = a.pdgcode().is_Dmeson() ? b : a;
-
-  const auto pdg_D = type_D.pdgcode().code();
-  const auto pdg_kaon = type_kaon.pdgcode().code();
+double CrossSections::DK_and_DstarK_inelastic() const {
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+  const auto pdg_D =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_a.code() : pdg_b.code();
+  const auto pdg_kaon =
+      (pdg_a.is_Dmeson() || pdg_a.is_Dstar2007()) ? pdg_b.code() : pdg_a.code();
 
   double sig_inel = -1.;
   switch (pack(pdg_D, pdg_kaon)) {
+    // Checks for D mesons scatterings
     case pack(pdg::D_p, pdg::K_z):
     case pack(pdg::D_m, pdg::Kbar_z): {  // Same xsec for charge conjugation.
       sig_inel = DplusKzero_DzeroKplus(sqrt_s_);
@@ -2972,6 +2972,27 @@ double CrossSections::DK_inelastic() const {
       sig_inel = DzeroKbarzero_DplusKminus(sqrt_s_);
       break;
     }
+    // Checks for D* mesons scatterings
+    case pack(pdg::Dstar_p, pdg::K_z):
+    case pack(pdg::Dstar_m, pdg::Kbar_z): {  // Same xs for charge conjugation.
+      sig_inel = DstarplusKzero_DstarzeroKplus(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::K_p):
+    case pack(pdg::Dstarbar_z, pdg::K_m): {  // Same xs for charge conjugation.
+      sig_inel = DstarzeroKplus_DstarplusKzero(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_p, pdg::K_m):
+    case pack(pdg::Dstar_m, pdg::K_p): {  // Same xsec for charge conjugation.
+      sig_inel = DstarplusKminus_DstarzeroKbarzero(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dstar_z, pdg::Kbar_z):
+    case pack(pdg::Dstarbar_z, pdg::K_z): {  // Same xs for charge conjugation.
+      sig_inel = DstarzeroKbarzero_DstarplusKminus(sqrt_s_);
+      break;
+    }
     case pack(pdg::D_p, pdg::K_p):
     case pack(pdg::D_p, pdg::Kbar_z):
     case pack(pdg::D_z, pdg::K_z):
@@ -2979,7 +3000,15 @@ double CrossSections::DK_inelastic() const {
     case pack(pdg::D_m, pdg::K_z):
     case pack(pdg::D_m, pdg::K_m):
     case pack(pdg::Dbar_z, pdg::K_p):
-    case pack(pdg::Dbar_z, pdg::Kbar_z): {
+    case pack(pdg::Dbar_z, pdg::Kbar_z):
+    case pack(pdg::Dstar_p, pdg::K_p):
+    case pack(pdg::Dstar_p, pdg::Kbar_z):
+    case pack(pdg::Dstar_z, pdg::K_z):
+    case pack(pdg::Dstar_z, pdg::K_m):
+    case pack(pdg::Dstar_m, pdg::K_z):
+    case pack(pdg::Dstar_m, pdg::K_m):
+    case pack(pdg::Dstarbar_z, pdg::K_p):
+    case pack(pdg::Dstarbar_z, pdg::Kbar_z): {
       // These combinations can only scatter elastically.
       return 0.;
       break;
