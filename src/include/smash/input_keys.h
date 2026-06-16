@@ -4775,7 +4775,8 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * <h3> Parameters for fluidization at constant tau </h3>
-   * \optional_key_no_line{key_MC_IC_lower_bound_,Lower_Bound,double,0.5}
+   * \optional_key_no_line{key_MC_IC_lower_bound_,Lower_Bound,double,
+   * 0.5,\f$x>0\f$}
    *
    * Lower bound \unit{in fm} for the IC proper time if
    * <tt>\ref key_MC_IC_proper_time_ "Proper_Time"</tt> is not provided. It is

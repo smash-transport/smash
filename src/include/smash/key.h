@@ -155,14 +155,13 @@ class Key {
    * @param[in] versions A list of one, two or three version numbers identifying
    * the versions in which the key has been introduced, deprecated and removed,
    * respectively.
-   * @param[in] validator An optional functor that takes a default_type
-   * parameters and returns a bool variable.
+   * @param[in] validator A functor that takes a default_type parameter and
+   * returns a bool variable.
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    */
-  explicit Key(
-      const KeyLabels& labels, const KeyMetadata& versions,
-      validator_type validator = detail::get_default_validator<default_type>())
+  explicit Key(const KeyLabels& labels, const KeyMetadata& versions,
+               validator_type validator)
       : Key{labels, Default<default_type>{}, versions, validator} {}
 
   /**
@@ -173,14 +172,14 @@ class Key {
    * @param[in] versions A list of one, two or three version numbers identifying
    * the versions in which the key has been introduced, deprecated and removed,
    * respectively.
-   * @param[in] validator An optional functor that takes a default_type
-   * parameters and returns a bool variable.
+   * @param[in] validator A functor that takes a default_type parameter and
+   * returns a bool variable.
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    * @throw std::invalid_argument If \c validator(value) returns \c false .
    */
   Key(const KeyLabels& labels, default_type value, const KeyMetadata& versions,
-      validator_type validator = detail::get_default_validator<default_type>())
+      validator_type validator)
       : Key{labels, Default<default_type>{value}, versions, validator} {}
 
   /**
@@ -192,15 +191,14 @@ class Key {
    * @param[in] versions A list of one, two or three version numbers identifying
    * the versions in which the key has been introduced, deprecated and removed,
    * respectively.
-   * @param[in] validator An optional functor that takes a default_type
-   * parameters and returns a bool variable.
+   * @param[in] validator A functor that takes a default_type parameter and
+   * returns a bool variable.
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    * @throw std::logic_error If \c type is not \c DefaultType::Dependent .
    */
   Key(const KeyLabels& labels, DefaultType type_of_default,
-      const KeyMetadata& versions,
-      validator_type validator = detail::get_default_validator<default_type>())
+      const KeyMetadata& versions, validator_type validator)
       : Key{labels, Default<default_type>{type_of_default}, versions,
             validator} {}
 
