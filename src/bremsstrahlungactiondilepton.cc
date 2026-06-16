@@ -294,7 +294,6 @@ double BremsstrahlungActionDilepton::pion_em_form_factor_sq_(
 }
 
 double BremsstrahlungActionDilepton::gamma_rho_(double M_sq) const {
-  // The energy-dependent width as provided in \iref{Brown:1985gu}.
   const double m_rho = ParticleType::find(pdg::rho_z).mass();
   const double m_rho_sq = m_rho * m_rho;
   const double m_pi_sq = pion_mass * pion_mass;
@@ -310,7 +309,7 @@ double BremsstrahlungActionDilepton::gamma_rho_(double M_sq) const {
   // If M² is above the 2-pion threshold, calculate the energy-dependent width
   const double M = std::sqrt(M_sq);
 
-  return gamma0_rho * (m_rho_sq * m_rho) / (M * (2.0 * m_rho_sq - M_sq)) *
+  return gamma0_rho * (m_rho / M) *
          std::pow(num / (m_rho_sq - 4.0 * m_pi_sq), 1.5);
 }
 
