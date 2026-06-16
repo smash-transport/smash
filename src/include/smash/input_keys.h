@@ -2482,9 +2482,10 @@ struct InputKeys {
    *    \iref{Tolos:2013kva}, \iref{Torres-Rincon:2014ffa}) are used, which
    *    handle elastic and inelastic binary collisions.
    *    \note Currently, only \f$ D\pi \leftrightarrow D\pi \f$,
-   *    \f$ D\eta \leftrightarrow D\eta \f$, and \f$ DK \leftrightarrow DK \f$
-   *    channels are implemented. All other interactions including charmed
-   *    hadrons are treated via intermediate resonances.
+   *    \f$ D\eta \leftrightarrow D\eta \f$, \f$ DK \leftrightarrow DK \f$, and
+   *    the same channels for D*(2007) and D*(2010) are implemented. All other
+   *    interactions including charmed hadrons are treated via intermediate
+   *    resonances.
    * - `"none"` &rarr; Interactions of charmed hadrons will not be taken into
    *    account, i.e. their cross sections are set to zero.
    *
@@ -2690,12 +2691,13 @@ struct InputKeys {
    * - `"PiDeuteron_to_pidprime"` &rarr; deuteron + pion &harr; d' + pion
    * - `"NDeuteron_to_Ndprime"` &rarr; deuteron + (anti-)nucleon &harr;
    *   d' + (anti-)nucleon, and their CPT-conjugates
-   * - `"Charm_T-matrix"` &rarr; D meson + light meson &harr; D meson +
-   *    light meson; currently, included light mesons are pions, etas, kaons,
-   *    and their corresponding antiparticles. Only taken into account if
-   *    <tt>\ref key_CT_charm_rescattering_ "Charm_Rescattering_Method"</tt> is
-   *    set to `T-matrix`. Otherwise, collisions including charmed hadrons are
-   *    treated via intermediate resonances.
+   * - `"Charm_T-matrix"` &rarr; D meson + light meson &harr; D meson + light
+   *   meson and D* + light meson &harr; D* + light meson, where D* refers to
+   *   D*(2007) and D*(2010); currently, included light mesons are pions, etas,
+   *   kaons, and their corresponding antiparticles. Only taken into account if
+   *   <tt>\ref key_CT_charm_rescattering_ "Charm_Rescattering_Method"</tt> is
+   *   set to `T-matrix`. Otherwise, collisions including charmed hadrons are
+   *   treated via intermediate resonances.
    * - `"All"` &rarr; include all binary processes, no necessity to list each
    *   single category
    *
