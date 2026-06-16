@@ -1248,7 +1248,8 @@ CollisionBranchList CrossSections::two_to_one(
   const PdgCode& pdg_b = type_particle_b.pdgcode();
 
   if (charm_rescattering == CharmRescattering::T_Matrix &&
-      (pdg_a.is_Dmeson() || pdg_b.is_Dmeson())) {
+      ((pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) ||
+       (pdg_a.is_Dstar2007() || pdg_b.is_Dstar2007()))) {
     if ((pdg_a.is_pion() || pdg_b.is_pion()) ||
         (pdg_a.is_eta() || pdg_b.is_eta()) ||
         (pdg_a.is_kaon() || pdg_b.is_kaon())) {

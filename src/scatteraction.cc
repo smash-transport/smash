@@ -185,16 +185,29 @@ void ScatterAction::add_all_scatterings(
     }
   }
 
+  // Prevent pseudoresonances for charmed hadrons in T-matrix approach
+  bool suppress_pseudoresonances_for_T_matrix_channels = false;
+  if (finder_parameters.charm_rescattering == CharmRescattering::T_Matrix &&
+      ((pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) ||
+       (pdg_a.is_Dstar2007() || pdg_b.is_Dstar2007()))) {
+    if ((pdg_a.is_pion() || pdg_b.is_pion()) ||
+        (pdg_a.is_eta() || pdg_b.is_eta()) ||
+        (pdg_a.is_kaon() || pdg_b.is_kaon())) {
+      suppress_pseudoresonances_for_T_matrix_channels = true;
+    }
+  }
+
   ParticleTypePtr pseudoresonance =
       try_find_pseudoresonance(finder_parameters.pseudoresonance_method,
                                finder_parameters.transition_high_energy);
-  if (pseudoresonance && finder_parameters.two_to_one) {
+  if (pseudoresonance && finder_parameters.two_to_one &&
+      !suppress_pseudoresonances_for_T_matrix_channels) {
     const double xs_total = is_total_parametrized_
                                 ? *parametrized_total_cross_section_
                                 : xs.high_energy(finder_parameters);
     const double xs_gap = xs_total - sum_of_partial_cross_sections_;
-    // The pseudo-resonance is only created if there is a (positive) cross
-    // section gap
+    /* The pseudo-resonance is only created if there is a (positive) cross
+     * section gap */
     if (xs_gap > really_small) {
       auto pseudoresonance_branch = std::make_unique<CollisionBranch>(
           *pseudoresonance, xs_gap, ProcessType::TwoToOne);
@@ -206,7 +219,6 @@ void ScatterAction::add_all_scatterings(
           << " mb.";
     }
   }
-  were_processes_added_ = true;
   // Rescale the branches so that their sum matches the parametrization
   if (is_total_parametrized_) {
     rescale_outgoing_branches();
