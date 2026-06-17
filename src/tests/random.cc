@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022
+ *    Copyright (c) 2014-2020,2022,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,6 +14,7 @@
 #include <cinttypes>
 
 #include "histogram.h"
+#include "smash/constants.h"
 
 using namespace smash;
 
@@ -86,6 +87,18 @@ TEST(xsquared_exponential) {
                random::exponential(1.0);
       },
       [](double x) { return x * x * exp(-x); });
+}
+
+TEST_CATCH(expo_inverse_boundaries, std::logic_error) {
+  random::expo(2., -1., 3.);
+}
+
+TEST_CATCH(expo_equal_boundaries, std::logic_error) {
+  random::expo(2., -42., -42.);
+}
+
+TEST_CATCH(expo_nan, std::logic_error) {
+  random::expo(2., smash_NaN<double>, -42.);
 }
 
 TEST(expo) {
