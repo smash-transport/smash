@@ -122,8 +122,7 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
       coll_crit(parameters.coll_crit),
       nnbar_treatment(parameters.nnbar_treatment),
       included_2to2(parameters.included_2to2),
-      charm_rescattering(
-          config.take(InputKeys::collTerm_charmRescatteringMethod)),
+      charm_rescattering(parameters.charm_rescattering),
       included_multi(parameters.included_multi),
       testparticles(parameters.testparticles),
       two_to_one(parameters.two_to_one),

@@ -67,6 +67,9 @@ struct ExperimentParameters {
   /// This indicates which two to two reactions are switched off.
   const ReactionsBitSet included_2to2;
 
+  /// Method to use for charm rescattering.
+  const CharmRescattering charm_rescattering;
+
   /// This indicates which multi-particle reactions are switched on.
   const MultiParticleReactionsBitSet included_multi;
 
