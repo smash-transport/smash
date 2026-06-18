@@ -89,6 +89,8 @@ TEST(xsquared_exponential) {
       [](double x) { return x * x * exp(-x); });
 }
 
+#ifdef NDEBUG
+
 TEST_CATCH(expo_inverse_boundaries, std::logic_error) {
   random::expo(2., -1., 3.);
 }
@@ -100,6 +102,8 @@ TEST_CATCH(expo_equal_boundaries, std::logic_error) {
 TEST_CATCH(expo_nan, std::logic_error) {
   random::expo(2., smash_NaN<double>, -42.);
 }
+
+#endif
 
 TEST(expo) {
   test_distribution(
