@@ -911,7 +911,6 @@ std::optional<double> Dzeropiplus_elastic(double sqrts) {
     if (Dzeropiplus_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DPI_SQRTS, DZEROPIPLUS_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       Dzeropiplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -924,7 +923,6 @@ double Dzeropiplus_Dpluspizero(double sqrts) {
   if (Dzeropiplus_Dpluspizero_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(DPI_SQRTS, DZEROPIPLUS_DPLUSPIZERO_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
     Dzeropiplus_Dpluspizero_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(
             dedup_x, dedup_y, ExtrapolationType::Constant);
@@ -941,7 +939,6 @@ std::optional<double> Dzeropiminus_elastic(double sqrts) {
     if (Dzeropiminus_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DPI_SQRTS, DZEROPIMINUS_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       Dzeropiminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -959,7 +956,6 @@ std::optional<double> Dzeropizero_elastic(double sqrts) {
     if (Dzeropizero_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DPI_SQRTS, DZEROPIZERO_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       Dzeropizero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -972,7 +968,6 @@ double Dzeropizero_Dpluspiminus(double sqrts) {
   if (Dzeropizero_Dpluspiminus_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(DPI_SQRTS, DZEROPIZERO_DPLUSPIMINUS_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
     Dzeropizero_Dpluspiminus_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(
             dedup_x, dedup_y, ExtrapolationType::Constant);
@@ -989,7 +984,6 @@ std::optional<double> Dpluspiplus_elastic(double sqrts) {
     if (Dpluspiplus_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DPI_SQRTS, DPLUSPIPLUS_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       Dpluspiplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1007,7 +1001,6 @@ std::optional<double> Dpluspiminus_elastic(double sqrts) {
     if (Dpluspiminus_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DPI_SQRTS, DPLUSPIMINUS_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       Dpluspiminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1020,7 +1013,6 @@ double Dpluspiminus_Dzeropizero(double sqrts) {
   if (Dpluspiminus_Dzeropizero_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(DPI_SQRTS, DPLUSPIMINUS_DZEROPIZERO_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
     Dpluspiminus_Dzeropizero_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(
             dedup_x, dedup_y, ExtrapolationType::Constant);
@@ -1037,7 +1029,6 @@ std::optional<double> Dpluspizero_elastic(double sqrts) {
     if (Dpluspizero_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DPI_SQRTS, DPLUSPIZERO_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       Dpluspizero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1050,7 +1041,6 @@ double Dpluspizero_Dzeropiplus(double sqrts) {
   if (Dpluspizero_Dzeropiplus_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(DPI_SQRTS, DPLUSPIZERO_DZEROPIPLUS_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
     Dpluspizero_Dzeropiplus_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(
             dedup_x, dedup_y, ExtrapolationType::Constant);
@@ -1067,7 +1057,6 @@ std::optional<double> Dpluseta_elastic(double sqrts) {
     if (Dpluseta_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DETA_SQRTS, DPLUSETA_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       Dpluseta_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1085,7 +1074,6 @@ std::optional<double> Dzeroeta_elastic(double sqrts) {
     if (Dzeroeta_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DETA_SQRTS, DZEROETA_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       Dzeroeta_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1103,7 +1091,6 @@ std::optional<double> DplusKplus_elastic(double sqrts) {
     if (DplusKplus_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DKAON_SQRTS, DPLUSKPLUS_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       DplusKplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1121,7 +1108,6 @@ std::optional<double> DplusKzero_elastic(double sqrts) {
     if (DplusKzero_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DKAON_SQRTS, DPLUSKZERO_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       DplusKzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1134,7 +1120,6 @@ double DplusKzero_DzeroKplus(double sqrts) {
   if (DplusKzero_DzeroKplus_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(DKAON_SQRTS, DPLUSKZERO_DZEROKPLUS_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
     DplusKzero_DzeroKplus_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(
             dedup_x, dedup_y, ExtrapolationType::Constant);
@@ -1146,7 +1131,6 @@ double DzeroKplus_DplusKzero(double sqrts) {
   if (DzeroKplus_DplusKzero_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(DKAON_SQRTS, DZEROKPLUS_DPLUSKZERO_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
     DzeroKplus_DplusKzero_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(
             dedup_x, dedup_y, ExtrapolationType::Constant);
@@ -1163,7 +1147,6 @@ std::optional<double> DzeroKplus_elastic(double sqrts) {
     if (DzeroKplus_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DKAON_SQRTS, DZEROKPLUS_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       DzeroKplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1181,7 +1164,6 @@ std::optional<double> DzeroKzero_elastic(double sqrts) {
     if (DzeroKzero_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DKAON_SQRTS, DZEROKZERO_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       DzeroKzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1199,7 +1181,6 @@ std::optional<double> DplusKbarzero_elastic(double sqrts) {
     if (DplusKbarzero_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DKAON_SQRTS, DPLUSKBARZERO_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       DplusKbarzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1217,7 +1198,6 @@ std::optional<double> DplusKminus_elastic(double sqrts) {
     if (DplusKminus_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DKAON_SQRTS, DPLUSKMINUS_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       DplusKminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1230,7 +1210,6 @@ double DplusKminus_DzeroKbarzero(double sqrts) {
   if (DplusKminus_DzeroKbarzero_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(DKAON_SQRTS, DPLUSKMINUS_DZEROKBARZERO_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
     DplusKminus_DzeroKbarzero_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(
             dedup_x, dedup_y, ExtrapolationType::Constant);
@@ -1242,7 +1221,6 @@ double DzeroKbarzero_DplusKminus(double sqrts) {
   if (DzeroKbarzero_DplusKminus_interpolation == nullptr) {
     auto [dedup_x, dedup_y] =
         dedup_avg<double>(DKAON_SQRTS, DZEROKBARZERO_DPLUSKMINUS_SIG);
-    dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
     DzeroKbarzero_DplusKminus_interpolation =
         std::make_unique<InterpolateDataLinear<double>>(
             dedup_x, dedup_y, ExtrapolationType::Constant);
@@ -1259,7 +1237,6 @@ std::optional<double> DzeroKbarzero_elastic(double sqrts) {
     if (DzeroKbarzero_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DKAON_SQRTS, DZEROKBARZERO_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       DzeroKbarzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
@@ -1277,7 +1254,6 @@ std::optional<double> DzeroKminus_elastic(double sqrts) {
     if (DzeroKminus_elastic_interpolation == nullptr) {
       auto [dedup_x, dedup_y] =
           dedup_avg<double>(DKAON_SQRTS, DZEROKMINUS_ELASTIC_SIG);
-      dedup_y = smooth(dedup_x, dedup_y, 0.01, 6);
       DzeroKminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
               dedup_x, dedup_y, ExtrapolationType::None);
