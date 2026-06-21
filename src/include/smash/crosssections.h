@@ -406,8 +406,8 @@ class CrossSections {
    * Determine the elastic cross section for a D meson-pion (Dpi) or a D*-pion
    * (D*pi) collision. If the center-of-mass energy for the collision is below
    * the lower bound of the energy range of the underlying cross section data,
-   * the return value will be 0. If it is above the upper bound, the return
-   * value will be `std::nullopt`.
+   * the return value is the lower bound value. If it is above the upper bound,
+   * the return value will be `std::nullopt`.
    *
    * \return Elastic cross section for Dpi or D*pi.
    *
@@ -431,8 +431,8 @@ class CrossSections {
    * Determine the elastic cross section for a D meson-eta (Deta) or a D*-eta
    * (D*eta) collision. If the center-of-mass energy for the collision is below
    * the lower bound of the energy range of the underlying cross section data,
-   * the return value will be 0. If it is above the upper bound, the return
-   * value will be `std::nullopt`.
+   * the return value is the lower bound value. If it is above the upper bound,
+   * the return value will be `std::nullopt`.
    *
    * \return Elastic cross section for Deta or D*eta.
    *
@@ -445,8 +445,8 @@ class CrossSections {
    * Determine the elastic cross section for a D meson-kaon (DK) or a D*-kaon
    * (D*K) collision. If the center-of-mass energy for the collision is below
    * the lower bound of the energy range of the underlying cross section data,
-   * the return value will be 0. If it is above the upper bound, the return
-   * value will be `std::nullopt`.
+   * the return value is the lower bound value. If it is above the upper bound,
+   * the return value will be `std::nullopt`.
    *
    * \return Elastic cross section for DK or D*K.
    *
