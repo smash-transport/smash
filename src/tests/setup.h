@@ -251,6 +251,7 @@ inline ExperimentParameters default_parameters(
       criterion,                             // collision criterion
       true,                                  // two_to_one
       included_2to2,
+      CharmRescattering::Resonances,
       no_multiparticle_reactions(),
       strings,
       1.0,

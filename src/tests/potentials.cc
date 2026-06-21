@@ -449,7 +449,7 @@ static ExperimentParameters default_parameters_vdf(
       triangular_smearing_range,            // triangular smearing range
       CollisionCriterion::Geometric,
       false,  // two_to_one
-      false, Test::no_multiparticle_reactions(),
+      false, CharmRescattering::Resonances, Test::no_multiparticle_reactions(),
       false,  // strings switch
       1.0, NNbarTreatment::NoAnnihilation,
       0.,     // low energy sigma_NN cut-off
