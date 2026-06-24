@@ -476,12 +476,12 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  * tuning possibilities, see the following pages:
  * - \ref doxypage_input_conf_ct_pauliblocker
  * - \ref doxypage_input_conf_ct_string_transition
+ * - \ref doxypage_input_conf_ct_hard_string_transition
  * - \ref doxypage_input_conf_ct_string_parameters
  * - \ref doxypage_input_conf_ct_dileptons
  * - \ref doxypage_input_conf_ct_photons
  * - \ref doxypage_input_conf_ct_heavy_flavor
  * - \ref doxypage_input_conf_ct_spin_interactions
- * - \ref doxypage_input_conf_ct_hard_string_transition
  */
 
 /*!\Userguide
@@ -581,34 +581,33 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  * The transition mode is selected via the `Mode` key:
  * - `Exponential`: use the legacy exponential splitting of the non-diffractive
  *   cross section. The probability for a purely soft non-diffractive
- interaction
- *   is given by
+ *   interaction is given by
  *   \f[
- *     P_{\mathrm{soft}} = \exp\!\left(-\frac{\sigma_{\mathrm{hard}}}
- *     {\sigma_{\mathrm{ND}}}\right),
+ *     P_{\mathrm{soft}} =
+ *     \exp\!\left(-\frac{\sigma_{\mathrm{hard}}}
+ *                       {\sigma_{\mathrm{ND}}}\right),
  *   \f]
  *   where \f$\sigma_{\mathrm{hard}}\f$ is the hard string cross section and
  *   \f$\sigma_{\mathrm{ND}}\f$ the total non-diffractive cross section. The
- hard
- *   non-diffractive contribution follows from
- *   \f$\sigma_{\mathrm{ND,hard}} = \sigma_{\mathrm{ND}} -
- *   \sigma_{\mathrm{ND,soft}}\f$.
+ *   hard non-diffractive contribution follows from
+ *   \f$\sigma_{\mathrm{ND,hard}} =
+ *     \sigma_{\mathrm{ND}} - \sigma_{\mathrm{ND,soft}}\f$.
  * - `Custom_Range`: use a smooth, user-defined transition from soft to hard
  *   string excitation as a function of the collision energy.
  *
- * For `Custom_Range`, the transition is controlled by `Start_Energy` and
- * `End_Energy` (in \f$\sqrt{s}\f$ measured in GeV). Below this range only soft
- * string excitation is used, above it only hard string excitation is used, and
- * inside the range the probability for hard string excitation increases
- * smoothly with energy.
+ * For `Custom_Range`, the transition is controlled by `Energy_Range`
+ * (in \f$\sqrt{s}\f$ measured in GeV). The first value specifies the lower
+ * bound and the second value the upper bound of the transition region.
+ * Below this range only soft string excitation is used, above it only hard
+ * string excitation is used, and inside the range the probability for hard
+ * string excitation increases smoothly with energy.
  *
  * For example:
- *\verbatim
+ * \verbatim
  Collision_Term:
      Hard_String_Transition:
          Mode: Custom_Range
-         Start_Energy: 10.0
-         End_Energy: 20.0
+         Energy_Range: [10.0, 20.0]
  \endverbatim
  */
 
@@ -3101,7 +3100,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_ct_hard_string_transition
    * \optional_key{key_CT_hard_string_transition_mode_,
-   *               Mode,string,Exponential}
+   *               Mode,string,Exponential,Exponential|Custom_Range}
    *
    * Select the mode used for the transition from soft to hard string
    * excitation.
@@ -3113,69 +3112,64 @@ struct InputKeys {
    *   within a user-defined invariant energy range.
    *
    *   In this mode, the transition follows a sinusoidal function within the
-   *   interval defined by Start_Energy and End_Energy, ensuring a smooth and
-   *   continuous interpolation between the soft and hard regimes.
+   *   interval defined by Energy_Range, ensuring a smooth and continuous
+   *   interpolation between the soft and hard regimes.
    *
-   * For Custom_Range, the transition is controlled by Start_Energy and
-   * End_Energy.
+   * For Custom_Range, the transition is controlled by Energy_Range.
    */
   /**
    * \see_key{key_CT_hard_string_transition_mode_}
    */
   inline static const Key<HardStringTransitionMode>
-      collTerm_hard_string_transition_mode{
+      collTerm_hardStringTransition_mode{
           InputSections::c_hardStringTransition + "Mode",
           HardStringTransitionMode::Exponential,
-          {"3.4"}};
+          {"3.4"},
+          [](const HardStringTransitionMode &value) noexcept {
+            return value == HardStringTransitionMode::Exponential ||
+                   value == HardStringTransitionMode::Custom_Range;
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_hard_string_transition
-   * \optional_key{key_CT_hard_string_transition_start_energy_,
-   *               Start_Energy,double,10.0}
+   * \optional_key{key_CT_hard_string_transition_energyRange_,
+   *               Energy_Range,list,[10.0\,200.0],
+   *               \f$E_{\mathrm{min}} \ge 10\,\mathrm{GeV}\f$ and
+   *               \f$E_{\mathrm{min}} < E_{\mathrm{max}}\f$}
    *
-   * Lower bound of the invariant mass range (\f$\sqrt{s}\f$ in GeV) for the
+   * Invariant energy range (\f$\sqrt{s}\f$ in GeV) used for the custom
    * transition from soft to hard string excitation.
    *
-   * For \f$\sqrt{s}\f$ below this value, only soft string excitation is used.
-   * Above this value, the transition to hard string excitation begins.
+   * This key is only used when Mode is set to Custom_Range. For \f$\sqrt{s}\f$
+   * below the lower bound, only soft string excitation is used. For
+   * \f$\sqrt{s}\f$ above the upper bound, only hard string excitation is used.
    *
-   * Must be greater than or equal to 10 GeV and smaller than or equal to
-   * End_Energy.
+   * Within the specified range, the transition probability is interpolated
+   * smoothly from the soft to the hard regime.
    *
+   * The lower bound must be greater than or equal to 10 GeV and strictly
+   * smaller than the upper bound.
    */
   /**
-   * \see_key{key_CT_hard_string_transition_start_energy_}
+   * \see_key{key_CT_hard_string_transition_energyRange_}
    */
-  inline static const Key<double> collTerm_hard_string_transition_start_energy{
-      InputSections::c_hardStringTransition + "Start_Energy", 10.0, {"3.4"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_ct_hard_string_transition
-   * \optional_key{key_CT_hard_string_transition_end_energy_,
-   *               End_Energy,double,200.0}
-   *
-   * Upper bound of the invariant energy range for the transition from soft to
-   * hard string excitation (\f$\sqrt{s}\f$ in GeV).
-   *
-   *
-   * Must be larger than or equal to Start_Energy
-   *
-   */
-
-  /**
-   * \see_key{key_CT_hard_string_transition_end_energy_}
-   */
-  inline static const Key<double> collTerm_hard_string_transition_end_energy{
-      InputSections::c_hardStringTransition + "End_Energy", 200.0, {"3.4"}};
+  inline static const Key<std::pair<double, double>>
+      collTerm_hardStringTransition_energyRange{
+          InputSections::c_hardStringTransition + "Energy_Range",
+          std::make_pair(10.0, 200.0),
+          {"3.4"},
+          [](const std::pair<double, double> &value) noexcept {
+            return value.first >= 10.0 && value.first < value.second;
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
    * \optional_key{key_CT_PB_gaussian_cutoff_,Gaussian_Cutoff,double,
    * 2.2,\f$1\leq x\leq10\f$}
    *
-   * Radius \unit{in fm} at which Gaussians used for smoothing are cut. It
-   * should be larger than \ref key_CT_PB_spatial_averaging_radius_
-   * "Spatial_Averaging_Radius".
+   * Radius \unit{in fm} at which Gaussians used for smoothing are
+   * cut. It should be larger than \ref
+   * key_CT_PB_spatial_averaging_radius_ "Spatial_Averaging_Radius".
    */
   /**
    * \see_key{key_CT_PB_gaussian_cutoff_}
@@ -3731,11 +3725,11 @@ struct InputKeys {
       DefaultType::Dependent,
       {"3.0"},
       detail::get_default_validator<bool>()};
-
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_unformed_xsec_suppression,Unformed_Xsec_Suppression,
-   *               double,0.7}
+   * \optional_key{key_CT_SP_unformed_xsec_suppression_,
+   *               Unformed_Xsec_Suppression,double,0.7,
+   *               \f$0 \le x \le 1\f$}
    *
    * Applies an additional suppression factor to the interaction cross sections
    * of unformed hadrons.
@@ -3751,12 +3745,16 @@ struct InputKeys {
    * - This parameter serves as a phenomenological tuning knob.
    */
   /**
-   * \see_key{key_CT_SP_unformed_xsec_suppression}
+   * \see_key{key_CT_SP_unformed_xsec_suppression_}
    */
+
   inline static const Key<double> collTerm_stringParam_unformedXsecSuppression{
       InputSections::c_stringParameters + "Unformed_Xsec_Suppression",
       0.7,
-      {"3.4"}};
+      {"3.4"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons

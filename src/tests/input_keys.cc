@@ -454,6 +454,19 @@ TEST(validators_collision_term) {
   VERIFY(!string_ZB_lead.validate(2.1));
   const auto& use_monash_tune = InputKeys::collTerm_stringParam_useMonashTune;
   VERIFY(use_monash_tune.validate(false));
+  const auto& hard_string_transition_mode =
+      InputKeys::collTerm_hardStringTransition_mode;
+  VERIFY(hard_string_transition_mode.validate(
+      HardStringTransitionMode::Exponential));
+  VERIFY(hard_string_transition_mode.validate(
+      HardStringTransitionMode::Custom_Range));
+  const auto& hard_string_transition_energy_range =
+      InputKeys::collTerm_hardStringTransition_energyRange;
+  VERIFY(hard_string_transition_energy_range.validate({10.0, 20.0}));
+  VERIFY(hard_string_transition_energy_range.validate({10.0, 200.0}));
+  VERIFY(!hard_string_transition_energy_range.validate({9.9, 20.0}));
+  VERIFY(!hard_string_transition_energy_range.validate({10.0, 10.0}));
+  VERIFY(!hard_string_transition_energy_range.validate({20.0, 10.0}));
   const auto& dileptons_decays = InputKeys::collTerm_dileptons_decays;
   VERIFY(dileptons_decays.validate(false));
   const auto& photons_2_to_2 = InputKeys::collTerm_photons_twoToTwoScatterings;
