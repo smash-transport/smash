@@ -23,7 +23,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Processes with more than two outgoing particles (e.g. Dalitz decays and multiparticle reactions) can now produce resonances, with masses sampled from the appropriate spectral function.
 * Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams.
   This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
-* `CrossSections::probability_transit_high` has been replaced by `CrossSections::interpolation_at_sqrts`.
+* `CrossSections::probability_transit_high` has been replaced by `CrossSections::transition_probability_at_sqrts`.
 * New key `Ignore_Unformed` in `Output: Thermodynamics` to exclude unformed (and preformed) particles from the density evaluation. This is useful e.g. in afterburner calculations.
 * The path to tabulations can now be passed with the command line argument `-t to/path/tabulations`. However, if the input files for particles/decay modes or SMASH version change, the tabulations will be recalculated in the indicated folder. This is useful to make several runs share the same tabulations folder, even if these are in different output directories, avoiding creating several sets of possibly identical files.
 
@@ -35,7 +35,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * The `make install` target has been standardized to create an enclosing version-specific folder inside which the standard `bin`, `lib`, `include` and `share` directories are created (previously, the version specific folder was created inside the standard ones).
 * SMASH installation has been totally revised and now offers everything needed to flawlessly find and use SMASH in a client CMake project.
 * Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams. This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
-* `CrossSections::probability_transit_high` has been replaced by `CrossSections::interpolation_at_sqrts`.
+* `CrossSections::probability_transit_high` has been replaced by `CrossSections::transition_probability_at_sqrts`.
 * The interpolations `InterpolateDataLinear`, `InterpolateDataSpline`, and `InterpolateData2DSpline` are restricted to not extrapolate by default and will in this case now throw if out-of-bounds values are tried to access.
   Extrapolation can be enabled by giving an `ExtrapolationType` as an argument during construction.
 * All configuration files YAML keys are now validated when taken (constraints are listed in the documentation).

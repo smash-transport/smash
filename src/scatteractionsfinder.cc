@@ -162,34 +162,13 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
       total_xs_strategy(config.take(InputKeys::collTerm_totXsStrategy)),
       pseudoresonance_method(config.take(InputKeys::collTerm_pseudoresonance)),
       hard_string_transition_mode(
-          config.take(InputKeys::collTerm_hard_string_transition_mode)),
-      hard_string_transition_start_energy(
-          config.take(InputKeys::collTerm_hard_string_transition_start_energy)),
-      hard_string_transition_end_energy(
-          config.take(InputKeys::collTerm_hard_string_transition_end_energy)),
-
+          config.take(InputKeys::collTerm_hardStringTransition_mode)),
+      hard_string_transition_energy_range(
+          config.take(InputKeys::collTerm_hardStringTransition_energyRange)),
       AQM_charm_suppression(
           config.take(InputKeys::collTerm_HF_AQMcSuppression)),
       AQM_bottom_suppression(
           config.take(InputKeys::collTerm_HF_AQMbSuppression)) {
-  if (hard_string_transition_mode == HardStringTransitionMode::Custom_Range) {
-    if (hard_string_transition_start_energy < 10.0) {
-      throw std::invalid_argument(
-          "Custom string transition: hard_string_transition_start_energy (" +
-          std::to_string(hard_string_transition_start_energy) +
-          " GeV) must be >= 10 GeV.");
-    }
-
-    if (hard_string_transition_start_energy >
-        hard_string_transition_end_energy) {
-      throw std::invalid_argument(
-          "Custom string transition: hard_string_transition_start_energy (" +
-          std::to_string(hard_string_transition_start_energy) +
-          " GeV) must be <= hard_string_transition_end_energy (" +
-          std::to_string(hard_string_transition_end_energy) + " GeV).");
-    }
-  }
-
   if (total_xs_strategy == TotalCrossSectionStrategy::BottomUp) {
     logg[LFindScatter].info(
         "Evaluating total cross sections from partial processes.");
