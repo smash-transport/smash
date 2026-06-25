@@ -3100,7 +3100,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_ct_hard_string_transition
    * \optional_key{key_CT_hard_string_transition_mode_,
-   *               Mode,string,Exponential,Exponential|Custom_Range}
+   *               Mode,string,Exponential,\any_valid}
    *
    * Select the mode used for the transition from soft to hard string
    * excitation.
@@ -3125,19 +3125,15 @@ struct InputKeys {
           InputSections::c_hardStringTransition + "Mode",
           HardStringTransitionMode::Exponential,
           {"3.4"},
-          [](const HardStringTransitionMode &value) noexcept {
-            return value == HardStringTransitionMode::Exponential ||
-                   value == HardStringTransitionMode::Custom_Range;
-          }};
+          detail::get_default_validator<HardStringTransitionMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_hard_string_transition
    * \optional_key{key_CT_hard_string_transition_energyRange_,
-   *               Energy_Range,list,[10.0\,200.0],
-   *               \f$E_{\mathrm{min}} \ge 10\,\mathrm{GeV}\f$ and
-   *               \f$E_{\mathrm{min}} < E_{\mathrm{max}}\f$}
+   *               Energy_Range,list of two doubles,[10.0\,200.0],
+   *               \f$E_1 \ge 10\f$ and \f$E_1 < E_2\f$}
    *
-   * Invariant energy range (\f$\sqrt{s}\f$ in GeV) used for the custom
+   * Invariant energy range (\f$\sqrt{s}\f$) \unit{GeV} used for the custom
    * transition from soft to hard string excitation.
    *
    * This key is only used when Mode is set to Custom_Range. For \f$\sqrt{s}\f$
@@ -3147,11 +3143,8 @@ struct InputKeys {
    * Within the specified range, the transition probability is interpolated
    * smoothly from the soft to the hard regime.
    *
-   * The lower bound must be greater than or equal to 10 GeV and strictly
+   * The lower bound must be greater than or equal to 10 \unit{GeV} and strictly
    * smaller than the upper bound.
-   */
-  /**
-   * \see_key{key_CT_hard_string_transition_energyRange_}
    */
   inline static const Key<std::pair<double, double>>
       collTerm_hardStringTransition_energyRange{

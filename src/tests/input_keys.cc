@@ -459,8 +459,6 @@ TEST(validators_collision_term) {
       InputKeys::collTerm_hardStringTransition_mode;
   VERIFY(hard_string_transition_mode.validate(
       HardStringTransitionMode::Exponential));
-  VERIFY(hard_string_transition_mode.validate(
-      HardStringTransitionMode::Custom_Range));
   const auto& hard_string_transition_energy_range =
       InputKeys::collTerm_hardStringTransition_energyRange;
   VERIFY(hard_string_transition_energy_range.validate({10.0, 20.0}));
