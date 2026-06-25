@@ -249,10 +249,11 @@ T InterpolateDataLinear<T>::operator()(T x0) const {
   const double last_x = x_.back();
   if (x0 < first_x || x0 > last_x) {
     if (extrapolation_type_ == ExtrapolationType::None) {
-      std::stringstream error_msg{
+      std::ostringstream error_msg{
           "InterpolateDataLinear only accepts x values within the range of the "
-          "underlying data when an extrapolation type is not specified."};
-      error_msg << "\nx value " << x0 << " is out of bounds.";
+          "underlying data\nwhen an extrapolation type is not specified. ",
+          std::ios::ate};
+      error_msg << "x value " << x0 << " is out of bounds.";
       throw std::out_of_range(error_msg.str());
     } else if (extrapolation_type_ == ExtrapolationType::Zero) {
       return 0.;

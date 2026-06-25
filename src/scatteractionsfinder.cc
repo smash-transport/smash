@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -206,6 +206,14 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
     logg[LFindScatter].info(
         "Evaluating total cross sections from parametrizations only for "
         "measured processes.");
+  }
+
+  if (!use_AQM && (total_xs_strategy != TotalCrossSectionStrategy::BottomUp)) {
+    logg[LFindScatter].warn(
+        "It is not possible to completely disable AQM when "
+        "Total_Cross_Section_Strategy is set to \"TopDown\" or "
+        "\"TopDownMeasured\".\n"
+        "AQM will be used for total parametrizations of cross sections.");
   }
 
   if (AQM_charm_suppression < 0 || AQM_bottom_suppression < 0 ||

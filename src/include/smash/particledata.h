@@ -625,7 +625,7 @@ std::ostream &operator<<(std::ostream &out,
  *
  * This function possibly warns the user, if requested.
  *
- * \param[in] pdgcode PdgCode  of the particle which is supposed to be checked
+ * \param[in] pdgcode PdgCode of the particle which is supposed to be checked
  * \param[in] mass Mass of the new particle
  * \param[in] four_position Position four vector of the new particle
  * \param[in] four_momentum Momentum four vector of the new particle

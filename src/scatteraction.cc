@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -81,12 +81,12 @@ void ScatterAction::generate_final_state() {
     case ProcessType::TwoToOne:
       /* resonance formation */
       resonance_formation();
+      spin_interaction();
       break;
     case ProcessType::TwoToTwo:
       /* 2->2 inelastic scattering */
       /* Sample the particle momenta in CM system. */
       inelastic_scattering();
-      spin_interaction();
       break;
     case ProcessType::TwoToThree:
     case ProcessType::TwoToFour:
@@ -192,9 +192,9 @@ void ScatterAction::add_all_scatterings(
       add_collision(std::move(pseudoresonance_branch));
       logg[LScatterAction].debug()
           << "Pseudoresonance between " << incoming_particles_[0].type().name()
-          << " and " << incoming_particles_[1].type().name() << "is"
+          << " and " << incoming_particles_[1].type().name() << " is "
           << pseudoresonance->name() << " with cross section " << xs_gap
-          << "mb.";
+          << " mb.";
     }
   }
   were_processes_added_ = true;
@@ -220,7 +220,7 @@ void ScatterAction::rescale_outgoing_branches() {
     if (!warned_no_rescaling_available.count(pair)) {
       logg[LScatterAction].warn()
           << "Total cross section between " << type_a->name() << " and "
-          << type_b->name() << "is roughly zero at sqrt(s) = " << sqrt_s()
+          << type_b->name() << " is roughly zero at sqrt(s) = " << sqrt_s()
           << " GeV, and no rescaling to match the parametrized value will be "
              "done.\nAn elastic process will be added, instead, to match the "
              "total cross section.\nFor this pair of particles, this warning "

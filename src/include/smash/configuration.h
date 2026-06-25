@@ -1397,7 +1397,7 @@ class Configuration {
         return SpinInteractionType::Off;
       throw IncorrectTypeInAssignment("The value for key \"" +
                                       std::string(key_) + "\" should be " +
-                                      "\"On\", \"Off\" " + "or \"Elastic\".");
+                                      "\"On\" or \"Off\".");
     }
 
     /**
@@ -1575,8 +1575,7 @@ class Configuration {
    *
    * \return Node in the tree reached by using the provided keys.
    */
-  YAML::Node find_node_creating_it_if_not_existing(
-      std::vector<std::string_view> keys) const;
+  YAML::Node find_node_creating_it_if_not_existing(KeyLabels keys) const;
 
   /**
    * Descend in the YAML tree from the given node using the provided keys.
@@ -1600,8 +1599,7 @@ class Configuration {
    *       cause a performance cost that can be avoided (exceptions on the
    *       exceptional path are expensive).
    */
-  std::optional<YAML::Node> find_existing_node(
-      std::vector<std::string_view> keys) const;
+  std::optional<YAML::Node> find_existing_node(KeyLabels keys) const;
 
   /**
    * Utility type trait (general case) for the take and read public methods.
@@ -1684,7 +1682,7 @@ class Configuration {
    *
    * \throw std::runtime_error if the key does not exist.
    */
-  Value take(std::vector<std::string_view> labels);
+  Value take(KeyLabels labels);
 
   /**
    * This is the implementation detail to read a key. Having a non-templated
@@ -1697,7 +1695,7 @@ class Configuration {
    *
    * \throw std::runtime_error if the key does not exist.
    */
-  Value read(std::vector<std::string_view> labels) const;
+  Value read(KeyLabels labels) const;
 
   /**
    * Find out whether a key has been already taken.

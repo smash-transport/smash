@@ -26,6 +26,13 @@ function(smash_add_functional_test name)
                      --source "${PROJECT_SOURCE_DIR}" --binary "${PROJECT_BINARY_DIR}")
     set_tests_properties(functional_${name} PROPERTIES FIXTURES_REQUIRED fixture_compile_smash
                                                        LABELS "functional;physics")
+    add_custom_target(run_functional_${name}
+                      COMMAND ${Python3_EXECUTABLE}
+                              "${PROJECT_SOURCE_DIR}/src/tests/functional/${name}.py" --source
+                              "${PROJECT_SOURCE_DIR}" --binary "${PROJECT_BINARY_DIR}"
+                      DEPENDS smash
+                      COMMENT "Executing functional test ${name}"
+                      VERBATIM)
 endfunction()
 
 # The following function add a physics "test" to run e.g. smash with certain arguments, choosing an
@@ -83,7 +90,8 @@ endfunction()
 # The following function adds an executable for a test, linking it to the test library and taking
 # care of some compiler options to be adjusted.
 function(_smash_add_exe name)
-    add_executable(${name} ${name}.cc)
+    add_executable(${name} EXCLUDE_FROM_ALL ${name}.cc)
+    add_dependencies(tests ${name})
     target_link_libraries(${name} PRIVATE smash_testlib)
     set_target_properties(${name} PROPERTIES CXX_EXTENSIONS OFF)
     target_compile_definitions(${name}
@@ -117,7 +125,7 @@ function(_smash_add_test name label depends)
                                                 "ASAN_OPTIONS=detect_container_overflow=0")
     endif()
     add_custom_target(run_${name}
-                      COMMAND ${ARGN} $<$<BOOL:${FORMAT_TEST_OUTPUT_FOR_VIM}>:-v>
+                      COMMAND ${ARGN}
                       DEPENDS ${depends}
                       COMMENT "Executing test ${name}"
                       VERBATIM)
@@ -126,7 +134,10 @@ endfunction()
 # The following function sets up a Python virtual environment which is needed for functional tests
 function(_smash_setup_python_venv out_success out_python_exec out_venv_path)
     message(STATUS "Looking for Python3")
-    find_package(Python3 3.3...<3.12 QUIET COMPONENTS Interpreter Development)
+    # Note that the functional tests require Pandas 2.0 which in turn requires at least Python 3.8.
+    # However, Python 3.12 (and above) is excluded because it contains setuptools>=82 and with it
+    # pkg_resources has been removed which causes problems installing Panda v2.x.
+    find_package(Python3 3.8...<3.12 QUIET COMPONENTS Interpreter Development)
     if(NOT Python3_FOUND)
         message(ATTENTION "Python3 not found. Functional tests disabled.")
         set(${out_success} OFF PARENT_SCOPE)

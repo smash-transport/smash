@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022-2025
+ *    Copyright (c) 2014-2020,2022-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -17,7 +17,6 @@
 
 #include "TFile.h"
 #include "TTree.h"
-#include "configuration.h"
 #include "forwarddeclarations.h"
 #include "outputinterface.h"
 #include "outputparameters.h"

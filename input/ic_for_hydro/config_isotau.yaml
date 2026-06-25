@@ -1,0 +1,28 @@
+Logging:
+    default: INFO
+
+General:
+    Modus:          Collider
+    Time_Step_Mode: Fixed
+    Delta_Time:     1.0
+    End_Time:       2000.0
+    Randomseed:     -1
+    Nevents:        1
+
+Output:
+    Initial_Conditions:
+      Format: ["For_vHLLE","Oscar2013"]
+      Extended: True
+
+Modi:
+    Collider:
+        Projectile:
+            Particles: {2212: 79, 2112: 118} #Gold197
+        Target:
+            Particles: {2212: 79, 2112: 118} #Gold197
+
+        Sqrtsnn: 19.6
+        Fermi_Motion: frozen
+
+        Initial_Conditions:
+            Type: "Constant_Tau"

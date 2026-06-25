@@ -33,6 +33,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Minimum supported ROOT version is now version `6.20`.
 * Minimum supported HepMC3 version is now version `3.2.6`.
 * The `make install` target has been standardized to create an enclosing version-specific folder inside which the standard `bin`, `lib`, `include` and `share` directories are created (previously, the version specific folder was created inside the standard ones).
+* SMASH installation has been totally revised and now offers everything needed to flawlessly find and use SMASH in a client CMake project.
 * Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams. This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
 * `CrossSections::probability_transit_high` has been replaced by `CrossSections::interpolation_at_sqrts`.
 * The interpolations `InterpolateDataLinear`, `InterpolateDataSpline`, and `InterpolateData2DSpline` are restricted to not extrapolate by default and will in this case now throw if out-of-bounds values are tried to access.
@@ -40,6 +41,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Removed
 * CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally.
+* ⚠️ CMake module `FindSMASH.cmake` is not any more needed and has been removed.
+
 
 ## SMASH-3.3
 Date: 2025-12-03

@@ -57,10 +57,11 @@ InterpolateDataSpline::~InterpolateDataSpline() {
 double InterpolateDataSpline::operator()(double xi) const {
   if (xi < first_x_ || xi > last_x_) {
     if (extrapolation_type_ == ExtrapolationType::None) {
-      std::stringstream error_msg{
+      std::ostringstream error_msg{
           "InterpolateDataSpline only accepts x values within the range of the "
-          "underlying data when an extrapolation type is not specified."};
-      error_msg << "\nx value " << xi << " is out of bounds.";
+          "underlying data\nwhen an extrapolation type is not specified. ",
+          std::ios::ate};
+      error_msg << "x value " << xi << " is out of bounds.";
       throw std::out_of_range(error_msg.str());
     } else if (extrapolation_type_ == ExtrapolationType::Zero) {
       return 0.;
