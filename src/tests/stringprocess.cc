@@ -576,23 +576,37 @@ TEST(string_make_string_ends) {
   VERIFY((id2 == -1 && id1 == -2203) || (id2 == -2 && (id1 == -2101 || -2103)));
 }
 
-TEST(string_set_Vec4) {
-  // make arbitrary lightlike 4-vector with random direction
-  Angles angle_random = Angles(0., 0.);
-  angle_random.distribute_isotropically();
-  const double energy = 10.;
-  const ThreeVector mom = energy * angle_random.threevec();
-  Pythia8::Vec4 vector = Pythia8::Vec4(0., 0., 0., 0.);
-  // set Pythia8::Vec4
-  vector = StringProcess::set_Vec4(energy, mom);
-  // check if Pythia8::Vec4 is same with 4-vector from energy and mom
-  const double energy_scale = 0.5 * (vector.e() + energy);
-  VERIFY(std::abs(vector.e() - energy) < really_small * energy_scale);
-  VERIFY(std::abs(vector.px() - mom.x1()) < really_small * energy_scale);
-  VERIFY(std::abs(vector.py() - mom.x2()) < really_small * energy_scale);
-  VERIFY(std::abs(vector.pz() - mom.x3()) < really_small * energy_scale);
+TEST(string_make_smash_4vec) {
+  const Pythia8::Vec4 pythia_vec(1.2, -3.4, 5.6, 7.8);
+
+  const FourVector smash_vec = StringProcess::make_smash_4vec(pythia_vec);
+
+  const double energy_scale = 0.5 * (smash_vec.x0() + pythia_vec.e());
+  VERIFY(std::abs(smash_vec.x0() - pythia_vec.e()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(smash_vec.x1() - pythia_vec.px()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(smash_vec.x2() - pythia_vec.py()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(smash_vec.x3() - pythia_vec.pz()) <
+         really_small * energy_scale);
 }
 
+TEST(string_make_pythia_4vec) {
+  const FourVector smash_vec(7.8, 1.2, -3.4, 5.6);
+
+  const Pythia8::Vec4 pythia_vec = StringProcess::make_pythia_4vec(smash_vec);
+
+  const double energy_scale = 0.5 * (pythia_vec.e() + smash_vec.x0());
+  VERIFY(std::abs(pythia_vec.e() - smash_vec.x0()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(pythia_vec.px() - smash_vec.x1()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(pythia_vec.py() - smash_vec.x2()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(pythia_vec.pz() - smash_vec.x3()) <
+         really_small * energy_scale);
+}
 TEST(pdg_map_for_pythia) {
   int pdgid_mapped = 0;
 
