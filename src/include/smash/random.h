@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2012-2020
+ *    Copyright (c) 2012-2020,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -13,8 +13,11 @@
 #include <cassert>
 #include <limits>
 #include <random>
+#include <sstream>
 #include <utility>
 #include <vector>
+
+#include "smash/macros.h"
 
 namespace smash {
 
@@ -86,6 +89,9 @@ inline Engine::result_type advance() { return engine(); }
  */
 template <typename T>
 T uniform(T min, T max) {
+  /* Strictly speaking, a distribution could be created with min == max, but
+   * then it would be UB to use the call operator(), which we do here. */
+  assert(min < max);
   return std::uniform_real_distribution<T>(min, max)(engine);
 }
 
@@ -98,6 +104,9 @@ T uniform(T min, T max) {
  */
 template <typename T>
 T uniform_int(T min, T max) {
+  /* Strictly speaking, a distribution could be created with min == max, but
+   * then it would be UB to use the call operator(), which we do here. */
+  assert(min < max);
   return std::uniform_int_distribution<T>(min, max)(engine);
 }
 
@@ -161,21 +170,29 @@ T exponential(T lambda) {
  * \param x1 Maximal sampled value.
  * \param x2 Minimal sampled value.
  * \return Sampled random number.
+ *
+ * \throw std::logic_error if the computed sampling interval is degenerate,
+ *        reversed, or otherwise invalid.
  */
 template <typename T = double>
 T expo(T A, T x1, T x2) {
   const T a1 = A * x1, a2 = A * x2;
   const T a_min = std::log(std::numeric_limits<T>::min());
-#ifndef NDEBUG
-  assert(A > T(0.) && x1 >= x2 && a1 > a_min);
-#endif
-  const T r1 = std::exp(a1);
-  const T r2 = a2 > a_min ? std::exp(a2) : T(0.);  // prevent underflow
-  T x;
+  assert(A > T(0.) && x1 > x2 && a1 > a_min);
+  const T high = std::exp(a1);
+  const T low = a2 > a_min ? std::exp(a2) : T(0.);  // prevent underflow
+  if (unlikely(!(low < high))) {                    // catches NANs, too
+    std::ostringstream error_message{};
+    error_message << "Function " << __func__
+                  << ": internal invariant 'low < high' violated (low = " << low
+                  << ", high = " << high << ")";
+    throw std::logic_error(error_message.str());
+  }
+  T x{};
   do {
     /* sample repeatedly until x is in the requested range
-     * (it can get outside due to numerical errors, see issue #2959) */
-    x = std::log(uniform(r1, r2)) / A;
+     * (it can get outside due to numerical errors). */
+    x = std::log(uniform(low, high)) / A;
   } while (!(x <= x1 && x > x2));
   return x;
 }
