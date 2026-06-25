@@ -3146,6 +3146,9 @@ struct InputKeys {
    * The lower bound must be greater than or equal to 10 \unit{GeV} and strictly
    * smaller than the upper bound.
    */
+  /**
+   * \see_key{key_CT_hard_string_transition_energyRange_}
+   */
   inline static const Key<std::pair<double, double>>
       collTerm_hardStringTransition_energyRange{
           InputSections::c_hardStringTransition + "Energy_Range",

@@ -16,16 +16,18 @@
 
 using namespace smash;
 using namespace std::string_literals;
-
+using smash::detail::get_default_validator;
 template <typename T>
 static Key<T> get_test_key(std::optional<T> def_val = std::nullopt) {
   const Version v_intro = "1.0.0";
-  if (def_val)
-    return Key<T>{{"Test", "Key"}, *def_val, {v_intro}};
-  else
-    return Key<T>{{"Test", "Key"}, {v_intro}};
-}
 
+  if (def_val) {
+    return Key<T>{
+        {"Test", "Key"}, *def_val, {v_intro}, get_default_validator<T>()};
+  } else {
+    return Key<T>{{"Test", "Key"}, {v_intro}, get_default_validator<T>()};
+  }
+}
 TEST(create_keys) {
   get_test_key<int>();
   get_test_key<double>(3.14);
@@ -55,11 +57,13 @@ TEST_CATCH(key_with_invalid_default_value, std::logic_error) {
 }
 
 TEST_CATCH(key_with_invalid_default_type_I, std::logic_error) {
-  Key<int> key({"Test"}, DefaultType::Null, {"1.0"});
+  Key<int> key({"Test"}, DefaultType::Null, {"1.0"},
+               get_default_validator<int>());
 }
 
 TEST_CATCH(key_with_invalid_default_type_II, std::logic_error) {
-  Key<int> key({"Test"}, DefaultType::Value, {"1.0"});
+  Key<int> key({"Test"}, DefaultType::Value, {"1.0"},
+               get_default_validator<int>());
 }
 
 TEST_CATCH(ask_not_available_default, std::bad_optional_access) {
@@ -68,11 +72,12 @@ TEST_CATCH(ask_not_available_default, std::bad_optional_access) {
 }
 
 TEST_CATCH(key_without_version, smash::Key<int>::WrongNumberOfVersions) {
-  Key<int> key({"Test"}, {});
+  Key<int> key({"Test"}, {}, get_default_validator<int>());
 }
 
 TEST_CATCH(key_with_too_many_versions, smash::Key<int>::WrongNumberOfVersions) {
-  Key<int> key({"Test"}, {"v1", "v2", "v3", "v4"});
+  Key<int> key({"Test"}, {"v1", "v2", "v3", "v4"},
+               get_default_validator<int>());
 }
 
 TEST(check_introduction_version) {
@@ -89,8 +94,10 @@ TEST_CATCH(not_deprecated_key, std::bad_optional_access) {
 
 TEST(deprecated_key) {
   const Version v_deprecation = "1.2.0";
-  const Key<std::string> key{
-      {"Test"}, "Hello world"s, {"1.0.0", v_deprecation}};
+  const Key<std::string> key{{"Test"},
+                             "Hello world"s,
+                             {"1.0.0", v_deprecation},
+                             get_default_validator<std::string>()};
   VERIFY(key.is_allowed());
   VERIFY(key.is_deprecated());
   COMPARE(key.deprecated_in(), v_deprecation);
@@ -105,8 +112,10 @@ TEST_CATCH(not_removed_key, std::bad_optional_access) {
 TEST(removed_key) {
   const Version v_deprecation = "1.2.0";
   const Version v_removal = "1.2.0";
-  const Key<std::string> key{
-      {"Test"}, "Hello world"s, {"1.0.0", v_deprecation, v_removal}};
+  const Key<std::string> key{{"Test"},
+                             "Hello world"s,
+                             {"1.0.0", v_deprecation, v_removal},
+                             get_default_validator<std::string>()};
   VERIFY(!key.is_allowed());
   COMPARE(key.removed_in(), v_removal);
 }
@@ -116,7 +125,10 @@ TEST(dependent_default) {
   VERIFY(!key_1.has_dependent_default());
   const auto key_2 = get_test_key<int>(42);
   VERIFY(!key_2.has_dependent_default());
-  Key<double> dependent_key{{"Test"}, DefaultType::Dependent, {"1.0.0"}};
+  Key<double> dependent_key{{"Test"},
+                            DefaultType::Dependent,
+                            {"1.0.0"},
+                            get_default_validator<double>()};
   VERIFY(dependent_key.has_dependent_default());
 }
 
