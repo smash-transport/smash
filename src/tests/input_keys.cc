@@ -42,7 +42,8 @@ TEST(section_conversion) {
 TEST(create_key_from_key_path_conversion) {
   static constexpr InputSections::Section a{"A"};
   static constexpr InputSections::Section a_b = a + "B";
-  const Key<int> key{a_b, 42, {"0.50"}};
+  const Key<int> key{
+      a_b, 42, {"0.50"}, [](const int& value) { return value > 0; }};
   VERIFY(key.has_same_labels({"A", "B"}));
   VERIFY(key.default_value() == 42);
 }
