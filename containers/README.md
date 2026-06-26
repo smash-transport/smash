@@ -169,4 +169,3 @@ singularity build mycontainer-image.sif docker-archive://abcd1234.tar
 ```
 
 This kind of operation does not require root privileges.
-

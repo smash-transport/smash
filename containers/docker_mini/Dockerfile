@@ -137,7 +137,10 @@ FROM ${SOURCE_STAGE} AS final
 RUN <<'EOF'
   set -euxo pipefail
   cd /SMASH/smash
-  find_pythia_strings=($(grep 'find_package(Pythia' src/CMakeLists.txt | grep -Eo '[1-9]?[0-9]\.[0-9]{3}'))
+  find_pythia_strings=($(
+    grep 'Pythia_REQUIRED_VERSION' src/CMakeLists.txt | grep -Eo '[1-9]?[0-9]\.[0-9]{3}' ||
+    grep 'find_package(Pythia' src/CMakeLists.txt | grep -Eo '[1-9]?[0-9]\.[0-9]{3}'
+  ))
   if [[ ${#find_pythia_strings[@]} -ne 1 ]]; then
     echo "Error: Exactly one Pythia version expected from src/CMakeLists.txt, found: ${#find_pythia_strings[@]}" >&2
     exit 1
@@ -178,6 +181,7 @@ ENV PYTHIA_INCLUDE=${PYTHIA8}/include
 ENV LD_LIBRARY_PATH=${PYTHIA_LIBRARY}:${LD_LIBRARY_PATH}
 ENV PATH=${PYTHIA8}/bin:/SMASH/smash_bin:${PATH}
 
+# Set up shell prompts when using the container image under Docker or under
 # Singularity (CUSTOM_ENV file automatically sourced by Singularity).
 
 RUN <<'EOF'
