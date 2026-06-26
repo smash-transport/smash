@@ -1,8 +1,11 @@
 # syntax=docker/dockerfile:1.4
 
-# Import the base smash Docker container image.
-# Adjust the address as needed. In particular, be sure to use a base image compatible with your cpu.
-# The official Docker images are prepared for a generic Intel/AMD x86-64 cpu.
+# Import the base SMASH Docker image.
+# Adjust the image name as needed, e.g. replace
+# "ghcr.io/smash-transport/smash:newest" with a different SMASH image or
+# your own image. Make sure the selected image is compatible with your CPU
+# architecture. The official Docker images are built for generic Intel/AMD
+# x86-64 CPUs.
 
 ARG BASE_IMAGE="ghcr.io/smash-transport/smash:newest"
 FROM ${BASE_IMAGE}

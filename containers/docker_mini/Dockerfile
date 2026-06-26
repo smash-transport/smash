@@ -1,26 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-# Select the source of the SMASH repository.
-#
-# The final stage is chosen via:
-#
-#   FROM ${SOURCE_STAGE} AS final
-#
-# rather than using shell conditionals. Docker BuildKit resolves the
-# stage name during parsing, allowing us to select between cloning the
-# public repository ("public-source") and using local development sources
-# ("local-source") supplied through a build context.
-#
-# Example:
-#
-#   docker buildx build .
-#
-#   docker buildx build \
-#     --build-context local_smash=/path/to/smash-devel \
-#     --build-arg SOURCE_STAGE=local-source .
-#
-# Discussion:
-# https://stackoverflow.com/a/60820156
+# Select the source stage used for the final image.
 ARG SOURCE_STAGE=public-source
 
 FROM ubuntu:24.04 AS base
@@ -76,6 +56,7 @@ RUN <<EOF
     vim
 EOF
 
+# Set cpu architecture flag for compilation
 ARG C_CXX_ARCH_FLAG="-march=${TARGET_ARCHITECTURE}"
 
 # Set LD_LIBRARY_PATH environment variable to comply with Docker suggestion to always define
@@ -92,97 +73,95 @@ WORKDIR /SMASH
 
 RUN mkdir /MNT
 
-# Get and build public SMASH
-
-ARG SMASH_TAG="latest"
 ENV PYTHIA8=/SMASH/pythia_install/
 
 FROM base AS public-source
+
+# Select which SMASH tag to build. Use "latest" to build the most recent
+# available Git tag.
+
+ARG SMASH_TAG="latest"
+
+# Get and build public SMASH
+
 RUN <<'EOF'
   set -euxo pipefail
   mkdir -p /SMASH
   cd /SMASH
-
   echo "Cloning public SMASH repository..."
   git clone https://github.com/smash-transport/smash.git smash
   cd smash
-
   if [[ "${SMASH_TAG}" == "latest" ]]; then
-    latest_tag=$(git describe --tags "$(git rev-list --tags --max-count=1)")
-    git switch --detach "${latest_tag}"
-  else
-    git checkout "${SMASH_TAG}"
+    SMASH_TAG=$(git describe --tags "$(git rev-list --tags --max-count=1)")
   fi
+  git switch --detach "${SMASH_TAG}"
 EOF
 
+# Get and build SMASH from local source
+
 FROM base AS local-source
-# The build context "local_smash" is provided with:
 
-#
-
-#   docker buildx build \
-
-#     --build-context local_smash=/path/to/smash-devel \
-
-#     --build-arg SOURCE_STAGE=local-source .
-
-#
-
-# and mounted into this stage using BuildKit.
 RUN --mount=from=local_smash,target=/__local_smash <<'EOF'
   set -euxo pipefail
   mkdir -p /SMASH
   echo "Using local SMASH development sources..."
   cp -a /__local_smash /SMASH/smash
+  rm -rf /SMASH/smash/build
 EOF
+
+# Select the source of the SMASH repository.
+#
+# The final stage is chosen via:
+#
+#   FROM ${SOURCE_STAGE} AS final
+#
+# rather than using shell conditionals. Docker BuildKit resolves the
+# stage name during parsing, allowing us to select between cloning the
+# public repository ("public-source") and using local development sources
+# ("local-source") supplied through a build context.
+#
+# To build from the public SMASH repository:
+#
+#   docker buildx build .
+#
+# To build from local development sources:
+#
+#   docker buildx build \
+#     --build-context local_smash=/path/to/smash-devel \
+#     --build-arg SOURCE_STAGE=local-source .
+#
+# For further information see:
+# https://stackoverflow.com/a/60820156
 
 FROM ${SOURCE_STAGE} AS final
 RUN <<'EOF'
   set -euxo pipefail
   cd /SMASH/smash
-
   find_pythia_strings=($(grep 'find_package(Pythia' src/CMakeLists.txt | grep -Eo '[1-9]?[0-9]\.[0-9]{3}'))
-
   if [[ ${#find_pythia_strings[@]} -ne 1 ]]; then
     echo "Error: Exactly one Pythia version expected from src/CMakeLists.txt, found: ${#find_pythia_strings[@]}" >&2
     exit 1
   fi
-
-  PYTHIA_VERSION="${find_pythia_strings[0]}"
-  PYTHIA_VERSION_NODOT="${PYTHIA_VERSION/./}"
-
-  if [[ -z "${PYTHIA_VERSION}" ]]; then
-    echo "Error: could not detect Pythia version from src/CMakeLists.txt" >&2
-    exit 1
-  fi
-
-  echo "Detected Pythia version: ${PYTHIA_VERSION}"
-  echo "Using tarball version: ${PYTHIA_VERSION_NODOT}"
-
+  PYTHIA_VERSION="${find_pythia_strings[0]//./}"
+  echo "Using Pythia tarball version: ${PYTHIA_VERSION}"
   cd /SMASH
-  wget "https://pythia.org/download/pythia83/pythia${PYTHIA_VERSION_NODOT}.tgz"
-  tar xf "pythia${PYTHIA_VERSION_NODOT}.tgz"
-  rm "pythia${PYTHIA_VERSION_NODOT}.tgz"
-
-  cd "/SMASH/pythia${PYTHIA_VERSION_NODOT}"
+  wget "https://pythia.org/download/pythia83/pythia${PYTHIA_VERSION}.tgz"
+  tar xf "pythia${PYTHIA_VERSION}.tgz"
+  rm "pythia${PYTHIA_VERSION}.tgz"
+  cd "/SMASH/pythia${PYTHIA_VERSION}"
   ./configure --cxx-common="${C_CXX_ARCH_FLAG} -O3 -std=c++17 -fPIC -pthread" --prefix="${PYTHIA8}"
   make -j"$(nproc)"
   make install
-
   echo "${PYTHIA8}/lib" > /etc/ld.so.conf.d/pythia8.conf
   ldconfig
-
   mkdir -p /SMASH/smash/build
   mkdir -p /SMASH/smash_bin
   cd /SMASH/smash/build
-
   cmake \
-    -DPythia_CONFIG_EXECUTABLE="/SMASH/pythia${PYTHIA_VERSION_NODOT}/bin/pythia8-config" \
+    -DPythia_CONFIG_EXECUTABLE="/SMASH/pythia${PYTHIA_VERSION}/bin/pythia8-config" \
     -DSMASH_ARCH_FLAG="${C_CXX_ARCH_FLAG}" \
     ..
-
   make smash -j"$(nproc)"
-
   if [[ -f /SMASH/smash/build/smash ]]; then
     cp /SMASH/smash/build/smash /SMASH/smash_bin/
     cp /SMASH/smash/build/config.yaml /SMASH/smash_bin/
@@ -193,16 +172,11 @@ RUN <<'EOF'
   fi
 EOF
 
-
-
-
 ENV PYTHIA8DATA=${PYTHIA8}/share/Pythia8/xmldoc
 ENV PYTHIA_LIBRARY=${PYTHIA8}/lib
 ENV PYTHIA_INCLUDE=${PYTHIA8}/include
 ENV LD_LIBRARY_PATH=${PYTHIA_LIBRARY}:${LD_LIBRARY_PATH}
 ENV PATH=${PYTHIA8}/bin:/SMASH/smash_bin:${PATH}
-
-
 
 # Singularity (CUSTOM_ENV file automatically sourced by Singularity).
 
