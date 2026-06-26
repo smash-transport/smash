@@ -38,6 +38,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * `CrossSections::probability_transit_high` has been replaced by `CrossSections::interpolation_at_sqrts`.
 * The interpolations `InterpolateDataLinear`, `InterpolateDataSpline`, and `InterpolateData2DSpline` are restricted to not extrapolate by default and will in this case now throw if out-of-bounds values are tried to access.
   Extrapolation can be enabled by giving an `ExtrapolationType` as an argument during construction.
+* A maximum version of 3.1.11 for Rivet is now imposed, as SMASH cannot compile with the 4.x versions.
 
 ### Removed
 * CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally.

@@ -31,6 +31,7 @@ set(SMASH_USE_HepMC3 @SMASH_USE_HepMC3@)
 set(SMASH_HepMC3_MIN_VERSION "@HepMC3_MINIMUM_VERSION@")
 set(SMASH_USE_Rivet @SMASH_USE_Rivet@)
 set(SMASH_Rivet_MIN_VERSION "@Rivet_MINIMUM_VERSION@")
+set(SMASH_Rivet_MAX_VERSION "@Rivet_MAXIMUM_VERSION@")
 
 # Make sure configuration of this file properly worked for clients
 function(_fail_if_any_variable_is_unset_or_empty)
@@ -57,7 +58,7 @@ if(SMASH_USE_HepMC3)
     _fail_if_any_variable_is_unset_or_empty(SMASH_HepMC3_MIN_VERSION)
 endif()
 if(SMASH_USE_Rivet)
-    _fail_if_any_variable_is_unset_or_empty(SMASH_Rivet_MIN_VERSION)
+    _fail_if_any_variable_is_unset_or_empty(SMASH_Rivet_MIN_VERSION SMASH_Rivet_MAX_VERSION)
     if(NOT SMASH_USE_HepMC3)
         message(FATAL_ERROR " \n" " SMASH installation error: SMASH_USE_Rivet set to ON but \n"
                             " SMASH_USE_HepMC3 is set to OFF. This should not happen.\n")
