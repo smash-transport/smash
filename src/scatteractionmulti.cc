@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2020-2025
+ *    Copyright (c) 2020-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -458,7 +458,7 @@ double ScatterActionMulti::probability_three_to_one(
   const double ph_sp_3 =
       1. / (8 * M_PI * M_PI * M_PI) * 1. / (16 * sqrts * sqrts) * I_3;
 
-  const double spec_f_val = type_out.spectral_function(sqrts);
+  const double spec_f_val = type_out.full_spectral_function(sqrts);
 
   return dt / (gcell_vol * gcell_vol) * M_PI / (4. * e1 * e2 * e3) *
          gamma_decay / ph_sp_3 * spec_f_val * std::pow(hbarc, 5.0) *

@@ -13,12 +13,12 @@
 #include <memory>
 #include <utility>
 
-#include "forwarddeclarations.h"
-#include "isoparticletype.h"
-#include "particles.h"
-#include "potential_globals.h"
-#include "scatteractionsfinderparameters.h"
-#include "stringprocess.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/isoparticletype.h"
+#include "smash/particles.h"
+#include "smash/potential_globals.h"
+#include "smash/scatteractionsfinderparameters.h"
+#include "smash/stringprocess.h"
 
 namespace smash {
 
@@ -63,6 +63,7 @@ class CrossSections {
    *
    * \param[in] finder_parameters Parameters for collision finding, containing
    * cut for low energy NN interactions.
+   *
    * \return The appropriate total cross section value.
    */
   double parametrized_total(
@@ -114,7 +115,9 @@ class CrossSections {
   CollisionBranchList two_to_one() const;
 
   /**
-   * Return the 2-to-1 resonance production cross section for a given resonance.
+   * Calculates the 2-to-1 resonance production cross section for a given
+   * resonance using the Breit-Wigner distribution as probability amplitude.
+   * See eq. (176) in \iref{Buss:2011mx}.
    *
    * \param[in] type_resonance Type information for the resonance to be
    * produced.
@@ -324,12 +327,24 @@ class CrossSections {
       const ScatterActionsFinderParameters& finder_parameters) const;
 
   /**
-   * \param[in] region_lower the lowest sqrts in the transition region [GeV]
-   * \param[in] region_upper the highest sqrts in the transition region [GeV]
-   * \return probability to have the high energy interaction (via string)
+   * Computes a smooth transition weight w ∈ [0,1] based on sqrt(s).
+   *
+   * The weight is:
+   *   - w = 0 for sqrt(s) < region_lower
+   *   - w = 1 for sqrt(s) > region_upper
+   *   - smoothly interpolated in between using a sinusoidal profile
+   *
+   * This weight can be used to interpolate between two models,
+   * parameters, or process choices (e.g. soft ↔ hard interactions).
+   *
+   * \param[in] region_lower Lower bound of the transition region in sqrt(s)
+   * [GeV]
+   * \param[in] region_upper Upper bound of the transition region in
+   * sqrt(s) [GeV]
+   *
+   * \return Transition weight w ∈ [0,1]
    */
-  double probability_transit_high(double region_lower,
-                                  double region_upper) const;
+  double interpolation_at_sqrts(double region_lower, double region_upper) const;
 
  private:
   /**
@@ -342,6 +357,8 @@ class CrossSections {
    * scatterings
    *
    * \return Elastic cross section
+   *
+   * \throw std::runtime_error if elastic cross section is negative.
    */
   double elastic_parametrization(
       const ScatterActionsFinderParameters& finder_parameters) const;
@@ -351,8 +368,7 @@ class CrossSections {
    * nucleon-nucleon (NN) collision.
    * \return Elastic cross section for NN
    *
-   * \throw std::runtime_error
-   *        if positive cross section cannot be specified.
+   * \throw std::runtime_error if positive cross section cannot be specified.
    */
   double nn_el() const;
 
@@ -361,10 +377,8 @@ class CrossSections {
    * It is given by a parametrization of experimental data.
    * \return Elastic cross section for Npi
    *
-   * \throw std::runtime_error
-   *        if incoming particles are not nucleon+pion.
-   * \throw std::runtime_error
-   *        if positive cross section cannot be specified.
+   * \throw std::runtime_error if incoming particles are not nucleon+pion.
+   * \throw std::runtime_error if positive cross section cannot be specified.
    */
   double npi_el() const;
 
@@ -373,10 +387,8 @@ class CrossSections {
    * It is given by a parametrization of experimental data.
    * \return Elastic cross section for NK
    *
-   * \throw std::runtime_error
-   *        if incoming particles are not nucleon+kaon.
-   * \throw std::runtime_error
-   *        if positive cross section cannot be specified.
+   * \throw std::runtime_error if incoming particles are not nucleon+kaon.
+   * \throw std::runtime_error if positive cross section cannot be specified.
    */
   double nk_el() const;
 
@@ -385,8 +397,7 @@ class CrossSections {
    * These scatterings are suppressed at high energies when strings are
    * turned on with probabilities, so they need to be added back manually.
    *
-   * \return List of all possible Npi -> YK reactions
-   *          with their cross sections
+   * \return List of all possible Npi -> YK reactions with their cross sections
    */
   CollisionBranchList npi_yk() const;
 
@@ -425,8 +436,7 @@ class CrossSections {
    * \param[in] KN_offset Offset to the minimum energy for string production in
    * KN scatterings
    *
-   * \return List of all possible NK reactions with their cross
-   * sections
+   * \return List of all possible NK reactions with their cross sections
    */
   CollisionBranchList nk_xx(const ReactionsBitSet& included_2to2,
                             double KN_offset) const;
@@ -500,8 +510,8 @@ class CrossSections {
   double string_hard_cross_section() const;
 
   /**
-   * Calculate cross sections for resonance absorption
-   * (i.e. NR->NN and ΔR->NN).
+   * Calculate cross sections for 2 → 2 resonance absorption (i.e. NR → NN and
+   * ΔR → NN). See eqs. (B.6), (B.9) and (181) in \iref{Buss:2011mx}.
    *
    * \param[in] is_anti_particles Whether the colliding particles are
    * antiparticles
@@ -531,10 +541,12 @@ class CrossSections {
 
   /**
    * Utility function to avoid code replication in nn_xx().
+   *
    * \param[in] type_res_1 List of possible first final resonance types
    * \param[in] type_res_2 List of possible second final resonance types
    * \param[in] integrator Used to integrate over the kinematically allowed
-   * mass range of the Breit-Wigner distribution
+   *                       mass range of the Breit-Wigner distribution
+   *
    * \return List of all possible NN reactions with their cross sections
    * with different final states
    */

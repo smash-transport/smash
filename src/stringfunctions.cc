@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2018,2022
+ *    Copyright (c) 2014-2018,2022,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -124,11 +124,52 @@ std::vector<std::string> split(const std::string &s, char delim) {
   return elems;
 }
 
-std::string join(const std::vector<std::string> &v, const std::string &delim) {
-  return std::accumulate(std::begin(v), std::end(v), std::string{},
-                         [&delim](const std::string &ss, const std::string &s) {
-                           return ss.empty() ? s : ss + delim + s;
-                         });
+template <typename Container>
+static std::string join_impl(const Container &container,
+                             std::string_view delim) {
+  // Enable ADL (Argument-Dependent Lookup); not necessary now but harmless
+  using std::begin;
+  using std::end;
+  using value_type = std::decay_t<decltype(*begin(container))>;
+  /* Here this is not really needed as the developer calls this function with
+   * the appropriate types, but it is ready to be moved to the header one day */
+  static_assert(
+      std::is_convertible_v<value_type, std::string_view>,
+      "join() requires string-like objects convertible to std::string_view!");
+  auto it = begin(container);
+  const auto last = end(container);
+  if (it == last) {
+    return {};
+  }
+  std::size_t total_size = 0;
+  std::size_t count = 0;
+  for (const auto &s : container) {
+    total_size += std::string_view{s}.size();
+    ++count;
+  }
+  total_size += delim.size() * (count - 1);
+  std::string result{};
+  result.reserve(total_size);
+  result.append(std::string_view{*it});
+  ++it;
+  for (; it != last; ++it) {
+    result.append(delim);
+    result.append(std::string_view{*it});
+  }
+  return result;
+}
+
+std::string join(const std::vector<std::string> &v, std::string_view delim) {
+  return join_impl(v, delim);
+}
+
+std::string join(const std::vector<std::string_view> &v,
+                 std::string_view delim) {
+  return join_impl(v, delim);
+}
+
+std::string join(const std::set<std::string> &s, std::string_view delim) {
+  return join_impl(s, delim);
 }
 
 std::string quote(const std::string &s) { return "\"" + s + "\""; }

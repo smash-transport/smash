@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -241,7 +241,15 @@ enum IncludedReactions {
   NDeuteron_to_Ndprime = 9,
 };
 
-/// Container for the 2 to 2 reactions in the code
+/**
+ * Container for the 2 to 2 reactions in the code
+ *
+ * @attention Two `typedef`s naming the same type are not distinct types. Hence,
+ * if two bitsets have an identical length N of bits (\c std::bitset<N>), the
+ * types are exactly the same. The compiler will e.g. reject ambiguous
+ * overloads; therefore, developers should ensure that multiple bitsets are not
+ * set to the same length.
+ */
 typedef std::bitset<10> ReactionsBitSet;
 
 /// The different groups of multi-particle reactions that one can include
@@ -253,7 +261,11 @@ enum IncludedMultiParticleReactions {
   A3_Nuclei_4to2 = 3,
 };
 
-/// Container for the n to m reactions in the code
+/**
+ * Container for the n to m reactions in the code
+ *
+ * @attention See remark in \ref ReactionsBitSet
+ */
 typedef std::bitset<4> MultiParticleReactionsBitSet;
 
 /// Possible spin interaction types
@@ -266,12 +278,12 @@ enum class SpinInteractionType {
 
 /**
  * Defines the algorithm used for the forced thermalization.
- *  For the description of algorithms see \iref{Oliinychenko:2016vkg}.
- *  All of them intend to conserve the net baryon number, strangeness
- *  and electric charge, as well as energy. Mode sampling is the fastest,
- *  but least theoretically robust, unbiased BF is the slowest
- *  (even hangs completely from time to time), but it is also the most
- *  theoretically robust.
+ * For the description of algorithms see \iref{Oliinychenko:2016vkg}.
+ * All of them intend to conserve the net baryon number, strangeness
+ * and electric charge, as well as energy. Mode sampling is the fastest,
+ * but least theoretically robust, unbiased BF is the slowest
+ * (even hangs completely from time to time), but it is also the most
+ * theoretically robust.
  */
 enum class ThermalizationAlgorithm {
   ModeSampling,
@@ -304,7 +316,19 @@ enum class TotalCrossSectionStrategy {
 };
 
 /**
- *  Which pseudo-resonance fills the inelastic gap in the transition to string
+ * Select the model used for the transition from soft to hard string
+ * excitation.
+ */
+enum class HardStringTransitionMode {
+  /// Legacy exponential splitting based on the hard string cross section
+  Exponential,
+
+  /// Smooth transition within a user-defined invariant energy range.
+  Custom_Range,
+};
+
+/**
+ * Which pseudo-resonance fills the inelastic gap in the transition to string
  * region of cross sections. \see_key{key_CT_pseudoresonance_}
  */
 enum class PseudoResonance {
@@ -323,8 +347,10 @@ enum class PseudoResonance {
   ClosestFromUnstable,
 };
 
-/// Possible methods to convert SMASH particle into fluid cells.
-/// \see_key{key_MC_IC_type_}
+/**
+ * Possible methods to convert SMASH particle into fluid cells.
+ * \see_key{key_MC_IC_type_}
+ */
 enum class FluidizationType {
   /// Hypersurface crossed at a fixed proper time
   ConstantTau,
@@ -332,8 +358,10 @@ enum class FluidizationType {
   Dynamic,
 };
 
-/// The different processes from where fluidizable particles are produced.
-/// \see_key{key_MC_IC_fluidizable_processes}
+/**
+ * The different processes from where fluidizable particles are produced.
+ * \see_key{key_MC_IC_fluidizable_processes}
+ */
 // Because std::bitset does not handle enum classes, this is a simple enum.
 enum IncludedFluidizableProcesses {
   From_Elastic = 0,
@@ -343,6 +371,7 @@ enum IncludedFluidizableProcesses {
   From_HardString = 4,
 };
 
+/// @attention See remark in \ref ReactionsBitSet
 typedef std::bitset<5> FluidizableProcessesBitSet;
 
 /**
@@ -359,6 +388,18 @@ enum class DensityType {
   Isospin3_tot = 5,
   Charge = 6,
   Strangeness = 7,
+};
+
+/// Allows to specify the desired extrapolation type.
+enum class ExtrapolationType {
+  /// No extrapolation is done.
+  None = -1,
+  /// Extrapolate with zero.
+  Zero = 0,
+  /// Extrapolate using a constant value.
+  Constant = 1,
+  /// Extrapolate using a linear approach.
+  Linear = 2,
 };
 
 /// @cond

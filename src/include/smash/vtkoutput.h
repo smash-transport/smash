@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2022,2024
+ *    Copyright (c) 2014-2022,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -25,7 +25,8 @@ namespace smash {
 
 /**
  * \ingroup output
- * SMASH output in a paraview format, intended for simple visualization.
+ * Output format processible by <a href="http://paraview.org">ParaView
+ * </a>, intended for simple visualization.
  */
 class VtkOutput : public OutputInterface {
  public:

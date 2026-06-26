@@ -19,9 +19,13 @@ include(FindPkgConfig)
 # everything that should be exposed to users of the shared library. NOTE: shared libraries need PIC
 # and this is already set for all targets through CMAKE_POSITION_INDEPENDENT_CODE
 add_library(smash_objlib OBJECT)
-add_executable(smash smash.cc $<TARGET_OBJECTS:smash_objlib>)
+add_executable(smash smash.cc)
 add_library(smash_shared SHARED $<TARGET_OBJECTS:smash_objlib>)
 add_library(smash_api INTERFACE)
+
+# Alias for the shared library to unify build and install trees syntax. If e.g. SMASH is used via
+# add_subdirectory in another project, the alias allows to link to SMASH always using SMASH::smash.
+add_library(SMASH::smash ALIAS smash_shared)
 
 # Both smash executable and shared library are linked privately to the object library because the
 # object is only an implementation detail and we do not want to expose it to clients, but also to
@@ -29,9 +33,16 @@ add_library(smash_api INTERFACE)
 # which should not be aware of them (dependency on external library is introduced in the Config
 # file). What has to be propagated to clients belongs to smash_api interface target.
 target_link_libraries(smash_objlib PUBLIC smash_project_build_requirements smash_api)
-target_link_libraries(smash_api INTERFACE smash_project_usage_requirements)
-target_link_libraries(smash PRIVATE smash_objlib smash_api)
+target_link_libraries(smash_api
+                      INTERFACE smash_project_usage_requirements
+                                einhard
+                                yaml-cpp
+                                cuhre
+                                suave
+                                divonne
+                                vegas)
 target_link_libraries(smash_shared PRIVATE smash_objlib PUBLIC smash_api)
+target_link_libraries(smash PRIVATE smash_shared)
 
 # Disable compiler-specific extensions for all targets. This cannot be done through INTERFACE
 # libraries because properties like CXX_EXTENSIONS do not propagate through them.
@@ -41,24 +52,34 @@ set_target_properties(smash_objlib smash smash_shared PROPERTIES CXX_EXTENSIONS 
 # not be used for binaries in the install tree" (CMake documentation), we request here to set the
 # INSTALL_RPATH in the library to ensure that projects linking to SMASH finds at run time libraries
 # like Pythia, which are likely to be in not standard places.
-set_target_properties(smash_shared PROPERTIES OUTPUT_NAME smash INSTALL_RPATH "${ORIGIN}"
-                                              INSTALL_RPATH_USE_LINK_PATH TRUE)
+set_target_properties(smash_shared
+                      PROPERTIES OUTPUT_NAME smash
+                                 EXPORT_NAME smash
+                                 INSTALL_RPATH_USE_LINK_PATH TRUE
+                                 INSTALL_RPATH "$<IF:$<PLATFORM_ID:Darwin>,@loader_path,$ORIGIN>")
+# For the executable, we set the RPATH to be the same as the shared library one, but with an
+# additional "../lib" to look for the shared library in the installation lib folder. Note that
+# INSTALL_RPATH_USE_LINK_PATH is set to TRUE for the executable as well, since it is needed to find
+# at runtime the shared library dependencies of the executable (e.g. Pythia) as smash executable
+# directly depends on e.g. Pythia and not only through the smash shared library.
+set_target_properties(smash
+                      PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE
+                                 INSTALL_RPATH
+                                 "$<IF:$<PLATFORM_ID:Darwin>,@loader_path/../lib,$ORIGIN/../lib>")
 
-# Set up include paths for SMASH and its clients using the smash_api interface target.
-target_include_directories(smash_api
-                           INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                                     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
-                                     $<INSTALL_INTERFACE:include>)
+# Set up compilation include paths for given target. Note that we need to set both BUILD_INTERFACE
+# and INSTALL_INTERFACE to be sure that the include directories are correctly set both when using
+# the target from the build tree and from the install tree.
+function(smash_set_target_include_directories target scope)
+    target_include_directories(${target}
+                               ${scope}
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
+                               $<INSTALL_INTERFACE:include>)
+endfunction()
 
-# Prepare list variables to collect libraries, compiler definitions for internal usage in SMASH,
-# compiler definitions for users of SMASH, internal compile options and so on
-target_link_libraries(smash_objlib
-                      PUBLIC einhard
-                             yaml-cpp
-                             cuhre
-                             suave
-                             divonne
-                             vegas)
+# Set up compilation include paths for the API target
+smash_set_target_include_directories(smash_api INTERFACE)
 
 # Enable warnings for supported compilers only (we know the compilers support the flag, do not test)
 if(CMAKE_CXX_COMPILER_ID MATCHES "^((Apple)?Clang|GNU)$")
@@ -130,31 +151,35 @@ string(TIMESTAMP BUILD_DATE)
 # linked before all the other and it is meant to avoid possible issues with e.g. ROOT whose include
 # directories might contain a Pythia.h header that might not be the one of the Pythia linked to
 # SMASH. See https://github.com/smash-transport/smash/issues/38#issuecomment-1033239643
-find_package(Pythia 8.316 EXACT REQUIRED)
+set(Pythia_REQUIRED_VERSION "8.316") # For SMASHConfig.cmake file
+find_package(Pythia ${Pythia_REQUIRED_VERSION} EXACT REQUIRED)
 if(Pythia_FOUND)
-    if(NOT TARGET Pythia::Pythia)
+    if(TARGET Pythia::Pythia)
+        target_link_libraries(smash_api INTERFACE Pythia::Pythia)
+        target_compile_definitions(smash_api INTERFACE "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
+                                                       "PYTHIA_FOUND")
+    else()
         message(FATAL_ERROR "Pythia library found, but its target is somehow missing.\n"
                             "Ensure to be using the provided CMake module to find it.\n")
     endif()
-    target_link_libraries(smash_objlib PUBLIC Pythia::Pythia)
-    target_compile_definitions(smash_objlib PUBLIC "PYTHIA_XML_DIR=\"${Pythia_xmldoc_PATH}\""
-                                                   "PYTHIA_FOUND")
 endif()
 
-find_package(GSL 2.0 REQUIRED)
+set(GSL_MINIMUM_VERSION "2.0") # For SMASHConfig.cmake file
+find_package(GSL ${GSL_MINIMUM_VERSION} REQUIRED)
 if(GSL_FOUND)
     if(TARGET GSL::gsl AND TARGET GSL::gslcblas)
-        target_link_libraries(smash_objlib PUBLIC GSL::gsl GSL::gslcblas)
+        target_link_libraries(smash_api INTERFACE GSL::gsl GSL::gslcblas)
     else()
         message(FATAL_ERROR " \n" " GSL library found, but its targets are somehow missing.\n"
                             " Ensure to be using the official CMake module to find it.\n")
     endif()
 endif()
 
-find_package(Eigen3 3.0 REQUIRED)
+set(EIGEN3_MINIMUM_VERSION "3.0") # For SMASHConfig.cmake file
+find_package(Eigen3 ${EIGEN3_MINIMUM_VERSION} REQUIRED)
 if(EIGEN3_FOUND)
     if(TARGET Eigen3::Eigen)
-        target_link_libraries(smash_objlib PUBLIC Eigen3::Eigen)
+        target_link_libraries(smash_api INTERFACE Eigen3::Eigen)
     else()
         message(FATAL_ERROR " \n" " Eigen3 library found, but its target is somehow missing.\n"
                             " Ensure to be using the provided CMake module to find it.\n")
@@ -162,9 +187,11 @@ if(EIGEN3_FOUND)
 endif()
 
 option(TRY_USE_ROOT "Turn this off to disable ROOT output support in SMASH." ON)
+set(SMASH_USE_ROOT OFF) # For SMASHConfig.cmake file
+set(ROOT_COMPONENTS Core RIO Tree) # Also for SMASHConfig.cmake file
 if(TRY_USE_ROOT)
-    find_package(ROOT CONFIG QUIET COMPONENTS Core RIO Tree)
-    set(ROOT_MINIMUM_VERSION "6.20")
+    find_package(ROOT CONFIG QUIET COMPONENTS ${ROOT_COMPONENTS})
+    set(ROOT_MINIMUM_VERSION "6.20") # Also for SMASHConfig.cmake file
     if(ROOT_FOUND)
         message(STATUS "Candidate ROOT version ${ROOT_VERSION} found, "
                        "requested ${ROOT_MINIMUM_VERSION}")
@@ -174,8 +201,20 @@ if(TRY_USE_ROOT)
     endif()
     if(ROOT_FOUND)
         message(STATUS "Found ROOT: ${ROOT_INCLUDE_DIRS} (version ${ROOT_VERSION})")
-        target_link_libraries(smash_objlib PUBLIC ROOT::Core ROOT::RIO ROOT::Tree)
-        target_compile_definitions(smash_api INTERFACE "SMASH_USE_ROOT")
+        set(_root_targets ROOT::Core ROOT::RIO ROOT::Tree)
+        # Prepare dedicated target for SMASH installation
+        add_library(smash_root INTERFACE)
+        add_library(SMASH::smash_root ALIAS smash_root)
+        smash_set_target_include_directories(smash_root INTERFACE)
+        target_compile_definitions(smash_root INTERFACE SMASH_USE_ROOT)
+        target_link_libraries(smash_root INTERFACE ${_root_targets} SMASH::smash)
+        set_target_properties(smash_root PROPERTIES EXPORT_NAME smash_root)
+        set(SMASH_USE_ROOT ON)
+        # Pull ROOT into smash_objlib to compile ROOT related translation units
+        target_compile_definitions(smash_objlib PUBLIC SMASH_USE_ROOT)
+        target_link_libraries(smash_objlib PUBLIC ${_root_targets})
+        # Link ROOT into smash executable
+        target_link_libraries(smash PRIVATE smash_root)
     else()
         message(STATUS "Suitable ROOT not found. Support disabled. "
                        "See README for more information.")
@@ -183,9 +222,10 @@ if(TRY_USE_ROOT)
 endif()
 
 option(TRY_USE_HEPMC "Turn this off to disable HepMC3 output support in SMASH." ON)
+set(SMASH_USE_HepMC3 OFF) # For SMASHConfig.cmake file
 if(TRY_USE_HEPMC OR TRY_USE_RIVET)
     find_package(HepMC3 QUIET CONFIG) # Min version not handled here but after to better inform user
-    set(HepMC3_MINIMUM_VERSION "3.2.6")
+    set(HepMC3_MINIMUM_VERSION "3.2.6") # Also for SMASHConfig.cmake file
     if(HepMC3_FOUND)
         message(STATUS "Candidate HepMC3 version ${HepMC3_VERSION} found, "
                        "requested ${HepMC3_MINIMUM_VERSION}")
@@ -198,7 +238,8 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
         if(NOT TARGET HepMC3::HepMC3)
             message(FATAL_ERROR "HepMC3 found, but its main target is missing.")
         else()
-            set(HEPMC3_TARGETS HepMC3::HepMC3)
+            set(_hepmc_targets HepMC3::HepMC3)
+            set(_hepmc_definitions SMASH_USE_HEPMC)
         endif()
         if(NOT ROOT_FOUND)
             message(STATUS "HepMC3_treeroot output disabled, missing ROOT support")
@@ -206,11 +247,22 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
             message(STATUS "HepMC3_treeroot output disabled, missing HepMC3 ROOT I/O support")
         else()
             message(STATUS "HepMC3_treeroot output support enabled")
-            list(APPEND HEPMC3_TARGETS HepMC3::rootIO)
-            target_compile_definitions(smash_api INTERFACE "SMASH_USE_HEPMC_ROOTIO")
+            list(APPEND _hepmc_targets HepMC3::rootIO)
+            list(APPEND _hepmc_definitions SMASH_USE_HEPMC_ROOTIO)
         endif()
-        target_link_libraries(smash_objlib PUBLIC ${HEPMC3_TARGETS})
-        target_compile_definitions(smash_api INTERFACE "SMASH_USE_HEPMC")
+        # Prepare dedicated target for SMASH installation
+        add_library(smash_hepmc3 INTERFACE)
+        add_library(SMASH::smash_hepmc3 ALIAS smash_hepmc3)
+        smash_set_target_include_directories(smash_hepmc3 INTERFACE)
+        target_compile_definitions(smash_hepmc3 INTERFACE ${_hepmc_definitions})
+        target_link_libraries(smash_hepmc3 INTERFACE ${_hepmc_targets} SMASH::smash)
+        set_target_properties(smash_hepmc3 PROPERTIES EXPORT_NAME smash_hepmc3)
+        set(SMASH_USE_HepMC3 ON)
+        # Pull HepMC3 into smash_objlib to compile HepMC3 related translation units
+        target_compile_definitions(smash_objlib PUBLIC ${_hepmc_definitions})
+        target_link_libraries(smash_objlib PUBLIC ${_hepmc_targets})
+        # Link HepMC3 into smash executable
+        target_link_libraries(smash PRIVATE smash_hepmc3)
     else()
         message(STATUS "Suitable HepMC3 not found. Support disabled. "
                        "See README for more information.")
@@ -218,9 +270,10 @@ if(TRY_USE_HEPMC OR TRY_USE_RIVET)
 endif()
 
 option(TRY_USE_RIVET "Turn this off to disable Rivet output support in SMASH." ON)
+set(SMASH_USE_Rivet OFF) # For SMASHConfig.cmake file
 if(TRY_USE_RIVET AND HepMC3_FOUND)
     find_package(Rivet QUIET) # Min version not handled here but after to better inform user
-    set(Rivet_MINIMUM_VERSION "3.1")
+    set(Rivet_MINIMUM_VERSION "3.1") # Also for SMASHConfig.cmake file
     if(Rivet_FOUND)
         message(STATUS "Candidate Rivet version ${RIVET_VERSION} found, "
                        "requested ${Rivet_MINIMUM_VERSION}")
@@ -237,8 +290,19 @@ if(TRY_USE_RIVET AND HepMC3_FOUND)
             message(FATAL_ERROR " \n" " Rivet library found, but its target is somehow missing.\n"
                                 " Ensure to be using the provided CMake module to find it.\n")
         endif()
+        # Prepare dedicated target for SMASH installation
+        add_library(smash_rivet INTERFACE)
+        add_library(SMASH::smash_rivet ALIAS smash_rivet)
+        smash_set_target_include_directories(smash_rivet INTERFACE)
+        target_compile_definitions(smash_rivet INTERFACE SMASH_USE_RIVET)
+        target_link_libraries(smash_rivet INTERFACE Rivet::Rivet smash_hepmc3 SMASH::smash)
+        set_target_properties(smash_rivet PROPERTIES EXPORT_NAME smash_rivet)
+        set(SMASH_USE_Rivet ON)
+        # Pull Rivet into smash_objlib to compile Rivet related translation units
+        target_compile_definitions(smash_objlib PUBLIC SMASH_USE_RIVET)
         target_link_libraries(smash_objlib PUBLIC Rivet::Rivet)
-        target_compile_definitions(smash_api INTERFACE "SMASH_USE_RIVET")
+        # Link Rivet into smash executable
+        target_link_libraries(smash PRIVATE smash_rivet) # HepMC3 targets already linked in
     else()
         message(STATUS "Suitable Rivet not found. Support disabled. "
                        "See README for more information.")
@@ -300,6 +364,7 @@ target_sources(smash_objlib
                        hadgas_eos.cc
                        hypersurfacecrossingfinder.cc
                        icoutput.cc
+                       input_keys.cc
                        inputfunctions.cc
                        interpolation.cc
                        interpolation2D.cc
@@ -389,13 +454,14 @@ endmacro()
 generate_headers(particles.txt decaymodes.txt)
 set_source_files_properties(experiment.cc PROPERTIES OBJECT_DEPENDS "${generated_headers}")
 
-# tests:
+# Targets preparation for tests
 if(BUILD_TESTING)
-    # Add library for unit tests. Note that we link to smash_objlib publicly to propagate all SMASH
-    # internal features to tests targets that will link against this library.
-    add_library(smash_testlib STATIC $<TARGET_OBJECTS:smash_objlib>)
+    # Add library for tests. Note that we link to smash_objlib publicly to propagate all SMASH
+    # internal features to tests targets that will link against this library. Furthermore, we
+    # exclude this library from all, as tests are and this library is to build tests only.
+    add_library(smash_testlib EXCLUDE_FROM_ALL STATIC $<TARGET_OBJECTS:smash_objlib>)
     target_link_libraries(smash_testlib PUBLIC vir-test smash_objlib smash_api)
-    set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash CXX_EXTENSIONS OFF)
+    set_target_properties(smash_testlib PROPERTIES OUTPUT_NAME smash-for-tests CXX_EXTENSIONS OFF)
 
     # Look for sanitizers supported by the compiler. Sanitizers add instrumentation code to the
     # executable that test correctness of the code:
@@ -442,8 +508,9 @@ if(BUILD_TESTING)
     if(USE_SANITIZER)
         target_compile_options(smash_testlib PUBLIC ${SANITIZER_FLAG})
         target_link_options(smash_testlib PUBLIC ${SANITIZER_FLAG})
-
-        add_executable(smash_sanitizer smash.cc)
+        # Create a smash exectuable with sanitizers enabled to be used by tests. As for tests,
+        # exclude this target from all target, since it is meant to be used by tests only.
+        add_executable(smash_sanitizer EXCLUDE_FROM_ALL smash.cc)
         target_compile_definitions(smash_sanitizer PUBLIC BUILD_TESTS)
         target_compile_options(smash_sanitizer PUBLIC ${SANITIZER_FLAG})
         target_link_options(smash_sanitizer PUBLIC ${SANITIZER_FLAG})
@@ -453,16 +520,45 @@ if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
-# Since at the top level the dependency of the install target on all target was disabled, it is
-# needed to now build the smash library and exectuable target here before installing them
-install(CODE "execute_process(COMMAND ${CMAKE_COMMAND}
-                                      --build ${PROJECT_BINARY_DIR}
-                                      --target smash_shared smash)")
-install(TARGETS smash_shared LIBRARY DESTINATION "lib")
-install(FILES ${generated_headers} DESTINATION "include/smash")
+# Configure and install CMake configuration files for find_package.
+configure_package_config_file(${CMAKE_SOURCE_DIR}/cmake/SMASHConfig.cmake.in
+                              ${CMAKE_CURRENT_BINARY_DIR}/SMASHConfig.cmake
+                              INSTALL_DESTINATION lib/cmake/SMASH)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/SMASHConfig.cmake DESTINATION lib/cmake/SMASH)
+
+# Install targets and files. Note that we do not only install the shared library target, but also
+# the API interface and the usage requirements interface, since this chain of dependencies will be
+# needed by clients using the smash libraries in a CMake project.
+install(TARGETS smash_shared smash_api smash_project_usage_requirements
+        EXPORT SMASH-targets-core
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        RUNTIME DESTINATION bin)
 # Note that the absent trailing slash in the DIRECTORY argument is crucial to create an additional
 # "smash" folder at destination!
-install(DIRECTORY include/smash DESTINATION "include" PATTERN "*.h.in" EXCLUDE)
-install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION "include")
-# Copy SMASH executable to installation bin folder
-install(PROGRAMS $<TARGET_FILE_NAME:smash> DESTINATION bin)
+install(FILES ${generated_headers} DESTINATION "include/smash")
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/smash" DESTINATION include PATTERN "*.h.in"
+                                                                                          EXCLUDE)
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/include/smash" DESTINATION include)
+# Install SMASH executable to installation bin folder
+install(TARGETS smash RUNTIME DESTINATION bin)
+# If optional dependencies are found, install them into dedicated targets files in order to split
+# the installed SMASH into CMake components. This allows users in their project to e.g. use
+# find_package(SMASH COMPONENTS Core ROOT) to get only the core and ROOT support without the need to
+# link to HepMC3 and Rivet. The components names are defined in the SMASHConfig.cmake.in file.
+foreach(_dependency IN ITEMS ROOT HepMC3 Rivet)
+    string(TOLOWER ${_dependency} _dependency_lower)
+    if(SMASH_USE_${_dependency})
+        install(EXPORT SMASH-targets-${_dependency_lower}
+                FILE SMASH-targets-${_dependency_lower}.cmake
+                NAMESPACE SMASH::
+                DESTINATION lib/cmake/SMASH)
+        install(TARGETS smash_${_dependency_lower}
+                EXPORT SMASH-targets-${_dependency_lower}
+                INCLUDES
+                DESTINATION include)
+        if(_dependency STREQUAL "Rivet")
+            install(FILES ${CMAKE_SOURCE_DIR}/cmake/FindRivet.cmake DESTINATION lib/cmake/SMASH)
+        endif()
+    endif()
+endforeach()

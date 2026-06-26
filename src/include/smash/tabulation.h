@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015-2020
+ *    Copyright (c) 2015-2020,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -8,26 +8,21 @@
 #ifndef SRC_INCLUDE_SMASH_TABULATION_H_
 #define SRC_INCLUDE_SMASH_TABULATION_H_
 
+#include <algorithm>
 #include <fstream>
 #include <functional>
 #include <map>
 #include <memory>
 #include <vector>
 
-#include "forwarddeclarations.h"
-#include "integrate.h"
-#include "kinematics.h"
-#include "particletype.h"
-#include "sha256.h"
+#include "smash/constants.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/integrate.h"
+#include "smash/kinematics.h"
+#include "smash/particletype.h"
+#include "smash/sha256.h"
 
 namespace smash {
-
-/// The kind of extrapolation used by the tabulation.
-enum class Extrapolation {
-  Zero = 0,
-  Const = 1,
-  Linear = 2,
-};
 
 /**
  * A class for storing a one-dimensional lookup table of floating-point values.
@@ -89,12 +84,15 @@ class Tabulation {
    * asymptotics, e.g. rho(m) functions.
    *
    * \param x Argument to tabulated function.
-   * \param extrapolation Extrapolation that should be used for values
-   * outside the tabulation.
+   * \param extrapolation Extrapolation type that is used for values greater
+   *                      than the maximum x in the tabulation.
+   *
    * \return Tabulated value using linear interpolation.
+   * \throw std::invalid_argument if unsupported extrapolation type is
+   *                              requested.
    */
-  double get_value_linear(
-      double x, Extrapolation extrapolation = Extrapolation::Linear) const;
+  double get_value_linear(double x, ExtrapolationType extrapolation =
+                                        ExtrapolationType::Linear) const;
 
   /**
    * Write a binary representation of the tabulation to a stream.
@@ -105,18 +103,28 @@ class Tabulation {
    */
   void write(std::ofstream& stream, sha256::Hash hash) const;
 
- protected:
+ private:
   /// vector for storing tabulated values
-  std::vector<double> values_;
+  std::vector<double> values_{};
 
   /// lower bound for tabulation
-  double x_min_;
+  double x_min_ = smash_NaN<double>;
 
   /// upper bound for tabulation
-  double x_max_;
+  double x_max_ = smash_NaN<double>;
 
   /// inverse step size 1/dx
-  double inv_dx_;
+  double inv_dx_ = smash_NaN<double>;
+
+  /// Linear approximation to interpolate and extrapolate tabulations
+  double linear_approximation_(double x) const {
+    const double index_double = (x - x_min_) * inv_dx_;
+    // here n is the lower index
+    const size_t n =
+        std::min(static_cast<size_t>(index_double), values_.size() - 2);
+    const double r = index_double - n;
+    return values_[n] + (values_[n + 1] - values_[n]) * r;
+  }
 };
 
 /**
@@ -142,7 +150,7 @@ inline double spec_func_integrand_1res(double resonance_mass, double sqrts,
 
   /* Integrand is the spectral function weighted by the CM momentum of the
    * final state. */
-  return type.spectral_function(resonance_mass) *
+  return type.full_spectral_function(resonance_mass) *
          pCM(sqrts, stable_mass, resonance_mass);
 }
 
@@ -172,7 +180,8 @@ inline double spec_func_integrand_2res(double sqrts, double res_mass_1,
 
   /* Integrand is the product of the spectral function weighted by the
    * CM momentum of the final state. */
-  return t1.spectral_function(res_mass_1) * t2.spectral_function(res_mass_2) *
+  return t1.full_spectral_function(res_mass_1) *
+         t2.full_spectral_function(res_mass_2) *
          pCM(sqrts, res_mass_1, res_mass_2);
 }
 

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022-2025
+ *    Copyright (c) 2022-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -28,11 +28,7 @@
 namespace smash {
 
 /**
- * A container to keep track of all ever existed sections in the input file.
- *
- * In this struct with exclusively static constant members we collect all input
- * sections without any metadata associated to it. This is why we simply use \c
- * KeyLabels as type (after all a %YAML section is a key with a map as value).
+ * A namespace to keep track of all ever existed sections in the input file
  *
  * \note The naming convention for members of this class is the following: Any
  *       subsection variable gets as prefix the first letter of the section it
@@ -45,136 +41,201 @@ namespace smash {
  * \attention Keep members of such a class in blocks corresponding to sections
  *            from the top-level of the file. Keep blocks alphabetically sorted.
  */
-struct InputSections {
-  /// Type alias to be more descriptive when declaring members
-  using Section = KeyLabels;
+namespace InputSections {
 
-  /// Section for the collision term
-  inline static const Section collisionTerm{"Collision_Term"};
-  /// Subsection for the dileptons
-  inline static const Section c_dileptons =
-      InputSections::collisionTerm + "Dileptons";
-  /// Subsection for the Pauli blocking mechanism
-  inline static const Section c_pauliBlocking =
-      InputSections::collisionTerm + "Pauli_Blocking";
-  /// Subsection for the photons
-  inline static const Section c_photons =
-      InputSections::collisionTerm + "Photons";
-  /// Subsection for heavy flavor
-  inline static const Section c_heavyFlavor =
-      InputSections::collisionTerm + "Heavy_Flavor";
-  /// Subsection for the string parameters
-  inline static const Section c_stringParameters =
-      InputSections::collisionTerm + "String_Parameters";
-  /// Subsection for the string transition
-  inline static const Section c_stringTransition =
-      InputSections::collisionTerm + "String_Transition";
+/**
+ * A simple struct to represent input sections.
+ *
+ * This struct contains a raw pointer to the parent section and the name of the
+ * section itself. The parent pointer is used to reconstruct the full path of
+ * labels to reach a given section from the top-level section. This is needed to
+ * declare \c Key objects which need the full path of labels. A \c Section can
+ * be implicitly converted to \c KeyLabels and this is desired by design (after
+ * all a %YAML section is a key with a map as value).
+ *
+ * \attention Objects of type \c Section are meant to be created at compile time
+ * and they are not meant to be ever modified (note the \c constexpr
+ * constructor). This is a crucial aspect that guarantees that compile-time
+ * construction of sections will not hit any SIOF issue. Materialization into
+ * \c KeyLabels is done at runtime when \c InputKeys members are initialized.
+ */
+struct Section {
+  /// A pointer to the parent section
+  const Section *const parent = nullptr;
+  /// The name of the section
+  const std::string_view name = "";
 
-  /// Section for the forced thermalization
-  inline static const Section forcedThermalization{"Forced_Thermalization"};
+  /**
+   * Construct a new section
+   *
+   * \param name_in The name of the section
+   * \param parent_in A pointer to the parent section
+   */
+  explicit constexpr Section(std::string_view name_in,
+                             const Section *parent_in = nullptr)
+      : parent{parent_in}, name{name_in} {}
 
-  /// General section
-  inline static const Section general{"General"};
-  /// Subsection for the minimum-nonempty-ensembles mechanism
-  inline static const Section g_minEnsembles =
-      InputSections::general + "Minimum_Nonempty_Ensembles";
+  /**
+   * Convert the section to a list of labels
+   *
+   * \return A list of labels representing the full path to the section
+   */
+  [[nodiscard]] operator KeyLabels() const { return materialize(); }
 
-  /// Section for the lattice
-  inline static const Section lattice{"Lattice"};
-
-  /// Section for the logging
-  inline static const Section logging{"Logging"};
-
-  /// Section for the modus specific information
-  inline static const Section modi{"Modi"};
-  /// Subsection for the box modus
-  inline static const Section m_box = InputSections::modi + "Box";
-  /// Subsection for the jet in box modus
-  inline static const Section m_b_jet = InputSections::m_box + "Jet";
-  /// Subsection for the collider modus
-  inline static const Section m_collider = InputSections::modi + "Collider";
-  /// Subsection for the impact information in collider modus
-  inline static const Section m_c_impact = InputSections::m_collider + "Impact";
-  /// Subsection for the initial conditions in collider modus
-  inline static const Section m_c_initialConditions =
-      InputSections::m_collider + "Initial_Conditions";
-  /// Subsection for the projectile in collider modus
-  inline static const Section m_c_projectile =
-      InputSections::m_collider + "Projectile";
-  /// Subsection for the alpha-clustered projectile in collider modus
-  inline static const Section m_c_p_alphaClustered =
-      InputSections::m_c_projectile + "Alpha_Clustered";
-  /// Subsection for the custom projectile in collider modus
-  inline static const Section m_c_p_custom =
-      InputSections::m_c_projectile + "Custom";
-  /// Subsection for the deformed projectile in collider modus
-  inline static const Section m_c_p_deformed =
-      InputSections::m_c_projectile + "Deformed";
-  /// Subsection for the projectile orientation in collider modus
-  inline static const Section m_c_p_orientation =
-      InputSections::m_c_projectile + "Orientation";
-  /// Subsection for the target in collider modus
-  inline static const Section m_c_target = InputSections::m_collider + "Target";
-  /// Subsection for the alpha-clustered target in collider modus
-  inline static const Section m_c_t_alphaClustered =
-      InputSections::m_c_target + "Alpha_Clustered";
-  /// Subsection for the custom target in collider modus
-  inline static const Section m_c_t_custom =
-      InputSections::m_c_target + "Custom";
-  /// Subsection for the deformed target in collider modus
-  inline static const Section m_c_t_deformed =
-      InputSections::m_c_target + "Deformed";
-  /// Subsection for the target orientation in collider modus
-  inline static const Section m_c_t_orientation =
-      InputSections::m_c_target + "Orientation";
-  /// Subsection for the list modus
-  inline static const Section m_list = InputSections::modi + "List";
-  /// Subsection for the list-box modus
-  inline static const Section m_listBox = InputSections::modi + "ListBox";
-  /// Subsection for the sphere modus
-  inline static const Section m_sphere = InputSections::modi + "Sphere";
-  /// Subsection for the jet in sphere modus
-  inline static const Section m_s_jet = InputSections::m_sphere + "Jet";
-
-  /// Section for the output information
-  inline static const Section output{"Output"};
-  /// Subsection for the output collisions content
-  inline static const Section o_collisions =
-      InputSections::output + "Collisions";
-  /// Subsection for the output Coulomb content
-  inline static const Section o_coulomb = InputSections::output + "Coulomb";
-  /// Subsection for the output dileptons content
-  inline static const Section o_dileptons = InputSections::output + "Dileptons";
-  /// Subsection for the output initial conditions content
-  inline static const Section o_initialConditions =
-      InputSections::output + "Initial_Conditions";
-  /// Subsection for the output particles content
-  inline static const Section o_particles = InputSections::output + "Particles";
-  /// Subsection for the output photons content
-  inline static const Section o_photons = InputSections::output + "Photons";
-  /// Subsection for the output Rivet content
-  inline static const Section o_rivet = InputSections::output + "Rivet";
-  /// Subsection for the output Rivet weights information
-  inline static const Section o_r_weights = InputSections::o_rivet + "Weights";
-  /// Subsection for the output thermodynamics content
-  inline static const Section o_thermodynamics =
-      InputSections::output + "Thermodynamics";
-
-  /// Section for the potentials information
-  inline static const Section potentials{"Potentials"};
-  /// Subsection for the Coulomb potentials information
-  inline static const Section p_coulomb = InputSections::potentials + "Coulomb";
-  /// Subsection for the momentum-dependent potentials information
-  inline static const Section p_momentumDependence =
-      InputSections::potentials + "Momentum_Dependence";
-  /// Subsection for the Skyrme potentials information
-  inline static const Section p_skyrme = InputSections::potentials + "Skyrme";
-  /// Subsection for the symmetry potentials information
-  inline static const Section p_symmetry =
-      InputSections::potentials + "Symmetry";
-  /// Subsection for the VDF potentials information
-  inline static const Section p_vdf = InputSections::potentials + "VDF";
+ private:
+  /**
+   * Materialize the section into a list of labels
+   *
+   * \return A list of labels representing the full path to the section
+   */
+  [[nodiscard]] KeyLabels materialize() const {
+    KeyLabels labels = {name};
+    auto current = parent;
+    while (current) {
+      labels.emplace_back(current->name);
+      current = current->parent;
+    }
+    std::reverse(labels.begin(), labels.end());
+    return labels;
+  }
 };
+
+/**
+ * Add a child section to a parent section
+ *
+ * \param parent The parent section
+ * \param child The name of the child section
+ *
+ * \return The new section
+ */
+constexpr Section operator+(const Section &parent, std::string_view child) {
+  return Section{child, &parent};
+}
+
+/// Section for the collision term
+inline constexpr Section collisionTerm{"Collision_Term"};
+/// Subsection for the dileptons
+inline constexpr Section c_dileptons =
+    InputSections::collisionTerm + "Dileptons";
+/// Subsection for the Pauli blocking mechanism
+inline constexpr Section c_pauliBlocking =
+    InputSections::collisionTerm + "Pauli_Blocking";
+/// Subsection for the photons
+inline constexpr Section c_photons = InputSections::collisionTerm + "Photons";
+/// Subsection for heavy flavor
+inline constexpr Section c_heavyFlavor =
+    InputSections::collisionTerm + "Heavy_Flavor";
+/// Subsection for the string parameters
+inline constexpr Section c_stringParameters =
+    InputSections::collisionTerm + "String_Parameters";
+/// Subsection for the string transition
+inline constexpr Section c_stringTransition =
+    InputSections::collisionTerm + "String_Transition";
+/// Subsection for the hard string transition
+inline constexpr Section c_hardStringTransition =
+    InputSections::collisionTerm + "Hard_String_Transition";
+/// Section for the forced thermalization
+inline constexpr Section forcedThermalization{"Forced_Thermalization"};
+
+/// General section
+inline constexpr Section general{"General"};
+/// Subsection for the minimum-nonempty-ensembles mechanism
+inline constexpr Section g_minEnsembles =
+    InputSections::general + "Minimum_Nonempty_Ensembles";
+
+/// Section for the lattice
+inline constexpr Section lattice{"Lattice"};
+
+/// Section for the logging
+inline constexpr Section logging{"Logging"};
+
+/// Section for the modus specific information
+inline constexpr Section modi{"Modi"};
+/// Subsection for the box modus
+inline constexpr Section m_box = InputSections::modi + "Box";
+/// Subsection for the jet in box modus
+inline constexpr Section m_b_jet = InputSections::m_box + "Jet";
+/// Subsection for the collider modus
+inline constexpr Section m_collider = InputSections::modi + "Collider";
+/// Subsection for the impact information in collider modus
+inline constexpr Section m_c_impact = InputSections::m_collider + "Impact";
+/// Subsection for the initial conditions in collider modus
+inline constexpr Section m_c_initialConditions =
+    InputSections::m_collider + "Initial_Conditions";
+/// Subsection for the projectile in collider modus
+inline constexpr Section m_c_projectile =
+    InputSections::m_collider + "Projectile";
+/// Subsection for the alpha-clustered projectile in collider modus
+inline constexpr Section m_c_p_alphaClustered =
+    InputSections::m_c_projectile + "Alpha_Clustered";
+/// Subsection for the custom projectile in collider modus
+inline constexpr Section m_c_p_custom =
+    InputSections::m_c_projectile + "Custom";
+/// Subsection for the deformed projectile in collider modus
+inline constexpr Section m_c_p_deformed =
+    InputSections::m_c_projectile + "Deformed";
+/// Subsection for the projectile orientation in collider modus
+inline constexpr Section m_c_p_orientation =
+    InputSections::m_c_projectile + "Orientation";
+/// Subsection for the target in collider modus
+inline constexpr Section m_c_target = InputSections::m_collider + "Target";
+/// Subsection for the alpha-clustered target in collider modus
+inline constexpr Section m_c_t_alphaClustered =
+    InputSections::m_c_target + "Alpha_Clustered";
+/// Subsection for the custom target in collider modus
+inline constexpr Section m_c_t_custom = InputSections::m_c_target + "Custom";
+/// Subsection for the deformed target in collider modus
+inline constexpr Section m_c_t_deformed =
+    InputSections::m_c_target + "Deformed";
+/// Subsection for the target orientation in collider modus
+inline constexpr Section m_c_t_orientation =
+    InputSections::m_c_target + "Orientation";
+/// Subsection for the list modus
+inline constexpr Section m_list = InputSections::modi + "List";
+/// Subsection for the list-box modus
+inline constexpr Section m_listBox = InputSections::modi + "ListBox";
+/// Subsection for the sphere modus
+inline constexpr Section m_sphere = InputSections::modi + "Sphere";
+/// Subsection for the jet in sphere modus
+inline constexpr Section m_s_jet = InputSections::m_sphere + "Jet";
+
+/// Section for the output information
+inline constexpr Section output{"Output"};
+/// Subsection for the output collisions content
+inline constexpr Section o_collisions = InputSections::output + "Collisions";
+/// Subsection for the output Coulomb content
+inline constexpr Section o_coulomb = InputSections::output + "Coulomb";
+/// Subsection for the output dileptons content
+inline constexpr Section o_dileptons = InputSections::output + "Dileptons";
+/// Subsection for the output initial conditions content
+inline constexpr Section o_initialConditions =
+    InputSections::output + "Initial_Conditions";
+/// Subsection for the output particles content
+inline constexpr Section o_particles = InputSections::output + "Particles";
+/// Subsection for the output photons content
+inline constexpr Section o_photons = InputSections::output + "Photons";
+/// Subsection for the output Rivet content
+inline constexpr Section o_rivet = InputSections::output + "Rivet";
+/// Subsection for the output Rivet weights information
+inline constexpr Section o_r_weights = InputSections::o_rivet + "Weights";
+/// Subsection for the output thermodynamics content
+inline constexpr Section o_thermodynamics =
+    InputSections::output + "Thermodynamics";
+
+/// Section for the potentials information
+inline constexpr Section potentials{"Potentials"};
+/// Subsection for the Coulomb potentials information
+inline constexpr Section p_coulomb = InputSections::potentials + "Coulomb";
+/// Subsection for the momentum-dependent potentials information
+inline constexpr Section p_momentumDependence =
+    InputSections::potentials + "Momentum_Dependence";
+/// Subsection for the Skyrme potentials information
+inline constexpr Section p_skyrme = InputSections::potentials + "Skyrme";
+/// Subsection for the symmetry potentials information
+inline constexpr Section p_symmetry = InputSections::potentials + "Symmetry";
+/// Subsection for the VDF potentials information
+inline constexpr Section p_vdf = InputSections::potentials + "VDF";
+};  // namespace InputSections
 
 /*!\Userguide
  * \page doxypage_input
@@ -418,6 +479,7 @@ struct InputSections {
  * - \ref doxypage_input_conf_ct_photons
  * - \ref doxypage_input_conf_ct_heavy_flavor
  * - \ref doxypage_input_conf_ct_spin_interactions
+ * - \ref doxypage_input_conf_ct_hard_string_transition
  */
 
 /*!\Userguide
@@ -504,6 +566,47 @@ struct InputSections {
  *\verbatim
  Collision_Term:
      Spin_Interactions: On
+ \endverbatim
+ */
+
+/*!\Userguide
+ * \page doxypage_input_conf_ct_hard_string_transition
+ *
+ * The subsection `Hard_String_Transition` of the `Collision_Term` section
+ * controls how the non-diffractive string excitation is split into soft and
+ * hard components.
+ *
+ * The transition mode is selected via the `Mode` key:
+ * - `Exponential`: use the legacy exponential splitting of the non-diffractive
+ *   cross section. The probability for a purely soft non-diffractive
+ interaction
+ *   is given by
+ *   \f[
+ *     P_{\mathrm{soft}} = \exp\!\left(-\frac{\sigma_{\mathrm{hard}}}
+ *     {\sigma_{\mathrm{ND}}}\right),
+ *   \f]
+ *   where \f$\sigma_{\mathrm{hard}}\f$ is the hard string cross section and
+ *   \f$\sigma_{\mathrm{ND}}\f$ the total non-diffractive cross section. The
+ hard
+ *   non-diffractive contribution follows from
+ *   \f$\sigma_{\mathrm{ND,hard}} = \sigma_{\mathrm{ND}} -
+ *   \sigma_{\mathrm{ND,soft}}\f$.
+ * - `Custom_Range`: use a smooth, user-defined transition from soft to hard
+ *   string excitation as a function of the collision energy.
+ *
+ * For `Custom_Range`, the transition is controlled by `Start_Energy` and
+ * `End_Energy` (in \f$\sqrt{s}\f$ measured in GeV). Below this range only soft
+ * string excitation is used, above it only hard string excitation is used, and
+ * inside the range the probability for hard string excitation increases
+ * smoothly with energy.
+ *
+ * For example:
+ *\verbatim
+ Collision_Term:
+     Hard_String_Transition:
+         Mode: Custom_Range
+         Start_Energy: 10.0
+         End_Energy: 20.0
  \endverbatim
  */
 
@@ -2653,17 +2756,17 @@ struct InputKeys {
    * \sigma^{\mathrm{param}}_\mathrm{ref\_process}
    * \f]
    * where "process" refers to a generic process and "ref_process" to a
-   * reference process such as PP for which solid parametrizations exist.
+   * reference process such as \f$pp\f$ for which solid parametrizations exist.
    * The AQM cross-section for a process involving the incoming particles
-   * \f$a\f$ and \f$b\f$ is determined by the following calculation:
+   * \f$1\f$ and \f$2\f$ is determined by the following calculation:
    * \f[
-   * \sigma^{\mathrm{AQM}}_{ab} = 40 \left( \frac{2}{3}
-   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_a) (1 - 0.4 x^s_b) (1 - \kappa^c
-   * x^c_a) (1 - \kappa^c x^c_b) (1 - \kappa^b x^b_a) (1 - \kappa^b x^b_b) \f]
+   * \sigma^{\mathrm{AQM}}_{12} = 40 \left( \frac{2}{3}
+   * \right)^{n_\mathrm{meson}} (1 - 0.4 x^s_1) (1 - 0.4 x^s_2) (1 - \kappa^c
+   * x^c_1) (1 - \kappa^c x^c_2) (1 - \kappa^b x^b_1) (1 - \kappa^b x^b_2) \f]
    * with \f$n_\mathrm{meson}\f$ being the number of mesons in the process,
-   * \f$x^s_{a,b}\f$ the fraction of strange quarks, \f$x^c_{a,b}\f$ the
-   * fraction of charm quarks, and \f$x^b_{a,b}\f$ the fraction of bottom quarks
-   * of the hadrons \f$a\f$ and \f$b\f$. \f$ \kappa^c \f$ and \f$ \kappa^b \f$
+   * \f$x^s_{1,2}\f$ the fraction of strange quarks, \f$x^c_{1,2}\f$ the
+   * fraction of charm quarks, and \f$x^b_{1,2}\f$ the fraction of bottom quarks
+   * of the hadrons \f$1\f$ and \f$2\f$. \f$ \kappa^c \f$ and \f$ \kappa^b \f$
    * are the respective suppression factors for interactions involving charm and
    * bottom hadrons (see
    * <tt>\ref key_CT_HF_AQM_c_suppression_ "AQM_Charm_Suppression"</tt> and
@@ -2671,12 +2774,90 @@ struct InputKeys {
    * default values and how to specify alternate values in the configuration
    * file). See \iref{Bass:1998ca} for AQM only considering strangeness and
    * \iref{Bierlich:2022pfr} for the charm and bottom suppression factors.
+   *
+   * @attention
+   * If <tt>\ref key_CT_totXsStrategy_ "Total_Cross_Section_Strategy"</tt> is
+   * set to `TopDown` or `TopDownMeasured` it is not possible to turn AQM off
+   * completely. It is necessary for the total parametrizations of cross
+   * sections.
    */
   /**
    * \see_key{key_CT_use_aqm_}
    */
   inline static const Key<bool> collTerm_useAQM{
       InputSections::collisionTerm + "Use_AQM", true, {"1.3"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_hard_string_transition
+   * \optional_key{key_CT_hard_string_transition_mode_,
+   *               Mode,string,Exponential}
+   *
+   * Select the mode used for the transition from soft to hard string
+   * excitation.
+   *
+   * - Exponential: use the legacy exponential suppression based on the hard
+   *   string cross section in the Pythia multiparton interaction (MPI)
+   *   framework.
+   * - Custom_Range: use a smooth transition from soft to hard string excitation
+   *   within a user-defined invariant energy range.
+   *
+   *   In this mode, the transition follows a sinusoidal function within the
+   *   interval defined by Start_Energy and End_Energy, ensuring a smooth and
+   *   continuous interpolation between the soft and hard regimes.
+   *
+   * For Custom_Range, the transition is controlled by Start_Energy and
+   * End_Energy.
+   */
+
+  /**
+   * \see_key{key_CT_hard_string_transition_mode_}
+   */
+  inline static const Key<HardStringTransitionMode>
+      collTerm_hard_string_transition_mode{
+          InputSections::c_hardStringTransition + "Mode",
+          HardStringTransitionMode::Exponential,
+          {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_hard_string_transition
+   * \optional_key{key_CT_hard_string_transition_start_energy_,
+   *               Start_Energy,double,10.0}
+   *
+   * Lower bound of the invariant mass range (\f$\sqrt{s}\f$ in GeV) for the
+   * transition from soft to hard string excitation.
+   *
+   * For \f$\sqrt{s}\f$ below this value, only soft string excitation is used.
+   * Above this value, the transition to hard string excitation begins.
+   *
+   * Must be greater than or equal to 10 GeV and smaller than or equal to
+   * End_Energy.
+   *
+   */
+
+  /**
+   * \see_key{key_CT_hard_string_transition_start_energy_}
+   */
+  inline static const Key<double> collTerm_hard_string_transition_start_energy{
+      InputSections::c_hardStringTransition + "Start_Energy", 10.0, {"3.4"}};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_hard_string_transition
+   * \optional_key{key_CT_hard_string_transition_end_energy_,
+   *               End_Energy,double,200.0}
+   *
+   * Upper bound of the invariant energy range for the transition from soft to
+   * hard string excitation (\f$\sqrt{s}\f$ in GeV).
+   *
+   *
+   * Must be larger than or equal to Start_Energy
+   *
+   */
+
+  /**
+   * \see_key{key_CT_hard_string_transition_end_energy_}
+   */
+  inline static const Key<double> collTerm_hard_string_transition_end_energy{
+      InputSections::c_hardStringTransition + "End_Energy", 200.0, {"3.4"}};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
@@ -3120,6 +3301,32 @@ struct InputKeys {
       {"3.0"}};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_unformed_xsec_suppression,Unformed_Xsec_Suppression,
+   *               double,0.7}
+   *
+   * Applies an additional suppression factor to the interaction cross sections
+   * of unformed hadrons.
+   *
+   * This parameter rescales the effective cross sections of hadrons during
+   * their formation time and can be used to tune the interaction strength of
+   * unformed hadrons in dense environments.
+   *
+   * Notes:
+   * - A value of 1.0 corresponds to no additional suppression.
+   * - Values smaller than 1.0 reduce the interaction probability of unformed
+   *   hadrons.
+   * - This parameter serves as a phenomenological tuning knob.
+   */
+  /**
+   * \see_key{key_CT_SP_unformed_xsec_suppression}
+   */
+  inline static const Key<double> collTerm_stringParam_unformedXsecSuppression{
+      InputSections::c_stringParameters + "Unformed_Xsec_Suppression",
+      0.7,
+      {"3.4"}};
+
+  /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_decays_,Decays,bool,false}
    *
@@ -3301,7 +3508,7 @@ struct InputKeys {
    * The initial distance of the two nuclei \unit{in fm}:
    * \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
    *
-   * Note that this distance is applied before the Lorentz boost to the chosen
+   * @note This distance is applied before the Lorentz boost to the chosen
    * calculation frame, and thus the actual distance may be different.
    */
   /**
@@ -6100,309 +6307,19 @@ struct InputKeys {
       std::reference_wrapper<const Key<SphereInitialCondition>>,
       std::reference_wrapper<const Key<ThermalizationAlgorithm>>,
       std::reference_wrapper<const Key<TimeStepMode>>,
+      std::reference_wrapper<const Key<HardStringTransitionMode>>,
       std::reference_wrapper<const Key<TotalCrossSectionStrategy>>>;
 
-  /// List of references to all existing SMASH keys.
-  inline static const std::vector<key_references_variant> list = {
-      std::cref(particles),
-      std::cref(decaymodes),
-      std::cref(gen_endTime),
-      std::cref(gen_modus),
-      std::cref(gen_nevents),
-      std::cref(gen_randomseed),
-      std::cref(gen_minNonEmptyEnsembles_maximumEnsembles),
-      std::cref(gen_minNonEmptyEnsembles_number),
-      std::cref(gen_deltaTime),
-      std::cref(gen_derivativesMode),
-      std::cref(gen_smearingDiscreteWeight),
-      std::cref(gen_ensembles),
-      std::cref(gen_expansionRate),
-      std::cref(gen_fieldDerivativesMode),
-      std::cref(gen_smearingGaussCutoffInSigma),
-      std::cref(gen_smearingGaussianSigma),
-      std::cref(gen_metricType),
-      std::cref(gen_restFrameDensityDerivativeMode),
-      std::cref(gen_smearingMode),
-      std::cref(gen_testparticles),
-      std::cref(gen_timeStepMode),
-      std::cref(gen_smearingTriangularRange),
-      std::cref(gen_useGrid),
-      std::cref(log_default),
-      std::cref(log_box),
-      std::cref(log_collider),
-      std::cref(log_yamlConfiguration),
-      std::cref(log_experiment),
-      std::cref(log_grandcanThermalizer),
-      std::cref(log_initialConditions),
-      std::cref(log_list),
-      std::cref(log_main),
-      std::cref(log_output),
-      std::cref(log_sphere),
-      std::cref(log_action),
-      std::cref(log_clock),
-      std::cref(log_crossSections),
-      std::cref(log_decayModes),
-      std::cref(log_density),
-      std::cref(log_distributions),
-      std::cref(log_findScatter),
-      std::cref(log_fpe),
-      std::cref(log_grid),
-      std::cref(log_hyperSurfaceCrossing),
-      std::cref(log_inputParser),
-      std::cref(log_lattice),
-      std::cref(log_nucleus),
-      std::cref(log_particleType),
-      std::cref(log_pauliBlocking),
-      std::cref(log_potentials),
-      std::cref(log_propagation),
-      std::cref(log_pythia),
-      std::cref(log_resonances),
-      std::cref(log_rootsolver),
-      std::cref(log_scatterAction),
-      std::cref(log_scatterActionMulti),
-      std::cref(log_tmn),
-      std::cref(version),
-      std::cref(collTerm_additionalElasticCrossSection),
-      std::cref(collTerm_collisionCriterion),
-      std::cref(collTerm_crossSectionScaling),
-      std::cref(collTerm_elasticCrossSection),
-      std::cref(collTerm_elasticNNCutoffSqrts),
-      std::cref(collTerm_totXsStrategy),
-      std::cref(collTerm_pseudoresonance),
-      std::cref(collTerm_fixedMinCellLength),
-      std::cref(collTerm_forceDecaysAtEnd),
-      std::cref(collTerm_ignoreDecayWidthAtTheEnd),
-      std::cref(collTerm_includeDecaysAtTheEnd),
-      std::cref(collTerm_decayInitial),
-      std::cref(collTerm_includedTwoToTwo),
-      std::cref(collTerm_isotropic),
-      std::cref(collTerm_maximumCrossSection),
-      std::cref(collTerm_multiParticleReactions),
-      std::cref(collTerm_nnbarTreatment),
-      std::cref(collTerm_noCollisions),
-      std::cref(collTerm_onlyWarnForHighProbability),
-      std::cref(collTerm_resonanceLifetimeModifier),
-      std::cref(collTerm_spinInteractions),
-      std::cref(collTerm_strings),
-      std::cref(collTerm_stringsWithProbability),
-      std::cref(collTerm_twoToOne),
-      std::cref(collTerm_useAQM),
-      std::cref(collTerm_pauliBlocking_gaussianCutoff),
-      std::cref(collTerm_pauliBlocking_momentumAveragingRadius),
-      std::cref(collTerm_pauliBlocking_spatialAveragingRadius),
-      std::cref(collTerm_stringTrans_KNOffset),
-      std::cref(collTerm_stringTrans_pipiOffset),
-      std::cref(collTerm_stringTrans_lower),
-      std::cref(collTerm_stringTrans_rangeNN),
-      std::cref(collTerm_stringTrans_rangeNpi),
-      std::cref(collTerm_stringTrans_range_width),
-      std::cref(collTerm_stringParam_diquarkSuppression),
-      std::cref(collTerm_stringParam_formTimeFactor),
-      std::cref(collTerm_stringParam_formationTime),
-      std::cref(collTerm_stringParam_gluonBeta),
-      std::cref(collTerm_stringParam_gluonPMin),
-      std::cref(collTerm_stringParam_mDependentFormationTimes),
-      std::cref(collTerm_stringParam_quarkAlpha),
-      std::cref(collTerm_stringParam_quarkBeta),
-      std::cref(collTerm_stringParam_popcornRate),
-      std::cref(collTerm_stringParam_powerParticleFormation),
-      std::cref(collTerm_stringParam_probabilityPToDUU),
-      std::cref(collTerm_stringParam_separateFragmentBaryon),
-      std::cref(collTerm_stringParam_sigmaPerp),
-      std::cref(collTerm_stringParam_strangeSuppression),
-      std::cref(collTerm_stringParam_stringSigmaT),
-      std::cref(collTerm_stringParam_stringTension),
-      std::cref(collTerm_stringParam_stringZA),
-      std::cref(collTerm_stringParam_stringZALeading),
-      std::cref(collTerm_stringParam_stringZB),
-      std::cref(collTerm_stringParam_stringZBLeading),
-      std::cref(collTerm_stringParam_useMonashTune),
-      std::cref(collTerm_dileptons_decays),
-      std::cref(collTerm_photons_twoToTwoScatterings),
-      std::cref(collTerm_photons_bremsstrahlung),
-      std::cref(collTerm_photons_fractionalPhotons),
-      std::cref(collTerm_HF_AQMbSuppression),
-      std::cref(collTerm_HF_AQMcSuppression),
-      std::cref(modi_collider_eKin),
-      std::cref(modi_collider_eTot),
-      std::cref(modi_collider_pLab),
-      std::cref(modi_collider_sqrtSNN),
-      std::cref(modi_collider_calculationFrame),
-      std::cref(modi_collider_collisionWithinNucleus),
-      std::cref(modi_collider_fermiMotion),
-      std::cref(modi_collider_initialDistance),
-      std::cref(modi_collider_projectile_diffusiveness),
-      std::cref(modi_collider_target_diffusiveness),
-      std::cref(modi_collider_projectile_particles),
-      std::cref(modi_collider_target_particles),
-      std::cref(modi_collider_projectile_radius),
-      std::cref(modi_collider_target_radius),
-      std::cref(modi_collider_projectile_saturationDensity),
-      std::cref(modi_collider_target_saturationDensity),
-      std::cref(modi_collider_projectile_eKin),
-      std::cref(modi_collider_target_eKin),
-      std::cref(modi_collider_projectile_eTot),
-      std::cref(modi_collider_target_eTot),
-      std::cref(modi_collider_projectile_pLab),
-      std::cref(modi_collider_target_pLab),
-      std::cref(modi_collider_projectile_custom_fileDirectory),
-      std::cref(modi_collider_target_custom_fileDirectory),
-      std::cref(modi_collider_projectile_custom_fileName),
-      std::cref(modi_collider_target_custom_fileName),
-      std::cref(modi_collider_projectile_deformed_automatic),
-      std::cref(modi_collider_target_deformed_automatic),
-      std::cref(modi_collider_projectile_deformed_beta2),
-      std::cref(modi_collider_target_deformed_beta2),
-      std::cref(modi_collider_projectile_deformed_beta3),
-      std::cref(modi_collider_target_deformed_beta3),
-      std::cref(modi_collider_projectile_deformed_beta4),
-      std::cref(modi_collider_target_deformed_beta4),
-      std::cref(modi_collider_projectile_deformed_gamma),
-      std::cref(modi_collider_target_deformed_gamma),
-      std::cref(modi_collider_projectile_alphaClustered_automatic),
-      std::cref(modi_collider_target_alphaClustered_automatic),
-      std::cref(modi_collider_projectile_alphaClustered_sideLength),
-      std::cref(modi_collider_target_alphaClustered_sideLength),
-      std::cref(modi_collider_projectile_orientation_phi),
-      std::cref(modi_collider_target_orientation_phi),
-      std::cref(modi_collider_projectile_orientation_psi),
-      std::cref(modi_collider_target_orientation_psi),
-      std::cref(modi_collider_projectile_orientation_randRot),
-      std::cref(modi_collider_target_orientation_randRot),
-      std::cref(modi_collider_projectile_orientation_theta),
-      std::cref(modi_collider_target_orientation_theta),
-      std::cref(modi_collider_impact_max),
-      std::cref(modi_collider_impact_randomReactionPlane),
-      std::cref(modi_collider_impact_range),
-      std::cref(modi_collider_impact_sample),
-      std::cref(modi_collider_impact_value),
-      std::cref(modi_collider_impact_values),
-      std::cref(modi_collider_impact_yields),
-      std::cref(modi_collider_initialConditions_eDenThreshold),
-      std::cref(modi_collider_initialConditions_delayInitialElastic),
-      std::cref(modi_collider_initialConditions_fluidCells),
-      std::cref(modi_collider_initialConditions_formTimeFraction),
-      std::cref(modi_collider_initialConditions_fluidProcesses),
-      std::cref(modi_collider_initialConditions_lowerBound),
-      std::cref(modi_collider_initialConditions_scaling),
-      std::cref(modi_collider_initialConditions_maxTime),
-      std::cref(modi_collider_initialConditions_minTime),
-      std::cref(modi_collider_initialConditions_properTime),
-      std::cref(modi_collider_initialConditions_pTCut),
-      std::cref(modi_collider_initialConditions_rapidityCut),
-      std::cref(modi_collider_initialConditions_type),
-      std::cref(modi_sphere_initialMultiplicities),
-      std::cref(modi_sphere_radius),
-      std::cref(modi_sphere_startTime),
-      std::cref(modi_sphere_temperature),
-      std::cref(modi_sphere_accountResonanceWidths),
-      std::cref(modi_sphere_addRadialVelocity),
-      std::cref(modi_sphere_addRadialVelocityExponent),
-      std::cref(modi_sphere_baryonChemicalPotential),
-      std::cref(modi_sphere_chargeChemicalPotential),
-      std::cref(modi_sphere_initialCondition),
-      std::cref(modi_sphere_strangeChemicalPotential),
-      std::cref(modi_sphere_heavyFlavorMultiplier),
-      std::cref(modi_sphere_useThermalMultiplicities),
-      std::cref(modi_sphere_jet_jetPdg),
-      std::cref(modi_sphere_jet_jetMomentum),
-      std::cref(modi_sphere_jet_jetPosition),
-      std::cref(modi_sphere_jet_backToBack),
-      std::cref(modi_sphere_jet_backToBackSeparation),
-      std::cref(modi_box_initialMultiplicities),
-      std::cref(modi_box_initialCondition),
-      std::cref(modi_box_length),
-      std::cref(modi_box_startTime),
-      std::cref(modi_box_temperature),
-      std::cref(modi_box_accountResonanceWidths),
-      std::cref(modi_box_baryonChemicalPotential),
-      std::cref(modi_box_chargeChemicalPotential),
-      std::cref(modi_box_equilibrationTime),
-      std::cref(modi_box_strangeChemicalPotential),
-      std::cref(modi_box_useThermalMultiplicities),
-      std::cref(modi_box_jet_jetMomentum),
-      std::cref(modi_box_jet_jetPdg),
-      std::cref(modi_list_fileDirectory),
-      std::cref(modi_list_filename),
-      std::cref(modi_list_filePrefix),
-      std::cref(modi_list_shiftId),
-      std::cref(modi_list_optionalQuantities),
-      std::cref(modi_listBox_fileDirectory),
-      std::cref(modi_listBox_filename),
-      std::cref(modi_listBox_filePrefix),
-      std::cref(modi_listBox_length),
-      std::cref(modi_listBox_shiftId),
-      std::cref(modi_listBox_optionalQuantities),
-      std::cref(output_densityType),
-      std::cref(output_outputInterval),
-      std::cref(output_outputTimes),
-      std::cref(output_particles_format),
-      std::cref(output_collisions_format),
-      std::cref(output_dileptons_format),
-      std::cref(output_photons_format),
-      std::cref(output_initialConditions_format),
-      std::cref(output_rivet_format),
-      std::cref(output_coulomb_format),
-      std::cref(output_thermodynamics_format),
-      std::cref(output_particles_extended),
-      std::cref(output_particles_quantities),
-      std::cref(output_particles_onlyFinal),
-      std::cref(output_collisions_extended),
-      std::cref(output_collisions_quantities),
-      std::cref(output_collisions_printStartEnd),
-      std::cref(output_dileptons_extended),
-      std::cref(output_dileptons_quantities),
-      std::cref(output_photons_extended),
-      std::cref(output_photons_quantities),
-      std::cref(output_initialConditions_extended),
-      std::cref(output_initialConditions_quantities),
-      std::cref(output_initialConditions_lowerBound),
-      std::cref(output_initialConditions_properTime),
-      std::cref(output_initialConditions_pTCut),
-      std::cref(output_initialConditions_rapidityCut),
-      std::cref(output_rivet_analyses),
-      std::cref(output_rivet_crossSection),
-      std::cref(output_rivet_ignoreBeams),
-      std::cref(output_rivet_logging),
-      std::cref(output_rivet_paths),
-      std::cref(output_rivet_preloads),
-      std::cref(output_rivet_weights_cap),
-      std::cref(output_rivet_weights_deselect),
-      std::cref(output_rivet_weights_nloSmearing),
-      std::cref(output_rivet_weights_noMulti),
-      std::cref(output_rivet_weights_nominal),
-      std::cref(output_rivet_weights_select),
-      std::cref(output_thermodynamics_onlyParticipants),
-      std::cref(output_thermodynamics_ignoreUnformed),
-      std::cref(output_thermodynamics_position),
-      std::cref(output_thermodynamics_quantites),
-      std::cref(output_thermodynamics_smearing),
-      std::cref(output_thermodynamics_type),
-      std::cref(lattice_automatic),
-      std::cref(lattice_cellNumber),
-      std::cref(lattice_origin),
-      std::cref(lattice_periodic),
-      std::cref(lattice_potentialsAffectThreshold),
-      std::cref(lattice_sizes),
-      std::cref(potentials_use_potentials_outside_lattice),
-      std::cref(potentials_skyrme_skyrmeA),
-      std::cref(potentials_skyrme_skyrmeB),
-      std::cref(potentials_skyrme_skyrmeTau),
-      std::cref(potentials_symmetry_gamma),
-      std::cref(potentials_symmetry_sPot),
-      std::cref(potentials_vdf_coeffs),
-      std::cref(potentials_vdf_powers),
-      std::cref(potentials_vdf_satRhoB),
-      std::cref(potentials_coulomb_rCut),
-      std::cref(potentials_momentum_dependence_C),
-      std::cref(potentials_momentum_dependence_Lambda),
-      std::cref(forcedThermalization_cellNumber),
-      std::cref(forcedThermalization_criticalEDensity),
-      std::cref(forcedThermalization_startTime),
-      std::cref(forcedThermalization_timestep),
-      std::cref(forcedThermalization_algorithm),
-      std::cref(forcedThermalization_latticeSizes),
-      std::cref(forcedThermalization_microcanonical)};
+  /**
+   * Get list of references to all existing SMASH keys.
+   *
+   * \attention Here the Construct-On-First-Use idiom is used to avoid the
+   *            static initialization order fiasco. This means that the list of
+   *            keys is only initialized when this method is called for the
+   *            first time. Therefore, it is guaranteed that all keys are
+   *            already initialized when the list is created.
+   */
+  static const std::vector<key_references_variant> &all_keys();
 
   /**
    * Get the logging Key given a logging area.
@@ -6461,24 +6378,7 @@ struct InputKeys {
    *         \c std::nullopt otherwise.
    */
   static std::optional<key_references_variant> find_key(
-      const KeyLabels &labels) {
-    if (labels.size() == 0)
-      return std::nullopt;
-    auto iterator_to_key_references_variant =
-        std::find_if(smash::InputKeys::list.begin(),
-                     smash::InputKeys::list.end(), [&labels](auto key) {
-                       return std::visit(
-                           [&labels](auto &&arg) {
-                             return arg.get().has_same_labels(labels);
-                           },
-                           key);
-                     });
-    if (iterator_to_key_references_variant == smash::InputKeys::list.end()) {
-      return std::nullopt;
-    } else {
-      return *iterator_to_key_references_variant;
-    }
-  }
+      const KeyLabels &labels);
 };
 
 /*!\Userguide
@@ -6718,7 +6618,7 @@ General:
  center
  * of velocity, and the nuclei are not deformed. Refer to \ref
  * doxypage_input_conf_modi_C_proj_targ for information about the
- * `Particles` and `Target` sections.
+ * `%Particles` and `Target` sections.
  *
  *\verbatim
  Modi:

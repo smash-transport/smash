@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2019,2022,2024
+ *    Copyright (c) 2014-2019,2022,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -109,7 +109,7 @@ YAML::Node operator|=(YAML::Node a, const YAML::Node &b) {
  * @param keys The list of keys.
  * @return A \c std::string with the desired result.
  */
-std::string join_quoted(std::vector<std::string_view> keys) {
+std::string join_quoted(KeyLabels keys) {
   return std::accumulate(keys.begin(), keys.end(), std::string{"{"},
                          [](const std::string &ss, const std::string_view &s) {
                            return ss + ((ss.size() == 1) ? "\"" : ", \"") +
@@ -212,7 +212,7 @@ std::vector<std::string> Configuration::list_upmost_nodes() {
   return r;
 }
 
-Configuration::Value Configuration::take(std::vector<std::string_view> labels) {
+Configuration::Value Configuration::take(KeyLabels labels) {
   assert(labels.size() > 0);
   /* Here we want to descend the YAML tree but not all the way to the last key,
      because we need the node associated to the previous to last key in order to
@@ -242,8 +242,7 @@ Configuration::Value Configuration::take(std::vector<std::string_view> labels) {
   return {to_be_returned.value(), last_key_it->data()};
 }
 
-Configuration::Value Configuration::read(
-    std::vector<std::string_view> labels) const {
+Configuration::Value Configuration::read(KeyLabels labels) const {
   auto found_node = find_existing_node({labels.begin(), labels.end()});
   if (found_node) {
     // The same remark about the take return value applies here.
@@ -364,7 +363,7 @@ std::string Configuration::to_string() const {
 }
 
 std::optional<YAML::Node> Configuration::find_existing_node(
-    std::vector<std::string_view> keys) const {
+    KeyLabels keys) const {
   /* Here we do not assert(keys.size()>0) and allow to pass in an empty vector,
      in which case the passed in YAML:Node is simply returned. This might happen
      e.g. in the take or extract_sub_configuration methods if called with a
@@ -377,7 +376,7 @@ std::optional<YAML::Node> Configuration::find_existing_node(
 }
 
 YAML::Node Configuration::find_node_creating_it_if_not_existing(
-    std::vector<std::string_view> keys) const {
+    KeyLabels keys) const {
   assert(keys.size() > 0);
   YAML::Node node{root_node_};
   for (const auto &key : keys) {
@@ -413,7 +412,7 @@ void fill_list_of_labels_per_key_in_yaml_tree(const YAML::Node &root_node,
   // Here sub_node is an iterator value, i.e. a key/value pair of nodes,
   // not a single YAML node (that's how YAML library works)
   for (const auto &sub_node : root_node) {
-    new_list_entry.push_back(sub_node.first.as<std::string>());
+    new_list_entry.push_back(sub_node.first.as<std::string_view>());
     if (sub_node.second.IsMap())
       fill_list_of_labels_per_key_in_yaml_tree(sub_node.second, list,
                                                new_list_entry);
@@ -482,7 +481,7 @@ struct IsStdMap<std::map<MapKey, MapValue>> {
  */
 auto collect_input_keys_taken_as_maps() {
   std::vector<KeyLabels> labels_of_keys_taken_as_map{};
-  for (const auto &keys_variant : smash::InputKeys::list) {
+  for (const auto &keys_variant : smash::InputKeys::all_keys()) {
     std::visit(
         [&labels_of_keys_taken_as_map](auto &&var) {
           /*
@@ -553,14 +552,14 @@ void adjust_list_of_labels_dealing_with_keys_taken_as_maps(
  * \return \c Configuration::Is::Invalid if the key is invalid.
  */
 Configuration::Is validate_key(const KeyLabels &labels) {
-  auto key_ref_var_it = std::find_if(
-      smash::InputKeys::list.begin(), smash::InputKeys::list.end(),
-      [&labels](auto key) {
+  const auto &list = InputKeys::all_keys();
+  auto key_ref_var_it =
+      std::find_if(list.begin(), list.end(), [&labels](auto key) {
         return std::visit(
             [&labels](auto &&arg) { return arg.get().has_same_labels(labels); },
             key);
       });
-  if (key_ref_var_it == smash::InputKeys::list.end()) {
+  if (key_ref_var_it == list.end()) {
     logg[LConfiguration].error("Key ", smash::quote(smash::join(labels, ": ")),
                                " is not a valid SMASH input key.");
     return Configuration::Is::Invalid;

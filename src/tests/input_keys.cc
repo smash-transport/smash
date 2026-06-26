@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2022,2024-2025
+ *    Copyright (c) 2022,2024-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -14,6 +14,38 @@
 #include "smash/stringify.h"
 
 using namespace smash;
+
+TEST(section_compile_time) {
+  static constexpr InputSections::Section a{"A"};
+  static_assert(a.parent == nullptr);
+  static_assert(a.name == "A");
+  static constexpr InputSections::Section a_b{"B", &a};
+  static_assert(a_b.parent == &a);
+  static_assert(a_b.name == "B");
+}
+
+TEST(section_concatenation) {
+  static constexpr InputSections::Section a{"A"};
+  static constexpr InputSections::Section a_b = a + "B";
+  static_assert(a_b.parent == &a);
+  static_assert(a_b.name == "B");
+}
+
+TEST(section_conversion) {
+  static constexpr InputSections::Section a{"A"};
+  static constexpr InputSections::Section a_b = a + "B";
+  static constexpr InputSections::Section a_b_c = a_b + "C";
+  const KeyLabels expected_labels = {"A", "B", "C"};
+  VERIFY(static_cast<KeyLabels>(a_b_c) == expected_labels);
+}
+
+TEST(create_key_from_key_path_conversion) {
+  static constexpr InputSections::Section a{"A"};
+  static constexpr InputSections::Section a_b = a + "B";
+  const Key<int> key{a_b, 42, {"0.50"}};
+  VERIFY(key.has_same_labels({"A", "B"}));
+  VERIFY(key.default_value() == 42);
+}
 
 TEST(get_logging_key) {
   auto key = InputKeys::get_logging_key("Main");

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2025
+ *    Copyright (c) 2025-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -178,6 +178,16 @@ std::string to_string(CollisionCriterion c);
  * \throws std::invalid_argument If the enum value is unhandled.
  */
 std::string to_string(SpinInteractionType type);
+
+/**
+ * Convert a HardStringTransitionMode enum value to its corresponding string.
+ *
+ * \param[in] mode The HardStringTransitionMode enum value to convert.
+ *
+ * \return std::string Corresponding string representation.
+ * \throws std::invalid_argument If the enum value is unhandled.
+ */
+std::string to_string(HardStringTransitionMode mode);
 
 /**
  * Convert a TotalCrossSectionStrategy enum value to its corresponding string.

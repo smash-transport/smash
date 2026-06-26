@@ -197,7 +197,8 @@ Ds₃*(2860)      2.861   5.300e-02 -  10437
 ###################### charmonia ########################
 
 ηc(1S)         2.9836   0         -    441          #PDG width 3.047e-02
-J/Ψ            3.097    0         -    443          #PDG width 9.260e-05
+J/Ψ            3.097    1.106e-05 -    443          
+#^ total PDG width is 9.260e-05, here we only include the pure electromagnetic channels
 χc₀            3.41475  1.075e-02 +  10441
 χc₁            3.51066  8.405e-04 +  20443
 hc             3.52538  7.800e-04 +  10443

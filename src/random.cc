@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014,2017-2019,2022,2024
+ *    Copyright (c) 2014,2017-2019,2022,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -16,7 +16,7 @@
 
 namespace smash {
 static constexpr int LGrandcanThermalizer = LogArea::GrandcanThermalizer::id;
-/*thread_local (see #3075)*/ random::Engine random::engine;
+/*thread_local (see commit 897d0b8)*/ random::Engine random::engine;
 
 int64_t random::generate_63bit_seed() {
   std::random_device rd;

@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015,2017-2020,2022
+ *    Copyright (c) 2015,2017-2020,2022,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -88,4 +88,10 @@ TEST(quadratic) {
   FUZZY_COMPARE(tab.get_value_linear(2.), 4.);
   // check extrapolated values
   COMPARE_ABSOLUTE_ERROR(tab.get_value_linear(3.), 7.8, error);
+}
+
+TEST_CATCH(invalid_extrapolation, std::invalid_argument) {
+  // tabulate a constant function
+  const Tabulation tab(0., 10., 10, [](double) { return 1.; });
+  tab.get_value_linear(11., ExtrapolationType::None);
 }

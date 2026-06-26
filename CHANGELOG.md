@@ -20,8 +20,12 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## Unreleased
 
 ### Added
-* New key `Ignore_Unformed` in `Output: Thermodynamics` to exclude unformed (and preformed) particles from the density
-evaluation. This is useful e.g. in afterburner calculations.
+* Processes with more than two outgoing particles (e.g. Dalitz decays and multiparticle reactions) can now produce resonances, with masses sampled from the appropriate spectral function.
+* Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams.
+  This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
+* `CrossSections::probability_transit_high` has been replaced by `CrossSections::interpolation_at_sqrts`.
+* New key `Ignore_Unformed` in `Output: Thermodynamics` to exclude unformed (and preformed) particles from the density evaluation. This is useful e.g. in afterburner calculations.
+* The path to tabulations can now be passed with the command line argument `-t to/path/tabulations`. However, if the input files for particles/decay modes or SMASH version change, the tabulations will be recalculated in the indicated folder. This is useful to make several runs share the same tabulations folder, even if these are in different output directories, avoiding creating several sets of possibly identical files.
 
 ### Changed
 * ⚠️ To build SMASH tuning compilation for a different architecture than the `native` one, the `SMASH_ARCH_FLAG` CMake variable must now be used (e.g. passing `-DSMASH_ARCH_FLAG=x86-64` to CMake). Using `CMAKE_CXX_FLAGS` and `CMAKE_C_FLAGS` or setting the environment `CFLAGS` and `CXXFLAGS` variables will not have the desired effect!
@@ -29,9 +33,16 @@ evaluation. This is useful e.g. in afterburner calculations.
 * Minimum supported ROOT version is now version `6.20`.
 * Minimum supported HepMC3 version is now version `3.2.6`.
 * The `make install` target has been standardized to create an enclosing version-specific folder inside which the standard `bin`, `lib`, `include` and `share` directories are created (previously, the version specific folder was created inside the standard ones).
+* SMASH installation has been totally revised and now offers everything needed to flawlessly find and use SMASH in a client CMake project.
+* Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams. This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
+* `CrossSections::probability_transit_high` has been replaced by `CrossSections::interpolation_at_sqrts`.
+* The interpolations `InterpolateDataLinear`, `InterpolateDataSpline`, and `InterpolateData2DSpline` are restricted to not extrapolate by default and will in this case now throw if out-of-bounds values are tried to access.
+  Extrapolation can be enabled by giving an `ExtrapolationType` as an argument during construction.
 
 ### Removed
-* CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally
+* CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally.
+* ⚠️ CMake module `FindSMASH.cmake` is not any more needed and has been removed.
+
 
 ## SMASH-3.3
 Date: 2025-12-03
@@ -46,7 +57,7 @@ Date: 2025-12-03
 * The `ParticleData` class now initially sets the formation time and the time of the last collision to `NAN` and overwrites them with the real values the first time the objects are used. Previously, these values were initially set to `0.0`, which could be misleading if the time evolution started at negative times.
 * The procedure for dynamic initial conditions was updated, fluidized hadrons are no longer removed from the evolution, in order to provide energy density to the surrounding particles, being internally named as "core" particles. Core and corona (non-core) particles can only interact elastically.
 * The automatic lattice heuristic determination uses a minimum lattice size and has been disabled in `List` modus.
-* ⚠️ The `backpropagate_to_the_same_time` method is now a private member of `ListModus`. Its functionality was moved to the free function `backpropagate_straight_line`, which *does not set* the formation time or cross section scaling of particles.
+* ⚠️ The `backpropagate_to_the_same_time` method is now a private member of `ListModus`. Its functionality was moved to the free function `backpropagate_straight_line`.
 * The `only_res` boolean parameter of `find_final_actions` was removed in the base class `ActionsFindersInterface` and all its derived action classes.
 
 ### Fixed

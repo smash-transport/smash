@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2020,2022-2025
+ *    Copyright (c) 2014-2015,2017-2020,2022-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -174,6 +174,7 @@ TEST_CATCH(custom_clock_tick_beyond_last, std::out_of_range) {
   ++clock;
   clock.current_time();
 }
+
 TEST_CATCH(custom_clock_tick_till_end_ask_next_time, std::out_of_range) {
   CustomClock clock{{42}};
   ++clock;

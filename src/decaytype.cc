@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2015-2022,2025
+ *    Copyright (c) 2015-2022,2025-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -29,7 +29,7 @@ static double integrand_rho_Manley_1res(double sqrts, double mass,
   const double p_f = pCM(sqrts, stable_mass, mass);
 
   return p_f / sqrts * blatt_weisskopf_sqr(p_f, L) *
-         type->spectral_function(mass);
+         type->full_spectral_function(mass);
 }
 
 static double integrand_rho_Manley_2res(double sqrts, double m1, double m2,
@@ -42,8 +42,8 @@ static double integrand_rho_Manley_2res(double sqrts, double m1, double m2,
   /* center-of-mass momentum of final state particles */
   const double p_f = pCM(sqrts, m1, m2);
 
-  return p_f / sqrts * blatt_weisskopf_sqr(p_f, L) * t1->spectral_function(m1) *
-         t2->spectral_function(m2);
+  return p_f / sqrts * blatt_weisskopf_sqr(p_f, L) *
+         t1->full_spectral_function(m1) * t2->full_spectral_function(m2);
 }
 
 // TwoBodyDecay
@@ -140,7 +140,7 @@ double TwoBodyDecaySemistable::get_Lambda() {
 
 /// Number of tabulation points.
 constexpr size_t num_tab_pts = 200;
-static /*thread_local (see #3075)*/ Integrator integrate;
+static /*thread_local (see commit 897d0b8)*/ Integrator integrate;
 
 double TwoBodyDecaySemistable::rho(double mass) const {
   if (tabulation_ == nullptr) {
@@ -194,7 +194,7 @@ double TwoBodyDecayUnstable::get_Lambda() {
   return 0.6;
 }
 
-static /*thread_local*/ Integrator2d integrate2d(1E7);
+static /*thread_local (see commit 897d0b8)*/ Integrator2d integrate2d(1E7);
 
 double TwoBodyDecayUnstable::rho(double mass) const {
   if (tabulation_ == nullptr) {
@@ -484,7 +484,7 @@ double ThreeBodyDecayDilepton::width(double, double G0, double m) const {
         });
   }
 
-  return tabulation_->get_value_linear(m, Extrapolation::Const);
+  return tabulation_->get_value_linear(m, ExtrapolationType::Constant);
 }
 
 }  // namespace smash

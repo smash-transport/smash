@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2017-2020,2022
+ *    Copyright (c) 2017-2020,2022,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -56,9 +56,10 @@ TEST(pp_DeltaDelta_integral) {
   FUZZY_COMPARE(GD0, 0.117);
   COMPARE_ABSOLUTE_ERROR(pCM(mD0, mN, mpi), 0.228161951, 1.e-9);
   COMPARE_ABSOLUTE_ERROR(delta_plus.total_width(2.0), 0.400452404, 1.e-9);
-  COMPARE_ABSOLUTE_ERROR(delta_plus.spectral_function_no_norm(1.3), 2.343254132,
+  COMPARE_ABSOLUTE_ERROR(delta_plus.no_norm_spectral_function(1.3), 2.343254132,
                          1.e-9);
-  COMPARE_ABSOLUTE_ERROR(delta_plus.spectral_function(1.3), 2.044684068, 1.e-9);
+  COMPARE_ABSOLUTE_ERROR(delta_plus.full_spectral_function(1.3), 2.044684068,
+                         1.e-9);
   std::vector<double> sqrts_list = {2.662, 3.162, 3.662, 4.162,
                                     4.662, 5.162, 5.662, 50.};
   std::vector<double> integrals2d = {0.180796, 0.539887, 0.858989, 1.15759,

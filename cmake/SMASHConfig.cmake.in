@@ -1,0 +1,167 @@
+########################################################
+#
+#    Copyright (c) 2026
+#      SMASH Team
+#
+#    BSD 3-clause license
+#
+########################################################
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+# Set some SMASH setup variable to keep track of how SMASH was installed. These variables will
+# propagate to clients through their find_package(SMASH) calls and in this spirit we add here also
+# the information about installed input files. Keep dependencies names as they are in variable names
+# to be able to use functions later. Note that according to the official CMake documentation
+# (https://cmake.org/cmake/help/latest/module/CMakePackageConfigHelpers.html) it should be fine
+# using PACKAGE_PREFIX_DIR here, because there has been no find_dependency() call so far. This is
+# relevant in CMake versions before 3.30 and it is worth remarking it because we now require 3.28
+# only.
+set(SMASH_INPUT_FILES_DIR "${PACKAGE_PREFIX_DIR}/share/input_files")
+set(Pythia_CONFIG_EXECUTABLE "@Pythia_CONFIG_EXECUTABLE@")
+set(SMASH_Pythia_REQUIRED_VERSION "@Pythia_REQUIRED_VERSION@")
+set(SMASH_GSL_MIN_VERSION "@GSL_MINIMUM_VERSION@")
+set(SMASH_Eigen3_MIN_VERSION "@EIGEN3_MINIMUM_VERSION@")
+set(SMASH_USE_ROOT @SMASH_USE_ROOT@)
+set(SMASH_ROOT_MIN_VERSION "@ROOT_MINIMUM_VERSION@")
+set(SMASH_ROOT_COMPONENTS @ROOT_COMPONENTS@)
+set(SMASH_USE_HepMC3 @SMASH_USE_HepMC3@)
+set(SMASH_HepMC3_MIN_VERSION "@HepMC3_MINIMUM_VERSION@")
+set(SMASH_USE_Rivet @SMASH_USE_Rivet@)
+set(SMASH_Rivet_MIN_VERSION "@Rivet_MINIMUM_VERSION@")
+
+# Make sure configuration of this file properly worked for clients
+function(_fail_if_any_variable_is_unset_or_empty)
+    foreach(_variable IN ITEMS ${ARGN})
+        if(NOT DEFINED ${_variable} OR "${${_variable}}" STREQUAL "")
+            message(FATAL_ERROR "SMASH installation error: "
+                                "${_variable} variable is not set or empty.")
+        endif()
+    endforeach()
+endfunction()
+set(_variables_to_be_set
+    SMASH_INPUT_FILES_DIR
+    SMASH_Pythia_REQUIRED_VERSION
+    SMASH_GSL_MIN_VERSION
+    SMASH_Eigen3_MIN_VERSION
+    SMASH_USE_ROOT
+    SMASH_USE_HepMC3
+    SMASH_USE_Rivet)
+_fail_if_any_variable_is_unset_or_empty(${_variables_to_be_set})
+if(SMASH_USE_ROOT)
+    _fail_if_any_variable_is_unset_or_empty(SMASH_ROOT_MIN_VERSION SMASH_ROOT_COMPONENTS)
+endif()
+if(SMASH_USE_HepMC3)
+    _fail_if_any_variable_is_unset_or_empty(SMASH_HepMC3_MIN_VERSION)
+endif()
+if(SMASH_USE_Rivet)
+    _fail_if_any_variable_is_unset_or_empty(SMASH_Rivet_MIN_VERSION)
+    if(NOT SMASH_USE_HepMC3)
+        message(FATAL_ERROR " \n" " SMASH installation error: SMASH_USE_Rivet set to ON but \n"
+                            " SMASH_USE_HepMC3 is set to OFF. This should not happen.\n")
+    endif()
+endif()
+
+# -------------------------------------------------------------------------------------------------
+# ~~~
+# This is what SMASH is supposed to provide and how the components are handled in this file:
+#
+#    Component    Targets-file                  Provides
+#   -----------------------------------------------------------------
+#      Core       SMASH-targets-core.cmake      SMASH::smash
+#   -----------------------------------------------------------------
+#      ROOT       SMASH-targets-root.cmake      SMASH::smash_root
+#   -----------------------------------------------------------------
+#      HepMC3     SMASH-targets-hepmc3.cmake    SMASH::smash_hepmc3
+#   -----------------------------------------------------------------
+#      Rivet      SMASH-targets-hepmc3.cmake    SMASH::smash_hepmc3
+#                 SMASH-targets-rivet.cmake     SMASH::smash_rivet
+#   -----------------------------------------------------------------
+#
+# where Core component is the default one and it is always shipped when installing SMASH.
+#
+# According to CMake documentation
+#  https://cmake.org/cmake/help/latest/command/find_package.html#package-file-interface-variables
+# find_package uses by client code will set:
+#  - <PackageName>_FIND_COMPONENTS   -> List of specified components (required and optional)
+#  - <PackageName>_FIND_REQUIRED_<c> -> True if component <c> is required, false if component <c>
+#                                       is optional and this is what should be used here to
+#                                       determine how SMASH was looked for.
+# ~~~
+# -------------------------------------------------------------------------------------------------
+
+# We start collecting available components to then handle requested components
+set(SMASH_AVAILABLE_COMPONENTS Core)
+if(SMASH_USE_ROOT)
+    list(APPEND SMASH_AVAILABLE_COMPONENTS ROOT)
+endif()
+if(SMASH_USE_HepMC3)
+    list(APPEND SMASH_AVAILABLE_COMPONENTS HepMC3)
+endif()
+if(SMASH_USE_Rivet)
+    list(APPEND SMASH_AVAILABLE_COMPONENTS Rivet)
+endif()
+
+# Default: only Core
+if(NOT SMASH_FIND_COMPONENTS)
+    set(SMASH_FIND_COMPONENTS Core)
+endif()
+
+# Rivet depends on HepMC3, so if Rivet is requested we need to make sure that HepMC3 is also
+# requested. We do not want to force users to explicitly request HepMC3 if they want to use Rivet,
+# since this is an implementation detail that they should not care about.
+if(Rivet IN_LIST SMASH_FIND_COMPONENTS AND NOT HepMC3 IN_LIST SMASH_FIND_COMPONENTS)
+    list(APPEND SMASH_FIND_COMPONENTS HepMC3)
+endif()
+
+# Validate requested components
+foreach(comp IN LISTS SMASH_FIND_COMPONENTS)
+    if(NOT comp IN_LIST SMASH_AVAILABLE_COMPONENTS)
+        if(SMASH_FIND_REQUIRED_${comp})
+            message(FATAL_ERROR " \n" " SMASH component ${comp} requested but not available\n"
+                                " in this installation. Available components:\n"
+                                "   ${SMASH_AVAILABLE_COMPONENTS}\n")
+        else()
+            message(STATUS "SMASH component ${comp} requested but not available, skipping it.")
+        endif()
+    endif()
+endforeach()
+
+# -------------------------------------------------------------------------------------------------
+# Find dependencies and load components as requested
+# -------------------------------------------------------------------------------------------------
+
+# Change temporarily CMAKE_MODULE_PATH to be sure the shipped module are found
+set(_smash_old_module_path "${CMAKE_MODULE_PATH}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+
+# Always required dependencies (core)
+find_dependency(Pythia ${SMASH_Pythia_REQUIRED_VERSION} EXACT REQUIRED)
+find_dependency(Eigen3 ${SMASH_Eigen3_MIN_VERSION} REQUIRED)
+find_dependency(GSL ${SMASH_GSL_MIN_VERSION} REQUIRED)
+
+# Always load core targets
+include("${CMAKE_CURRENT_LIST_DIR}/SMASH-targets-core.cmake")
+
+# Load optional dependencies
+foreach(_dependence IN ITEMS ROOT HepMC3 Rivet)
+    if(${_dependence} IN_LIST SMASH_FIND_COMPONENTS AND SMASH_USE_${_dependence})
+        string(TOLOWER ${_dependence} _dependence_lower)
+        set(_dependence_required)
+        if(SMASH_FIND_REQUIRED_${_dependence})
+            set(_dependence_required "REQUIRED")
+        endif()
+        set(_dependence_components_option)
+        if(_dependence STREQUAL "ROOT")
+            set(_dependence_components_option COMPONENTS ${SMASH_ROOT_COMPONENTS})
+        endif()
+        find_dependency(${_dependence} ${SMASH_${_dependence}_MIN_VERSION} ${_dependence_required}
+                        ${_dependence_components_option})
+        include("${CMAKE_CURRENT_LIST_DIR}/SMASH-targets-${_dependence_lower}.cmake")
+    endif()
+endforeach()
+
+# Restore previous value of CMAKE_MODULE_PATH
+set(CMAKE_MODULE_PATH "${_smash_old_module_path}")

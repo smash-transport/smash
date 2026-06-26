@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2018-2020,2022
+ *    Copyright (c) 2018-2020,2022,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -34,7 +34,8 @@ TEST(partial_density) {
   COMPARE_ABSOLUTE_ERROR(dpip, 0.0372145, 1.e-6);
   COMPARE(rhop.mass(), 0.776);
   COMPARE(rhop.width_at_pole(), 0.149);
-  COMPARE_ABSOLUTE_ERROR(rhop.spectral_function(rhop.mass()), 4.1841, 1.e-4);
+  COMPARE_ABSOLUTE_ERROR(rhop.full_spectral_function(rhop.mass()), 4.1841,
+                         1.e-4);
   COMPARE_ABSOLUTE_ERROR(drhop, 0.00682181, 1.e-5);
 }
 
@@ -50,7 +51,8 @@ TEST(sample_mass_thermal) {
   });
   hist.test(
       [&](double m) {
-        return rhop.spectral_function(m) * m * m * gsl_sf_bessel_Kn(2, m / T) *
+        return rhop.full_spectral_function(m) * m * m *
+               gsl_sf_bessel_Kn(2, m / T) *
                HadronGasEos::partial_density(rhop, T, 0.0, 0.0, 0.0);
       },
       "mass_sampling.dat");

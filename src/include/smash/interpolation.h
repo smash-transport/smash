@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2018,2020,2022,2024
+ *    Copyright (c) 2015-2018,2020,2022,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -23,6 +23,9 @@
 #include "gsl/gsl_errno.h"
 #include "gsl/gsl_spline.h"
 
+#include "smash/constants.h"
+#include "smash/forwarddeclarations.h"
+
 namespace smash {
 
 /**
@@ -33,10 +36,6 @@ namespace smash {
 template <typename T>
 class InterpolateLinear {
  public:
-  /// Slope of the linear interpolation.
-  T slope_;
-  /// y-axis intercept of the linear interpolation.
-  T yintercept_;
   /**
    * Linear interpolation given two points (x0, y0) and (x1, y1).
    *
@@ -45,12 +44,18 @@ class InterpolateLinear {
   InterpolateLinear(T x0, T y0, T x1, T y1);
 
   /**
-   * Calculate spline interpolation at x.
+   * Calculate linear interpolation at x.
    *
-   *  \param x Interpolation argument.
-   *  \return Interpolated value.
+   * \param x Interpolation argument.
+   * \return Interpolated value.
    */
   T operator()(T x) const;
+
+ private:
+  /// Slope of the linear interpolation.
+  T slope_{};
+  /// y-axis intercept of the linear interpolation.
+  T yintercept_{};
 };
 
 /**
@@ -63,29 +68,47 @@ class InterpolateDataLinear {
  public:
   /**
    * Interpolate function f given discrete samples f(x_i) = y_i.
+   * Piecewise linear interpolation is used.
    *
    * \param x x-values.
    * \param y y-values.
+   * \param extrapolation_type Type of extrapolation for requested x_i values
+   *                           that are out of bounds. Extrapolation is by
+   *                           default disabled. Possible types are
+   *                           <tt>None</tt>, <tt>Zero</tt>, <tt>Constant</tt>,
+   *                           and <tt>Linear</tt>.
+   *
    * \return The interpolation function.
-   *
-   * Piecewise linear interpolation is used.
-   * Values outside the given samples will use the outmost linear
-   * interpolation.
+   * \throw std::invalid_argument if vectors x and y have different length.
+   * \throw std::out_of_range if values outside of the boundaries of the
+   *                          underlying data are tried to be accessed and
+   *                          extrapolation is disabled.
+   * \throw std::invalid_argument if unsupported extrapolation type is
+   *                              requested.
    */
-  InterpolateDataLinear(const std::vector<T>& x, const std::vector<T>& y);
+  InterpolateDataLinear(
+      const std::vector<T>& x, const std::vector<T>& y,
+      ExtrapolationType extrapolation_type = ExtrapolationType::None);
+
   /**
-   * Calculate spline interpolation at x.
+   * Calculate linear interpolation at x.
    *
-   *  \param x Interpolation argument.
-   *  \return Interpolated value.
+   * \param x Interpolation argument.
+   * \return Interpolated value.
+   *
+   * \throw std::out_of_range if values outside of the boundaries of the
+   *                          underlying data are tried to be accessed and
+   *                          extrapolation is disabled.
    */
   T operator()(T x) const;
 
  private:
   /// x_i
-  std::vector<T> x_;
+  std::vector<T> x_{};
   /// Piecewise linear interpolation using f(x_i)
-  std::vector<InterpolateLinear<T>> f_;
+  std::vector<InterpolateLinear<T>> f_{};
+  /// Extrapolation type
+  ExtrapolationType extrapolation_type_ = ExtrapolationType::None;
 };
 
 template <typename T>
@@ -98,38 +121,6 @@ InterpolateLinear<T>::InterpolateLinear(T x0, T y0, T x1, T y1) {
 template <typename T>
 T InterpolateLinear<T>::operator()(T x) const {
   return slope_ * x + yintercept_;
-}
-
-/**
- * Perform a trilinear 1st order interpolation
- *
- * Assume, we seek the value of a function f at position (x, y, z). We know the
- * position (x, y, z) lies within a 3D cube, for which the values of the
- * function f are known at each corner (f1, ..., f8). We can now interpolate
- * those values trilinearly to obtain an estimate of f at position (x, y, z).
- *
- * \param[in] ax fraction of the step in x-direction
- * \param[in] ay fraction of the step in y-direction
- * \param[in] az fraction of the step in z-direction
- * \param[in] f1 Value at the lower left front corner of the cube
- * \param[in] f2 Value at the lower right front corner of the cube
- * \param[in] f3 Value at the upper left front corner of the cube
- * \param[in] f4 Value at the upper right front corner of the cube
- * \param[in] f5 Value at the lower left back corner of the cube
- * \param[in] f6 Value at the lower right back corner of the cube
- * \param[in] f7 Value at the upper left back corner of the cube
- * \param[in] f8 Value at the upper right back corner of the cube
- *
- * \return Interpolated value
- */
-template <typename T>
-T interpolate_trilinear(T ax, T ay, T az, T f1, T f2, T f3, T f4, T f5, T f6,
-                        T f7, T f8) {
-  T res = az * (ax * (ay * f8 + (1.0 - ay) * f6) +
-                (1.0 - ax) * (ay * f7 + (1.0 - ay) * f5)) +
-          (1 - az) * (ax * (ay * f4 + (1.0 - ay) * f2) +
-                      (1.0 - ax) * (ay * f3 + (1.0 - ay) * f1));
-  return res;
 }
 
 /// Represent a permutation.
@@ -172,19 +163,19 @@ std::vector<T> apply_permutation(const std::vector<T>& v,
 /**
  * Check whether two components have the same value in a sorted vector x.
  *
- * Throws an exception if duplicates are encountered.
- *
  * \tparam T Type of values to be checked for duplicates.
  * \param x Vector to be checked for duplicates.
- * \param error_position String used in the error message, indicating where
- *                       the error originated.
+ * \param error_position String used in the error message, indicating where the
+ *                       error originated.
+ *
+ * \throw std::runtime_error if duplicates are encountered.
  */
 template <typename T>
 void check_duplicates(const std::vector<T>& x,
                       const std::string& error_position) {
   auto it = std::adjacent_find(x.begin(), x.end());
   if (it != x.end()) {
-    std::stringstream error_msg;
+    std::stringstream error_msg{};
     error_msg << error_position << ": Each x value must be unique. \"" << *it
               << "\" was found twice.";
     throw std::runtime_error(error_msg.str());
@@ -192,9 +183,25 @@ void check_duplicates(const std::vector<T>& x,
 }
 
 template <typename T>
-InterpolateDataLinear<T>::InterpolateDataLinear(const std::vector<T>& x,
-                                                const std::vector<T>& y) {
-  assert(x.size() == y.size());
+InterpolateDataLinear<T>::InterpolateDataLinear(
+    const std::vector<T>& x, const std::vector<T>& y,
+    const ExtrapolationType extrapolation_type)
+    : extrapolation_type_{extrapolation_type} {
+  switch (extrapolation_type_) {
+    case ExtrapolationType::None:
+    case ExtrapolationType::Zero:
+    case ExtrapolationType::Constant:
+    case ExtrapolationType::Linear:
+      break;
+    default:
+      throw std::invalid_argument(
+          "The provided extrapolation type is not supported. Valid types are "
+          "'None', 'Zero', 'Constant', and 'Linear'.");
+  }
+  if (x.size() != y.size()) {
+    throw std::invalid_argument(
+        "The interpolation requires two vectors of equal length.");
+  }
   const size_t n = x.size();
   const auto p = generate_sort_permutation(
       x, [&](T const& a, T const& b) { return a < b; });
@@ -238,13 +245,26 @@ size_t find_index(const std::vector<T>& v, T x) {
 
 template <typename T>
 T InterpolateDataLinear<T>::operator()(T x0) const {
-  // Find the piecewise linear interpolation corresponding to x0.
-  size_t i = find_index(x_, x0);
-  if (i >= f_.size()) {
-    // We don't have a linear interpolation beyond the last point in x_.
-    // Use the last linear interpolation instead.
-    i = f_.size() - 1;
+  const double first_x = x_.front();
+  const double last_x = x_.back();
+  if (x0 < first_x || x0 > last_x) {
+    if (extrapolation_type_ == ExtrapolationType::None) {
+      std::ostringstream error_msg{
+          "InterpolateDataLinear only accepts x values within the range of the "
+          "underlying data\nwhen an extrapolation type is not specified. ",
+          std::ios::ate};
+      error_msg << "x value " << x0 << " is out of bounds.";
+      throw std::out_of_range(error_msg.str());
+    } else if (extrapolation_type_ == ExtrapolationType::Zero) {
+      return 0.;
+    } else if (extrapolation_type_ == ExtrapolationType::Constant) {
+      return (x0 < first_x) ? f_.front()(first_x) : f_.back()(last_x);
+    } else if (extrapolation_type_ == ExtrapolationType::Linear) {
+      return (x0 < first_x) ? f_.front()(x0) : f_.back()(x0);
+    }
   }
+  // Find the piecewise linear interpolation corresponding to x0.
+  const size_t i = find_index(x_, x0);
   return f_[i](x0);
 }
 
@@ -253,17 +273,28 @@ class InterpolateDataSpline {
  public:
   /**
    * Interpolate function f given discrete samples f(x_i) = y_i.
+   * Cubic spline interpolation is used.
    *
    * \param x x-values.
    * \param y y-values.
-   * \return The interpolation function.
+   * \param extrapolation_type Type of extrapolation for requested x_i values
+   *                           that are out of bounds. Extrapolation is by
+   *                           default disabled. Possible types are
+   *                           <tt>None</tt>, <tt>Zero</tt>, and
+   *                           <tt>Constant</tt>.
    *
-   * Cubic spline interpolation is used.
-   * Values outside the given samples will use the outmost sample
-   * as a constant extrapolation.
+   * \return The interpolation function.
+   * \throw std::invalid_argument if vectors x and y have different length.
+   * \throw std::invalid_argument if less than 3 data points are provided.
+   * \throw std::out_of_range if values outside of the boundaries of the
+   *                          underlying data are tried to be accessed and
+   *                          extrapolation is disabled.
+   * \throw std::invalid_argument if unsupported extrapolation type is
+   *                              requested.
    */
-  InterpolateDataSpline(const std::vector<double>& x,
-                        const std::vector<double>& y);
+  InterpolateDataSpline(
+      const std::vector<double>& x, const std::vector<double>& y,
+      ExtrapolationType extrapolation_type = ExtrapolationType::None);
 
   /// Destructor
   ~InterpolateDataSpline();
@@ -271,24 +302,30 @@ class InterpolateDataSpline {
   /**
    * Calculate spline interpolation at x.
    *
-   *  \param x Interpolation argument.
-   *  \return Interpolated value.
+   * \param x Interpolation argument.
+   * \return Interpolated value.
+   *
+   * \throw std::out_of_range if values outside of the boundaries of the
+   *                          underlying data are tried to be accessed and
+   *                          extrapolation is disabled.
    */
   double operator()(double x) const;
 
  private:
-  /// First x value.
-  double first_x_;
-  /// Last x value.
-  double last_x_;
-  /// First y value.
-  double first_y_;
-  /// Last y value.
-  double last_y_;
+  /// Extrapolation type.
+  ExtrapolationType extrapolation_type_ = ExtrapolationType::None;
+  /// First x value of underlying data.
+  double first_x_ = smash_NaN<double>;
+  /// Last x value of underlying data.
+  double last_x_ = smash_NaN<double>;
+  /// First y value of underlying data.
+  double first_y_ = smash_NaN<double>;
+  /// Last y value of underlying data.
+  double last_y_ = smash_NaN<double>;
   /// GSL iterator for interpolation lookups.
-  gsl_interp_accel* acc_;
+  gsl_interp_accel* acc_ = nullptr;
   /// GSL spline.
-  gsl_spline* spline_;
+  gsl_spline* spline_ = nullptr;
 };
 
 }  // namespace smash

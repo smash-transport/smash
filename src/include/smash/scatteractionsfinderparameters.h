@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2022-2025
+ *    Copyright (c) 2022-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -11,7 +11,8 @@
 #include <set>
 #include <utility>
 
-#include "input_keys.h"
+#include "smash/forwarddeclarations.h"
+#include "smash/input_keys.h"
 
 namespace smash {
 
@@ -138,6 +139,17 @@ class ScatterActionsFinderParameters {
   const TotalCrossSectionStrategy total_xs_strategy;
   /// Which pseudo-resonance to choose.
   const PseudoResonance pseudoresonance_method;
+
+  /// Mode used to control the transition from soft to hard string excitation.
+  const HardStringTransitionMode hard_string_transition_mode;
+
+  /// Lower bound of the invariant energy range for the soft-to-hard string
+  /// transition (in \f$\sqrt{s}\f$ measured in GeV).
+  const double hard_string_transition_start_energy;
+
+  /// Upper bound of the invariant energy range for the soft-to-hard string
+  /// transition (in \f$\sqrt{s}\f$ measured in GeV).
+  const double hard_string_transition_end_energy;
 
   /**
    * AQM scaling factor for a hadron. The suppression factor for strangeness is

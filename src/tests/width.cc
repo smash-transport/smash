@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2016-2020,2022
+ *    Copyright (c) 2016-2020,2022,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -72,7 +72,7 @@ static void compare_in_vs_out_width(const ParticleType &t,
                                   m_R - pt[0]->mass(), [&](double m) {
                                     p1.set_4momentum(m, 0., 0., 0.);
                                     return t.get_partial_in_width(m_R, p0, p1) *
-                                           pt[1]->spectral_function(m);
+                                           pt[1]->full_spectral_function(m);
                                   });
 
   std::printf("width comparison at m=%5.3f: %8.6f %8.6f %8.6f %8.6f \n", m_R,
