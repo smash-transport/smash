@@ -136,9 +136,6 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
   logg[LExperiment].trace() << SMASH_SOURCE_LOCATION;
 
   const int ntest = config.take(InputKeys::gen_testparticles);
-  if (ntest <= 0) {
-    throw std::invalid_argument("Testparticle number should be positive!");
-  }
 
   // sets whether to consider only participants in thermodynamic outputs or not
   const bool only_participants =
@@ -165,18 +162,8 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     box_length = config.read(InputKeys::modi_listBox_length);
   }
 
-  /* If this Delta_Time option is absent (this can be for timestepless mode)
-   * just assign 1.0 fm, reasonable value will be set at event initialization
-   */
   const double dt = config.take(InputKeys::gen_deltaTime);
-  if (dt <= 0.) {
-    throw std::invalid_argument("Delta_Time cannot be zero or negative.");
-  }
-
   const double t_end = config.read(InputKeys::gen_endTime);
-  if (t_end <= 0.) {
-    throw std::invalid_argument("End_Time cannot be zero or negative.");
-  }
 
   // Enforce a small time step, if the box modus is used
   if (box_length > 0.0 && dt > box_length / 10.0) {
@@ -248,21 +235,15 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     if (missing_output_decays) {
       throw std::invalid_argument(
           "Dilepton output is disabled although dilepton production is "
-          "enabled. "
-          "Please enable the dilepton output.");
+          "enabled. Please enable the dilepton output.");
     }
   }
+
   /* Elastic collisions between the nucleons with the square root s
    * below low_snn_cut are excluded. */
   const double low_snn_cut =
       config.take(InputKeys::collTerm_elasticNNCutoffSqrts);
-  const auto proton = ParticleType::try_find(pdg::p);
-  const auto pion = ParticleType::try_find(pdg::pi_z);
-  if (proton && pion &&
-      low_snn_cut > proton->mass() + proton->mass() + pion->mass()) {
-    logg[LExperiment].warn("The cut-off should be below the threshold energy",
-                           " of the process: NN to NNpi");
-  }
+
   const bool potential_affect_threshold =
       config.take(InputKeys::lattice_potentialsAffectThreshold);
   const double scale_xs = config.take(InputKeys::collTerm_crossSectionScaling);

@@ -139,18 +139,16 @@ class ScatterActionsFinderParameters {
   const TotalCrossSectionStrategy total_xs_strategy;
   /// Which pseudo-resonance to choose.
   const PseudoResonance pseudoresonance_method;
-
   /// Mode used to control the transition from soft to hard string excitation.
   const HardStringTransitionMode hard_string_transition_mode;
-
-  /// Lower bound of the invariant energy range for the soft-to-hard string
-  /// transition (in \f$\sqrt{s}\f$ measured in GeV).
-  const double hard_string_transition_start_energy;
-
-  /// Upper bound of the invariant energy range for the soft-to-hard string
-  /// transition (in \f$\sqrt{s}\f$ measured in GeV).
-  const double hard_string_transition_end_energy;
-
+  /**
+   * Invariant energy range for the soft-to-hard string transition
+   * (in \f$\sqrt{s}\f$ measured in GeV).
+   *
+   * The first element is the lower bound and the second element is the
+   * upper bound of the transition interval.
+   */
+  const std::pair<double, double> hard_string_transition_energy_range;
   /**
    * AQM scaling factor for a hadron. The suppression factor for strangeness is
    * fixed to 40%, while the charm and bottom can be configured.

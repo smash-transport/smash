@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2020,2022-2024
+ *    Copyright (c) 2014-2015,2017-2020,2022-2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -93,7 +93,7 @@ TEST(create_experiment_with_default_lattice) {
 }
 
 TEST_CATCH(create_experiment_with_invalid_modus,
-           ExperimentBase::InvalidModusRequest) {
+           Configuration::InvalidKeyValue) {
   Test::experiment(Configuration{"General: {Modus: Invalid}"});
 }
 

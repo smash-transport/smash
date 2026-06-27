@@ -69,20 +69,21 @@ TEST(initialize_collider_normal) {
           Particles: {661: 1}
         Target:
           Particles: {661: 8}
-        Initial_Distance: 0
+        Initial_Distance: 1.732050807569
         Impact:
           Value: 0
   )"};
   ColliderModus n(std::move(config), Test::default_parameters());
   Particles P;
-  COMPARE(n.initial_conditions(&P, Test::default_parameters()), 0.);
+  COMPARE_ABSOLUTE_ERROR(n.initial_conditions(&P, Test::default_parameters()),
+                         -1., 1e-12);
   COMPARE(P.size(), 9u);
   for (auto p : P) {
     // velocity should be +- sqrt(3/4)
     COMPARE_RELATIVE_ERROR(p.velocity().sqr(), 0.75, 1e-6);
     // this is the mass squared
     COMPARE_RELATIVE_ERROR(p.momentum().sqr(), 0.16, 1e-6);
-    COMPARE(p.position().x0(), 0.0);
+    COMPARE_RELATIVE_ERROR(p.position().x0(), -1., 1e-6);
     COMPARE(p.pdgcode(), PdgCode(0x661));
     COMPARE_RELATIVE_ERROR(p.momentum().x0(), 0.8, 1e-6);
     COMPARE_ABSOLUTE_ERROR(p.momentum().x1(), 0.0, 1e-6);
@@ -101,14 +102,14 @@ TEST_CATCH(initialize_collider_low_energy, ModusDefault::InvalidEnergy) {
           Particles: {661: 1}
         Target:
           Particles: {661: 8}
-        Initial_Distance: 0
+        Initial_Distance: 0.001
   )"};
   ColliderModus n(std::move(config), Test::default_parameters());
   Particles P;
   n.initial_conditions(&P, Test::default_parameters());
 }
 
-TEST_CATCH(initialize_nucleus_empty_projectile, ColliderModus::ColliderEmpty) {
+TEST_CATCH(initialize_nucleus_empty_projectile, std::invalid_argument) {
   Configuration config{R"(
     Modi:
       Collider:
@@ -117,14 +118,14 @@ TEST_CATCH(initialize_nucleus_empty_projectile, ColliderModus::ColliderEmpty) {
           Particles: {661: 0}
         Target:
           Particles: {661: 8}
-        Initial_Distance: 0
+        Initial_Distance: 0.001
   )"};
   ColliderModus n(std::move(config), Test::default_parameters());
   Particles P;
   n.initial_conditions(&P, Test::default_parameters());
 }
 
-TEST_CATCH(initialize_nucleus_empty_target, ColliderModus::ColliderEmpty) {
+TEST_CATCH(initialize_nucleus_empty_target, std::invalid_argument) {
   Configuration config{R"(
     Modi:
       Collider:
@@ -133,7 +134,7 @@ TEST_CATCH(initialize_nucleus_empty_target, ColliderModus::ColliderEmpty) {
           Particles: {661: 8}
         Target:
           Particles: {661: 0}
-        Initial_Distance: 0
+        Initial_Distance: 0.001
   )"};
   ColliderModus n(std::move(config), Test::default_parameters());
   Particles P;

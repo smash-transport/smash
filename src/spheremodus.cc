@@ -83,16 +83,6 @@ SphereModus::SphereModus(Configuration modus_config,
         "In order to specify 'Back_To_Back_Separation', 'Back_To_Back' must be "
         "true.");
   }
-  if (radial_velocity_ > 1.0) {
-    throw std::invalid_argument(
-        "Additional velocity cannot be greater than 1!");
-  }
-  if (sphere_temperature_ <= 0.0) {
-    throw std::invalid_argument("Temperature must be positive!");
-  }
-  if (radial_velocity_exponent_ < 0.0) {
-    throw std::invalid_argument("Flow velocity exponent cannot be negative!");
-  }
 }
 
 /* console output on startup of sphere specific parameters */

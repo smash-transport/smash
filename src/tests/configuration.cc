@@ -129,7 +129,9 @@ TEST(take_multiple) {
 TEST_CATCH(take_twice_optional_key, Configuration::TakeSameKeyTwice) {
   Configuration conf = make_test_configuration();
   const Key<double> optional_key{
-      {"tamer", "pipit", "bushelling"}, 3.14, {"1.0"}};
+      {"tamer", "pipit", "bushelling"}, 3.14, {"1.0"}, [](const double &x) {
+        return x > 0.0;
+      }};
   [[maybe_unused]] double d = conf.take(optional_key);
   d = conf.take(optional_key);
 }

@@ -325,26 +325,27 @@ class CrossSections {
    */
   double string_probability(
       const ScatterActionsFinderParameters& finder_parameters) const;
-
   /**
-   * Computes a smooth transition weight w ∈ [0,1] based on sqrt(s).
+   * Computes a smooth transition probability as a function of sqrt(s).
    *
-   * The weight is:
-   *   - w = 0 for sqrt(s) < region_lower
-   *   - w = 1 for sqrt(s) > region_upper
-   *   - smoothly interpolated in between using a sinusoidal profile
+   * The probability is:
+   *   - 0 for sqrt(s) < region_lower
+   *   - 1 for sqrt(s) > region_upper
+   *   - smoothly varying between 0 and 1 inside the transition region
+   *     according to a sinusoidal profile
    *
-   * This weight can be used to interpolate between two models,
-   * parameters, or process choices (e.g. soft ↔ hard interactions).
+   * This probability can be used to determine the relative contribution of
+   * two processes or regimes (e.g. soft ↔ hard string excitation).
    *
    * \param[in] region_lower Lower bound of the transition region in sqrt(s)
-   * [GeV]
-   * \param[in] region_upper Upper bound of the transition region in
-   * sqrt(s) [GeV]
+   *                         [GeV]
+   * \param[in] region_upper Upper bound of the transition region in sqrt(s)
+   *                         [GeV]
    *
-   * \return Transition weight w ∈ [0,1]
+   * \return Transition probability in the interval [0,1]
    */
-  double interpolation_at_sqrts(double region_lower, double region_upper) const;
+  double transition_probability_at_sqrts(double region_lower,
+                                         double region_upper) const;
 
  private:
   /**
