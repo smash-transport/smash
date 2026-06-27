@@ -2470,7 +2470,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_ct_heavy_flavor
    * \optional_key{key_CT_charm_rescattering_,Charm_Rescattering_Method,string,
-   * "resonances"}
+   * "resonances",\any_valid}
    *
    * With this key, the method of charm rescattering at lower energies can be
    * chosen for two to two reactions including charmed hadrons that are
@@ -2501,7 +2501,8 @@ struct InputKeys {
   inline static const Key<CharmRescattering> collTerm_charmRescatteringMethod{
       InputSections::c_heavyFlavor + "Charm_Rescattering_Method",
       CharmRescattering::Resonances,
-      {"3.4"}};
+      {"3.4"},
+      detail::get_default_validator<CharmRescattering>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
