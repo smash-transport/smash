@@ -41,6 +41,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * All configuration files YAML keys are now validated when taken (constraints are listed in the documentation).
 * The value `0.0` for the incident energy in collider modus is not accepted anymore.
 * The `Elastic_NN_Cutoff_Sqrts: 1.8` has been removed from shipped input file for `Box` and `Sphere` cases (the default value `1.98` is then used).
+* A maximum version of 3.1.11 for Rivet is now imposed, as SMASH cannot compile with the 4.x versions.
 
 ### Removed
 * CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally.
