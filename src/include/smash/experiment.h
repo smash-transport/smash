@@ -967,15 +967,6 @@ Experiment<Modus>::Experiment(Configuration &config,
         "smearing!");
   }
 
-  // for triangular smearing:
-  // the weight needs to be larger than 1./7. for the center cell to contribute
-  // more than the surrounding cells
-  if (parameters_.smearing_mode == SmearingMode::Discrete &&
-      parameters_.discrete_weight < (1. / 7.)) {
-    throw std::invalid_argument(
-        "The central weight for discrete smearing should be >= 1./7.");
-  }
-
   if (parameters_.coll_crit == CollisionCriterion::Stochastic &&
       (time_step_mode_ != TimeStepMode::Fixed || !use_grid_)) {
     throw std::invalid_argument(
@@ -1040,16 +1031,11 @@ Experiment<Modus>::Experiment(Configuration &config,
         config.take(InputKeys::collTerm_photons_fractionalPhotons);
   }
   if (parameters_.two_to_one) {
-    if (parameters_.res_lifetime_factor < 0.) {
-      throw std::invalid_argument(
-          "Resonance lifetime modifier cannot be negative!");
-    }
     if (parameters_.res_lifetime_factor < really_small) {
       logg[LExperiment].warn(
           "Resonance lifetime set to zero. Make sure resonances cannot "
-          "interact",
-          "inelastically (e.g. resonance chains), else SMASH is known to "
-          "hang.");
+          "interact inelastically (e.g. resonance chains), else SMASH is known "
+          "to hang.");
     }
     action_finders_.emplace_back(
         std::make_unique<DecayActionsFinder>(parameters_));
@@ -1488,18 +1474,30 @@ Experiment<Modus>::Experiment(Configuration &config,
   } else {
     output_conf.enclose_into_section(InputSections::output);
   }
-  std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
-  std::transform(
-      output_contents.cbegin(), output_contents.cend(), list_of_formats.begin(),
-      [&output_conf](std::string content) -> std::vector<std::string> {
-        /* Note that the "Format" key has an empty list as default, although it
-         * is a required key, because then here below the error for the user is
-         * more informative, if the key was not given in the input file. */
-        return output_conf.take(InputKeys::get_output_format_key(content));
-      });
   auto abort_because_of_invalid_input_file = []() {
     throw std::invalid_argument("Invalid configuration input file.");
   };
+  std::vector<std::vector<std::string>> list_of_formats(output_contents.size());
+  std::transform(
+      output_contents.cbegin(), output_contents.cend(), list_of_formats.begin(),
+      [&output_conf, &abort_because_of_invalid_input_file](
+          const std::string &content) -> std::vector<std::string> {
+        /* Note that the "Format" key is required and taking it will throw an
+         * exception if not given by the user. We do here a try and catch to
+         * give a more informative error message in this case, instead of just
+         * using the general Configuration::take message.*/
+        try {
+          return output_conf.take(InputKeys::get_output_format_key(content));
+        } catch (const Configuration::RequiredKeyMissing &) {
+          logg[LExperiment].fatal() << "Unspecified list of formats for "
+                                    << std::quoted(content) << " content.";
+          abort_because_of_invalid_input_file();
+          /* This is never reached, but it is needed to avoid compiler warnings
+           * about missing return statement. In C++23 the [[noreturn]] attribute
+           * can be used on lambda functions after the capturing brackets. */
+          return {};
+        }
+      });
   const OutputParameters output_parameters(std::move(output_conf));
   for (std::size_t i = 0; i < output_contents.size(); ++i) {
     if (output_contents[i] == "Particles" ||
@@ -1555,13 +1553,8 @@ Experiment<Modus>::Experiment(Configuration &config,
       }
     }
 
-    if (list_of_formats[i].empty()) {
-      logg[LExperiment].fatal()
-          << "Empty or unspecified list of formats for "
-          << std::quoted(output_contents[i]) << " content.";
-      abort_because_of_invalid_input_file();
-    } else if (std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
-                         "None") != list_of_formats[i].end()) {
+    if (std::find(list_of_formats[i].begin(), list_of_formats[i].end(),
+                  "None") != list_of_formats[i].end()) {
       if (list_of_formats[i].size() > 1) {
         logg[LExperiment].fatal()
             << "Use of \"None\" output format together with other formats is "

@@ -40,7 +40,6 @@ static double thermal_average_sigmavrel(const ParticleTypePtr A_type,
   Collision_Term:
     Collision_Criterion: Stochastic
     Strings: false
-    Elastic_NN_Cutoff_Sqrts: 0
     Included_2to2: []
     Multi_Particle_Reactions: [Deuteron_3to2, A3_Nuclei_4to2]
     NNbar_Treatment: "no annihilation"

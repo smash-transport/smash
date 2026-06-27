@@ -2634,10 +2634,11 @@ CollisionBranchList CrossSections::string_excitation(
   };
   if (finder_parameters.hard_string_transition_mode ==
       HardStringTransitionMode::Custom_Range) {
-    const double weight_hard = interpolation_at_sqrts(
-        finder_parameters.hard_string_transition_start_energy,
-        finder_parameters.hard_string_transition_end_energy);
+    const auto& [hard_transition_start, hard_transition_end] =
+        finder_parameters.hard_string_transition_energy_range;
 
+    const double weight_hard = transition_probability_at_sqrts(
+        hard_transition_start, hard_transition_end);
     split(Proc::ND, nondiffractive, weight_hard);
     split(Proc::SD_AX, single_diffr_AX, weight_hard);
     split(Proc::SD_XB, single_diffr_XB, weight_hard);
@@ -2645,7 +2646,6 @@ CollisionBranchList CrossSections::string_excitation(
 
   } else if (nondiffractive > 0.0) {
     const double hard_xsec = AQM_scaling * string_hard_cross_section();
-
     /* Hard string process is added by hard cross section
      * in conjunction with multipartion interaction picture
      * \iref{Sjostrand:1987su}. */
@@ -2755,7 +2755,8 @@ double CrossSections::high_energy(
        * that defined in string_probability(). */
       auto [region_lower, region_upper] =
           finder_parameters.transition_high_energy.sqrts_range_NN;
-      double prob_high = interpolation_at_sqrts(region_lower, region_upper);
+      double prob_high =
+          transition_probability_at_sqrts(region_lower, region_upper);
       xs = xs_l * (1. - prob_high) + xs_h * prob_high;
     }
   }
@@ -3192,12 +3193,12 @@ double CrossSections::string_probability(
                      finder_parameters.transition_high_energy.sqrts_range_width;
     }
 
-    return interpolation_at_sqrts(region_lower, region_upper);
+    return transition_probability_at_sqrts(region_lower, region_upper);
   }
 }
 
-double CrossSections::interpolation_at_sqrts(double region_lower,
-                                             double region_upper) const {
+double CrossSections::transition_probability_at_sqrts(
+    double region_lower, double region_upper) const {
   if (sqrt_s_ < region_lower) {
     return 0.;
   } else if (sqrt_s_ > region_upper) {

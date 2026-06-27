@@ -122,7 +122,7 @@ However, setting it is not harmful and actually makes the behavior more determin
 ### Installing and enabling Rivet support
 
 [Rivet website](https://rivet.hepforge.org/) is pretty complete and general information can be found there.
-Since the interface with SMASH has been tested with version 3.1.4, if possible, this version should be installed and used.
+Since the interface with SMASH has been tested with version 3.1.4, if possible, this version should be installed and used. The latest version supported is 3.1.11.
 
 An [installation script](https://gitlab.com/hepcedar/rivet/-/blob/release-3-1-x/doc/tutorials/installation.md) exists and can be downloaded e.g. via
 ```console
