@@ -174,6 +174,13 @@ class StringProcess {
   double additional_xsec_supp_;
 
   /**
+   * Optional center-of-mass energy used to initialize MPI-capable Pythia
+   * objects. If unset, the initialization energy is determined from the
+   * incoming hadrons.
+   */
+  std::optional<double> mpi_initialization_sqrts_;
+
+  /**
    * Compute flags identifying beam valence partons (quarks or diquarks)
    * that act as leading partons after the initial interaction.
    *
@@ -672,10 +679,22 @@ class StringProcess {
   }
 
   /**
+   * Set the center-of-mass energy used to initialize MPI-capable Pythia
+   * objects.
+   *
+   * If no value is set, the initialization energy is determined from the
+   * incoming hadrons.
+   *
+   * \param sqrts Center-of-mass energy [GeV] used for MPI initialization.
+   */
+  void set_mpi_initialization_sqrts(double sqrts) {
+    mpi_initialization_sqrts_ = sqrts;
+  }
+
+  /**
    * initialization
-   * feed intial particles, time of collision and gamma factor of the center of
-   * mass.
-   * \param[in] incoming is the list of initial state particles.
+   * feed intial particles, time of collision and gamma factor of the center
+   * of mass. \param[in] incoming is the list of initial state particles.
    * \param[in] tcoll is time of collision.
    */
   void init(const ParticleList &incoming, double tcoll);

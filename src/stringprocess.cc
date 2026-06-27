@@ -963,25 +963,21 @@ bool StringProcess::next_Hard(ProcessType type) {
     hard_map_[idAB]->readString("SoftQCD:singleDiffractiveAX = on");
     hard_map_[idAB]->readString("SoftQCD:doubleDiffractive = on");
     hard_map_[idAB]->readString("HadronLevel:all = off");
-
     common_setup_pythia(hard_map_[idAB].get(), strange_supp_, diquark_supp_,
                         popcorn_rate_, stringz_a_produce_, stringz_b_produce_,
                         string_sigma_T_);
-
     hard_map_[idAB]->settings.flag("Beams:allowVariableEnergy", true);
     hard_map_[idAB]->settings.mode("Beams:idA", idAB.first);
     hard_map_[idAB]->settings.mode("Beams:idB", idAB.second);
-    hard_map_[idAB]->settings.parm("Beams:eCM", sqrtsAB_);
-
+    hard_map_[idAB]->settings.parm(
+        "Beams:eCM", mpi_initialization_sqrts_.value_or(sqrtsAB_));
     logg[LPythia].debug("Pythia object initialized with ", pdg_for_pythia[0],
                         " + ", pdg_for_pythia[1], " at CM energy [GeV] ",
-                        sqrtsAB_);
-
+                        mpi_initialization_sqrts_.value_or(sqrtsAB_));
     if (!hard_map_[idAB]->init()) {
       throw std::runtime_error("Pythia failed to initialize.");
     }
   }
-
   const int seed_new = random::uniform_int(1, maximum_rndm_seed_in_pythia);
   hard_map_[idAB]->rndm.init(seed_new);
   logg[LPythia].debug("hard_map_[", idAB.first, "][", idAB.second,
