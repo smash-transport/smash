@@ -18,6 +18,7 @@
 #include "histogram.h"
 #include "setup.h"
 #include "smash/angles.h"
+#include "smash/quantumnumbers.h"
 #include "smash/random.h"
 #include "smash/scatteraction.h"
 
@@ -857,4 +858,216 @@ TEST(string_tag_leading_hadrons_no_overwrite) {
   sp->tag_leading_hadrons(event);
 
   VERIFY(event[only_baryon].statusAbs() == from_diquark);
+}
+TEST(string_soft_nondiff_runs) {
+  auto sp = smash::Test::default_string_process_interface();
+
+  ParticleList incoming;
+  incoming.emplace_back(ParticleType::find(0x2212));  // proton
+  incoming.emplace_back(ParticleType::find(0x2212));  // proton
+
+  incoming[0].set_4momentum(FourVector(5.0, 0.0, 0.0, 4.8));
+  incoming[1].set_4momentum(FourVector(5.0, 0.0, 0.0, -4.8));
+
+  sp->init(incoming, 0.0);
+
+  bool success = false;
+  for (int i = 0; i < 1000 && !success; ++i) {
+    success = sp->next(ProcessType::StringSoftNonDiffractive);
+  }
+
+  VERIFY(success);
+  VERIFY(!sp->get_final_state().empty());
+}
+
+TEST(string_hard_nondiff_runs) {
+  auto sp = smash::Test::default_string_process_interface();
+
+  ParticleList incoming;
+  incoming.emplace_back(ParticleType::find(0x2212));  // proton
+  incoming.emplace_back(ParticleType::find(0x2212));  // proton
+
+  incoming[0].set_4momentum(FourVector(5.0, 0.0, 0.0, 4.8));
+  incoming[1].set_4momentum(FourVector(5.0, 0.0, 0.0, -4.8));
+
+  sp->init(incoming, 0.0);
+
+  bool success = false;
+  for (int i = 0; i < 1000 && !success; ++i) {
+    success = sp->next(ProcessType::StringHardNonDiffractive);
+  }
+
+  VERIFY(success);
+  VERIFY(!sp->get_final_state().empty());
+}
+
+static bool check_single_diff_replaces_elastic_hadron_flavour(
+    ProcessType process_type, int mapped_side) {
+  auto sp = smash::Test::default_string_process_interface();
+
+  ParticleList incoming;
+  incoming.emplace_back(ParticleType::find(mapped_side == 0 ? 0x3122 : 0x2212));
+  incoming.emplace_back(ParticleType::find(mapped_side == 1 ? 0x3122 : 0x2212));
+
+  incoming[0].set_4momentum(FourVector(5020.0, 0.0, 0.0, 5000.0));
+  incoming[1].set_4momentum(FourVector(5020.0, 0.0, 0.0, -5000.0));
+
+  sp->init(incoming, 0.0);
+
+  for (int i = 0; i < 1000; ++i) {
+    if (!sp->next(process_type)) {
+      continue;
+    }
+
+    const ParticleList& final_state = sp->get_final_state();
+
+    const bool found_lambda = std::any_of(
+        final_state.begin(), final_state.end(),
+        [](const ParticleData& p) { return p.pdgcode() == PdgCode(0x3122); });
+
+    return found_lambda &&
+           QuantumNumbers{incoming} == QuantumNumbers{final_state};
+  }
+
+  return false;
+}
+TEST(string_hard_single_diff_AX_replaces_elastic_hadron_flavour) {
+  VERIFY(check_single_diff_replaces_elastic_hadron_flavour(
+      ProcessType::StringHardSingleDiffractiveAX, 0));
+}
+
+TEST(string_hard_single_diff_XB_replaces_elastic_hadron_flavour) {
+  VERIFY(check_single_diff_replaces_elastic_hadron_flavour(
+      ProcessType::StringHardSingleDiffractiveXB, 1));
+}
+static std::unique_ptr<StringProcess> initialized_pp_string_process() {
+  /**
+   * Junctions are disabled here so that leading hadrons come only from ordinary
+   * open-string endpoints. With junctions enabled, valence content can be
+   * spread over topology-dependent baryonic strings, so the number of leading
+   * hadrons is not fixed.
+   */
+  Configuration config{R"(
+    Collision_Term:
+      String_Parameters:
+        Pythia_Settings:
+          - "BeamRemnants:allowJunction = off"
+    )"};
+
+  auto sp = std::make_unique<StringProcess>(config);
+
+  ParticleList incoming;
+  incoming.emplace_back(ParticleType::find(0x2212));
+  incoming.emplace_back(ParticleType::find(0x2212));
+
+  incoming[0].set_4momentum(FourVector(5020.0, 0.0, 0.0, 5000.0));
+  incoming[1].set_4momentum(FourVector(5020.0, 0.0, 0.0, -5000.0));
+
+  sp->init(incoming, 0.0);
+  return sp;
+}
+static int count_leading_hadrons(const ParticleList& final_state) {
+  int n_leading = 0;
+
+  for (const ParticleData& p : final_state) {
+    if (p.initial_xsec_scaling_factor() <= 0.0 || !p.is_hadron()) {
+      continue;
+    }
+
+    if (p.pdgcode().is_charmonia()) {
+      continue;
+    }
+
+    ++n_leading;
+  }
+
+  return n_leading;
+}
+static int check_process_produces_leading_hadrons(StringProcess& sp,
+                                                  ProcessType process_type,
+                                                  int n_leading_expected,
+                                                  int n_events_to_check) {
+  int n_matches = 0;
+  int n_checked = 0;
+
+  for (int i = 0; i < 10000 && n_checked < n_events_to_check; ++i) {
+    if (!sp.next(process_type)) {
+      continue;
+    }
+
+    const int n_leading = count_leading_hadrons(sp.get_final_state());
+
+    if (n_leading == n_leading_expected) {
+      ++n_matches;
+    }
+    ++n_checked;
+  }
+
+  return n_matches;
+}
+
+static double average_number_of_leading_hadrons(StringProcess& sp,
+                                                ProcessType process_type,
+                                                int n_events_to_check) {
+  int n_checked = 0;
+  int total_leading = 0;
+
+  for (int i = 0; i < 10000 && n_checked < n_events_to_check; ++i) {
+    if (!sp.next(process_type)) {
+      continue;
+    }
+    total_leading += count_leading_hadrons(sp.get_final_state());
+
+    ++n_checked;
+  }
+
+  return static_cast<double>(total_leading) / n_checked;
+}
+TEST(string_processes_produce_expected_leading_hadrons) {
+  constexpr int n_events_to_check = 2000;
+  auto sp = initialized_pp_string_process();
+
+  VERIFY(check_process_produces_leading_hadrons(
+             *sp, ProcessType::StringSoftNonDiffractive, 4,
+             n_events_to_check) == n_events_to_check);
+
+  VERIFY(check_process_produces_leading_hadrons(
+             *sp, ProcessType::StringSoftSingleDiffractiveAX, 3,
+             n_events_to_check) == n_events_to_check);
+
+  VERIFY(check_process_produces_leading_hadrons(
+             *sp, ProcessType::StringSoftSingleDiffractiveXB, 3,
+             n_events_to_check) == n_events_to_check);
+  VERIFY(check_process_produces_leading_hadrons(
+             *sp, ProcessType::StringSoftDoubleDiffractive, 4,
+             n_events_to_check) == n_events_to_check);
+
+  VERIFY(check_process_produces_leading_hadrons(
+             *sp, ProcessType::StringHardSingleDiffractiveAX, 3,
+             n_events_to_check) == n_events_to_check);
+
+  VERIFY(check_process_produces_leading_hadrons(
+             *sp, ProcessType::StringHardSingleDiffractiveXB, 3,
+             n_events_to_check) == n_events_to_check);
+
+  VERIFY(check_process_produces_leading_hadrons(
+             *sp, ProcessType::StringHardDoubleDiffractive, 4,
+             n_events_to_check) == n_events_to_check);
+
+  constexpr int n_hard_nondiff_events = 1000;
+  /**
+   * In hard non-diffractive events, a beam valence quark can participate in the
+   * hard/MPI system instead of surviving as a final quark endpoint. For
+   * example, a beam-valence quark may annihilate with a sea antiquark, leaving
+   * only gluons as final descendants. Since leading tags are assigned to final
+   * quark/diquark string endpoints, such events can contain fewer than four
+   * leading hadrons even with junctions disabled.
+   *
+   * We therefore test the average number of leading hadrons rather than
+   * requiring exactly four in every hard non-diffractive event.
+   */
+  COMPARE_ABSOLUTE_ERROR(
+      average_number_of_leading_hadrons(
+          *sp, ProcessType::StringHardNonDiffractive, n_hard_nondiff_events),
+      4.0, 0.01);
 }

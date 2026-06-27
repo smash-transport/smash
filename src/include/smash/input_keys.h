@@ -3726,7 +3726,7 @@ struct InputKeys {
       3.0,
       {"1.6"},
       [](const double &value) noexcept {
-        return value >= 0.0 && value <= 2.0;
+        return value >= 0.2 && value <= 5.0;
       }};
 
   /*!\Userguide
@@ -3780,13 +3780,41 @@ struct InputKeys {
       }};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_pythia_settings_,
+   *               Pythia_Settings,list,[],\none}
+   *
+   * Additional Pythia 8 settings passed directly to the internal Pythia
+   * instances used for string fragmentation.
+   *
+   * These settings are applied after the corresponding SMASH string
+   * parameters. Consequently, if a setting is specified both through a SMASH
+   * input key and in `Pythia_Settings`, the value given in
+   * `Pythia_Settings` takes precedence.
+   *
+   * Invalid settings cause SMASH to terminate during initialization.
+   */
+  /**
+   * \see_key{key_CT_SP_pythia_settings_}
+   */
+  inline static const Key<std::vector<std::string>>
+      collTerm_stringParam_pythiaSettings{
+          InputSections::c_stringParameters + "Pythia_Settings",
+          std::vector<std::string>{},
+          {"3.4"},
+          detail::get_default_validator<std::vector<std::string>>()};
+
+  /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_decays_,Decays,bool,false,\none}
    *
-   * Whether or not to enable dilepton production from hadron decays.
-   * This includes direct decays as well as Dalitz decays. Dilepton decays
-   * additionally have to be uncommented in the used *decaymodes.txt* file
-   * (see also \ref input_collision_term_dileptons_note_ "this note").
+   * Whether or not to enable dilepton production
+   * from hadron decays. This includes direct
+   * decays as well as Dalitz decays. Dilepton
+   * decays additionally have to be uncommented in
+   * the used *decaymodes.txt* file (see also \ref
+   * input_collision_term_dileptons_note_ "this
+   * note").
    */
   /**
    * \see_key{key_CT_dileptons_decays_}

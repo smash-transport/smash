@@ -15,6 +15,8 @@
 #include <utility>
 #include <vector>
 
+#include <Pythia8/Basics.h>
+
 #include "actionfinderfactory.h"
 #include "actions.h"
 #include "bremsstrahlungaction.h"
@@ -1060,7 +1062,11 @@ Experiment<Modus>::Experiment(Configuration &config,
      * TODO: Investigate whether a better choice for the MPI initialization
      * energy ceiling can be determined.
      */
-    process_string_ptr_->set_mpi_initialization_sqrts(modus_.sqrt_s_NN() * 1.2);
+
+    if (modus_.is_collider() && process_string_ptr_) {
+      process_string_ptr_->set_mpi_initialization_sqrts(modus_.sqrt_s_NN() *
+                                                        1.2);
+    }
     action_finders_.emplace_back(std::move(scat_finder));
   } else {
     max_transverse_distance_sqr_ =

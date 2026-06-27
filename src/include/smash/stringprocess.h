@@ -181,6 +181,15 @@ class StringProcess {
   std::optional<double> mpi_initialization_sqrts_;
 
   /**
+   * Additional Pythia 8 settings passed to each internal Pythia instance.
+   *
+   * These settings are applied after the corresponding SMASH string
+   * parameters and therefore override them if both configure the same
+   * Pythia setting.
+   */
+  std::vector<std::string> pythia_settings_;
+
+  /**
    * Compute flags identifying beam valence partons (quarks or diquarks)
    * that act as leading partons after the initial interaction.
    *

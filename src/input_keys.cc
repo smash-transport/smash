@@ -150,6 +150,7 @@ const std::vector<InputKeys::key_references_variant>& InputKeys::all_keys() {
       std::cref(collTerm_stringParam_dampPopcorn),
       std::cref(collTerm_stringParam_useMonashTune),
       std::cref(collTerm_stringParam_unformedXsecSuppression),
+      std::cref(collTerm_stringParam_pythiaSettings),
       std::cref(collTerm_dileptons_decays),
       std::cref(collTerm_photons_twoToTwoScatterings),
       std::cref(collTerm_photons_bremsstrahlung),
