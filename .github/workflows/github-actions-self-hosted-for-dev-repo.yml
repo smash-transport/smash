@@ -14,7 +14,6 @@ on:
       - develop
       - release*
       - hotfix*
-      - sattler/implement-charm-cross-sections
 
 jobs:
   workflow-gsi:
