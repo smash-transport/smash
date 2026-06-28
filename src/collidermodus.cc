@@ -63,9 +63,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
   } else {
     projectile_ = std::make_unique<Nucleus>(proj_cfg, params.testparticles);
   }
-  if (projectile_->size() < 1) {
-    throw ColliderEmpty("Input Error: Projectile nucleus is empty.");
-  }
   projectile_->set_label(BelongsTo::Projectile);
 
   // Set up the target nucleus
@@ -81,9 +78,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
         create_alphaclustered_nucleus(targ_cfg, params.testparticles, "target");
   } else {
     target_ = std::make_unique<Nucleus>(targ_cfg, params.testparticles);
-  }
-  if (target_->size() < 1) {
-    throw ColliderEmpty("Input Error: Target nucleus is empty.");
   }
   target_->set_label(BelongsTo::Target);
 
@@ -142,11 +136,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
    * (target at rest).  */
   if (modus_cfg.has_value(InputKeys::modi_collider_eKin)) {
     const double e_kin = modus_cfg.take(InputKeys::modi_collider_eKin);
-    if (e_kin < 0) {
-      throw ModusDefault::InvalidEnergy(
-          "Input Error: "
-          "E_Kin must be nonnegative.");
-    }
     // Set the total nucleus-nucleus collision energy.
     total_s_ = s_from_Ekin(e_kin * projectile_->number_of_particles(),
                            mass_projec, mass_target);
@@ -156,11 +145,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
   // Option 4: Momentum of the projectile nucleus (target at rest).
   if (modus_cfg.has_value(InputKeys::modi_collider_pLab)) {
     const double p_lab = modus_cfg.take(InputKeys::modi_collider_pLab);
-    if (p_lab < 0) {
-      throw ModusDefault::InvalidEnergy(
-          "Input Error: "
-          "P_Lab must be nonnegative.");
-    }
     // Set the total nucleus-nucleus collision energy.
     total_s_ = s_from_plab(p_lab * projectile_->number_of_particles(),
                            mass_projec, mass_target);
@@ -173,11 +157,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
     const double e_tot_p =
         proj_cfg.take(InputKeys::modi_collider_projectile_eTot);
     const double e_tot_t = targ_cfg.take(InputKeys::modi_collider_target_eTot);
-    if (e_tot_p < 0 || e_tot_t < 0) {
-      throw ModusDefault::InvalidEnergy(
-          "Input Error: "
-          "E_Tot must be nonnegative.");
-    }
     total_s_ = s_from_Etot(e_tot_p * projectile_->number_of_particles(),
                            e_tot_t * target_->number_of_particles(),
                            mass_projec, mass_target);
@@ -190,11 +169,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
     const double e_kin_p =
         proj_cfg.take(InputKeys::modi_collider_projectile_eKin);
     const double e_kin_t = targ_cfg.take(InputKeys::modi_collider_target_eKin);
-    if (e_kin_p < 0 || e_kin_t < 0) {
-      throw ModusDefault::InvalidEnergy(
-          "Input Error: "
-          "E_Kin must be nonnegative.");
-    }
     total_s_ = s_from_Ekin(e_kin_p * projectile_->number_of_particles(),
                            e_kin_t * target_->number_of_particles(),
                            mass_projec, mass_target);
@@ -207,11 +181,6 @@ ColliderModus::ColliderModus(Configuration modus_config,
     const double p_lab_p =
         proj_cfg.take(InputKeys::modi_collider_projectile_pLab);
     const double p_lab_t = targ_cfg.take(InputKeys::modi_collider_target_pLab);
-    if (p_lab_p < 0 || p_lab_t < 0) {
-      throw ModusDefault::InvalidEnergy(
-          "Input Error: "
-          "P_Lab must be nonnegative.");
-    }
     total_s_ = s_from_plab(p_lab_p * projectile_->number_of_particles(),
                            p_lab_t * target_->number_of_particles(),
                            mass_projec, mass_target);
@@ -240,7 +209,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
     if (modus_cfg.has_value(InputKeys::modi_collider_impact_sample)) {
       sampling_ = modus_cfg.take(InputKeys::modi_collider_impact_sample);
       if (sampling_ == Sampling::Custom) {
-        if (!(modus_cfg.has_value(InputKeys::modi_collider_impact_values) ||
+        if (!(modus_cfg.has_value(InputKeys::modi_collider_impact_values) &&
               modus_cfg.has_value(InputKeys::modi_collider_impact_yields))) {
           throw std::invalid_argument(
               "Input Error: Need impact parameter spectrum for custom sampling."
@@ -307,7 +276,7 @@ ColliderModus::ColliderModus(Configuration modus_config,
           InputKeys::modi_collider_initialConditions_rapidityCut);
       IC_parameters_->pT_cut =
           modus_cfg.take(InputKeys::modi_collider_initialConditions_pTCut);
-      validate_IC_kinematic_range();
+      log_IC_kinematic_range();
     } else if (IC_parameters_->type == FluidizationType::Dynamic) {
       FluidizationAction::remove_particle_ = false;
       double threshold = modus_cfg.take(
@@ -320,17 +289,11 @@ ColliderModus::ColliderModus(Configuration modus_config,
           modus_cfg.take(InputKeys::modi_collider_initialConditions_fluidCells);
       double form_time_fraction = modus_cfg.take(
           InputKeys::modi_collider_initialConditions_formTimeFraction);
-      if (threshold <= 0 || max_time < min_time || min_time < 0 || cells < 2 ||
-          form_time_fraction < 0) {
+      if (max_time < min_time) {
         logg[LInitialConditions].fatal()
-            << "Bad parameters chosen for dynamic initial conditions. At least "
-               "one of the following inequalities is violated:\n"
-            << "  Energy_Density_Threshold = " << threshold << " > 0\n"
+            << "Bad parameters chosen for dynamic initial conditions:\n"
             << "  Maximum_Time = " << max_time << " > " << min_time
-            << " = Minimum_Time > 0\n"
-               "Fluidization_Cells = "
-            << cells << " > 2\n"
-            << " Formation_Time_Fraction < 0";
+            << " = Minimum_Time";
         throw std::invalid_argument("Please adjust the configuration file.");
       }
 
@@ -364,33 +327,9 @@ ColliderModus::ColliderModus(Configuration modus_config,
   }
 }
 
-void ColliderModus::validate_IC_kinematic_range() {
-  bool bad_cuts = false;
-  assert(IC_parameters_->rapidity_cut.has_value());
-  assert(IC_parameters_->pT_cut.has_value());
+void ColliderModus::log_IC_kinematic_range() noexcept {
   const double rapidity = IC_parameters_->rapidity_cut.value();
   const double pT = IC_parameters_->pT_cut.value();
-  if (rapidity < 0.0) {
-    logg[LInitialConditions].fatal()
-        << "Rapidity cut for initial conditions configured as |y| < "
-        << rapidity
-        << " is unreasonable. \nPlease choose a positive, non-zero value or "
-           "employ SMASH without rapidity cut.";
-    bad_cuts = true;
-  }
-  if (pT < 0.0) {
-    logg[LInitialConditions].fatal()
-        << "Transverse momentum cut for initial conditions configured as pT < "
-        << pT
-        << " is unreasonable. \nPlease choose a positive, non-zero value or "
-           "employ SMASH without pT cut.";
-    bad_cuts = true;
-  }
-  if (bad_cuts) {
-    throw std::runtime_error(
-        "Kinematic cut for initial conditions malconfigured.");
-  }
-
   std::ostringstream message{"Extracting iso-tau initial conditions ",
                              std::ios_base::ate};
   std::vector<std::string> cuts{};

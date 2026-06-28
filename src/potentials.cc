@@ -9,6 +9,8 @@
 
 #include "smash/potentials.h"
 
+#include <algorithm>
+
 #include "smash/constants.h"
 #include "smash/density.h"
 #include "smash/input_keys.h"
@@ -48,23 +50,15 @@ Potentials::Potentials(Configuration conf, const DensityParameters &param)
   }
   if (use_vdf_) {
     saturation_density_ = conf.take(InputKeys::potentials_vdf_satRhoB);
-    std::vector<double> aux_coeffs =
-        conf.take(InputKeys::potentials_vdf_coeffs);
-    std::vector<double> aux_powers =
-        conf.take(InputKeys::potentials_vdf_powers);
-    if (aux_coeffs.size() != aux_powers.size()) {
+    coeffs_ = conf.take(InputKeys::potentials_vdf_coeffs);
+    powers_ = conf.take(InputKeys::potentials_vdf_powers);
+    if (coeffs_.size() != powers_.size()) {
       throw std::invalid_argument(
           "The number of coefficients should equal the number of powers.");
     }
-    const int n_terms = aux_powers.size();
-    for (int i = 0; i < n_terms; i++) {
-      if (aux_powers[i] < 0.0) {
-        throw std::invalid_argument("Powers need to be positive real numbers.");
-      }
-      // coefficients are provided in MeV, but the code uses GeV
-      coeffs_.push_back(aux_coeffs[i] * mev_to_gev);
-      powers_.push_back(aux_powers[i]);
-    }
+    // coefficients are provided in MeV, but the code uses GeV
+    std::transform(coeffs_.cbegin(), coeffs_.cend(), coeffs_.begin(),
+                   [](double c) { return c * mev_to_gev; });
   }
 }
 
