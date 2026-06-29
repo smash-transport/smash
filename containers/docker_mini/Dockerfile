@@ -158,28 +158,40 @@ RUN <<'EOF'
   echo "${PYTHIA8}/lib" > /etc/ld.so.conf.d/pythia8.conf
   ldconfig
   mkdir -p /SMASH/smash/build
-  mkdir -p /SMASH/smash_bin
   cd /SMASH/smash/build
   cmake \
     -DPythia_CONFIG_EXECUTABLE="/SMASH/pythia${PYTHIA_VERSION}/bin/pythia8-config" \
     -DSMASH_ARCH_FLAG="${C_CXX_ARCH_FLAG}" \
+    -DCMAKE_INSTALL_PREFIX="/SMASH" \
     ..
   make smash -j"$(nproc)"
-  if [[ -f /SMASH/smash/build/smash ]]; then
-    cp /SMASH/smash/build/smash /SMASH/smash_bin/
-    cp /SMASH/smash/build/config.yaml /SMASH/smash_bin/
-    rm -rf /SMASH/smash/build
+  make install
+  if [[ -x /SMASH/bin/smash ]]; then
+    SMASH_EXE="/SMASH/bin/smash"
   else
-    echo "SMASH executable not found! Something went wrong compiling SMASH!" >&2
+    SMASH_EXE="$(find /SMASH -path '*/bin/smash*' -type f -executable | sort | head -n 1)"
+  fi
+  SMASH_LIB_DIR="$(dirname "$(find /SMASH -name libsmash.so -type f | sort | head -n 1)")"
+  if [[ -z "${SMASH_EXE}" || ! -x "${SMASH_EXE}" ]]; then
+    echo "Installed SMASH executable not found!" >&2
     exit 1
   fi
+  if [[ -z "${SMASH_LIB_DIR}" || ! -f "${SMASH_LIB_DIR}/libsmash.so" ]]; then
+    echo "Installed SMASH library not found!" >&2
+    exit 1
+  fi
+  rm -f /usr/local/bin/smash
+  ln -s "${SMASH_EXE}" /usr/local/bin/smash
+  echo "${SMASH_LIB_DIR}" > /etc/ld.so.conf.d/smash.conf
+  ldconfig
+  rm -rf /SMASH/smash
 EOF
 
 ENV PYTHIA8DATA=${PYTHIA8}/share/Pythia8/xmldoc
 ENV PYTHIA_LIBRARY=${PYTHIA8}/lib
 ENV PYTHIA_INCLUDE=${PYTHIA8}/include
 ENV LD_LIBRARY_PATH=${PYTHIA_LIBRARY}:${LD_LIBRARY_PATH}
-ENV PATH=${PYTHIA8}/bin:/SMASH/smash_bin:${PATH}
+ENV PATH=${PYTHIA8}/bin:/usr/local/bin:${PATH}
 
 # Set up shell prompts when using the container image under Docker or under
 # Singularity (CUSTOM_ENV file automatically sourced by Singularity).
