@@ -559,9 +559,9 @@ bool StringProcess::next_SDiff(bool is_AB_to_AX) {
                             -cm_momentum);
 
   if (!append_string(make_pythia_4vec(pstrXcom), {idqX2, idqX1}, 101,
-                     !is_AB_to_AX))
+                     !is_AB_to_AX)) {
     return false;
-  // string_parton_events_.back().list();
+  }
   PdgCode hadron_code = is_AB_to_AX ? PDGcodes_[0] : PDGcodes_[1];
   ParticleData new_particle(ParticleType::find(hadron_code));
 
@@ -611,13 +611,8 @@ bool StringProcess::next_DDiff() {
   if (random::uniform_int(0, 1) == 0) {
     std::swap(quarks[1][0], quarks[1][1]);
   }
-  const bool added = append_string(p_str1, quarks[0], 101, true) &&
-                     append_string(p_str2, quarks[1], 102, false);
-
-  if (!added)
-    return false;
-
-  return true;
+  return append_string(p_str1, quarks[0], 101, true) &&
+         append_string(p_str2, quarks[1], 102, false);
 }
 
 bool StringProcess::next_BBbarAnn() {
@@ -771,11 +766,8 @@ bool StringProcess::next_NDiffSoft() {
   const double pzB = ((PPosB_ - dPPos) - (PNegB_ - dPNeg)) * M_SQRT1_2;
   const double EB = ((PPosB_ - dPPos) + (PNegB_ - dPNeg)) * M_SQRT1_2;
   Pythia8::Vec4 p_strB(-qx, -qy, pzB, EB);
-  if (!append_string(p_strA, endsA, 101, true) ||
-      !append_string(p_strB, endsB, 102, false))
-    return false;
-
-  return true;
+  return append_string(p_strA, endsA, 101, true) &&
+         append_string(p_strB, endsB, 102, false);
 }
 
 std::vector<bool> StringProcess::compute_beam_valence_flags(
@@ -1155,61 +1147,81 @@ bool StringProcess::next_Hard(ProcessType type) {
       type == ProcessType::StringHardSingleDiffractiveAX   ? 0
       : type == ProcessType::StringHardSingleDiffractiveXB ? 1
                                                            : -1;
-
   if (elastic_side >= 0 &&
       PDGcodes_[elastic_side].get_decimal() != pdg_for_pythia[elastic_side]) {
     const int mapped_id = pdg_for_pythia[elastic_side];
     const int actual_id = PDGcodes_[elastic_side].get_decimal();
 
     int elastic_index = -1;
-    int recoil_partner_index = -1;
 
     for (int i = 1; i < event_intermediate_.size(); ++i) {
       const auto& p = event_intermediate_[i];
 
       if (p.status() == 14 && p.id() == mapped_id) {
         elastic_index = i;
-        continue;
-      }
-      if (recoil_partner_index < 0) {
-        recoil_partner_index = i;
+        break;
       }
     }
+
     if (elastic_index < 0) {
       logg[LPythia].warn("Could not find elastic mapped hadron ", mapped_id,
                          " to replace by ", actual_id);
       return false;
     }
-    if (recoil_partner_index < 0) {
+
+    auto& elastic = event_intermediate_[elastic_index];
+
+    std::vector<int> recoil_indices;
+    Pythia8::Vec4 p_recoil_old;
+
+    for (int i = 1; i < event_intermediate_.size(); ++i) {
+      if (i == elastic_index)
+        continue;
+
+      const auto& p = event_intermediate_[i];
+
+      recoil_indices.push_back(i);
+      p_recoil_old += p.p();
+    }
+
+    if (recoil_indices.empty()) {
+      event_intermediate_.list();
       logg[LPythia].warn(
-          "Could not find recoil partner for elastic mapped hadron ",
-          mapped_id);
+          "Could not find recoil system for elastic mapped hadron ", mapped_id);
       return false;
     }
 
-    auto& elastic = event_intermediate_[elastic_index];
-    auto& recoil = event_intermediate_[recoil_partner_index];
-
-    Pythia8::Vec4 p_elastic = elastic.p();
-    Pythia8::Vec4 p_recoil = recoil.p();
+    Pythia8::Vec4 p_elastic_new = elastic.p();
+    Pythia8::Vec4 p_recoil_new = p_recoil_old;
 
     const double m_elastic_new =
         ParticleType::find(PdgCode::from_decimal(actual_id)).mass();
-    const double m_recoil_new = recoil.m();
 
-    if (!Pythia8::pShift(p_elastic, p_recoil, m_elastic_new, m_recoil_new)) {
-      logg[LPythia].debug(
+    const double m_recoil_system = p_recoil_old.mCalc();
+
+    if (!Pythia8::pShift(p_elastic_new, p_recoil_new, m_elastic_new,
+                         m_recoil_system)) {
+      logg[LPythia].warn(
           "Could not shift momenta when remapping elastic hadron from ",
           mapped_id, " to ", actual_id, ".");
       return false;
     }
+
+    Pythia8::RotBstMatrix recoil_bst;
+    recoil_bst.bstback(p_recoil_old);
+    recoil_bst.bst(p_recoil_new);
+
     elastic.id(actual_id);
     elastic.m(m_elastic_new);
-    elastic.p(p_elastic);
+    elastic.p(p_elastic_new);
 
-    recoil.p(p_recoil);
-    recoil.m(m_recoil_new);
+    for (const int idx : recoil_indices) {
+      auto& recoiler = event_intermediate_[idx];
 
+      Pythia8::Vec4 p_new = recoiler.p();
+      p_new.rotbst(recoil_bst);
+      recoiler.p(p_new);
+    }
     excess_quark[elastic_side] = {0, 0, 0, 0, 0};
     excess_antiq[elastic_side] = {0, 0, 0, 0, 0};
   }

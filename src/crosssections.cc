@@ -2632,6 +2632,13 @@ CollisionBranchList CrossSections::string_excitation(
     hard(p) = total * weight_hard;
     soft(p) = total - hard(p);
   };
+  auto split_all_string_processes = [&](double weight_hard) {
+    split(Proc::ND, nondiffractive, weight_hard);
+    split(Proc::SD_AX, single_diffr_AX, weight_hard);
+    split(Proc::SD_XB, single_diffr_XB, weight_hard);
+    split(Proc::DD, double_diffr, weight_hard);
+  };
+
   if (finder_parameters.hard_string_transition_mode ==
       HardStringTransitionMode::Custom_Range) {
     const auto& [hard_transition_start, hard_transition_end] =
@@ -2639,30 +2646,23 @@ CollisionBranchList CrossSections::string_excitation(
 
     const double weight_hard = transition_probability_at_sqrts(
         hard_transition_start, hard_transition_end);
-    split(Proc::ND, nondiffractive, weight_hard);
-    split(Proc::SD_AX, single_diffr_AX, weight_hard);
-    split(Proc::SD_XB, single_diffr_XB, weight_hard);
-    split(Proc::DD, double_diffr, weight_hard);
-
+    split_all_string_processes(weight_hard);
   } else if (nondiffractive > 0.0) {
     const double hard_xsec = AQM_scaling * string_hard_cross_section();
-    /* Hard string process is added by hard cross section
-     * in conjunction with multipartion interaction picture
-     * \iref{Sjostrand:1987su}. */
-    soft(Proc::ND) = nondiffractive * std::exp(-hard_xsec / nondiffractive);
-    hard(Proc::ND) = nondiffractive - soft(Proc::ND);
 
-    set_all_soft(Proc::SD_AX, single_diffr_AX);
-    set_all_soft(Proc::SD_XB, single_diffr_XB);
-    set_all_soft(Proc::DD, double_diffr);
+    /* Use the non-diffractive exponential transition probability for all
 
+    * string-excitation channels, so that soft strings are suppressed at high
+    * energies also for diffractive processes. */
+    const double weight_soft = std::exp(-hard_xsec / nondiffractive);
+    const double weight_hard = std::clamp(1.0 - weight_soft, 0.0, 1.0);
+    split_all_string_processes(weight_hard);
   } else {
     set_all_soft(Proc::ND, nondiffractive);
     set_all_soft(Proc::SD_AX, single_diffr_AX);
     set_all_soft(Proc::SD_XB, single_diffr_XB);
     set_all_soft(Proc::DD, double_diffr);
   }
-
   logg[LCrossSections].debug("Soft string cross sections [mb] are");
   logg[LCrossSections].debug("Soft single-diffractive AB->AX: ",
                              soft(Proc::SD_AX));

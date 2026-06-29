@@ -579,7 +579,7 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  * hard components.
  *
  * The transition mode is selected via the `Mode` key:
- * - `Exponential`: use the legacy exponential splitting of the non-diffractive
+ * - `Exponential`: use the exponential splitting of the non-diffractive
  *   cross section. The probability for a purely soft non-diffractive
  *   interaction is given by
  *   \f[
@@ -609,7 +609,27 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
          Mode: Custom_Range
          Energy_Range: [10.0, 20.0]
  \endverbatim
- */
+* Enabling hard string interactions at lower collision energies changes
+* baryon stopping. Therefore, some string-fragmentation and MPI parameters
+* may need to be adjusted. The following setup can be used as a starting
+* point for studies with an early hard-string transition:
+*\verbatim
+Collision_Term:
+  Hard_String_Transition:
+    Mode: Custom_Range
+    Energy_Range: [10.0, 11.0]
+  String_Parameters:
+    StringZ_A_Leading: 0.2
+    StringZ_B_Leading: 5.0
+    Damp_Popcorn: 0.0
+    String_Sigma_T: 0.3
+    Pythia_Settings:
+      - "MultipartonInteractions:ecmPow = 0.152"
+\endverbatim
+* These parameters are intended as a phenomenological starting point for
+* dedicated studies. They should not be interpreted as a tuned parameter set,
+* and further tuning may be required for quantitative applications.
+*/
 
 /*!\Userguide
  * \page doxypage_input_conf_modi
@@ -3105,7 +3125,7 @@ struct InputKeys {
    * Select the mode used for the transition from soft to hard string
    * excitation.
    *
-   * - Exponential: use the legacy exponential suppression based on the hard
+   * - Exponential: use exponential suppression based on the hard
    *   string cross section in the Pythia multiparton interaction (MPI)
    *   framework.
    * - Custom_Range: use a smooth transition from soft to hard string excitation
