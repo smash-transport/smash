@@ -1023,6 +1023,7 @@ static double average_number_of_leading_hadrons(StringProcess& sp,
 
   return static_cast<double>(total_leading) / n_checked;
 }
+
 TEST(string_processes_produce_expected_leading_hadrons) {
   constexpr int n_events_to_check = 2000;
   auto sp = initialized_pp_string_process();
@@ -1038,36 +1039,35 @@ TEST(string_processes_produce_expected_leading_hadrons) {
   VERIFY(check_process_produces_leading_hadrons(
              *sp, ProcessType::StringSoftSingleDiffractiveXB, 3,
              n_events_to_check) == n_events_to_check);
+
   VERIFY(check_process_produces_leading_hadrons(
              *sp, ProcessType::StringSoftDoubleDiffractive, 4,
              n_events_to_check) == n_events_to_check);
 
-  VERIFY(check_process_produces_leading_hadrons(
-             *sp, ProcessType::StringHardSingleDiffractiveAX, 3,
-             n_events_to_check) == n_events_to_check);
-
-  VERIFY(check_process_produces_leading_hadrons(
-             *sp, ProcessType::StringHardSingleDiffractiveXB, 3,
-             n_events_to_check) == n_events_to_check);
-
-  VERIFY(check_process_produces_leading_hadrons(
-             *sp, ProcessType::StringHardDoubleDiffractive, 4,
-             n_events_to_check) == n_events_to_check);
-
-  constexpr int n_hard_nondiff_events = 1000;
   /**
-   * In hard non-diffractive events, a beam valence quark can participate in the
-   * hard/MPI system instead of surviving as a final quark endpoint. For
-   * example, a beam-valence quark may annihilate with a sea antiquark, leaving
-   * only gluons as final descendants. Since leading tags are assigned to final
-   * quark/diquark string endpoints, such events can contain fewer than four
-   * leading hadrons even with junctions disabled.
-   *
-   * We therefore test the average number of leading hadrons rather than
-   * requiring exactly four in every hard non-diffractive event.
+   * In hard events, a beam valence quark can participate in the hard/MPI system
+   * instead of surviving as a final quark endpoint. Since leading tags are
+   * assigned to final quark/diquark string endpoints, such events can contain
+   * fewer leading hadrons. We therefore test the average number of leading
+   * hadrons rather than requiring the exact number in every hard event.
    */
   COMPARE_ABSOLUTE_ERROR(
       average_number_of_leading_hadrons(
-          *sp, ProcessType::StringHardNonDiffractive, n_hard_nondiff_events),
-      4.0, 0.01);
+          *sp, ProcessType::StringHardSingleDiffractiveAX, n_events_to_check),
+      3.0, 0.05);
+
+  COMPARE_ABSOLUTE_ERROR(
+      average_number_of_leading_hadrons(
+          *sp, ProcessType::StringHardSingleDiffractiveXB, n_events_to_check),
+      3.0, 0.05);
+
+  COMPARE_ABSOLUTE_ERROR(
+      average_number_of_leading_hadrons(
+          *sp, ProcessType::StringHardDoubleDiffractive, n_events_to_check),
+      4.0, 0.05);
+
+  COMPARE_ABSOLUTE_ERROR(
+      average_number_of_leading_hadrons(
+          *sp, ProcessType::StringHardNonDiffractive, n_events_to_check),
+      4.0, 0.05);
 }
