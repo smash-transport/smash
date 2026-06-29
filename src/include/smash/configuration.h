@@ -321,6 +321,20 @@ class Configuration {
   struct TakeSameKeyTwice : public std::logic_error {
     using std::logic_error::logic_error;
   };
+  /**
+   * \ingroup exception
+   * Thrown if a required Key is taken/read but is missing.
+   */
+  struct RequiredKeyMissing : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
+  /**
+   * \ingroup exception
+   * Thrown if a Key has an invalid value.
+   */
+  struct InvalidKeyValue : public std::invalid_argument {
+    using std::invalid_argument::invalid_argument;
+  };
 
   /**
    * Flag to mark initialization with a YAML formatted string.
@@ -535,7 +549,7 @@ class Configuration {
            hence we do not validate its default value here. */
         return key.default_value();
       } catch (std::bad_optional_access &) {
-        throw std::invalid_argument(
+        throw RequiredKeyMissing(
             "Key " + std::string{key} +  // NOLINT(whitespace/braces)
             " without default value taken, but missing in configuration.");
       }
@@ -623,7 +637,7 @@ class Configuration {
            hence we do not validate its default value here. */
         return key.default_value();
       } catch (std::bad_optional_access &) {
-        throw std::invalid_argument(
+        throw RequiredKeyMissing(
             "Key " + std::string{key} +  // NOLINT(whitespace/braces)
             " without default value read, but missing in configuration.");
       }
@@ -1629,9 +1643,8 @@ class Configuration {
     if (key.validate(value)) {
       return value;
     } else {
-      throw std::invalid_argument(
-          "Invalid value detected in configuration file:\n " +
-          key.as_yaml(value));
+      throw InvalidKeyValue("Invalid value detected in configuration file:\n " +
+                            key.as_yaml(value));
     }
   }
 

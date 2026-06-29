@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2020,2022,2024
+ *    Copyright (c) 2015-2020,2022,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -31,11 +31,10 @@ PauliBlocker::PauliBlocker(Configuration conf,
         "The recommended testparticles * ensembles is at least 20.");
   }
 
-  if (rc_ < rr_ || rr_ < 0.0 || rp_ < 0) {
+  if (rc_ < rr_) {
     logg[LPauliBlocking].error(
         "Please choose reasonable parameters for Pauli blocking:\n"
-        "All radii have to be positive and Gaussian_Cutoff should\n"
-        "be larger than Spatial_Averaging_Radius");
+        "Gaussian_Cutoff should be larger than Spatial_Averaging_Radius");
   }
 
   init_weights_analytical();

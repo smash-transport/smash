@@ -92,10 +92,10 @@ struct KeyTraits {
  * would be enough. However, this would be in general wrong because this functor
  * is used in the \c Key constructors which are used by the \c InputKeys class,
  * that is a collection of static <tt>Key</tt>s. Hence, since initialization
- * order of static/global objects in C++ is undefined, we need to to do
- * something else. We use therefore the "construct on first use idiom", making
- * the functor a static object in a function scope. For more information, refer
- * for example to <a
+ * order of static/global objects in C++ is undefined, we need to do something
+ * else. We use therefore the "construct on first use idiom", making the functor
+ * a static object in a function scope. For more information, refer for example
+ * to <a
  * href="https://isocpp.org/wiki/faq/ctors#static-init-order-on-first-use-members">ISO
  * C++ FAQ</a>.
  */
@@ -155,14 +155,13 @@ class Key {
    * @param[in] versions A list of one, two or three version numbers identifying
    * the versions in which the key has been introduced, deprecated and removed,
    * respectively.
-   * @param[in] validator An optional functor that takes a default_type
-   * parameters and returns a bool variable.
+   * @param[in] validator A functor that takes a default_type parameter and
+   * returns a bool variable.
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    */
-  explicit Key(
-      const KeyLabels& labels, const KeyMetadata& versions,
-      validator_type validator = detail::get_default_validator<default_type>())
+  explicit Key(const KeyLabels& labels, const KeyMetadata& versions,
+               validator_type validator)
       : Key{labels, Default<default_type>{}, versions, validator} {}
 
   /**
@@ -173,14 +172,14 @@ class Key {
    * @param[in] versions A list of one, two or three version numbers identifying
    * the versions in which the key has been introduced, deprecated and removed,
    * respectively.
-   * @param[in] validator An optional functor that takes a default_type
-   * parameters and returns a bool variable.
+   * @param[in] validator A functor that takes a default_type parameter and
+   * returns a bool variable.
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    * @throw std::invalid_argument If \c validator(value) returns \c false .
    */
   Key(const KeyLabels& labels, default_type value, const KeyMetadata& versions,
-      validator_type validator = detail::get_default_validator<default_type>())
+      validator_type validator)
       : Key{labels, Default<default_type>{value}, versions, validator} {}
 
   /**
@@ -192,15 +191,14 @@ class Key {
    * @param[in] versions A list of one, two or three version numbers identifying
    * the versions in which the key has been introduced, deprecated and removed,
    * respectively.
-   * @param[in] validator An optional functor that takes a default_type
-   * parameters and returns a bool variable.
+   * @param[in] validator A functor that takes a default_type parameter and
+   * returns a bool variable.
    *
    * @throw WrongNumberOfVersions If \c versions has the wrong size.
    * @throw std::logic_error If \c type is not \c DefaultType::Dependent .
    */
   Key(const KeyLabels& labels, DefaultType type_of_default,
-      const KeyMetadata& versions,
-      validator_type validator = detail::get_default_validator<default_type>())
+      const KeyMetadata& versions, validator_type validator)
       : Key{labels, Default<default_type>{type_of_default}, versions,
             validator} {}
 
@@ -336,6 +334,8 @@ class Key {
       } else if (default_.type_ == DefaultType::Value) {
         value_as_string << default_value();
       }
+    } else {
+      value_as_string << "<not-streamable>";
     }
     return as_yaml(value_as_string.str());
   }
