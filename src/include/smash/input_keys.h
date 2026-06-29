@@ -2481,17 +2481,20 @@ struct InputKeys {
    * - `"T-matrix"` &rarr; Tabulated cross sections (\iref{Abreu:2011ic},
    *    \iref{Tolos:2013kva}, \iref{Torres-Rincon:2014ffa}) are used, which
    *    handle elastic and inelastic binary collisions.
-   *    \note Currently, only \f$ D\pi \leftrightarrow D\pi \f$,
+   *    @attention Currently, only \f$ D\pi \leftrightarrow D\pi \f$,
    *    \f$ D\eta \leftrightarrow D\eta \f$, \f$ DK \leftrightarrow DK \f$, and
    *    the same channels for D*(2007) and D*(2010) are implemented. All other
    *    interactions including charmed hadrons are treated via intermediate
-   *    resonances.
+   *    resonances.<br>
+   *    When using this option of charm rescattering,
+   *    <tt>\ref key_CT_force_decays_at_end_ "Force_Decays_At_End"</tt> should
+   *    be set to true to handle decays properly.
    * - `"none"` &rarr; Interactions of charmed hadrons will not be taken into
    *    account, i.e. their cross sections are set to zero.
    *
    * @note
-   * This option facilitates disabling the two to two interactions of charmed
-   * hadrons that would otherwise be included via `"Charm_T-matrix"` in
+   * This config key facilitates disabling the two to two interactions of
+   * charmed hadrons that would otherwise be included via `"Charm_T-matrix"` in
    * <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>, without listing
    * every possible value except `"Charm_T-matrix"`.
    */
