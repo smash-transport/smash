@@ -911,7 +911,7 @@ std::optional<double> Dzeropiplus_elastic(double sqrts) {
           dedup_avg<double>(DPI_SQRTS, DZEROPIPLUS_ELASTIC_SIG);
       Dzeropiplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dzeropiplus_elastic_interpolation)(sqrts);
   }
@@ -937,7 +937,7 @@ std::optional<double> Dzeropiminus_elastic(double sqrts) {
           dedup_avg<double>(DPI_SQRTS, DZEROPIMINUS_ELASTIC_SIG);
       Dzeropiminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dzeropiminus_elastic_interpolation)(sqrts);
   }
@@ -952,7 +952,7 @@ std::optional<double> Dzeropizero_elastic(double sqrts) {
           dedup_avg<double>(DPI_SQRTS, DZEROPIZERO_ELASTIC_SIG);
       Dzeropizero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dzeropizero_elastic_interpolation)(sqrts);
   }
@@ -978,7 +978,7 @@ std::optional<double> Dpluspiplus_elastic(double sqrts) {
           dedup_avg<double>(DPI_SQRTS, DPLUSPIPLUS_ELASTIC_SIG);
       Dpluspiplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dpluspiplus_elastic_interpolation)(sqrts);
   }
@@ -993,7 +993,7 @@ std::optional<double> Dpluspiminus_elastic(double sqrts) {
           dedup_avg<double>(DPI_SQRTS, DPLUSPIMINUS_ELASTIC_SIG);
       Dpluspiminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dpluspiminus_elastic_interpolation)(sqrts);
   }
@@ -1019,7 +1019,7 @@ std::optional<double> Dpluspizero_elastic(double sqrts) {
           dedup_avg<double>(DPI_SQRTS, DPLUSPIZERO_ELASTIC_SIG);
       Dpluspizero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dpluspizero_elastic_interpolation)(sqrts);
   }
@@ -1045,7 +1045,7 @@ std::optional<double> Dpluseta_elastic(double sqrts) {
           dedup_avg<double>(DETA_SQRTS, DPLUSETA_ELASTIC_SIG);
       Dpluseta_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dpluseta_elastic_interpolation)(sqrts);
   }
@@ -1060,7 +1060,7 @@ std::optional<double> Dzeroeta_elastic(double sqrts) {
           dedup_avg<double>(DETA_SQRTS, DZEROETA_ELASTIC_SIG);
       Dzeroeta_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dzeroeta_elastic_interpolation)(sqrts);
   }
@@ -1075,7 +1075,7 @@ std::optional<double> DplusKplus_elastic(double sqrts) {
           dedup_avg<double>(DKAON_SQRTS, DPLUSKPLUS_ELASTIC_SIG);
       DplusKplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DplusKplus_elastic_interpolation)(sqrts);
   }
@@ -1090,7 +1090,7 @@ std::optional<double> DplusKzero_elastic(double sqrts) {
           dedup_avg<double>(DKAON_SQRTS, DPLUSKZERO_ELASTIC_SIG);
       DplusKzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DplusKzero_elastic_interpolation)(sqrts);
   }
@@ -1127,7 +1127,7 @@ std::optional<double> DzeroKplus_elastic(double sqrts) {
           dedup_avg<double>(DKAON_SQRTS, DZEROKPLUS_ELASTIC_SIG);
       DzeroKplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DzeroKplus_elastic_interpolation)(sqrts);
   }
@@ -1142,7 +1142,7 @@ std::optional<double> DzeroKzero_elastic(double sqrts) {
           dedup_avg<double>(DKAON_SQRTS, DZEROKZERO_ELASTIC_SIG);
       DzeroKzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DzeroKzero_elastic_interpolation)(sqrts);
   }
@@ -1157,7 +1157,7 @@ std::optional<double> DplusKbarzero_elastic(double sqrts) {
           dedup_avg<double>(DKAON_SQRTS, DPLUSKBARZERO_ELASTIC_SIG);
       DplusKbarzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DplusKbarzero_elastic_interpolation)(sqrts);
   }
@@ -1172,7 +1172,7 @@ std::optional<double> DplusKminus_elastic(double sqrts) {
           dedup_avg<double>(DKAON_SQRTS, DPLUSKMINUS_ELASTIC_SIG);
       DplusKminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DplusKminus_elastic_interpolation)(sqrts);
   }
@@ -1209,7 +1209,7 @@ std::optional<double> DzeroKbarzero_elastic(double sqrts) {
           dedup_avg<double>(DKAON_SQRTS, DZEROKBARZERO_ELASTIC_SIG);
       DzeroKbarzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DzeroKbarzero_elastic_interpolation)(sqrts);
   }
@@ -1224,7 +1224,7 @@ std::optional<double> DzeroKminus_elastic(double sqrts) {
           dedup_avg<double>(DKAON_SQRTS, DZEROKMINUS_ELASTIC_SIG);
       DzeroKminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DzeroKminus_elastic_interpolation)(sqrts);
   }
@@ -1239,7 +1239,7 @@ std::optional<double> Dstarpluspiplus_elastic(double sqrts) {
           dedup_avg<double>(DSTARPI_SQRTS, DSTARPLUSPIPLUS_ELASTIC_SIG);
       Dstarpluspiplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dstarpluspiplus_elastic_interpolation)(sqrts);
   }
@@ -1254,7 +1254,7 @@ std::optional<double> Dstarpluspiminus_elastic(double sqrts) {
           dedup_avg<double>(DSTARPI_SQRTS, DSTARPLUSPIMINUS_ELASTIC_SIG);
       Dstarpluspiminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dstarpluspiminus_elastic_interpolation)(sqrts);
   }
@@ -1280,7 +1280,7 @@ std::optional<double> Dstarpluspizero_elastic(double sqrts) {
           dedup_avg<double>(DSTARPI_SQRTS, DSTARPLUSPIZERO_ELASTIC_SIG);
       Dstarpluspizero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dstarpluspizero_elastic_interpolation)(sqrts);
   }
@@ -1317,7 +1317,7 @@ std::optional<double> Dstarzeropiplus_elastic(double sqrts) {
           dedup_avg<double>(DSTARPI_SQRTS, DSTARZEROPIPLUS_ELASTIC_SIG);
       Dstarzeropiplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dstarzeropiplus_elastic_interpolation)(sqrts);
   }
@@ -1332,7 +1332,7 @@ std::optional<double> Dstarzeropiminus_elastic(double sqrts) {
           dedup_avg<double>(DSTARPI_SQRTS, DSTARZEROPIMINUS_ELASTIC_SIG);
       Dstarzeropiminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dstarzeropiminus_elastic_interpolation)(sqrts);
   }
@@ -1358,7 +1358,7 @@ std::optional<double> Dstarzeropizero_elastic(double sqrts) {
           dedup_avg<double>(DSTARPI_SQRTS, DSTARZEROPIZERO_ELASTIC_SIG);
       Dstarzeropizero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dstarzeropizero_elastic_interpolation)(sqrts);
   }
@@ -1373,7 +1373,7 @@ std::optional<double> Dstarpluseta_elastic(double sqrts) {
           dedup_avg<double>(DSTARETA_SQRTS, DSTARPLUSETA_ELASTIC_SIG);
       Dstarpluseta_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dstarpluseta_elastic_interpolation)(sqrts);
   }
@@ -1388,7 +1388,7 @@ std::optional<double> Dstarzeroeta_elastic(double sqrts) {
           dedup_avg<double>(DSTARETA_SQRTS, DSTARZEROETA_ELASTIC_SIG);
       Dstarzeroeta_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*Dstarzeroeta_elastic_interpolation)(sqrts);
   }
@@ -1403,7 +1403,7 @@ std::optional<double> DstarplusKplus_elastic(double sqrts) {
           dedup_avg<double>(DSTARKAON_SQRTS, DSTARPLUSKPLUS_ELASTIC_SIG);
       DstarplusKplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DstarplusKplus_elastic_interpolation)(sqrts);
   }
@@ -1418,7 +1418,7 @@ std::optional<double> DstarplusKzero_elastic(double sqrts) {
           dedup_avg<double>(DSTARKAON_SQRTS, DSTARPLUSKZERO_ELASTIC_SIG);
       DstarplusKzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DstarplusKzero_elastic_interpolation)(sqrts);
   }
@@ -1455,7 +1455,7 @@ std::optional<double> DstarzeroKplus_elastic(double sqrts) {
           dedup_avg<double>(DSTARKAON_SQRTS, DSTARZEROKPLUS_ELASTIC_SIG);
       DstarzeroKplus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DstarzeroKplus_elastic_interpolation)(sqrts);
   }
@@ -1470,7 +1470,7 @@ std::optional<double> DstarzeroKzero_elastic(double sqrts) {
           dedup_avg<double>(DSTARKAON_SQRTS, DSTARZEROKZERO_ELASTIC_SIG);
       DstarzeroKzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DstarzeroKzero_elastic_interpolation)(sqrts);
   }
@@ -1485,7 +1485,7 @@ std::optional<double> DstarplusKbarzero_elastic(double sqrts) {
           dedup_avg<double>(DSTARKAON_SQRTS, DSTARPLUSKBARZERO_ELASTIC_SIG);
       DstarplusKbarzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DstarplusKbarzero_elastic_interpolation)(sqrts);
   }
@@ -1500,7 +1500,7 @@ std::optional<double> DstarplusKminus_elastic(double sqrts) {
           dedup_avg<double>(DSTARKAON_SQRTS, DSTARPLUSKMINUS_ELASTIC_SIG);
       DstarplusKminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DstarplusKminus_elastic_interpolation)(sqrts);
   }
@@ -1537,7 +1537,7 @@ std::optional<double> DstarzeroKbarzero_elastic(double sqrts) {
           dedup_avg<double>(DSTARKAON_SQRTS, DSTARZEROKBARZERO_ELASTIC_SIG);
       DstarzeroKbarzero_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DstarzeroKbarzero_elastic_interpolation)(sqrts);
   }
@@ -1552,7 +1552,7 @@ std::optional<double> DstarzeroKminus_elastic(double sqrts) {
           dedup_avg<double>(DSTARKAON_SQRTS, DSTARZEROKMINUS_ELASTIC_SIG);
       DstarzeroKminus_elastic_interpolation =
           std::make_unique<InterpolateDataLinear<double>>(
-              dedup_x, dedup_y, ExtrapolationType::Constant);
+              dedup_x, dedup_y, ExtrapolationType::Zero);
     }
     return (*DstarzeroKminus_elastic_interpolation)(sqrts);
   }
