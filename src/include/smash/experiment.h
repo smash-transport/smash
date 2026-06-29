@@ -15,8 +15,6 @@
 #include <utility>
 #include <vector>
 
-#include <Pythia8/Basics.h>
-
 #include "actionfinderfactory.h"
 #include "actions.h"
 #include "bremsstrahlungaction.h"
