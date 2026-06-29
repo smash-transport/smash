@@ -408,7 +408,7 @@ TEST(validators_collision_term) {
   VERIFY(popcorn_rate.validate(0.0));
   VERIFY(popcorn_rate.validate(1.0));
   VERIFY(!popcorn_rate.validate(-1e-12));
-  VERIFY(!popcorn_rate.validate(1.1));
+  VERIFY(!popcorn_rate.validate(2.1));
   const auto& power_pf = InputKeys::collTerm_stringParam_powerParticleFormation;
   VERIFY(power_pf.validate(1.0));
   const auto& prob_P_DUU = InputKeys::collTerm_stringParam_probabilityPToDUU;
@@ -442,17 +442,17 @@ TEST(validators_collision_term) {
   VERIFY(string_ZA_lead.validate(0.0));
   VERIFY(string_ZA_lead.validate(2.0));
   VERIFY(!string_ZA_lead.validate(-1e-12));
-  VERIFY(!string_ZA_lead.validate(2.1));
+  VERIFY(!string_ZA_lead.validate(6.1));
   const auto& string_ZB = InputKeys::collTerm_stringParam_stringZB;
   VERIFY(string_ZB.validate(0.0));
   VERIFY(string_ZB.validate(2.0));
   VERIFY(!string_ZB.validate(-1e-12));
   VERIFY(!string_ZB.validate(2.1));
   const auto& string_ZB_lead = InputKeys::collTerm_stringParam_stringZBLeading;
-  VERIFY(string_ZB_lead.validate(0.0));
+  VERIFY(string_ZB_lead.validate(0.2));
   VERIFY(string_ZB_lead.validate(2.0));
   VERIFY(!string_ZB_lead.validate(-1e-12));
-  VERIFY(!string_ZB_lead.validate(2.1));
+  VERIFY(!string_ZB_lead.validate(6.1));
   const auto& use_monash_tune = InputKeys::collTerm_stringParam_useMonashTune;
   VERIFY(use_monash_tune.validate(false));
   const auto& hard_string_transition_mode =

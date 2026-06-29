@@ -1051,6 +1051,20 @@ Experiment<Modus>::Experiment(Configuration &config,
     max_transverse_distance_sqr_ =
         scat_finder->max_transverse_distance_sqr(parameters_.testparticles);
     process_string_ptr_ = scat_finder->get_process_string_ptr();
+
+    /* Initialize Pythia's MPI machinery with a fixed center-of-mass energy
+     * to ensure reproducible event generation. This prevents the MPI
+     * initialization from depending on the energy of the current incoming
+     * hadrons. The factor of 1.2 provides a safety margin for Fermi motion.
+     *
+     * TODO: Investigate whether a better choice for the MPI initialization
+     * energy ceiling can be determined.
+     */
+
+    if (modus_.is_collider() && process_string_ptr_) {
+      process_string_ptr_->set_mpi_initialization_sqrts(modus_.sqrt_s_NN() *
+                                                        1.2);
+    }
     action_finders_.emplace_back(std::move(scat_finder));
   } else {
     max_transverse_distance_sqr_ =

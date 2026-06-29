@@ -2572,87 +2572,157 @@ CollisionBranchList CrossSections::string_excitation(
    * single-diffractive AB->AX and AB->XB in equal proportion.
    * The way it is done here is not unique. I (ryu) think that at high energy
    * collision this is not an issue, but at sqrt_s < 10 GeV it may matter. */
-  std::array<double, 3> xs = string_process->cross_sections_diffractive(
-      pdgid[0], pdgid[1], std::sqrt(mandelstam_s));
+  std::array<double, 3> xs_diffractive =
+      string_process->cross_sections_diffractive(pdgid[0], pdgid[1],
+                                                 std::sqrt(mandelstam_s));
+
   if (finder_parameters.use_AQM) {
-    for (int ip = 0; ip < 3; ip++) {
-      xs[ip] *= AQM_scaling;
+    for (double& x : xs_diffractive) {
+      x *= AQM_scaling;
     }
   }
-  double single_diffr_AX = xs[0], single_diffr_XB = xs[1], double_diffr = xs[2];
+
+  double single_diffr_AX = xs_diffractive[0];
+  double single_diffr_XB = xs_diffractive[1];
+  double double_diffr = xs_diffractive[2];
+
   double single_diffr = single_diffr_AX + single_diffr_XB;
   double diffractive = single_diffr + double_diffr;
 
-  const double nondiffractive_all =
+  const double nondiffractive =
       std::max(0., total_string_xs - sig_annihilation - diffractive);
-  diffractive = total_string_xs - sig_annihilation - nondiffractive_all;
+
+  diffractive = total_string_xs - sig_annihilation - nondiffractive;
   double_diffr = std::max(0., diffractive - single_diffr);
-  const double a = (diffractive - double_diffr) / single_diffr;
+
+  const double a =
+      single_diffr > 0.0 ? (diffractive - double_diffr) / single_diffr : 0.0;
+
   single_diffr_AX *= a;
   single_diffr_XB *= a;
+
   assert(std::abs(single_diffr_AX + single_diffr_XB + double_diffr +
-                  sig_annihilation + nondiffractive_all - total_string_xs) <
-         1.e-6);
+                  sig_annihilation + nondiffractive - total_string_xs) < 1.e-6);
+  enum class Proc { ND, SD_AX, SD_XB, DD, N };
+  enum class Comp { Soft, Hard, N };
 
-  double nondiffractive_soft = 0.0;
-  double nondiffractive_hard = 0.0;
+  constexpr std::size_t n_proc = static_cast<std::size_t>(Proc::N);
+  constexpr std::size_t n_comp = static_cast<std::size_t>(Comp::N);
 
-  if (nondiffractive_all > 0.0) {
+  std::array<std::array<double, n_comp>, n_proc> split_xs{};
+
+  auto proc_idx = [](Proc p) { return static_cast<std::size_t>(p); };
+
+  auto comp_idx = [](Comp c) { return static_cast<std::size_t>(c); };
+
+  auto soft = [&](Proc p) -> double& {
+    return split_xs[proc_idx(p)][comp_idx(Comp::Soft)];
+  };
+
+  auto hard = [&](Proc p) -> double& {
+    return split_xs[proc_idx(p)][comp_idx(Comp::Hard)];
+  };
+
+  auto set_all_soft = [&](Proc p, double total) {
+    soft(p) = total;
+    hard(p) = 0.0;
+  };
+
+  auto split = [&](Proc p, double total, double weight_hard) {
+    hard(p) = total * weight_hard;
+    soft(p) = total - hard(p);
+  };
+  auto split_all_string_processes = [&](double weight_hard) {
+    split(Proc::ND, nondiffractive, weight_hard);
+    split(Proc::SD_AX, single_diffr_AX, weight_hard);
+    split(Proc::SD_XB, single_diffr_XB, weight_hard);
+    split(Proc::DD, double_diffr, weight_hard);
+  };
+
+  if (finder_parameters.hard_string_transition_mode ==
+      HardStringTransitionMode::Custom_Range) {
+    const auto& [hard_transition_start, hard_transition_end] =
+        finder_parameters.hard_string_transition_energy_range;
+
+    const double weight_hard = transition_probability_at_sqrts(
+        hard_transition_start, hard_transition_end);
+    split_all_string_processes(weight_hard);
+  } else if (nondiffractive > 0.0) {
     const double hard_xsec = AQM_scaling * string_hard_cross_section();
 
-    if (finder_parameters.hard_string_transition_mode ==
-        HardStringTransitionMode::Custom_Range) {
-      const auto& [hard_transition_start, hard_transition_end] =
-          finder_parameters.hard_string_transition_energy_range;
+    /* Use the non-diffractive exponential transition probability for all
 
-      const double weight_hard = transition_probability_at_sqrts(
-          hard_transition_start, hard_transition_end);
-
-      nondiffractive_hard = nondiffractive_all * weight_hard;
-      nondiffractive_soft = nondiffractive_all - nondiffractive_hard;
-
-    } else {
-      /* Hard string process is added by hard cross section
-       * in conjunction with multipartion interaction picture
-       * \iref{Sjostrand:1987su}. */
-      nondiffractive_soft =
-          nondiffractive_all * std::exp(-hard_xsec / nondiffractive_all);
-      nondiffractive_hard = nondiffractive_all - nondiffractive_soft;
-    }
+    * string-excitation channels, so that soft strings are suppressed at high
+    * energies also for diffractive processes. */
+    const double weight_soft = std::exp(-hard_xsec / nondiffractive);
+    const double weight_hard = std::clamp(1.0 - weight_soft, 0.0, 1.0);
+    split_all_string_processes(weight_hard);
+  } else {
+    set_all_soft(Proc::ND, nondiffractive);
+    set_all_soft(Proc::SD_AX, single_diffr_AX);
+    set_all_soft(Proc::SD_XB, single_diffr_XB);
+    set_all_soft(Proc::DD, double_diffr);
   }
-  logg[LCrossSections].debug("String cross sections [mb] are");
-  logg[LCrossSections].debug("Single-diffractive AB->AX: ", single_diffr_AX);
-  logg[LCrossSections].debug("Single-diffractive AB->XB: ", single_diffr_XB);
-  logg[LCrossSections].debug("Double-diffractive AB->XX: ", double_diffr);
-  logg[LCrossSections].debug("Soft non-diffractive: ", nondiffractive_soft);
-  logg[LCrossSections].debug("Hard non-diffractive: ", nondiffractive_hard);
+  logg[LCrossSections].debug("Soft string cross sections [mb] are");
+  logg[LCrossSections].debug("Soft single-diffractive AB->AX: ",
+                             soft(Proc::SD_AX));
+  logg[LCrossSections].debug("Soft single-diffractive AB->XB: ",
+                             soft(Proc::SD_XB));
+  logg[LCrossSections].debug("Soft double-diffractive AB->XX: ",
+                             soft(Proc::DD));
+  logg[LCrossSections].debug("Soft non-diffractive: ", soft(Proc::ND));
   logg[LCrossSections].debug("B-Bbar annihilation: ", sig_annihilation);
 
+  logg[LCrossSections].debug("Hard string cross sections [mb] are");
+  logg[LCrossSections].debug("Hard single-diffractive AB->AX: ",
+                             hard(Proc::SD_AX));
+  logg[LCrossSections].debug("Hard single-diffractive AB->XB: ",
+                             hard(Proc::SD_XB));
+  logg[LCrossSections].debug("Hard double-diffractive AB->XX: ",
+                             hard(Proc::DD));
+  logg[LCrossSections].debug("Hard non-diffractive: ", hard(Proc::ND));
+
   // cross section of soft string excitation including annihilation
-  const double sig_string_soft = total_string_xs - nondiffractive_hard;
+  const double sig_string_soft = soft(Proc::SD_AX) + soft(Proc::SD_XB) +
+                                 soft(Proc::DD) + soft(Proc::ND) +
+                                 sig_annihilation;
 
   // fill the list of process channels
   if (sig_string_soft > 0.) {
     channel_list.push_back(std::make_unique<CollisionBranch>(
-        single_diffr_AX, ProcessType::StringSoftSingleDiffractiveAX));
+        soft(Proc::SD_AX), ProcessType::StringSoftSingleDiffractiveAX));
     channel_list.push_back(std::make_unique<CollisionBranch>(
-        single_diffr_XB, ProcessType::StringSoftSingleDiffractiveXB));
+        soft(Proc::SD_XB), ProcessType::StringSoftSingleDiffractiveXB));
     channel_list.push_back(std::make_unique<CollisionBranch>(
-        double_diffr, ProcessType::StringSoftDoubleDiffractive));
+        soft(Proc::DD), ProcessType::StringSoftDoubleDiffractive));
     channel_list.push_back(std::make_unique<CollisionBranch>(
-        nondiffractive_soft, ProcessType::StringSoftNonDiffractive));
+        soft(Proc::ND), ProcessType::StringSoftNonDiffractive));
+
     if (can_annihilate) {
       channel_list.push_back(std::make_unique<CollisionBranch>(
           sig_annihilation, ProcessType::StringSoftAnnihilation));
     }
   }
-  if (nondiffractive_hard > 0.) {
+
+  if (hard(Proc::SD_AX) > 0.) {
     channel_list.push_back(std::make_unique<CollisionBranch>(
-        nondiffractive_hard, ProcessType::StringHard));
+        hard(Proc::SD_AX), ProcessType::StringHardSingleDiffractiveAX));
   }
+  if (hard(Proc::SD_XB) > 0.) {
+    channel_list.push_back(std::make_unique<CollisionBranch>(
+        hard(Proc::SD_XB), ProcessType::StringHardSingleDiffractiveXB));
+  }
+  if (hard(Proc::DD) > 0.) {
+    channel_list.push_back(std::make_unique<CollisionBranch>(
+        hard(Proc::DD), ProcessType::StringHardDoubleDiffractive));
+  }
+  if (hard(Proc::ND) > 0.) {
+    channel_list.push_back(std::make_unique<CollisionBranch>(
+        hard(Proc::ND), ProcessType::StringHardNonDiffractive));
+  }
+
   return channel_list;
 }
-
 double CrossSections::high_energy(
     const ScatterActionsFinderParameters& finder_parameters) const {
   const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();

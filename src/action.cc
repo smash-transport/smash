@@ -20,6 +20,7 @@
 #include "smash/logging.h"
 #include "smash/pauliblocking.h"
 #include "smash/potential_globals.h"
+#include "smash/processbranch.h"
 #include "smash/quantumnumbers.h"
 
 namespace smash {
@@ -358,8 +359,7 @@ double Action::check_conservation(const uint32_t id_process) const {
     std::string err_msg = before.report_deviations(after);
     /* Pythia does not conserve energy and momentum at high energy, so we just
      * print the warning and continue. */
-    if ((is_string_soft_process(process_type_)) ||
-        (process_type_ == ProcessType::StringHard)) {
+    if (is_string_process(process_type_)) {
       logg[LAction].warn() << "Conservation law violations due to Pythia\n"
                            << particle_names.str() << err_msg;
       energy_violation = after.momentum()[0] - before.momentum()[0];

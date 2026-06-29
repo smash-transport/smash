@@ -26,6 +26,10 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * `CrossSections::probability_transit_high` has been replaced by `CrossSections::transition_probability_at_sqrts`.
 * New key `Ignore_Unformed` in `Output: Thermodynamics` to exclude unformed (and preformed) particles from the density evaluation. This is useful e.g. in afterburner calculations.
 * The path to tabulations can now be passed with the command line argument `-t to/path/tabulations`. However, if the input files for particles/decay modes or SMASH version change, the tabulations will be recalculated in the indicated folder. This is useful to make several runs share the same tabulations folder, even if these are in different output directories, avoiding creating several sets of possibly identical files.
+* New key `Unformed_Xsec_Suppression` to apply an additional suppression factor to the interaction cross sections of unformed hadrons during their formation time. A value of 1.0 corresponds to no additional suppression, while smaller values reduce the interaction probability of unformed hadrons. This parameter can be used as a phenomenological tuning knob for dense environments.
+* New key `Pythia_Settings` to pass additional PYTHIA 8 settings directly to the internal PYTHIA instances used for string fragmentation. These settings are applied after the corresponding SMASH string parameters, so values specified in `Pythia_Settings` take precedence. Invalid PYTHIA settings cause SMASH to terminate during initialization.
+* New key `Damp_Popcorn` in the Pythia string-fragmentation settings to control whether a diquark endpoint can hadronize via the popcorn mechanism into a leading meson before producing the baryon. A value of 1 corresponds to normal popcorn production, while 0 suppresses popcorn completely, such that the diquark fragments directly into a leading baryon. Intermediate values interpolate between these limits. This corresponds to PYTHIA’s `BeamRemnants:dampPopcorn` parameter.
+* Hard diffractive string processes are now included in the string transition. Single- and double-diffractive string excitations can therefore be split into soft and hard components, in the same way as non-diffractive string excitation.
 
 ### Changed
 * ⚠️ To build SMASH tuning compilation for a different architecture than the `native` one, the `SMASH_ARCH_FLAG` CMake variable must now be used (e.g. passing `-DSMASH_ARCH_FLAG=x86-64` to CMake). Using `CMAKE_CXX_FLAGS` and `CMAKE_C_FLAGS` or setting the environment `CFLAGS` and `CXXFLAGS` variables will not have the desired effect!
@@ -42,6 +46,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * The value `0.0` for the incident energy in collider modus is not accepted anymore.
 * The `Elastic_NN_Cutoff_Sqrts: 1.8` has been removed from shipped input file for `Box` and `Sphere` cases (the default value `1.98` is then used).
 * A maximum version of 3.1.11 for Rivet is now imposed, as SMASH cannot compile with the 4.x versions.
+* The separate SMASH procedure for manually peeling off leading baryons from string ends has been replaced by PYTHIA’s hard beam-remnant handling. Accordingly, `StringZ_A_Leading` and `StringZ_B_Leading` now map to PYTHIA’s `BeamRemnants:hardRemnantBaryonA` and `BeamRemnants:hardRemnantBaryonB`. Together with `BeamRemnants:dampPopcorn`, these settings control the baryon stopping of leading baryons. This change required some string-fragmentation parameters to be retuned.
 
 ### Removed
 * CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally.

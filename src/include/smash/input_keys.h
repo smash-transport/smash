@@ -579,7 +579,7 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  * hard components.
  *
  * The transition mode is selected via the `Mode` key:
- * - `Exponential`: use the legacy exponential splitting of the non-diffractive
+ * - `Exponential`: use the exponential splitting of the non-diffractive
  *   cross section. The probability for a purely soft non-diffractive
  *   interaction is given by
  *   \f[
@@ -609,7 +609,27 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
          Mode: Custom_Range
          Energy_Range: [10.0, 20.0]
  \endverbatim
- */
+* Enabling hard string interactions at lower collision energies changes
+* baryon stopping. Therefore, some string-fragmentation and MPI parameters
+* may need to be adjusted. The following setup can be used as a starting
+* point for studies with an early hard-string transition:
+*\verbatim
+Collision_Term:
+  Hard_String_Transition:
+    Mode: Custom_Range
+    Energy_Range: [10.0, 11.0]
+  String_Parameters:
+    StringZ_A_Leading: 0.2
+    StringZ_B_Leading: 5.0
+    Damp_Popcorn: 0.0
+    String_Sigma_T: 0.3
+    Pythia_Settings:
+      - "MultipartonInteractions:ecmPow = 0.152"
+\endverbatim
+* These parameters are intended as a phenomenological starting point for
+* dedicated studies. They should not be interpreted as a tuned parameter set,
+* and further tuning may be required for quantitative applications.
+*/
 
 /*!\Userguide
  * \page doxypage_input_conf_modi
@@ -3105,7 +3125,7 @@ struct InputKeys {
    * Select the mode used for the transition from soft to hard string
    * excitation.
    *
-   * - Exponential: use the legacy exponential suppression based on the hard
+   * - Exponential: use exponential suppression based on the hard
    *   string cross section in the Pythia multiparton interaction (MPI)
    *   framework.
    * - Custom_Range: use a smooth transition from soft to hard string excitation
@@ -3332,7 +3352,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_diquark_supp_,Diquark_Supp,double,0.036,
+   * \optional_key{key_CT_SP_diquark_supp_,Diquark_Supp,double,0.04,
    * \f$0\leq x\leq 1\f$}
    *
    * Diquark suppression factor. Defines the probability to produce a diquark
@@ -3343,7 +3363,7 @@ struct InputKeys {
    */
   inline static const Key<double> collTerm_stringParam_diquarkSuppression{
       InputSections::c_stringParameters + "Diquark_Supp",
-      0.036,
+      0.04,
       {"1.3"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 1.0;
@@ -3467,7 +3487,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_popcorn_rate_,Popcorn_Rate,double,
-   * 0.15,\f$0\leq x\leq 1\f$}
+   * 0.5,\f$0\leq x\leq 2\f$}
    *
    * Parameter StringFlav:popcornRate, which determines production rate of
    * popcorn mesons in string fragmentation. It is possible to produce a popcorn
@@ -3479,8 +3499,35 @@ struct InputKeys {
    */
   inline static const Key<double> collTerm_stringParam_popcornRate{
       InputSections::c_stringParameters + "Popcorn_Rate",
-      0.15,
+      0.5,
       {"1.6"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 2.0;
+      }};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_damp_popcorn_,Damp_Popcorn,double,0.5,\f$0\leq
+   * x\leq 1\f$}
+   *
+   * Controls whether a diquark endpoint may hadronize via the popcorn
+   * mechanism into a leading meson before producing the baryon.
+   *
+   * A value of \f$1\f$ corresponds to normal popcorn production, while
+   * \f$0\f$ suppresses popcorn completely such that the diquark always
+   * fragments directly into a leading baryon. Intermediate values interpolate
+   * between these two limits.
+   *
+   * Corresponds to Pythia's
+   * <tt>BeamRemnants:dampPopcorn</tt> parameter.
+   */
+  /**
+   * \see_key{key_CT_SP_damp_popcorn_}
+   */
+  inline static const Key<double> collTerm_stringParam_dampPopcorn{
+      InputSections::c_stringParameters + "Damp_Popcorn",
+      0.5,
+      {"3.4"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 1.0;
       }};
@@ -3491,10 +3538,10 @@ struct InputKeys {
    * double,±1,\none}
    *
    * The default value of this parameter is `+1` if
-   * \f$\sqrt{s}<200\,\mathrm{GeV}\f$ and `-1` otherwise. If positive, the power
-   * with which the cross section scaling factor of string fragments grows in
-   * time until it reaches 1. If negative, the scaling factor will be constant
-   * and jump to 1 once the particle forms.
+   * \f$\sqrt{s}<200\,\mathrm{GeV}\f$ and `-1` otherwise. If positive, the
+   * power with which the cross section scaling factor of string fragments
+   * grows in time until it reaches 1. If negative, the scaling factor will be
+   * constant and jump to 1 once the particle forms.
    */
   /**
    * \see_key{key_CT_SP_power_part_formation_}
@@ -3609,10 +3656,10 @@ struct InputKeys {
    * \optional_key{key_CT_SP_string_tension_,String_Tension,double,1.0,
    * \f$x\geq 0\f$}
    *
-   * String tension \f$\kappa\f$ \unit{in GeV/fm} connecting massless quarks in
-   * Hamiltonian, \f[H=|p_1|+|p_2|+\kappa |x_1-x_2|\;.\f]
-   * This parameter is only used to determine particles' formation times
-   * according to the yo-yo formalism (in the soft string routine for now).
+   * String tension \f$\kappa\f$ \unit{in GeV/fm} connecting massless quarks
+   * in Hamiltonian, \f[H=|p_1|+|p_2|+\kappa |x_1-x_2|\;.\f] This parameter is
+   * only used to determine particles' formation times according to the yo-yo
+   * formalism (in the soft string routine for now).
    */
   /**
    * \see_key{key_CT_SP_string_tension_}
@@ -3625,7 +3672,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_a_,StringZ_A,double,2.0,
+   * \optional_key{key_CT_SP_stringz_a_,StringZ_A,double,1.0,
    * \f$0\leq x\leq 2\f$}
    *
    * Parameter \f$a\f$ in Pythia fragmentation function \f$f(z)\f$,
@@ -3636,7 +3683,7 @@ struct InputKeys {
    */
   inline static const Key<double> collTerm_stringParam_stringZA{
       InputSections::c_stringParameters + "StringZ_A",
-      2.0,
+      1.0,
       {"1.3"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 2.0;
@@ -3644,7 +3691,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.2,
+   * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.0,
    * \f$0\leq x\leq 2\f$}
    *
    * Parameter \f$a\f$ in Lund fragmentation function (see <tt>\ref
@@ -3656,7 +3703,7 @@ struct InputKeys {
    */
   inline static const Key<double> collTerm_stringParam_stringZALeading{
       InputSections::c_stringParameters + "StringZ_A_Leading",
-      0.2,
+      0.0,
       {"1.6"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 2.0;
@@ -3664,7 +3711,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.55,
+   * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.3,
    * \f$0\leq x\leq 2\f$}
    *
    * Parameter \f$b\f$ \unit{in 1/GeV²} in Pythia fragmentation function shown
@@ -3675,7 +3722,7 @@ struct InputKeys {
    */
   inline static const Key<double> collTerm_stringParam_stringZB{
       InputSections::c_stringParameters + "StringZ_B",
-      0.55,
+      0.3,
       {"1.3"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 2.0;
@@ -3684,7 +3731,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_stringz_b_leading_,StringZ_B_Leading,double,
-   * 2.0,\f$0\leq x\leq 2\f$}
+   * 3.0,\f$0.2\leq x\leq 5\f$}
    *
    * Parameter \f$b\f$ \unit{in 1/GeV²} in Lund fraghmentation function (see
    * <tt>\ref key_CT_SP_stringz_a_ "StringZ_B"</tt>) used to sample the light
@@ -3696,10 +3743,10 @@ struct InputKeys {
    */
   inline static const Key<double> collTerm_stringParam_stringZBLeading{
       InputSections::c_stringParameters + "StringZ_B_Leading",
-      2.0,
+      3.0,
       {"1.6"},
       [](const double &value) noexcept {
-        return value >= 0.0 && value <= 2.0;
+        return value >= 0.2 && value <= 5.0;
       }};
 
   /*!\Userguide
@@ -3727,8 +3774,8 @@ struct InputKeys {
    *               Unformed_Xsec_Suppression,double,0.7,
    *               \f$0 \le x \le 1\f$}
    *
-   * Applies an additional suppression factor to the interaction cross sections
-   * of unformed hadrons.
+   * Applies an additional suppression factor to the interaction cross
+   * sections of unformed hadrons.
    *
    * This parameter rescales the effective cross sections of hadrons during
    * their formation time and can be used to tune the interaction strength of
@@ -3753,13 +3800,41 @@ struct InputKeys {
       }};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_pythia_settings_,
+   *               Pythia_Settings,list,[],\none}
+   *
+   * Additional Pythia 8 settings passed directly to the internal Pythia
+   * instances used for string fragmentation.
+   *
+   * These settings are applied after the corresponding SMASH string
+   * parameters. Consequently, if a setting is specified both through a SMASH
+   * input key and in `Pythia_Settings`, the value given in
+   * `Pythia_Settings` takes precedence.
+   *
+   * Invalid settings cause SMASH to terminate during initialization.
+   */
+  /**
+   * \see_key{key_CT_SP_pythia_settings_}
+   */
+  inline static const Key<std::vector<std::string>>
+      collTerm_stringParam_pythiaSettings{
+          InputSections::c_stringParameters + "Pythia_Settings",
+          std::vector<std::string>{},
+          {"3.4"},
+          detail::get_default_validator<std::vector<std::string>>()};
+
+  /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_decays_,Decays,bool,false,\none}
    *
-   * Whether or not to enable dilepton production from hadron decays.
-   * This includes direct decays as well as Dalitz decays. Dilepton decays
-   * additionally have to be uncommented in the used *decaymodes.txt* file
-   * (see also \ref input_collision_term_dileptons_note_ "this note").
+   * Whether or not to enable dilepton production
+   * from hadron decays. This includes direct
+   * decays as well as Dalitz decays. Dilepton
+   * decays additionally have to be uncommented in
+   * the used *decaymodes.txt* file (see also \ref
+   * input_collision_term_dileptons_note_ "this
+   * note").
    */
   /**
    * \see_key{key_CT_dileptons_decays_}
@@ -3774,7 +3849,8 @@ struct InputKeys {
    * \page doxypage_input_conf_ct_photons
    * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false,\none}
    *
-   * Whether or not to enable photon production in mesonic scattering processes.
+   * Whether or not to enable photon production in mesonic scattering
+   * processes.
    */
   /**
    * \see_key{key_CT_photons_2to2_scatterings_}
@@ -3832,8 +3908,8 @@ struct InputKeys {
    * \required_key_no_line{key_MC_e_kin_,E_Kin,double,\f$x>0\f$}
    *
    * Defines the energy of the collision by the kinetic energy per nucleon of
-   * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus is
-   * at rest. Note, this can also be given per-beam as described in \ref
+   * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus
+   * is at rest. Note, this can also be given per-beam as described in \ref
    * doxypage_input_conf_modi_C_proj_targ. This key can be
    * omitted if the incident energy is specified in a different way.
    */
@@ -3850,8 +3926,8 @@ struct InputKeys {
    * \required_key_no_line{key_MC_e_tot_,E_Tot,double,\f$x>0\f$}
    *
    * Defines the energy of the collision by the total energy per nucleon of
-   * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus is
-   * at rest. Note, this can also be given per-beam as described in \ref
+   * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus
+   * is at rest. Note, this can also be given per-beam as described in \ref
    * doxypage_input_conf_modi_C_proj_targ. This key can be
    * omitted if the incident energy is specified in a different way.
    */
@@ -3868,10 +3944,10 @@ struct InputKeys {
    * \required_key_no_line{key_MC_p_lab_,P_Lab,double,\f$x>0\f$}
    *
    * Defines the energy of the collision by the initial momentum per nucleon
-   * of the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus
-   * is at rest.  This must be positive.  Note, this can also be given per-beam
-   * as described in \ref doxypage_input_conf_modi_C_proj_targ.
-   * This key can be omitted if the incident energy is specified in a different
+   * of the projectile nucleus, \unit{in AGeV}. This assumes the target
+   * nucleus is at rest.  This must be positive.  Note, this can also be given
+   * per-beam as described in \ref doxypage_input_conf_modi_C_proj_targ. This
+   * key can be omitted if the incident energy is specified in a different
    * way.
    */
   /**
@@ -3886,10 +3962,10 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_collider
    * \required_key_no_line{key_MC_sqrtsnn_,Sqrtsnn,double,\f$x>0\f$}
    *
-   * Defines the energy of the collision \unit{in GeV} as center-of-mass energy
-   * in the collision of two hadrons, one for each nucleus, having the average
-   * mass of all the hadrons composing the given nucleus. This key can be
-   * omitted if the incident energy is specified in a different way.
+   * Defines the energy of the collision \unit{in GeV} as center-of-mass
+   * energy in the collision of two hadrons, one for each nucleus, having the
+   * average mass of all the hadrons composing the given nucleus. This key can
+   * be omitted if the incident energy is specified in a different way.
    */
   /**
    * \see_key{key_MC_sqrtsnn_}
@@ -3912,10 +3988,10 @@ struct InputKeys {
    * \note
    * Using `E_Tot`, `E_kin` or `P_Lab` to quantify the collision energy is not
    * sufficient to configure a collision in a fixed target frame. You need to
-   * additionally change the `Calculation_Frame`. Any format of incident energy
-   * can however be combined with any calculation frame, the provided incident
-   * energy is then intrinsically translated to the quantity needed for the
-   * computation.
+   * additionally change the `Calculation_Frame`. Any format of incident
+   * energy can however be combined with any calculation frame, the provided
+   * incident energy is then intrinsically translated to the quantity needed
+   * for the computation.
    */
   /**
    * \see_key{key_MC_calc_frame_}
@@ -3948,8 +4024,8 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_collider
    * \optional_key{key_MC_fermi_motion_,Fermi_Motion,string,"off",\any_valid}
    *
-   * - `"on"` &rarr; Switch Fermi motion on, it is recommended to also activate
-   * potentials.
+   * - `"on"` &rarr; Switch Fermi motion on, it is recommended to also
+   * activate potentials.
    * - `"off"` &rarr; Switch Fermi motion off.
    * - `"frozen"` &rarr; Use "frozen" if you want to use Fermi motion
    * without potentials.
@@ -3988,10 +4064,8 @@ struct InputKeys {
    * \optional_key{key_MC_PT_diffusiveness_,Diffusiveness,double,
    * </tt>\f$d(A)\f$<tt>, \f$0\le d \le1\f$}
    *
-   * Diffusiveness of the Woods-Saxon distribution for the nucleus \unit{in fm}.
-   * In general, the default value is
-   * \f[
-   * d(A)=\begin{cases}
+   * Diffusiveness of the Woods-Saxon distribution for the nucleus \unit{in
+   * fm}. In general, the default value is \f[ d(A)=\begin{cases}
    * 0.545 & A \le 16\\
    * 0.54  & A > 16
    * \end{cases}\;.
@@ -4127,7 +4201,8 @@ struct InputKeys {
    *
    * Set the kinetic energy \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
-   * key can be omitted if the incident energy is specified in a different way.
+   * key can be omitted if the incident energy is specified in a different
+   * way.
    */
   /**
    * \see_key{key_MC_PT_e_kin_}
@@ -4150,7 +4225,8 @@ struct InputKeys {
    *
    * Set the totat energy \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
-   * key can be omitted if the incident energy is specified in a different way.
+   * key can be omitted if the incident energy is specified in a different
+   * way.
    */
   /**
    * \see_key{key_MC_PT_e_tot_}
@@ -4173,14 +4249,15 @@ struct InputKeys {
    *
    * Set the momentum \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
-   * key can be omitted if the incident energy is specified in a different way.
+   * key can be omitted if the incident energy is specified in a different
+   * way.
    *
    * \note
    * If the beam specific kinetic energy or momentum is set using either of
-   * these keys, then it must be specified in the same way (not necessarily same
-   * value) for both beams. This is for example useful to simulate for p-Pb
-   * collisions at the LHC, where the centre-of-mass system does not correspond
-   * to the laboratory system (see \ref
+   * these keys, then it must be specified in the same way (not necessarily
+   * same value) for both beams. This is for example useful to simulate for
+   * p-Pb collisions at the LHC, where the centre-of-mass system does not
+   * correspond to the laboratory system (see \ref
    * input_modi_collider_projectile_and_target_ex1_ "example").
    */
   /**
@@ -4203,8 +4280,9 @@ struct InputKeys {
    * <hr>
    * <h3> Custom nuclei </h3>
    *
-   * It is possible to further customize the projectile and/or target using the
-   * `Custom` section, which should then contain few required keys, if given.
+   * It is possible to further customize the projectile and/or target using
+   * the `Custom` section, which should then contain few required keys, if
+   * given.
    *
    * \required_key_no_line{key_MC_PT_custom_file_dir_,File_Directory,
    * string, <b>Existing directory</b>}
@@ -4273,7 +4351,8 @@ struct InputKeys {
    * <h3> Deformed nuclei </h3>
    *
    * It is possible to deform the projectile and/or target nuclei using the
-   * `Deformed` section, which should then contain some configuration, if given.
+   * `Deformed` section, which should then contain some configuration, if
+   * given.
    *
    * \required_key_no_line{key_MC_PT_deformed_auto_,Automatic,bool,\none}
    *
@@ -4318,7 +4397,8 @@ struct InputKeys {
    * \f$-1\le\beta_2\le1\f$}
    *
    * The deformation coefficient \f$\beta_2\f$ for the spherical harmonic
-   * \f$Y_2^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
+   * \f$Y_2^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_
+   * "above".
    */
   /**
    * \see_key{key_MC_PT_deformed_betaII_}
@@ -4343,7 +4423,8 @@ struct InputKeys {
    * \f$-1\le\beta_3\le1\f$}
    *
    * The deformation coefficient \f$\beta_3\f$ for the spherical harmonic
-   * \f$Y_3^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
+   * \f$Y_3^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_
+   * "above".
    */
   /**
    * \see_key{key_MC_PT_deformed_betaIII_}
@@ -4368,7 +4449,8 @@ struct InputKeys {
    * \f$-1\le\beta_4\le1\f$}
    *
    * The deformation coefficient \f$\beta_4\f$ for the spherical harmonic
-   * \f$Y_4^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
+   * \f$Y_4^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_
+   * "above".
    */
   /**
    * \see_key{key_MC_PT_deformed_betaIV_}
@@ -4417,21 +4499,18 @@ struct InputKeys {
    * <hr>
    * <h3> Alpha-Clustered oxygen nuclei </h3>
    *
-   * It is possible to have alpha-clustered projectile and/or target **oxygen**
-   * nuclei using the `Alpha_Clustered` section, which should then contain some
-   * configuration, if given. This will create four Helium nuclei that are
-   * placed on the vertices of a regular tetrahedron with center in the origin,
-   * \f$\left(0,0,0\right)\f$. The initial positions of these vertices are the
-   * following:
-   * \f[
-   * \left(1,0,0\right),\;
-   * \left(-\frac{1}{3}, \frac{\sqrt{8}}{3}, 0\right),\;
-   * \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6}, \frac{\sqrt{24}}{6}\right),\;
-   * \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6}, -\frac{\sqrt{24}}{6}\right)\quad.
-   * \f]
-   * This means there is one vertex on the x-axis and the rest lie on a plane
-   * parallel to the y-z plane. For colliding them with a specific orientation
-   * refer to the `Orientation` section.
+   * It is possible to have alpha-clustered projectile and/or target
+   * **oxygen** nuclei using the `Alpha_Clustered` section, which should then
+   * contain some configuration, if given. This will create four Helium nuclei
+   * that are placed on the vertices of a regular tetrahedron with center in
+   * the origin, \f$\left(0,0,0\right)\f$. The initial positions of these
+   * vertices are the following: \f[ \left(1,0,0\right),\; \left(-\frac{1}{3},
+   * \frac{\sqrt{8}}{3}, 0\right),\; \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6},
+   * \frac{\sqrt{24}}{6}\right),\; \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6},
+   * -\frac{\sqrt{24}}{6}\right)\quad. \f] This means there is one vertex on
+   * the x-axis and the rest lie on a plane parallel to the y-z plane. For
+   * colliding them with a specific orientation refer to the `Orientation`
+   * section.
    *
    * \required_key_no_line{key_MC_PT_alphaClustered_auto_,Automatic,bool,\none}
    *
@@ -4491,12 +4570,12 @@ struct InputKeys {
    * <h3> Defining orientation </h3>
    *
    * In the `Orientation` section it is possible to specify the orientation of
-   * the nucleus by rotations which are performed about the axes of a coordinate
-   * system that is fixed with respect to the nucleus and whose axes are
-   * parallel to those of the computational frame before the first rotation.
-   * Note that the nucleus is first rotated around the z-axis by phi, then
-   * around the now rotated x-axis by theta and then around the rotated z-axis
-   * by psi.
+   * the nucleus by rotations which are performed about the axes of a
+   * coordinate system that is fixed with respect to the nucleus and whose
+   * axes are parallel to those of the computational frame before the first
+   * rotation. Note that the nucleus is first rotated around the z-axis by
+   * phi, then around the now rotated x-axis by theta and then around the
+   * rotated z-axis by psi.
    *
    * \optional_key_no_line{key_MC_PT_orientation_phi_,Phi,double,0.0,
    * \f$0\le\phi\le 2\pi\f$}
@@ -4619,8 +4698,8 @@ struct InputKeys {
    * \optional_key{key_MC_impact_rnd_reaction_plane_,Random_Reaction_Plane,
    * bool,false,\none}
    *
-   * Rotate the direction of the separation of the two nuclei due to the impact
-   * parameter with a uniform random angle in the x-y plane.
+   * Rotate the direction of the separation of the two nuclei due to the
+   * impact parameter with a uniform random angle in the x-y plane.
    */
   /**
    * \see_key{key_MC_impact_rnd_reaction_plane_}
@@ -4636,8 +4715,8 @@ struct InputKeys {
    * \optional_key{key_MC_impact_range_,Range,list of two doubles,[0.0\,0.0],
    * \f$x_i\ge0\f$}
    *
-   * A list of minimal and maximal impact parameters \unit{in fm} between which
-   * \f$b\f$ should be chosen. The order of these is not important.
+   * A list of minimal and maximal impact parameters \unit{in fm} between
+   * which \f$b\f$ should be chosen. The order of these is not important.
    */
   /**
    * \see_key{key_MC_impact_range_}
@@ -4705,9 +4784,9 @@ struct InputKeys {
    *
    * Impact parameter `Values` \unit{in fm} used to build the custom
    * distribution. Each element of `Values` corresponds to an element of
-   * `Yields`, these are connected through piecewise linear functions to create
-   * the distribution. Must be same length as `Yields`. This key can be omitted
-   * if `Sample` is not set to `"custom"`.
+   * `Yields`, these are connected through piecewise linear functions to
+   * create the distribution. Must be same length as `Yields`. This key can be
+   * omitted if `Sample` is not set to `"custom"`.
    */
   /**
    * \see_key{key_MC_impact_values_}
@@ -4727,10 +4806,11 @@ struct InputKeys {
    * \f$x_i\ge0\f$}
    *
    * Each element of `Yields` indicates the likelihood of sampling the
-   * corresponding impact parameter in `Values`. Between the specified points of
-   * `Values` and `Yields`, linear interpolation is used to build the custom
-   * distribution. `Yields` must be same length as `Values`. It does not need to
-   * be normed. This key is needed if and only if `Sample` is set to `"custom"`.
+   * corresponding impact parameter in `Values`. Between the specified points
+   * of `Values` and `Yields`, linear interpolation is used to build the
+   * custom distribution. `Yields` must be same length as `Values`. It does
+   * not need to be normed. This key is needed if and only if `Sample` is set
+   * to `"custom"`.
    */
   /**
    * \see_key{key_MC_impact_sample_}
@@ -4794,11 +4874,10 @@ struct InputKeys {
    * value depends on the nuclei passing time \f$t_{np}\f$ as follows,
    * \f[
    * f(t_{np})=\begin{cases}
-   * \mathrm{\texttt{Lower_Bound}}  & t_{np} \le \mathrm{\texttt{Lower_Bound}}\\
-   * t_{np} & t_{np} > \mathrm{\texttt{Lower_Bound}}
-   * \end{cases}\;.
-   * \f]
-   * It is only used if the constant tau initial condition is active.
+   * \mathrm{\texttt{Lower_Bound}}  & t_{np} \le
+   * \mathrm{\texttt{Lower_Bound}}\\ t_{np} & t_{np} >
+   * \mathrm{\texttt{Lower_Bound}} \end{cases}\;. \f] It is only used if the
+   * constant tau initial condition is active.
    */
   /**
    * \see_key{key_MC_IC_proper_time_}
@@ -4834,9 +4913,9 @@ struct InputKeys {
    * \optional_key_no_line{key_MC_IC_pt_cut_,pT_Cut,double,
    * </tt>No cut is done<tt>,\f$x\ge0\f$}
    *
-   * If set, employ a transverse momentum cut for particles contributing to the
-   * initial conditions for hydrodynamics. A positive value \unit{in GeV} is
-   * expected. Only particles characterized by
+   * If set, employ a transverse momentum cut for particles contributing to
+   * the initial conditions for hydrodynamics. A positive value \unit{in GeV}
+   * is expected. Only particles characterized by
    * \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed to the output file.
    * A value of 0 corresponds to no cut. It is only used if the constant tau
    * initial condition is active.
@@ -4948,8 +5027,8 @@ struct InputKeys {
    * \optional_key_no_line{key_MC_IC_fluidizable_processes,Fluidizable_Processes,
    * list of strings,"All",\any_valid}
    *
-   * Determines which process types can have outgoing particles as fluidizable.
-   * Possible values are:
+   * Determines which process types can have outgoing particles as
+   * fluidizable. Possible values are:
    * - `"All"`
    * - `"Elastic"`: Elastic \f$2\to2\f$
    * - `"Decay"`: All \f$1\to N\f$ processes
@@ -4957,11 +5036,11 @@ struct InputKeys {
    * - `"SoftString"`
    * - `"HardString"`
    *
-   * The argument for allowing string processes to produce fluidizable hadrons,
-   * even though they break detailed balance, is that the system is expanding,
-   * so the fragmentation products are driven towards equilibration when the
-   * medium becomes large enough, which happens if the fluidization happens
-   * after their formation time.
+   * The argument for allowing string processes to produce fluidizable
+   * hadrons, even though they break detailed balance, is that the system is
+   * expanding, so the fragmentation products are driven towards equilibration
+   * when the medium becomes large enough, which happens if the fluidization
+   * happens after their formation time.
    */
   /**
    * \see_key{key_MC_IC_fluidizable_processes}
@@ -4978,9 +5057,9 @@ struct InputKeys {
    * \optional_key_no_line{key_MC_IC_delay_initial_elastic,Delay_Initial_Elastic,
    * bool,true,\none}
    *
-   * Whether the first elastic scatterings of initial nucleons are excluded from
-   * the list of fluidizable processes. Since the core-corona interaction is
-   * only elastic, this prevents some instantaneous fluidization.
+   * Whether the first elastic scatterings of initial nucleons are excluded
+   * from the list of fluidizable processes. Since the core-corona interaction
+   * is only elastic, this prevents some instantaneous fluidization.
    */
   /**
    * \see_key{key_MC_IC_delay_initial_elastic}
@@ -5022,10 +5101,10 @@ struct InputKeys {
    * \required_key_no_line{key_MS_init_mult_,Init_Multiplicities,
    * map<int\,int>,\f$n_i>0\f$}
    *
-   * Initial multiplicities per particle species. The value of this key shall be
-   * a map of PDG number and amount \f$n_i\f$ corresponding to it. Use this key
-   * to specify how many particles of each species will be initialized. This key
-   * cannot be used if <tt>\ref key_MS_use_thermal_mult_
+   * Initial multiplicities per particle species. The value of this key shall
+   * be a map of PDG number and amount \f$n_i\f$ corresponding to it. Use this
+   * key to specify how many particles of each species will be initialized.
+   * This key cannot be used if <tt>\ref key_MS_use_thermal_mult_
    * "Use_Thermal_Multiplicities"</tt> is `true`.
    */
   /**
@@ -5115,14 +5194,14 @@ struct InputKeys {
    * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,0.0,
    * \f$0 \le x \le 1\f$}
    *
-   * This can be used in order to give each particle in the sphere an additional
-   * velocity in radial direction of the size \f$u_r = u_0 \,
+   * This can be used in order to give each particle in the sphere an
+   * additional velocity in radial direction of the size \f$u_r = u_0 \,
    * \left(\frac{r}{R}\right)^n\f$ with \f$u_0\f$ being the parameter of this
    * feature, \f$r\f$ the radial coordinate of the particle and \f$R\f$ the
-   * total radius of the sphere. \f$u_0\f$ can only take values in \f$[0, 1]\f$
-   * and a value of 0 is equivalent to omitting this key (i.e. not attributing
-   * any additional radial velocity). The exponent \f$n\f$ is set by
-   * <tt>\ref key_MS_add_radial_velocity_exponent
+   * total radius of the sphere. \f$u_0\f$ can only take values in \f$[0,
+   * 1]\f$ and a value of 0 is equivalent to omitting this key (i.e. not
+   * attributing any additional radial velocity). The exponent \f$n\f$ is set
+   * by <tt>\ref key_MS_add_radial_velocity_exponent
    * "Add_Radial_Velocity_Exponent"</tt>.
    */
   /**
@@ -5223,10 +5302,9 @@ struct InputKeys {
    * \optional_key{key_MS_strange_chem_pot_,Strange_Chemical_Potential,double,
    * 0.0,\none}
    *
-   * Strangeness chemical potential \f$\mu_S\f$ \unit{in GeV}. This key is used
-   * to compute thermal densities \f$n_i\f$ only if
-   * <tt>\ref key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities"</tt> is
-   * `true`.
+   * Strangeness chemical potential \f$\mu_S\f$ \unit{in GeV}. This key is
+   * used to compute thermal densities \f$n_i\f$ only if <tt>\ref
+   * key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities"</tt> is `true`.
    */
   /**
    * \see_key{key_MS_strange_chem_pot_}
@@ -5242,15 +5320,15 @@ struct InputKeys {
    * \optional_key{key_MS_hf_multiplier_,Heavy_Flavor_Multiplier,double,
    * 0.0,\none}
    *
-   * Multiply the thermal multiplicity of heavy flavor particles. This is a way
-   * to perturbatively obtain more statistics on heavy hadron observables with
-   * fewer events, under the assumption that these hadrons are sufficiently rare
-   * to not interact with each other. It is the user's responsibility to ensure
-   * that such assumption holds and that particle yields are properly normalized
-   * in the analysis.
+   * Multiply the thermal multiplicity of heavy flavor particles. This is a
+   * way to perturbatively obtain more statistics on heavy hadron observables
+   * with fewer events, under the assumption that these hadrons are
+   * sufficiently rare to not interact with each other. It is the user's
+   * responsibility to ensure that such assumption holds and that particle
+   * yields are properly normalized in the analysis.
    *
-   * By default, it is set to 0 so that no heavy flavor is initialized. For any
-   * positive value, a partial density is computed as described in \ref
+   * By default, it is set to 0 so that no heavy flavor is initialized. For
+   * any positive value, a partial density is computed as described in \ref
    * key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities" and multiplied by
    * it. Naturally, with a value of 1, each hadron corresponds to a real
    * thermalized hadron.
@@ -5273,9 +5351,9 @@ struct InputKeys {
    * that belong to the hadron gas equation of state, see
    * HadronGasEos::is_eos_particle(). The multiplicities are sampled from
    * Poisson distributions \f$\mathrm{Poi}(n_i V)\f$, where \f$n_i\f$ are the
-   * grand-canonical thermal densities of the corresponding species and \f$V\f$
-   * is the system volume. This option simulates the grand-canonical ensemble,
-   * where the number of particles is not fixed from event to event.
+   * grand-canonical thermal densities of the corresponding species and
+   * \f$V\f$ is the system volume. This option simulates the grand-canonical
+   * ensemble, where the number of particles is not fixed from event to event.
    *
    * If this option is set to `true`, <tt>\ref key_MS_init_mult_
    * "Init_Multiplicities"</tt> cannot be used.
@@ -5351,9 +5429,9 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_sphere
    * \optional_key_no_line{key_MS_jet_backtoback_,Back_To_Back,bool,false,\none}
    *
-   * Whether to create a jet with the corresponding antiparticle in the opposite
-   * direction with the same momentum. If the particle is a singlet, such as the
-   * neutral pion, it is considered its own antiparticle.
+   * Whether to create a jet with the corresponding antiparticle in the
+   * opposite direction with the same momentum. If the particle is a singlet,
+   * such as the neutral pion, it is considered its own antiparticle.
    */
   /**
    * \see_key{key_MS_jet_backtoback_}
@@ -5421,9 +5499,9 @@ struct InputKeys {
    *   distributed.
    * - `"thermal momenta"` &rarr; Momenta are sampled from a Maxwell-Boltzmann
    *   distribution.
-   * - `"thermal momenta quantum"` &rarr; Momenta are sampled from a Fermi-Dirac
-   *   distribution or a Bose-Einstein distribution, depending on the type of
-   *   particle.
+   * - `"thermal momenta quantum"` &rarr; Momenta are sampled from a
+   * Fermi-Dirac distribution or a Bose-Einstein distribution, depending on
+   * the type of particle.
    */
   /**
    * \see_key{key_MB_initial_condition_}
@@ -5451,8 +5529,8 @@ struct InputKeys {
    * \page doxypage_input_conf_modi_box
    * \required_key{key_MB_start_time_,Start_Time,double,\none}
    *
-   * Starting time of the simulation \unit{in fm}. All particles in the box are
-   * initialized with \f$x^0=\f$`Start_Time`.
+   * Starting time of the simulation \unit{in fm}. All particles in the box
+   * are initialized with \f$x^0=\f$`Start_Time`.
    */
   /**
    * \see_key{key_MB_start_time_}
@@ -5515,7 +5593,8 @@ struct InputKeys {
    * double,0.0,\none}
    *
    * See &nbsp;
-   * <tt>\ref key_MS_use_bar_chem_pot_ "Sphere: Baryon_Chemical_Potential"</tt>.
+   * <tt>\ref key_MS_use_bar_chem_pot_ "Sphere:
+   * Baryon_Chemical_Potential"</tt>.
    */
   /**
    * \see_key{key_MB_use_bar_chem_pot_}
@@ -5532,7 +5611,8 @@ struct InputKeys {
    * double,0.0,\none}
    *
    * See &nbsp;
-   * <tt>\ref key_MS_charge_chem_pot_ "Sphere: Charge_Chemical_Potential"</tt>.
+   * <tt>\ref key_MS_charge_chem_pot_ "Sphere:
+   * Charge_Chemical_Potential"</tt>.
    */
   /**
    * \see_key{key_MB_charge_chem_pot_}
@@ -5548,10 +5628,11 @@ struct InputKeys {
    * \optional_key{key_MB_equilibration_time_,Equilibration_Time,double,-1.0,\none}
    *
    * Time \unit{in fm} after which the output of the box is written out. The
-   * first time however will be printed. This is useful if one wants to simulate
-   * boxes for very long times and knows at which time the box reaches its
-   * thermal and chemical equilibrium. The default set to -1 is meaning that
-   * output is written from beginning on, if this key is not given.
+   * first time however will be printed. This is useful if one wants to
+   * simulate boxes for very long times and knows at which time the box
+   * reaches its thermal and chemical equilibrium. The default set to -1 is
+   * meaning that output is written from beginning on, if this key is not
+   * given.
    */
   /**
    * \see_key{key_MB_equilibration_time_}
@@ -5606,8 +5687,8 @@ struct InputKeys {
    * The `Jet` section can be specified in the `Box` section with the same
    * meaning it has for the `Sphere` modus. It is namely possible to put a
    * jet in the center of the box, on a outbound trajectory along the x-axis.
-   * Also here, if no PDG code is specified, but the section is given, an error
-   * about the missing key is raised.
+   * Also here, if no PDG code is specified, but the section is given, an
+   * error about the missing key is raised.
    */
 
   /*!\Userguide
@@ -5668,8 +5749,8 @@ struct InputKeys {
    *
    * External particle lists filename. This key shall be omitted if
    * <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt> is used. By using
-   * this key, it is understood that all events to be processed are contained in
-   * the given file, as this is the only one which will be read.
+   * this key, it is understood that all events to be processed are contained
+   * in the given file, as this is the only one which will be read.
    */
   /**
    * \see_key{key_ML_filename_}
@@ -5705,11 +5786,11 @@ struct InputKeys {
    * \optional_key{key_ML_shift_id_,Shift_Id,int,0,\none}
    *
    * Index of the \b first processed particle list file. Files with index
-   * smaller than the specidifed value are skipped. This key is considered when
-   * <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt> is used to specify
-   * which particles list file(s) should be read. If, instead, the user
-   * specifies the <tt>\ref key_ML_filename_ "List: Filename"</tt> key, this key
-   * is ignored.
+   * smaller than the specidifed value are skipped. This key is considered
+   * when <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt> is used to
+   * specify which particles list file(s) should be read. If, instead, the
+   * user specifies the <tt>\ref key_ML_filename_ "List: Filename"</tt> key,
+   * this key is ignored.
    */
   /**
    * \see_key{key_ML_shift_id_}
@@ -5733,25 +5814,26 @@ struct InputKeys {
    * The order of the quantities in the key value should respect the order of
    * the extra columns in the input file.
    *
-   * \attention It will cause wrong read-ins to leave out columns in between and
-   * there is no safety mechanism in place.
+   * \attention It will cause wrong read-ins to leave out columns in between
+   * and there is no safety mechanism in place.
    *
    * Available quantities:
    * - <tt>"ID"</tt> &rarr; Particle identifier represented by an integer,
-   *    unique for each particle in an event. Even if provided, the IDs will be
-   *    set during the SMASH run in the order the particles are initialized.
+   *    unique for each particle in an event. Even if provided, the IDs will
+   * be set during the SMASH run in the order the particles are initialized.
    * - <tt>"charge"</tt> &rarr; The particle's electric charge in units of the
    *    elementary charge e. This is only used for a consistency check and the
    *    charge will be set according to the PDG code data.
    * - <tt>"ncoll"</tt> &rarr; Number of collisions the particle already went
    *    through.
-   * - <tt>"form_time"</tt> &rarr;  Formation time. By default it is set to the
-   *    time coordinate (first column in the input).
-   * - <tt>"xsecfac"</tt> &rarr;  Scaling factor for the cross section, limited
-   *    between 0 and 1. By default it is 1.
+   * - <tt>"form_time"</tt> &rarr;  Formation time. By default it is set to
+   * the time coordinate (first column in the input).
+   * - <tt>"xsecfac"</tt> &rarr;  Scaling factor for the cross section,
+   * limited between 0 and 1. By default it is 1.
    * - <tt>"proc_type"</tt> &rarr; Type of the last interaction (See
    *   \ref doxypage_output_process_types)
-   * - <tt>"time_last_coll"</tt> &rarr; Time when the last interaction happened.
+   * - <tt>"time_last_coll"</tt> &rarr; Time when the last interaction
+   * happened.
    * - <tt>"pdg_mother1"</tt> &rarr; Parent of the particle.
    * - <tt>"pdg_mother2"</tt> &rarr; Second parent of the particle.
    * - <tt>"spin0"</tt> &rarr; 0-th component of the spin vector.
@@ -5761,17 +5843,17 @@ struct InputKeys {
    * - <tt>"perturbative_weight"</tt> &rarr; weight for treating heavy flavor
    *    hadrons perturbatively.
    *
-   * Be aware that the default setting of this key considers "ID" and "charge",
-   * which also have to be set by the user if these quantities are in the
-   * provided particle lists and other optional quantities are included as well.
-   * Hence, it is possible to leave out "ID" and "charge" in the input lists.
-   * Optional quantities that are not provided by the user as extra column in
-   * the input file are set to their default value when SMASH reads in the input
-   * file with the list of particles. Unless stated differently, this default
-   * value is 0.
+   * Be aware that the default setting of this key considers "ID" and
+   * "charge", which also have to be set by the user if these quantities are
+   * in the provided particle lists and other optional quantities are included
+   * as well. Hence, it is possible to leave out "ID" and "charge" in the
+   * input lists. Optional quantities that are not provided by the user as
+   * extra column in the input file are set to their default value when SMASH
+   * reads in the input file with the list of particles. Unless stated
+   * differently, this default value is 0.
    *
-   * \attention The code does a minimal validation to see if the quantities are
-   * internally meaningful, but no check is done on the physics content.
+   * \attention The code does a minimal validation to see if the quantities
+   * are internally meaningful, but no check is done on the physics content.
    * For instance, SMASH will not complain if a proton is said to originate
    * from a pion via wall crossing. Ensuring the correctness of the input is
    * the user's resposibility.
@@ -5980,11 +6062,14 @@ struct InputKeys {
    * \optional_key{key_output_out_times_,Output_Times,list of doubles,
    * use \ref key_output_out_interval_ "Output_Interval", \none}
    *
-   * Explicitly defines the times \unit{in fm} where output is generated in the
-   * form of a list. This cannot be used in combination with `Output_Interval`.
+   * Explicitly defines the times \unit{in fm} where output is generated in
+   the
+   * form of a list. This cannot be used in combination with
+   `Output_Interval`.
    * Output times outside the simulation time are ignored and both the initial
    * and final time are always considered. The following example will produce
-   * output at event start, event end and at the specified times as long as they
+   * output at event start, event end and at the specified times as long as
+   they
    * are within the simulation time.
    *\verbatim
    Output:
@@ -6006,28 +6091,28 @@ struct InputKeys {
    * <h2> Output format independently of the specific output content </h2>
    *
    * A dedicated subsection in the `Output` section exists for every single
-   * output content and dedicated options are described further below. Refer to
-   * \ref output_contents_ "output contents" for the list of possible
+   * output content and dedicated options are described further below. Refer
+   * to \ref output_contents_ "output contents" for the list of possible
    * contents. Independently of the content, i.e. in every subsection, it is
-   * always necessary (and probably desired) to provide the format in which the
-   * output should be generated.
+   * always necessary (and probably desired) to provide the format in which
+   * the output should be generated.
    *
    * \required_key_no_line{key_output_content_format_,Format, list of strings,
    * \any_valid}
    *
-   * List of formats for writing particular content. Available formats for every
-   * content are listed and described \ref output_contents_ "here", while
-   * \ref list_of_output_formats "here" all possible output formats are
+   * List of formats for writing particular content. Available formats for
+   * every content are listed and described \ref output_contents_ "here",
+   * while \ref list_of_output_formats "here" all possible output formats are
    * given.
    *
    * \warning If a `Format` list in a content `section` is not given or it is
    * left empty, i.e. `Format: []`, SMASH will abort with a fatal error.
    * Furthermore, SMASH also aborts if a not existing format is given in the
    * formats list. This is meant to prevent against e.g. losing output
-   * information because of a typo in the configuration file. If no output for a
-   * given content is desired, you can suppress it by using `Format: ["None"]`.
-   * However, it is not allowed to use valid formats together with the `"None"`
-   * special "format" string.
+   * information because of a typo in the configuration file. If no output for
+   * a given content is desired, you can suppress it by using `Format:
+   * ["None"]`. However, it is not allowed to use valid formats together with
+   * the `"None"` special "format" string.
    */
   /**
    * \see_key{key_output_content_format_}
@@ -6215,8 +6300,8 @@ struct InputKeys {
    * \anchor input_output_content_specific_
    *
    * Every possible content-specific section is documented in the following.
-   * Refer to \ref doxypage_input_conf_output_examples for a small selection of
-   * possible output configurations.
+   * Refer to \ref doxypage_input_conf_output_examples for a small selection
+   * of possible output configurations.
    *
    * <hr>
    * <h3> &diams; %Particles </h3>
@@ -6224,8 +6309,8 @@ struct InputKeys {
    * \optional_key_no_line{key_output_particles_extended_,Extended,bool,
    * false,\none}
    *
-   * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary`, `VTK`, `HepMC_asciiv3`
-   * and `HepMC_treeroot` formats.
+   * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary`, `VTK`,
+   * `HepMC_asciiv3` and `HepMC_treeroot` formats.
    * - `true` &rarr; Print extended information for each particle
    * - `false` &rarr; Regular output for each particle
    */
@@ -6575,17 +6660,18 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * <hr> \anchor input_output_rivet_
    * <h3> &diams; Rivet </h3>
-   * &rArr; Only `YODA` format (see \ref doxypage_output_rivet  "here" for more
-   * information about the format).
+   * &rArr; Only `YODA` format (see \ref doxypage_output_rivet  "here" for
+   * more information about the format).
    *
    * \note In the following, <b>no default</b> means that, if the key is
    *       omitted, Rivet default behavior will be used.
    *
-   * \optional_key_no_line{key_output_rivet_analyses_,Analyses,list of strings,
+   * \optional_key_no_line{key_output_rivet_analyses_,Analyses,list of
+   * strings,
    * </tt><b>no default</b><tt>,\none}
    *
-   * This key specifies the analyses (including possible options) to add to the
-   * Rivet analysis.
+   * This key specifies the analyses (including possible options) to add to
+   * the Rivet analysis.
    */
   /**
    * \see_key{key_output_rivet_analyses_}
@@ -6617,9 +6703,9 @@ struct InputKeys {
    * \optional_key_no_line{key_output_rivet_ignore_beams_,Ignore_Beams,bool,
    * true,\none}
    *
-   * Ask Rivet to not validate beams before running analyses. This is needed if
-   * you use the <tt>\ref key_MC_fermi_motion_ "Fermi_Motion"</tt> option that
-   * disrupts the collision energy event-by-event.
+   * Ask Rivet to not validate beams before running analyses. This is needed
+   * if you use the <tt>\ref key_MC_fermi_motion_ "Fermi_Motion"</tt> option
+   * that disrupts the collision energy event-by-event.
    */
   /**
    * \see_key{key_output_rivet_ignore_beams_}
@@ -6668,7 +6754,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_rivet_preloads_,Preloads,list of strings,
+   * \optional_key_no_line{key_output_rivet_preloads_,Preloads,list of
+   * strings,
    * </tt><b>no default</b><tt>,\none}
    *
    * Specify data files to read into Rivet (e.g., centrality calibrations) at
@@ -6793,11 +6880,11 @@ struct InputKeys {
    * &rArr; Only `VTK` format.
    *
    * No content-specific output options, apart from the <tt>\ref
-   * key_output_content_format_ "Format"</tt> key which only accepts `["VTK"]`.
-   * \note This output requires \ref doxypage_input_conf_pot_coulomb
-   *    "coulomb potential" to be enabled which in turn requires a
-   *    \ref doxypage_input_conf_lattice, both of which have to be specified in
-   *    the conguration file.
+   * key_output_content_format_ "Format"</tt> key which only accepts
+   * `["VTK"]`. \note This output requires \ref
+   * doxypage_input_conf_pot_coulomb "coulomb potential" to be enabled which
+   * in turn requires a \ref doxypage_input_conf_lattice, both of which have
+   * to be specified in the conguration file.
    */
 
   /*!\Userguide
@@ -6811,10 +6898,11 @@ struct InputKeys {
    * -# at a given point to ASCII output;
    * -# averaged over all particles to ASCII output.
    *
-   * <b>About 1 and 2:</b> Note that this output requires a lattice, which needs
-   * to be enabled in the conguration file and is regulated by the options of
-   * \ref doxypage_input_conf_lattice. See \ref doxypage_output_vtk for
-   * further information on 1 and \ref doxypage_output_thermodyn_lattice for 2.
+   * <b>About 1 and 2:</b> Note that this output requires a lattice, which
+   * needs to be enabled in the conguration file and is regulated by the
+   * options of \ref doxypage_input_conf_lattice. See \ref doxypage_output_vtk
+   * for further information on 1 and \ref doxypage_output_thermodyn_lattice
+   * for 2.
    *
    * <b>About 3 and 4:</b> See \ref doxypage_output_thermodyn for
    * further information.
@@ -6822,13 +6910,13 @@ struct InputKeys {
    * \optional_key_no_line{key_output_thermo_only_part_,Only_Participants,bool,
    * false,\none}
    *
-   * If set to `true`, only participants are included in the computation of the
-   * energy momentum tensor and of the Eckart currents. In this context, a
+   * If set to `true`, only participants are included in the computation of
+   * the energy momentum tensor and of the Eckart currents. In this context, a
    * hadron is considered as a participant if it had at least one collision.
    * When using \ref doxypage_input_conf_potentials "Potentials" this option
    * must be either left unset or set to `false`. The reason behind this
-   * limitation is that in this case hadrons can influence the evolution of the
-   * system even without collisions.
+   * limitation is that in this case hadrons can influence the evolution of
+   * the system even without collisions.
    */
   /**
    * \see_key{key_output_thermo_only_part_}
@@ -6847,12 +6935,12 @@ struct InputKeys {
    * Whether the thermodynamic calculation should consider unformed (or
    * preformed) particles or not.
    *
-   * Unformed particles are traditionally those created by string fragmentation,
-   * such that their density should contribute to thermodynamics. However, we
-   * use the formation time also to ignore particles that are not really present
-   * yet in the simulation, for example in afterburner/ListModus calculations.
-   * In these cases, one might want to ignore unformed particles when evaluating
-   * thermodynamic properties.
+   * Unformed particles are traditionally those created by string
+   * fragmentation, such that their density should contribute to
+   * thermodynamics. However, we use the formation time also to ignore
+   * particles that are not really present yet in the simulation, for example
+   * in afterburner/ListModus calculations. In these cases, one might want to
+   * ignore unformed particles when evaluating thermodynamic properties.
    */
   /**
    * \see_key{key_output_thermo_ignore_unformed_}
@@ -6893,12 +6981,12 @@ struct InputKeys {
    *   local rest frame, where \f$T^{0i}\f$ = 0.
    * - `"landau_velocity"` &rarr; Velocity of the Landau rest frame. The
    *   velocity is obtained from the energy-momentum tensor
-   *   \f$T^{\mu\nu}(t,x,y,z)\f$ by solving the generalized eigenvalue equation
-   *   \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0\f$.
+   *   \f$T^{\mu\nu}(t,x,y,z)\f$ by solving the generalized eigenvalue
+   * equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0\f$.
    * - `"j_QBS"` &rarr; Electric (Q), baryonic (B) and strange (S) currents
-   *   \f$j^{\mu}_{QBS}(t,x,y,z) \f$; note that all currents are given in units
-   *   of "number of charges"; multiply the electric current by the elementary
-   *   charge \f$\sqrt{4 \pi \alpha_{EM}} \f$ for charge units.
+   *   \f$j^{\mu}_{QBS}(t,x,y,z) \f$; note that all currents are given in
+   * units of "number of charges"; multiply the electric current by the
+   * elementary charge \f$\sqrt{4 \pi \alpha_{EM}} \f$ for charge units.
    */
   /**
    * \see_key{key_output_thermo_type_}
@@ -6914,32 +7002,32 @@ struct InputKeys {
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_smearing_,Smearing,bool,true,\none}
    *
-   * Using Gaussian smearing for computing thermodynamic quantities or not. This
-   * triggers whether thermodynamic quantities are evaluated at a fixed point
+   * Using Gaussian smearing for computing thermodynamic quantities or not.
+   * This triggers whether thermodynamic quantities are evaluated at a fixed
+   * point
    * (`true`) or summed over all particles (`false`).
    * - `true` &rarr; smearing applied
    * - `false` &rarr; smearing not applied
    *
-   * The contribution to the energy-momentum tensor and current (be it electric,
-   * baryonic or strange) from a single particle in its rest frame is:
-   * \f[\begin{eqnarray}
+   * The contribution to the energy-momentum tensor and current (be it
+   * electric, baryonic or strange) from a single particle in its rest frame
+   * is: \f[\begin{eqnarray}
    * j^{\mu} = B \frac{p_0^{\mu}}{p_0^0} W \\
    * T^{\mu \nu} = \frac{p_0^{\mu}p_0^{\nu}}{p_0^0} W
    * \end{eqnarray}
    * \f]
    * with B being the charge of interest and W being the weight given to this
    * particle. Normally, if one computes thermodynamic quantities at a point,
-   * smearing should be applied, and then \f$W\f$ takes on the following shape:
-   * \f[
-   * W = (2 \pi \sigma^2)^{-3/2} \exp\left(
+   * smearing should be applied, and then \f$W\f$ takes on the following
+   * shape: \f[ W = (2 \pi \sigma^2)^{-3/2} \exp\left(
    * - \frac{(\mathbf{r}-\mathbf{r}_0(t))^2}{2\sigma^2}
    * \right)\f]
    * It can however be useful to compute the thermodynamic quantities of all
-   * particles in a box with \f$W=1\f$, which would correspond to <tt>"Smearing:
-   * false"</tt>. Note that using this option changes the units of the
-   * thermodynamic quantities, as they are no longer spatially normalized. One
-   * should divide this quantity by the volume of the box to restore units to
-   * the correct ones.
+   * particles in a box with \f$W=1\f$, which would correspond to
+   * <tt>"Smearing: false"</tt>. Note that using this option changes the units
+   * of the thermodynamic quantities, as they are no longer spatially
+   * normalized. One should divide this quantity by the volume of the box to
+   * restore units to the correct ones.
    */
   /**
    * \see_key{key_output_thermo_smearing_}
@@ -6978,20 +7066,22 @@ struct InputKeys {
    *
    * Whether to automatically determine the geometry of the lattice. If set to
    * `False`, both <tt>\ref key_lattice_cell_number_ "Cell_Number"</tt> and
-   * <tt>\ref key_lattice_origin_ "Origin"</tt> and <tt>\ref key_lattice_sizes_
-   * "Sizes"</tt> keys must be specified. If set to `True` at least one of the
-   * geometrical properties must be omitted. SMASH will determine the missing
-   * properties as described in \ref doxypage_input_lattice_default_parameters.
+   * <tt>\ref key_lattice_origin_ "Origin"</tt> and <tt>\ref
+   * key_lattice_sizes_ "Sizes"</tt> keys must be specified. If set to `True`
+   * at least one of the geometrical properties must be omitted. SMASH will
+   * determine the missing properties as described in \ref
+   * doxypage_input_lattice_default_parameters.
    *
    * \attention
    * Specifying only \b some geometrical parameters (among `Cell_Number`,
-   * `Origin` and `Sizes`) and letting SMASH determine the remaining ones should
-   * be carefully done as it might give an undesired result. This is due to the
-   * fact that SMASH determines the full geometry of the lattice as described in
-   * \ref doxypage_input_lattice_default_parameters and **only afterwards** the
-   * provided keys are overwriting the calculated ones. Therefore, for example,
-   * specifing only the `Origin` will shift the automatically determined lattice
-   * and this might not be the desired effect.
+   * `Origin` and `Sizes`) and letting SMASH determine the remaining ones
+   * should be carefully done as it might give an undesired result. This is
+   * due to the fact that SMASH determines the full geometry of the lattice as
+   * described in \ref doxypage_input_lattice_default_parameters and **only
+   * afterwards** the provided keys are overwriting the calculated ones.
+   * Therefore, for example, specifing only the `Origin` will shift the
+   * automatically determined lattice and this might not be the desired
+   * effect.
    */
   /**
    * \see_key{key_lattice_automatic_}
@@ -7010,23 +7100,24 @@ struct InputKeys {
    * Number of cells in x, y, z directions.
    *
    * \attention Lattice is used to calculate bulk quantities such as baryon
-   * density or energy density. The choice of the number of cells, together with
-   * the chosen lattice size, affects the results: too coarse of a lattice will
-   * average over large volumes of space (which may yield dubious results),
-   * while too fine of a lattice may lead the calculation toward Poisson-like
-   * noise (because there is not enough particles to provide the necessary
-   * statistics). As guidance, one can argue that microscopic hadronic transport
-   * should resolve structures on the order of about 1 fm, so that one should
-   * choose lattice cell number and lattice size that result in cell size of
-   * about 1 fm. Using lattices corresponding to larger cell sizes can be fine
-   * if this is what is intended. Using lattices with cell sizes of about 0.5 fm
-   * may be risky, and smaller lattice sizes are not not advised.
+   * density or energy density. The choice of the number of cells, together
+   * with the chosen lattice size, affects the results: too coarse of a
+   * lattice will average over large volumes of space (which may yield dubious
+   * results), while too fine of a lattice may lead the calculation toward
+   * Poisson-like noise (because there is not enough particles to provide the
+   * necessary statistics). As guidance, one can argue that microscopic
+   * hadronic transport should resolve structures on the order of about 1 fm,
+   * so that one should choose lattice cell number and lattice size that
+   * result in cell size of about 1 fm. Using lattices corresponding to larger
+   * cell sizes can be fine if this is what is intended. Using lattices with
+   * cell sizes of about 0.5 fm may be risky, and smaller lattice sizes are
+   * not not advised.
    *
    * \note A too large number of cells can lead to long runtime and/or large
-   * memory usage. This aspect is clearly related to the choice of the <tt>\ref
-   * key_lattice_sizes_ "Sizes"</tt> key and these two keys should be chosen
-   * together. Make sure to choose the lattice geometry carefully and check the
-   * results for convergence with respect to it.
+   * memory usage. This aspect is clearly related to the choice of the
+   * <tt>\ref key_lattice_sizes_ "Sizes"</tt> key and these two keys should be
+   * chosen together. Make sure to choose the lattice geometry carefully and
+   * check the results for convergence with respect to it.
    */
   /**
    * \see_key{key_lattice_cell_number_}
@@ -7038,7 +7129,8 @@ struct InputKeys {
       [](const std::array<int, 3> &value) noexcept {
         if (std::abs(value[0] * value[1] * value[2]) > 15'000'000) {
           logg[LogArea::Configuration::id].warn(
-              "Number of total cells for lattice is very large, which may lead "
+              "Number of total cells for lattice is very large, which may "
+              "lead "
               "to long runtime and/or large memory usage.\nMake sure this is "
               "intended (refer to the documentation for more information).");
         }
@@ -7052,9 +7144,9 @@ struct InputKeys {
    * (see \ref doxypage_input_lattice_default_parameters)
    *
    * The lattice covers a cuboid region whose vertices \f$V_n\f$ are uniquely
-   * identified by the origin coordinates \f$(O_x, O_y, O_z)\f$ and the lattice
-   * sizes \f$(L_x, L_y, L_z)\f$ as follows:
-   * \f[ V_n = (O_x+i\cdot L_x, O_y+j\cdot L_y, O_z+k\cdot L_z) \f] where
+   * identified by the origin coordinates \f$(O_x, O_y, O_z)\f$ and the
+   * lattice sizes \f$(L_x, L_y, L_z)\f$ as follows: \f[ V_n = (O_x+i\cdot
+   * L_x, O_y+j\cdot L_y, O_z+k\cdot L_z) \f] where
    * \f$(i,j,k)\in\{0,1\}\times\{0,1\}\times\{0,1\}\f$. Coordinates of the
    * lattice are given \unit{in fm}.
    */
@@ -7092,8 +7184,8 @@ struct InputKeys {
    * \optional_key{key_lattice_pot_affect_threshold_,
    * Potentials_Affect_Thresholds,bool,false,\none}
    *
-   * Include potential effects, since mean field potentials change the threshold
-   * energies of the actions.
+   * Include potential effects, since mean field potentials change the
+   * threshold energies of the actions.
    */
   /**
    * \see_key{key_lattice_pot_affect_threshold_}
@@ -7113,14 +7205,14 @@ struct InputKeys {
    * Sizes of lattice in x, y, z directions \unit{in fm}.
    *
    * \note Lattice is used to calculate bulk quantities such as baryon
-   * density or energy density and the choice of its size can have a significant
-   * impact on the results. A too small lattice size may lead to inaccurate
-   * results, becuase part of the system might not be covered, while a too large
-   * lattice size may lead to long runtime and large memory usage, depending on
-   * the value of the <tt>\ref key_lattice_cell_number_ "Cell_Number"</tt> key.
-   * These two keys should be chosen together. Make sure to choose the lattice
-   * geometry carefully and check the results for convergence with respect to
-   * it.
+   * density or energy density and the choice of its size can have a
+   * significant impact on the results. A too small lattice size may lead to
+   * inaccurate results, becuase part of the system might not be covered,
+   * while a too large lattice size may lead to long runtime and large memory
+   * usage, depending on the value of the <tt>\ref key_lattice_cell_number_
+   * "Cell_Number"</tt> key. These two keys should be chosen together. Make
+   * sure to choose the lattice geometry carefully and check the results for
+   * convergence with respect to it.
    */
   /**
    * \see_key{key_lattice_sizes_}
@@ -7136,7 +7228,8 @@ struct InputKeys {
               "Lattice size(s) larger than " + std::to_string(max) +
               " fm may lead to long runtime or large memory usage\nor even "
               "inaccurate results depending on the number of cells chosen.\n"
-              "Make sure this is intended (refer to the documentation for more "
+              "Make sure this is intended (refer to the documentation for "
+              "more "
               "information).");
         }
         return value[0] > 0 && value[1] > 0 && value[2] > 0;
@@ -7210,7 +7303,8 @@ struct InputKeys {
    *
    * Exponent \f$\gamma\f$ in formula for \f$S(\rho_B)\f$. If `gamma` is
    * specified, the baryon density dependence is included in the potential.
-   * Otherwise only the first term of the potential will be taken into account.
+   * Otherwise only the first term of the potential will be taken into
+   * account.
    */
   /**
    * \see_key{key_potentials_symmetry_gamma_}
@@ -7258,7 +7352,8 @@ struct InputKeys {
    * Parameters \f$b_i\f$ of the VDF potential.
    *
    * \warning
-   * You need to provide as many entries for `Powers` as provided for `Coeffs`.
+   * You need to provide as many entries for `Powers` as provided for
+   * `Coeffs`.
    */
   /**
    * \see_key{key_potentials_vdf_powers_}
@@ -7356,7 +7451,8 @@ struct InputKeys {
         const bool valid = value[0] > 0 && value[1] > 0 && value[2] > 0;
         if (valid && value[0] * value[1] * value[2] > 2'000'000) {
           logg[LogArea::Configuration::id].warn(
-              "Number of total cells for forced thermalization is very large, "
+              "Number of total cells for forced thermalization is very "
+              "large, "
               "which may lead to long runtime. Make sure this is intended.");
         }
         return valid;
@@ -7367,9 +7463,9 @@ struct InputKeys {
    * \required_key_no_line{key_forced_therm_critical_edens_,Critical_Edens,
    * double,\f$x \in (0\, 2]\f$}
    *
-   * Critical energy density \unit{in GeV/fm³} above which forced thermalization
-   * is applied (see \iref{Oliinychenko:2016vkg} for more information on the
-   * constraint).
+   * Critical energy density \unit{in GeV/fm³} above which forced
+   * thermalization is applied (see \iref{Oliinychenko:2016vkg} for more
+   * information on the constraint).
    */
   /**
    * \see_key{key_forced_therm_critical_edens_}
@@ -7446,17 +7542,17 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \required_key_no_line{key_forced_therm_lattice_sizes_,Lattice_Sizes,list of
-   * 3 doubles,\f$x_i > 0\f$}
+   * \required_key_no_line{key_forced_therm_lattice_sizes_,Lattice_Sizes,list
+   * of 3 doubles,\f$x_i > 0\f$}
    *
    * The lattice is placed such that the center is [0.0,0.0,0.0].
    * If one wants to have a central cell with center at [0.0,0.0,0.0] then
    * number of cells should be odd (2k+1) in every direction.
    *
    * `Lattice_Sizes` is required for all modi, except the `"Box"` modus. In
-   * case of `"Box"` modus, the lattice is set up automatically to match the box
-   * size, and the user should not (and is not allowed to) specify it. Sizes are
-   * to be specified \unit{in fm}.
+   * case of `"Box"` modus, the lattice is set up automatically to match the
+   * box size, and the user should not (and is not allowed to) specify it.
+   * Sizes are to be specified \unit{in fm}.
    */
   /**
    * \see_key{key_forced_therm_lattice_sizes_}
@@ -7471,7 +7567,8 @@ struct InputKeys {
               logg[LogArea::Configuration::id].warn(
                   "Lattice size(s) for forced thermalization larger than " +
                   std::to_string(max) +
-                  " fm may lead to long runtime. Make sure this is intended.");
+                  " fm may lead to long runtime. Make sure this is "
+                  "intended.");
             }
             return (value[0] > 0 && value[1] > 0 && value[2] > 0);
           }};
@@ -7480,14 +7577,14 @@ struct InputKeys {
    * \page doxypage_input_conf_forced_therm
    * \optional_key{key_forced_therm_microcanonical_,Microcanonical,bool,false,\none}
    *
-   * Enforce energy conservation or not as part of sampling algorithm. Relevant
-   * for biased and unbiased Becattini-Ferroni (BF) algorithms. If this option
-   * is on, samples with energies deviating too far from the initial one will be
-   * rejected. This is different from simple energy and momentum
-   * renormalization, which is done in the end anyway. If energy conservation
-   * is enforced at sampling, the distributions become microcanonical instead
-   * of canonical. One particular effect is that multiplicity distributions
-   * become narrower.
+   * Enforce energy conservation or not as part of sampling algorithm.
+   * Relevant for biased and unbiased Becattini-Ferroni (BF) algorithms. If
+   * this option is on, samples with energies deviating too far from the
+   * initial one will be rejected. This is different from simple energy and
+   * momentum renormalization, which is done in the end anyway. If energy
+   * conservation is enforced at sampling, the distributions become
+   * microcanonical instead of canonical. One particular effect is that
+   * multiplicity distributions become narrower.
    *
    * The downside of having this option on is that the sampling takes
    * significantly longer time.
@@ -7548,10 +7645,10 @@ struct InputKeys {
    * Get list of references to all existing SMASH keys.
    *
    * \attention Here the Construct-On-First-Use idiom is used to avoid the
-   *            static initialization order fiasco. This means that the list of
-   *            keys is only initialized when this method is called for the
-   *            first time. Therefore, it is guaranteed that all keys are
-   *            already initialized when the list is created.
+   *            static initialization order fiasco. This means that the list
+   * of keys is only initialized when this method is called for the first
+   * time. Therefore, it is guaranteed that all keys are already initialized
+   * when the list is created.
    */
   static const std::vector<key_references_variant> &all_keys();
 
@@ -7587,9 +7684,9 @@ struct InputKeys {
    *
    * @throw std::invalid_argument if no Key was found.
    *
-   * @note This function internally use another method into which it might have
-   *       been merged. This has not been done to separate the finding operation
-   *       with the reference extraction out from the variant.
+   * @note This function internally use another method into which it might
+   * have been merged. This has not been done to separate the finding
+   * operation with the reference extraction out from the variant.
    */
   template <typename T>
   static const Key<T> &get_key_reference(const KeyLabels &labels) {
@@ -7634,10 +7731,12 @@ General:
 \endverbatim
 *
 * In contrast to the first example, in the next example we use 20 parallel
-* ensembles. Here, the maximum number of ensembles run is 2000. The calculation
+* ensembles. Here, the maximum number of ensembles run is 2000. The
+calculation
 * will continue until either this number of ensembles is reached or 1000
 * ensembles contain interactions. Note that an event consists of 20 ensembles.
-* The 20 ensembles run in parallel, so the number of non-empty ensembles in the
+* The 20 ensembles run in parallel, so the number of non-empty ensembles in
+the
 * ouput is between 1000 and 1019.
 * \verbatim
 General:
@@ -8116,7 +8215,8 @@ General:
 * <h3> Extracting initial conditions for hydrodynamic evolution </h3>
 *
 * The following example configures the initial conditions for hydrodynamics
-* for a Au+Au collision at \f$\sqrt{s_{NN}}=200\ \mathrm{GeV}\f$ at midrapidity
+* for a Au+Au collision at \f$\sqrt{s_{NN}}=200\ \mathrm{GeV}\f$ at
+midrapidity
 * (\f$-1<y<1\f$). In addition, the extended OSCAR2013 and "For_vHLLE" outputs
 * are enabled.
 *
@@ -8206,8 +8306,10 @@ Modi:
  * <hr>
  * <h3> Configuring a Box Simulation </h3>
  *
- * The following example configures an infinite matter simulation in a Box with
- * 10 fm cube length at a temperature of 200 MeV. The particles are initialized
+ * The following example configures an infinite matter simulation in a Box
+with
+ * 10 fm cube length at a temperature of 200 MeV. The particles are
+initialized
  * with thermal momenta at a start time of 10 fm. The particle numbers at
  * initialization are 100 \f$ \pi^+ \f$, 100 \f$ \pi^0 \f$, 100 \f$ \pi^- \f$,
  * 50 protons and 50 neutrons.
@@ -8258,10 +8360,13 @@ Modi:
 \endverbatim
  *
  * \note\anchor modi_box_usage_remark
- * The box modus is most useful for infinite matter simulations with thermal and
- * chemical equilibration and detailed balance. Detailed balance can however not
+ * The box modus is most useful for infinite matter simulations with thermal
+and
+ * chemical equilibration and detailed balance. Detailed balance can however
+not
  * be conserved if 3-body decays (or higher) are performed. To yield useful
- * results applying a SMASH box simulation, it is therefore necessary to modify
+ * results applying a SMASH box simulation, it is therefore necessary to
+modify
  * the provided default _particles.txt_ and _decaymodes.txt_ files by removing
  * 3-body and higher order decays from the decay modes file and all
  * corresponding particles that can no longer be produced from the particles
@@ -8288,9 +8393,11 @@ Modi:
  * <hr>
  * <h3> Configuring an afterburner simulation </h3>
  *
- * The following example sets up an afterburner simulation for a set of particle
+ * The following example sets up an afterburner simulation for a set of
+ particle
  * files located in _**particle_lists_in**_ folder. The files are named as
- * _event10_, _event11_, etc. (the first being number 10 is specified by the key
+ * _event10_, _event11_, etc. (the first being number 10 is specified by the
+ key
  * `Shift_Id`). SMASH is run once for each event in the folder.
  * \verbatim
  Modi:
@@ -8333,12 +8440,15 @@ Modi:
  * \f[(t, x, y, z) = (0.1, 6.42036, 1.66473, 9.38499)\,\mathrm{fm}\f]
  * and 4-momentum
  * \f[(p_0,p_x,p_y,p_z)=(0.232871,0.116953,-0.115553,0.090303)\,\mathrm{GeV}\f]
- * with mass = 0.138 GeV, pdg = 111, ID = 0 and charge 0 will be initialized for
+ * with mass = 0.138 GeV, pdg = 111, ID = 0 and charge 0 will be initialized
+ for
  * the first event (and also for the second event).
  *
  * \note
- * SMASH is shipped with an example configuration file to set up an afterburner
- * simulation by means of the list modus. This also requires a particle list to
+ * SMASH is shipped with an example configuration file to set up an
+ afterburner
+ * simulation by means of the list modus. This also requires a particle list
+ to
  * be read in. Both, the configuration file and the particle list, are located
  * in the _**input/list**_ folder at the top-level of SMASH codebase. To run
  * SMASH with the provided example configuration and particle list, execute
@@ -8355,7 +8465,8 @@ Modi:
  * <h3> Configuring the Lattice </h3>
  *
  * The following example configures the lattice with the origin in (0,0,0), 20
- * cells of 10 fm size in each direction and with periodic boundary conditions.
+ * cells of 10 fm size in each direction and with periodic boundary
+ conditions.
  * The potential effects on the thresholds are taken into consideration. Note
  * that, as the origin is by definition the left down near corner of the cell,
  * center is located at (5, 5, 5).
@@ -8398,7 +8509,8 @@ Modi:
  *
  * The following example activates forced thermalization in cells in which the
  * energy density is above 0.3 GeV/fm³. The lattice is initialized with 21
- * cells in x and y direction and 101 cells in z-direction. The lattice size is
+ * cells in x and y direction and 101 cells in z-direction. The lattice size
+ is
  * 20 fm in x and y direction and 50 fm in z-direction. The thermalization is
  * applied only for times later than 10 fm with a timestep of 1 fm. The
  * sampling is done according to the "biased BF" algorithm.
