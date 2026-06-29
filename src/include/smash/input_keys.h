@@ -3894,7 +3894,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
-   * \optional_key{key_CT_dileptons_bremsstrahlung_,Bremsstrahlung,bool,false}
+   * \optional_key{key_CT_dileptons_bremsstrahlung_,Bremsstrahlung,bool,false,
+   * \none}
    *
    * Whether or not to enable dilepton production via bremsstrahlung in
    * neutron-proton interactions. The approach follows the meson-exchange
@@ -3904,12 +3905,15 @@ struct InputKeys {
    * \see_key{key_CT_dileptons_bremsstrahlung_}
    */
   inline static const Key<bool> collTerm_dileptons_bremsstrahlung{
-      InputSections::c_dileptons + "Bremsstrahlung", false, {"3.4"}};
+      InputSections::c_dileptons + "Bremsstrahlung",
+      false,
+      {"3.4"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
    * \optional_key{key_CT_dileptons_pion_form_factor_,Pion_Form_Factor,string,
-   * "Off"}
+   * "Off",\any_valid}
    *
    * - `"Off"` &rarr; Implicitly using a factor of 1.
    * - `"FF1"` &rarr; Photon couples to pion direclty via \f$\rho_0\f$ meson.
@@ -3925,11 +3929,13 @@ struct InputKeys {
       collTerm_dileptons_pion_form_factor{
           InputSections::c_dileptons + "Pion_Form_Factor",
           DileptonBremsPionFormFactor::Off,
-          {"3.4"}};
+          {"3.4"},
+          detail::get_default_validator<DileptonBremsPionFormFactor>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
-   * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false,\none}
+   * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false,
+   * \none}
    *
    * Whether or not to enable photon production in mesonic scattering
    * processes.
@@ -3945,7 +3951,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
-   * \optional_key{key_CT_photons_bremsstrahlung_,Bremsstrahlung,bool,false,\none}
+   * \optional_key{key_CT_photons_bremsstrahlung_,Bremsstrahlung,bool,false,
+   * \none}
    *
    * Whether or not to enable photon production in bremsstrahlung processes.
    */

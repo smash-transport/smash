@@ -470,6 +470,9 @@ TEST(validators_collision_term) {
   VERIFY(!hard_string_transition_energy_range.validate({20.0, 10.0}));
   const auto& dileptons_decays = InputKeys::collTerm_dileptons_decays;
   VERIFY(dileptons_decays.validate(false));
+  const auto& dileptons_pion_form_factor =
+      InputKeys::collTerm_dileptons_pion_form_factor;
+  VERIFY(dileptons_pion_form_factor.validate(DileptonBremsPionFormFactor::FF1));
   const auto& photons_2_to_2 = InputKeys::collTerm_photons_twoToTwoScatterings;
   VERIFY(photons_2_to_2.validate(false));
   const auto& photons_brems = InputKeys::collTerm_photons_bremsstrahlung;
