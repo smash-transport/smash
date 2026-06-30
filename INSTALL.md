@@ -178,8 +178,11 @@ make
 However, CMake offers plenty of possible customizations, partly natively and partly created ad-hoc for SMASH.
 In the following, the relevant explanation about these can be found and users should collect the relevant information for their case and build the appropriate `cmake` command according to their needs.
 
-Please note that the `make` command builds everything (executables, tests, and libraries) and this might take a while.
-You can use `make smash` if you are interested only in the executables or use `make smash_shared` to exclusively build the libraries (needed e.g. in another project [using SMASH as a library](#how-can-i-use-smash-as-an-external-library)).
+Please note that the `make` command only builds the `smash` executable and the libraries.
+If you want to compile all the tests, please use `make tests`, which only builds the tests, i.e. if you want to build all executables (smash and tests) plus the libraries use `make all tests`.
+If you need to use SMASH as a library, it is recommended to install it using `make install` following the instructions in the [SMASH installation](#customizing) section.
+For completeness, it is also possible to use `make smash_shared` to exclusively build the libraries, but the install method should be preferred.
+Further info can be found in the [using SMASH as a library](#how-can-i-use-smash-as-an-external-library) section.
 
 #### Alternatives to specify the installation directory of Pythia
 
@@ -285,10 +288,10 @@ If compilation of SMASH in combination with a pre-compiled ROOT binary fails, pl
 
 ### I run out of disk space compiling the code. Why?
 
-Please note that after compilation the `smash` directory (including `build`) might have a size of some GB.
-By default, the unit tests are always compiled, which requires a lot of the disk space.
-If disk space is restricted, consider to just run `make smash`, which will only compile the SMASH binary.
-However, it is still recommended to run the unit tests at least once when compiling in a new environment to ensure that everything works as expected.
+Please note that after compiling with `make all tests` the `smash` directory (including `build`) might have a size of some GB.
+The tests, which are not compiled by default, require a lot of the disk space.
+If disk space is restricted, consider to just run `make`, which will only compile the SMASH binary and the libraries.
+However, it is still recommended to run the tests at least once when compiling in a new environment to ensure that everything works as expected.
 To see how to run the tests, see [CONTRIBUTING](CONTRIBUTING.md).
 
 <a id="disabling-tests"></a>
@@ -298,7 +301,7 @@ To see how to run the tests, see [CONTRIBUTING](CONTRIBUTING.md).
 SMASH is shipped with many tests of different type.
 Most of them are unit and integration tests which have been kept separated from functional tests.
 When CMake configure the project (i.e. when running `cmake` from the ***build*** folder), unit and integration tests are always setup to be later compiled and each of them has an executable associated.
-However, [as mentioned](#out-of-disk-space), one is not obliged to compile everything, as it is possible to pass a given target to `make`.
+However, [as mentioned](#out-of-disk-space), one is not obliged to compile everything and by default tests are not compiled when executing `make`.
 
 On the other hand, functional tests are only setup if the CMake option `ENABLE_FUNCTIONAL_TESTS` is set to `ON`, which is **NOT** the default case.
 This is due to the fact that, in order to setup these tests, CMake will create a Python virtual environment installing requirements in it and this might take some time (usually the first time only) if some required packages (e.g. `pandas`) need to be built from source.
@@ -372,17 +375,14 @@ This will build and copy all necessary SMASH files to the installation folder an
 In your software you can then use the files in the SMASH installation directory and manually pass them to the compiler.
 
 Another possibility would be to build SMASH following the [instructions in the building section](#building).
-Please be aware that in this case, using `make` (builds executables, tests, and libraries) or `make smash_shared` (exclusively builds the libraries) will both work, whereas `make smash` will not since this only builds the `smash` executable.
+If you need the `smash` executable, using `make` (builds the `smash` executable and libraries) might be the right choice, but it is also possible to exclusively build the libraries with `make smash_shared`.
 Be aware that this build is just local and you would have to refer to the path of it in the project that needs to access the SMASH libraries.
 
 However, we encourage you to set up your project with CMake, too.
-In that case, you can use the _FindSMASH.cmake_ module shipped in the ***cmake*** folder.
-Refer to the *examples/using_SMASH_as_library/CMakeLists.txt* file for an example.
-There are two important aspects to mention, in order to let the CMake `find_package(SMASH)` command succeed:
-1. The folder where *FindSMASH.cmake* is needs to be in the `CMAKE_MODULE_PATH` CMake variable;
-2. The `SMASH_INSTALL_DIR` environment variable must be correctly set.
+You should [install](#customizing) SMASH and afterward use the `find_package(SMASH)` command to locate it.
+Refer to the [*examples/using_SMASH_as_library/CMakeLists.txt*](examples/using_SMASH_as_library/CMakeLists.txt) file for an example.
 
-If you are interested how to set up SMASH as an external library for your project, check out the [example how to do this in a CMake project](https://github.com/smash-transport/smash/tree/main/examples/using_SMASH_as_library).
+If you are interested how to set up SMASH as an external library for your project, check out the [example how to do this in a CMake project](examples/using_SMASH_as_library).
 
 <a id="disable-root-hempc"></a>
 
