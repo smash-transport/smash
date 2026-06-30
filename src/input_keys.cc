@@ -90,6 +90,7 @@ const std::vector<InputKeys::key_references_variant>& InputKeys::all_keys() {
       std::cref(log_tmn),
       std::cref(version),
       std::cref(collTerm_additionalElasticCrossSection),
+      std::cref(collTerm_charmRescatteringMethod),
       std::cref(collTerm_collisionCriterion),
       std::cref(collTerm_crossSectionScaling),
       std::cref(collTerm_elasticCrossSection),

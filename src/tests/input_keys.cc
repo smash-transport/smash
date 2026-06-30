@@ -294,6 +294,8 @@ TEST(validators_collision_term) {
   VERIFY(!hf_AQM_c_supp.validate(-1.0e-12));
   const auto& add_elastic = InputKeys::collTerm_additionalElasticCrossSection;
   VERIFY(add_elastic.validate(0.0));
+  const auto& charm_rescattering = InputKeys::collTerm_charmRescatteringMethod;
+  VERIFY(charm_rescattering.validate(CharmRescattering::Resonances));
   const auto& collision_criterion = InputKeys::collTerm_collisionCriterion;
   VERIFY(collision_criterion.validate(CollisionCriterion::Covariant));
   const auto& xs_scaling = InputKeys::collTerm_crossSectionScaling;

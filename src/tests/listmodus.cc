@@ -582,6 +582,7 @@ TEST(try_create_particle_with_spin_func) {
       CollisionCriterion::Geometric,
       true,
       Test::all_reactions_included(),
+      CharmRescattering::Resonances,
       Test::no_multiparticle_reactions(),
       false,  // strings
       1.0,

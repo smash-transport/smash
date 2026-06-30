@@ -170,6 +170,16 @@ std::string to_string(ThermalizationAlgorithm algo);
 std::string to_string(CollisionCriterion c);
 
 /**
+ * Convert a CharmRescattering enum value to its corresponding string.
+ *
+ * \param[in] c The CharmRescattering enum value to convert.
+ *
+ * \return std::string Corresponding string representation.
+ * \throws std::invalid_argument If the enum value is unhandled.
+ */
+std::string to_string(CharmRescattering c);
+
+/**
  * Convert a SpinInteractionType enum value to its corresponding string.
  *
  * \param[in] type The SpinInteractionType enum value to convert.
