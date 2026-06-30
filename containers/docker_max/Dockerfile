@@ -86,10 +86,10 @@ RUN <<EOF
     build-essential  \
     bzip2  \
     ca-certificates  \
-    clang-13 \
-    clang-format-13 \
-    clang-tidy-13 \
-    clang-tools-13 \
+    clang-18 \
+    clang-format-18 \
+    clang-tidy-18 \
+    clang-tools-18 \
     coreutils  \
     curl \
     cython3 \
@@ -119,26 +119,26 @@ RUN <<EOF
     libc-bin  \
     libc-dev-bin  \
     libc-devtools \
-    libc++-13-dev \
-    libc++1-13 \
-    libc++abi-13-dev \
-    libc++abi1-13 \
-    libclang-common-13-dev \
-    libclang-cpp13 \
-    libclang1-13 \
+    libc++-18-dev \
+    libc++1-18 \
+    libc++abi-18-dev \
+    libc++abi1-18 \
+    libclang-common-18-dev \
+    libclang-cpp18 \
+    libclang1-18 \
     libfreetype-dev \
     libgif-dev  \
     libgmp-dev  \
     libgraphviz-dev  \
     libjpeg-dev  \
     libjpeg8-dev  \
-    libllvm13 \
+    libllvm18 \
     liblzma-dev  \
     libmpfr-dev  \
     libmpfrc++-dev  \
     libopenmpi-dev \
     libpcre3-dev \
-    libpcre++-dev  \
+    libpcre2-dev  \
     libpng-dev  \
     libpng-tools  \
     libssl-dev  \
@@ -151,11 +151,11 @@ RUN <<EOF
     libxxhash-dev \
     libzstd-dev \
     linux-libc-dev \
-    llvm-13 \
-    llvm-13-dev \
-    llvm-13-linker-tools \
-    llvm-13-runtime \
-    llvm-13-tools \
+    llvm-18 \
+    llvm-18-dev \
+    llvm-18-linker-tools \
+    llvm-18-runtime \
+    llvm-18-tools \
     locales \
     locales-all \
     lsb-base  \
@@ -169,7 +169,11 @@ RUN <<EOF
     python3-decorator  \
     python3-dev  \
     python3-distro  \
-    python3-distutils  \
+    python3-dev  \
+    python3-distro  \
+    python3-venv  \
+    python3-setuptools  \
+    python3-pip \
     python3-entrypoints  \
     python3-future  \
     python3-importlib-metadata  \
@@ -267,7 +271,7 @@ RUN <<EOF
   mkdir -p root_install root_build
   cd root_build
   cmake -DCMAKE_INSTALL_PREFIX=../root_install ../root_src -Dxrootd=OFF
-  cmake --build . --target install -j$(nproc)
+  cmake --build . --target install -j4
   printf '/SMASH/root_install/lib\n' >> /etc/ld.so.conf
   ldconfig
 EOF
@@ -468,7 +472,7 @@ ENV SMASH_BUILD_DIR=/SMASH/smash_bin
 # Miscellaneous:
 #  1. Remove most of the sources
 #  2. Allow Imagemagick to process PS, EPS and PDF files in case the user needs to use `convert` inside the container
-#  3. Set a symbolic link to clang-format-13 and clang-tidy-13 to make them usable from the SMASH formatting script
+#  3. Set a symbolic link to clang-format-18 and clang-tidy-18 to make them usable from the SMASH formatting script
 #  4. Install cmake-format
 
 RUN <<EOF
@@ -489,8 +493,8 @@ RUN <<EOF
          /var/cache/apt/archives/*.deb
   sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" \
          -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" /etc/ImageMagick-6/policy.xml
-  ln -s /usr/bin/clang-format-13 /usr/bin/clang-format
-  ln -s /usr/bin/clang-tidy-13 /usr/bin/clang-tidy
+  ln -s /usr/bin/clang-format-18 /usr/bin/clang-format
+  ln -s /usr/bin/clang-tidy-18 /usr/bin/clang-tidy
   pip install cmakelang
 EOF
 
