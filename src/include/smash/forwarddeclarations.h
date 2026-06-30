@@ -61,6 +61,22 @@ enum class CalculationFrame {
   FixedTarget,
 };
 
+/**
+ * Option to use form factors in dilepton bremsstrahlung as described in
+ * \iref{Shyam:2010vr}.
+ */
+enum class DileptonBremsPionFormFactor {
+  /// Don't use form factors, i.e. multiply by 1.
+  Off,
+  /// Photon couples to pion only via \f$\rho_0\f$ meson.
+  FF1,
+  /**
+   * Photon couples 40% directly to intrinsice quark structure of pion and
+   * 60% indirectly via \f$\rho_0\f$ meson.
+   */
+  FF2,
+};
+
 /// Option to use Fermi Motion
 enum class FermiMotion {
   /// Don't use fermi motion.
@@ -239,6 +255,7 @@ enum IncludedReactions {
   PiDeuteron_to_NN = 7,
   PiDeuteron_to_pidprime = 8,
   NDeuteron_to_Ndprime = 9,
+  Charm_T_matrix = 10,
 };
 
 /**
@@ -250,7 +267,7 @@ enum IncludedReactions {
  * overloads; therefore, developers should ensure that multiple bitsets are not
  * set to the same length.
  */
-typedef std::bitset<10> ReactionsBitSet;
+typedef std::bitset<11> ReactionsBitSet;
 
 /// The different groups of multi-particle reactions that one can include
 // Because std::bitset does not handle enum classes, this is a simple enum.
@@ -267,6 +284,16 @@ enum IncludedMultiParticleReactions {
  * @attention See remark in \ref ReactionsBitSet
  */
 typedef std::bitset<4> MultiParticleReactionsBitSet;
+
+/// Possible charm scattering options
+enum class CharmRescattering {
+  /// Disable charm interactions
+  None,
+  /// Charm interactions via resonances
+  Resonances,
+  /// Charm interactions via T-matrix approach
+  T_Matrix,
+};
 
 /// Possible spin interaction types
 enum class SpinInteractionType {

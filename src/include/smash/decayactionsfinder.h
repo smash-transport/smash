@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022-2025
+ *    Copyright (c) 2014-2020,2022-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -35,7 +35,8 @@ class DecayActionsFinder : public ActionFinderInterface {
         ignore_minimum_width_at_end_(par.ignore_minimum_width_at_end),
         force_decays_at_end_(par.force_decays_at_end),
         decay_initial_particles_(par.decay_initial_particles),
-        spin_interaction_type_(par.spin_interaction_type) {}
+        spin_interaction_type_(par.spin_interaction_type),
+        charm_rescattering_method_(par.charm_rescattering) {}
 
   /**
    * Check the whole particle list for decays.
@@ -92,6 +93,10 @@ class DecayActionsFinder : public ActionFinderInterface {
   /// Spin interaction type
   const SpinInteractionType spin_interaction_type_ =
       InputKeys::collTerm_spinInteractions.default_value();
+
+  /// Charm rescattering method
+  const CharmRescattering charm_rescattering_method_ =
+      InputKeys::collTerm_charmRescatteringMethod.default_value();
 };
 
 }  // namespace smash

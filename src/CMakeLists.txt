@@ -273,15 +273,16 @@ option(TRY_USE_RIVET "Turn this off to disable Rivet output support in SMASH." O
 set(SMASH_USE_Rivet OFF) # For SMASHConfig.cmake file
 if(TRY_USE_RIVET AND HepMC3_FOUND)
     find_package(Rivet QUIET) # Min version not handled here but after to better inform user
-    set(Rivet_MINIMUM_VERSION "3.1") # Also for SMASHConfig.cmake file
+    set(Rivet_MINIMUM_VERSION "3.1.4") # Also for SMASHConfig.cmake file
+    set(Rivet_MAXIMUM_VERSION "3.1.11") # Also for SMASHConfig.cmake file
     if(Rivet_FOUND)
         message(STATUS "Candidate Rivet version ${RIVET_VERSION} found, "
-                       "requested ${Rivet_MINIMUM_VERSION}")
-        if(RIVET_VERSION VERSION_LESS Rivet_MINIMUM_VERSION)
+                       "requested ${Rivet_MINIMUM_VERSION} to ${Rivet_MAXIMUM_VERSION} (included)")
+        if(RIVET_VERSION VERSION_LESS Rivet_MINIMUM_VERSION OR RIVET_VERSION VERSION_GREATER
+                                                               Rivet_MAXIMUM_VERSION)
             set(Rivet_FOUND FALSE)
-        elseif(RIVET_VERSION VERSION_GREATER_EQUAL "3.2")
-            message(ATTENTION "Rivet version larger than 3.1.x found. "
-                              "The SMASH interface might miss some functionality.")
+            message(ATTENTION "Rivet version outside supported range 3.1.4 to 3.1.11 found. "
+                              "The SMASH interface support is disabled.")
         endif()
     endif()
     if(Rivet_FOUND)
@@ -331,7 +332,8 @@ target_sources(smash_objlib
                PRIVATE action.cc
                        boxmodus.cc
                        binaryoutput.cc
-                       bremsstrahlungaction.cc
+                       bremsstrahlungactionphoton.cc
+                       bremsstrahlungactiondilepton.cc
                        chemicalpotential.cc
                        clebschgordan.cc
                        clebschgordan_lookup.cc

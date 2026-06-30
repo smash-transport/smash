@@ -154,7 +154,7 @@ TEST(outgoing_valid) {
 
   // add processes
 
-  double elastic_parameter = 0;  // don't include elastic scattering
+  double elastic_parameter = -1;  // don't include elastic scattering
   bool strings_switch = false;
   act->add_all_scatterings(Test::default_finder_parameters(
       elastic_parameter, NNbarTreatment::NoAnnihilation,
@@ -220,7 +220,7 @@ TEST(cross_sections_symmetric) {
 
     // add processes
 
-    double elastic_parameter = -10.;  // no added elastic cross sections
+    double elastic_parameter = -1.;  // no added elastic cross sections
     bool use_AQM = true;
     bool strings_with_probability = true;
     NNbarTreatment nnbar_treatment = NNbarTreatment::Strings;
@@ -279,7 +279,7 @@ TEST(pythia_running) {
 
   // add processes
 
-  double elastic_parameter = 0;  // don't include elastic scattering
+  double elastic_parameter = -1;  // don't include elastic scattering
   ReactionsBitSet included_2to2 = ReactionsBitSet();
 
   act->add_all_scatterings(Test::default_finder_parameters(
@@ -350,7 +350,7 @@ TEST(no_strings) {
     VERIFY(act != nullptr);
 
     // add processes
-    double elastic_parameter = 0;  // don't include elastic scattering
+    double elastic_parameter = -1;  // don't include elastic scattering
     bool strings_switch = false;
 
     act->add_all_scatterings(Test::default_finder_parameters(
@@ -403,17 +403,24 @@ TEST(update_incoming) {
   act.update_incoming(particles);
   COMPARE(act.incoming_particles()[0].position(), new_position);
 }
-
 static bool collisionbranches_equal(const CollisionBranchPtr& b1,
                                     const CollisionBranchPtr& b2) {
-  bool same_particle_number = b1->particle_number() == b2->particle_number();
-  bool same_weight = (std::abs(b1->weight() - b2->weight()) < really_small);
+  const bool same_particle_number =
+      b1->particle_number() == b2->particle_number();
+  const bool same_weight = std::abs(b1->weight() - b2->weight()) < really_small;
+
   if (b1->get_type() == ProcessType::StringSoftSingleDiffractiveAX) {
     return same_weight && same_particle_number &&
            b2->get_type() == ProcessType::StringSoftSingleDiffractiveXB;
   } else if (b1->get_type() == ProcessType::StringSoftSingleDiffractiveXB) {
     return same_weight && same_particle_number &&
            b2->get_type() == ProcessType::StringSoftSingleDiffractiveAX;
+  } else if (b1->get_type() == ProcessType::StringHardSingleDiffractiveAX) {
+    return same_weight && same_particle_number &&
+           b2->get_type() == ProcessType::StringHardSingleDiffractiveXB;
+  } else if (b1->get_type() == ProcessType::StringHardSingleDiffractiveXB) {
+    return same_weight && same_particle_number &&
+           b2->get_type() == ProcessType::StringHardSingleDiffractiveAX;
   } else {
     return same_weight && same_particle_number &&
            b1->get_type() == b2->get_type();
@@ -456,7 +463,7 @@ TEST(particle_ordering) {
     VERIFY(act21 != nullptr);
 
     // add processes
-    double elastic_parameter = -10.;  // no added elastic cross sections
+    double elastic_parameter = -1.;  // no added elastic cross sections
     bool use_AQM = true;
     bool strings_with_probability = true;
     NNbarTreatment nnbar_treatment = NNbarTreatment::Strings;
@@ -559,7 +566,7 @@ TEST(top_down_sum_matches_parametrization) {
     act_topdown->set_string_interface(string_process_interface.get());
 
     auto finder_parameters_topdown = Test::default_finder_parameters(
-        0, NNbarTreatment::Strings, Test::all_reactions_included(), true, true,
+        -1, NNbarTreatment::Strings, Test::all_reactions_included(), true, true,
         true, TotalCrossSectionStrategy::TopDown);
     act_topdown->set_parametrized_total_cross_section(
         finder_parameters_topdown);

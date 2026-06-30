@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022-2024
+ *    Copyright (c) 2014-2020,2022-2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -506,7 +506,7 @@ DecayBranchList ParticleType::get_partial_widths(const FourVector p,
   DecayBranchList partial;
   partial.reserve(decay_mode_list.size());
   for (unsigned int i = 0; i < decay_mode_list.size(); i++) {
-    /* Calculate the sqare root s of the final state particles. */
+    /* Calculate the square root s of the final state particles. */
     const auto FinalTypes = decay_mode_list[i]->type().particle_types();
     double scale_B = 0.0;
     double scale_I3 = 0.0;

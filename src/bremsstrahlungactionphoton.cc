@@ -7,7 +7,7 @@
  *
  */
 
-#include "smash/bremsstrahlungaction.h"
+#include "smash/bremsstrahlungactionphoton.h"
 
 #include "smash/crosssectionsbrems.h"
 #include "smash/outputinterface.h"
@@ -16,7 +16,7 @@
 namespace smash {
 static constexpr int LScatterAction = LogArea::ScatterAction::id;
 
-BremsstrahlungAction::BremsstrahlungAction(
+BremsstrahlungActionPhoton::BremsstrahlungActionPhoton(
     const ParticleList &in, const double time, const int n_frac_photons,
     const double hadronic_cross_section_input,
     const SpinInteractionType spin_interaction_type)
@@ -26,8 +26,9 @@ BremsstrahlungAction::BremsstrahlungAction(
       hadronic_cross_section_(hadronic_cross_section_input),
       spin_interaction_type_(spin_interaction_type) {}
 
-BremsstrahlungAction::ReactionType
-BremsstrahlungAction::bremsstrahlung_reaction_type(const ParticleList &in) {
+BremsstrahlungActionPhoton::ReactionType
+BremsstrahlungActionPhoton::bremsstrahlung_reaction_type(
+    const ParticleList &in) {
   if (in.size() != 2) {
     return ReactionType::no_reaction;
   }
@@ -62,7 +63,8 @@ BremsstrahlungAction::bremsstrahlung_reaction_type(const ParticleList &in) {
   }
 }
 
-void BremsstrahlungAction::perform_bremsstrahlung(const OutputsList &outputs) {
+void BremsstrahlungActionPhoton::perform_bremsstrahlung(
+    const OutputsList &outputs) {
   for (int i = 0; i < number_of_fractional_photons_; i++) {
     generate_final_state();
     for (const auto &output : outputs) {
@@ -74,12 +76,13 @@ void BremsstrahlungAction::perform_bremsstrahlung(const OutputsList &outputs) {
   }
 }
 
-void BremsstrahlungAction::generate_final_state() {
+void BremsstrahlungActionPhoton::generate_final_state() {
   // we have only one reaction per incoming particle pair
   if (collision_processes_bremsstrahlung_.size() != 1) {
     logg[LScatterAction].fatal()
-        << "Problem in BremsstrahlungAction::generate_final_state().\nThe "
-           "brocess branch has "
+        << "Problem in "
+           "BremsstrahlungActionPhoton::generate_final_state().\nThe "
+           "process branch has "
         << collision_processes_bremsstrahlung_.size()
         << " entries. It should however have 1.";
     throw std::runtime_error("");
@@ -149,7 +152,7 @@ void BremsstrahlungAction::generate_final_state() {
   Action::check_conservation(id_process);
 }
 
-void BremsstrahlungAction::sample_3body_phasespace() {
+void BremsstrahlungActionPhoton::sample_3body_phasespace() {
   assert(outgoing_particles_.size() == 3);
   const double m_a = outgoing_particles_[0].type().mass(),
                m_b = outgoing_particles_[1].type().mass(),
@@ -175,15 +178,15 @@ void BremsstrahlungAction::sample_3body_phasespace() {
   outgoing_particles_[1].boost_momentum(beta_cm_pion_pair_photon);
 }
 
-void BremsstrahlungAction::add_dummy_hadronic_process(
+void BremsstrahlungActionPhoton::add_dummy_hadronic_process(
     double reaction_cross_section) {
   CollisionBranchPtr dummy_process = std::make_unique<CollisionBranch>(
       incoming_particles_[0].type(), incoming_particles_[1].type(),
-      reaction_cross_section, ProcessType::Bremsstrahlung);
+      reaction_cross_section, ProcessType::BremsstrahlungPhoton);
   add_collision(std::move(dummy_process));
 }
 
-CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
+CollisionBranchList BremsstrahlungActionPhoton::brems_cross_sections() {
   CollisionBranchList process_list;
   // ParticleList final_state_particles;
   static const ParticleTypePtr photon_particle =
@@ -222,10 +225,10 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
     // Add both processes to the process_list
     process_list_pipi.push_back(std::make_unique<CollisionBranch>(
         incoming_particles_[0].type(), incoming_particles_[1].type(),
-        *photon_particle, xsection_pipi, ProcessType::Bremsstrahlung));
+        *photon_particle, xsection_pipi, ProcessType::BremsstrahlungPhoton));
     process_list_pipi.push_back(std::make_unique<CollisionBranch>(
         *pi_z_particle, *pi_z_particle, *photon_particle, xsection_pi0pi0,
-        ProcessType::Bremsstrahlung));
+        ProcessType::BremsstrahlungPhoton));
 
     // Decide for one of the possible final states
     double total_cross_section = xsection_pipi + xsection_pi0pi0;
@@ -236,7 +239,7 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
 
     process_list.push_back(std::make_unique<CollisionBranch>(
         proc->particle_list()[0].type(), proc->particle_list()[1].type(),
-        *photon_particle, xsection, ProcessType::Bremsstrahlung));
+        *photon_particle, xsection, ProcessType::BremsstrahlungPhoton));
 
   } else if (reac_ == ReactionType::pi_m_pi_m ||
              reac_ == ReactionType::pi_p_pi_p ||
@@ -255,7 +258,7 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
 
     process_list.push_back(std::make_unique<CollisionBranch>(
         incoming_particles_[0].type(), incoming_particles_[1].type(),
-        *photon_particle, xsection, ProcessType::Bremsstrahlung));
+        *photon_particle, xsection, ProcessType::BremsstrahlungPhoton));
 
   } else if (reac_ == ReactionType::pi_z_pi_z) {
     // Here we have a hard-coded final state that differs from the initial
@@ -267,15 +270,17 @@ CollisionBranchList BremsstrahlungAction::brems_cross_sections() {
 
     process_list.push_back(std::make_unique<CollisionBranch>(
         *pi_p_particle, *pi_m_particle, *photon_particle, xsection,
-        ProcessType::Bremsstrahlung));
+        ProcessType::BremsstrahlungPhoton));
   } else {
-    throw std::runtime_error("Unknown ReactionType in BremsstrahlungAction.");
+    throw std::runtime_error(
+        "Unknown ReactionType in BremsstrahlungActionPhoton.");
   }
 
   return process_list;
 }
 
-std::pair<double, double> BremsstrahlungAction::brems_diff_cross_sections() {
+std::pair<double, double>
+BremsstrahlungActionPhoton::brems_diff_cross_sections() {
   static const ParticleTypePtr pi_z_particle = &ParticleType::find(pdg::pi_z);
   const double collision_energy = sqrt_s();
   double dsigma_dk;
@@ -311,7 +316,7 @@ std::pair<double, double> BremsstrahlungAction::brems_diff_cross_sections() {
   } else {
     throw std::runtime_error(
         "Unkown channel when computing differential cross sections for "
-        "bremsstrahlung processes.");
+        "photon bremsstrahlung processes.");
   }
 
   // Prevent negative cross sections due to numerics in interpolation
@@ -324,7 +329,7 @@ std::pair<double, double> BremsstrahlungAction::brems_diff_cross_sections() {
   return diff_x_sections;
 }
 
-void BremsstrahlungAction::create_interpolations() {
+void BremsstrahlungActionPhoton::create_interpolations() {
   // Read in tabularized values for sqrt(s), k and theta
   std::vector<double> sqrts = BREMS_SQRTS;
   std::vector<double> photon_momentum = BREMS_K;
@@ -417,4 +422,5 @@ void BremsstrahlungAction::create_interpolations() {
                                                 dsigma_dtheta_pi0pi0_pipi,
                                                 ExtrapolationType::Constant);
 }
+
 }  // namespace smash

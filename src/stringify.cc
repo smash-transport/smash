@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2025
+ *    Copyright (c) 2025-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -49,6 +49,18 @@ std::string to_string(CalculationFrame frame) {
       return "fixed target";
   }
   throw_unhandled_enum("CalculationFrame", static_cast<int>(frame));
+}
+
+std::string to_string(DileptonBremsPionFormFactor factor) {
+  switch (factor) {
+    case DileptonBremsPionFormFactor::FF1:
+      return "FF1";
+    case DileptonBremsPionFormFactor::FF2:
+      return "FF2";
+    case DileptonBremsPionFormFactor::Off:
+      return "Off";
+  }
+  throw_unhandled_enum("DileptonBremsPionFormFactor", static_cast<int>(factor));
 }
 
 std::string to_string(FermiMotion motion) {
@@ -223,6 +235,18 @@ std::string to_string(CollisionCriterion c) {
   throw_unhandled_enum("CollisionCriterion", static_cast<int>(c));
 }
 
+std::string to_string(CharmRescattering c) {
+  switch (c) {
+    case CharmRescattering::None:
+      return "none";
+    case CharmRescattering::Resonances:
+      return "resonances";
+    case CharmRescattering::T_Matrix:
+      return "T-matrix";
+  }
+  throw_unhandled_enum("CharmRescattering", static_cast<int>(c));
+}
+
 std::string to_string(SpinInteractionType type) {
   switch (type) {
     case SpinInteractionType::On:
@@ -327,6 +351,8 @@ std::vector<std::string> to_string(const ReactionsBitSet &s) {
     result.push_back("PiDeuteron_to_pidprime");
   if (s.test(IncludedReactions::NDeuteron_to_Ndprime))
     result.push_back("NDeuteron_to_Ndprime");
+  if (s.test(IncludedReactions::Charm_T_matrix))
+    result.push_back("Charm_T-matrix");
   return result;
 }
 

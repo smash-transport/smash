@@ -34,7 +34,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       isotropic_(config.take(InputKeys::collTerm_isotropic)),
       box_length_(parameters.box_length),
       string_formation_time_(
-          config.take(InputKeys::collTerm_stringParam_formationTime)) {
+          config.read(InputKeys::collTerm_stringParam_formationTime)) {
   if (is_constant_elastic_isotropic()) {
     logg[LFindScatter].info(
         "Constant elastic isotropic cross-section mode:", " using ",
@@ -44,9 +44,7 @@ ScatterActionsFinder::ScatterActionsFinder(
       finder_parameters_.coll_crit != CollisionCriterion::Stochastic) {
     throw std::invalid_argument(
         "Multi-body reactions (like e.g. 3->1 or 3->2) are only possible with "
-        "the stochastic "
-        "collision "
-        "criterion. Change your config accordingly.");
+        "the stochastic collision criterion. Change your config accordingly.");
   }
 
   if (finder_parameters_
@@ -99,58 +97,14 @@ ScatterActionsFinder::ScatterActionsFinder(
   }
 
   if (finder_parameters_.strings_switch) {
-    string_process_interface_ = std::make_unique<StringProcess>(
-        config.take(InputKeys::collTerm_stringParam_stringTension),
-        string_formation_time_,
-        config.take(InputKeys::collTerm_stringParam_gluonBeta),
-        config.take(InputKeys::collTerm_stringParam_gluonPMin),
-        config.take(InputKeys::collTerm_stringParam_quarkAlpha),
-        config.take(InputKeys::collTerm_stringParam_quarkBeta),
-        config.take(InputKeys::collTerm_stringParam_strangeSuppression),
-        config.take(InputKeys::collTerm_stringParam_diquarkSuppression),
-        config.take(InputKeys::collTerm_stringParam_sigmaPerp),
-        config.take(InputKeys::collTerm_stringParam_stringZALeading),
-        config.take(InputKeys::collTerm_stringParam_stringZBLeading),
-        config.take(InputKeys::collTerm_stringParam_stringZA),
-        config.take(InputKeys::collTerm_stringParam_stringZB),
-        config.take(InputKeys::collTerm_stringParam_stringSigmaT),
-        config.take(InputKeys::collTerm_stringParam_formTimeFactor),
-        config.take(InputKeys::collTerm_stringParam_mDependentFormationTimes),
-        config.take(InputKeys::collTerm_stringParam_probabilityPToDUU),
-        config.take(InputKeys::collTerm_stringParam_separateFragmentBaryon),
-        config.take(InputKeys::collTerm_stringParam_popcornRate),
-        config.take(InputKeys::collTerm_stringParam_useMonashTune,
-                    parameters.use_monash_tune_default.value()),
-        config.take(InputKeys::collTerm_stringParam_unformedXsecSuppression));
+    string_process_interface_ = std::make_unique<StringProcess>(config);
   }
 }
 
 static StringTransitionParameters create_string_transition_parameters(
     Configuration& config) {
-  auto sqrts_range_Npi = config.take(InputKeys::collTerm_stringTrans_rangeNpi);
-  auto sqrts_range_NN = config.take(InputKeys::collTerm_stringTrans_rangeNN);
-
-  if (sqrts_range_Npi.first < nucleon_mass + pion_mass) {
-    sqrts_range_Npi.first = nucleon_mass + pion_mass;
-    if (sqrts_range_Npi.second < sqrts_range_Npi.first)
-      sqrts_range_Npi.second = sqrts_range_Npi.first;
-    logg[LFindScatter].warn(
-        "Lower bound of Sqrts_Range_Npi too small, setting it to mass "
-        "threshold. New range is [",
-        sqrts_range_Npi.first, ',', sqrts_range_Npi.second, "] GeV");
-  }
-  if (sqrts_range_NN.first < 2 * nucleon_mass) {
-    sqrts_range_NN.first = 2 * nucleon_mass;
-    if (sqrts_range_NN.second < sqrts_range_NN.first)
-      sqrts_range_NN.second = sqrts_range_NN.first;
-    logg[LFindScatter].warn(
-        "Lower bound of Sqrts_Range_NN too small, setting it to mass "
-        "threshold. New range is [",
-        sqrts_range_NN.first, ',', sqrts_range_NN.second, "] GeV.");
-  }
-
-  return {sqrts_range_Npi,
-          sqrts_range_NN,
+  return {config.take(InputKeys::collTerm_stringTrans_rangeNpi),
+          config.take(InputKeys::collTerm_stringTrans_rangeNN),
           config.take(InputKeys::collTerm_stringTrans_lower),
           config.take(InputKeys::collTerm_stringTrans_range_width),
           config.take(InputKeys::collTerm_stringTrans_pipiOffset),
@@ -168,6 +122,7 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
       coll_crit(parameters.coll_crit),
       nnbar_treatment(parameters.nnbar_treatment),
       included_2to2(parameters.included_2to2),
+      charm_rescattering(parameters.charm_rescattering),
       included_multi(parameters.included_multi),
       testparticles(parameters.testparticles),
       two_to_one(parameters.two_to_one),
@@ -184,34 +139,13 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
       total_xs_strategy(config.take(InputKeys::collTerm_totXsStrategy)),
       pseudoresonance_method(config.take(InputKeys::collTerm_pseudoresonance)),
       hard_string_transition_mode(
-          config.take(InputKeys::collTerm_hard_string_transition_mode)),
-      hard_string_transition_start_energy(
-          config.take(InputKeys::collTerm_hard_string_transition_start_energy)),
-      hard_string_transition_end_energy(
-          config.take(InputKeys::collTerm_hard_string_transition_end_energy)),
-
+          config.take(InputKeys::collTerm_hardStringTransition_mode)),
+      hard_string_transition_energy_range(
+          config.take(InputKeys::collTerm_hardStringTransition_energyRange)),
       AQM_charm_suppression(
           config.take(InputKeys::collTerm_HF_AQMcSuppression)),
       AQM_bottom_suppression(
           config.take(InputKeys::collTerm_HF_AQMbSuppression)) {
-  if (hard_string_transition_mode == HardStringTransitionMode::Custom_Range) {
-    if (hard_string_transition_start_energy < 10.0) {
-      throw std::invalid_argument(
-          "Custom string transition: hard_string_transition_start_energy (" +
-          std::to_string(hard_string_transition_start_energy) +
-          " GeV) must be >= 10 GeV.");
-    }
-
-    if (hard_string_transition_start_energy >
-        hard_string_transition_end_energy) {
-      throw std::invalid_argument(
-          "Custom string transition: hard_string_transition_start_energy (" +
-          std::to_string(hard_string_transition_start_energy) +
-          " GeV) must be <= hard_string_transition_end_energy (" +
-          std::to_string(hard_string_transition_end_energy) + " GeV).");
-    }
-  }
-
   if (total_xs_strategy == TotalCrossSectionStrategy::BottomUp) {
     logg[LFindScatter].info(
         "Evaluating total cross sections from partial processes.");
@@ -236,12 +170,6 @@ ScatterActionsFinderParameters::ScatterActionsFinderParameters(
         "Total_Cross_Section_Strategy is set to \"TopDown\" or "
         "\"TopDownMeasured\".\n"
         "AQM will be used for total parametrizations of cross sections.");
-  }
-
-  if (AQM_charm_suppression < 0 || AQM_bottom_suppression < 0 ||
-      AQM_charm_suppression > 1 || AQM_bottom_suppression > 1) {
-    throw std::invalid_argument(
-        "Suppression factors for AQM should be between 0 and 1.");
   }
 }
 
@@ -635,8 +563,7 @@ void ScatterActionsFinder::dump_reactions() const {
             for (const auto& channel : act->collision_channels()) {
               const auto type = channel->get_type();
               std::string r;
-              if (is_string_soft_process(type) ||
-                  type == ProcessType::StringHard) {
+              if (is_string_process(type)) {
                 r = A_type->name() + B_type->name() + std::string(" → strings");
               } else {
                 std::string r_type =

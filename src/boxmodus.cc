@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2012-2020,2022-2025
+ *    Copyright (c) 2012-2020,2022-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -95,10 +95,6 @@ BoxModus::BoxModus(Configuration modus_config,
                    : std::nullopt),
 
       jet_mom_(modus_config.take(InputKeys::modi_box_jet_jetMomentum)) {
-  if (parameters.res_lifetime_factor < 0.) {
-    throw std::invalid_argument(
-        "Resonance lifetime modifier cannot be negative!");
-  }
   // Check consistency, just in case
   if (std::abs(length_ - parameters.box_length) > really_small) {
     throw std::runtime_error("Box length inconsistency");

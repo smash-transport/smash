@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2017-2020,2022-2025
+ *    Copyright (c) 2017-2020,2022-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -582,6 +582,7 @@ TEST(try_create_particle_with_spin_func) {
       CollisionCriterion::Geometric,
       true,
       Test::all_reactions_included(),
+      CharmRescattering::Resonances,
       Test::no_multiparticle_reactions(),
       false,  // strings
       1.0,
@@ -597,6 +598,7 @@ TEST(try_create_particle_with_spin_func) {
       true,  // force decays at the end
       false,
       true,
+      DileptonBremsPionFormFactor::Off,
       SpinInteractionType::On,
       std::nullopt};
 

@@ -21,6 +21,7 @@ Hendrik Roch | [✉️](mailto:roch@fias.uni-frankfurt.de) | `2022-2024`
 Lukas Prinz | [✉️](mailto:lprinz@fias.uni-frankfurt.de) | `2019`
 Zuzana Paulinyova | [✉️](mailto:paulinyova@fias.uni-frankfurt.de) | `2023-2024`
 Long-Gang Pang | [✉️](mailto:pang@fias.uni-frankfurt.de) | `2015-2017`
+Sebastian Ostrowski | [✉️](mailto:ostrowski@itp.uni-frankfurt.de) | `2026-`
 Dmytro Oliinychenko | [✉️](mailto:oliiny@fias.uni-frankfurt.de) | `2014-2022`
 Justin Mohs | [✉️](mailto:jmohs@itp.uni-frankfurt.de) | `2017-2025`
 Damjan Mitrovic | [✉️](mailto:mitrovic@fias.uni-frankfurt.de) | `2019-2020`
@@ -37,7 +38,7 @@ Julia Groebel | [✉️](mailto:groebel@fias.uni-frankfurt.de) | `2022`
 Andy Goldschmidt | [✉️](mailto:goldschmidt@fias.uni-frankfurt.de) | `2014`
 Leon Geiger | [✉️](mailto:geiger@fias.uni-frankfurt.de) | `2019-2020`
 Oscar Garcia-Montero | [✉️](mailto:garcia@fias.uni-frankfurt.de) | `2020-2021`
-Manou Engel | [✉️](mailto:mengel@itp.uni-frankfurt.de) | `2025-`
+Manou Engel | [✉️](mailto:mengel@itp.uni-frankfurt.de) | `2025`
 Hannah Elfner | [✉️](mailto:elfner@itp.uni-frankfurt.de) | `2013-`
 Niklas Ehlert | [✉️](mailto:ehlert@fias.uni-frankfurt.de) | `2016`
 Lucas Constantin | [✉️](mailto:constantin@itp.uni-frankfurt.de) | `2024-`

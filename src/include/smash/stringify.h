@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2025
+ *    Copyright (c) 2025-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -38,6 +38,16 @@ std::string to_string(ThermodynamicQuantity quantity);
  * \throws std::invalid_argument If the enum value is unhandled.
  */
 std::string to_string(CalculationFrame frame);
+
+/**
+ * Convert a DileptonBremsPionFormFactor enum value to its corresponding string.
+ *
+ * \param[in] factor The DileptonBremsPionFormFactor enum value to convert.
+ *
+ * \return std::string Corresponding string representation.
+ * \throws std::invalid_argument If the enum value is unhandled.
+ */
+std::string to_string(DileptonBremsPionFormFactor factor);
 
 /**
  * Convert a FermiMotion enum value to its corresponding string.
@@ -168,6 +178,16 @@ std::string to_string(ThermalizationAlgorithm algo);
  * \throws std::invalid_argument If the enum value is unhandled.
  */
 std::string to_string(CollisionCriterion c);
+
+/**
+ * Convert a CharmRescattering enum value to its corresponding string.
+ *
+ * \param[in] c The CharmRescattering enum value to convert.
+ *
+ * \return std::string Corresponding string representation.
+ * \throws std::invalid_argument If the enum value is unhandled.
+ */
+std::string to_string(CharmRescattering c);
 
 /**
  * Convert a SpinInteractionType enum value to its corresponding string.

@@ -8,7 +8,7 @@
 #include "vir/test.h"  // This include has to be first
 
 #include "setup.h"
-#include "smash/bremsstrahlungaction.h"
+#include "smash/bremsstrahlungactionphoton.h"
 #include "smash/crosssectionsphoton.h"
 #include "smash/scatteractionphoton.h"
 
@@ -269,8 +269,8 @@ TEST(bremsstrahlung_gen_final_state) {
   ParticleList in{pip, pim};
 
   // create bremsstrahlung action
-  const auto act =
-      std::make_unique<BremsstrahlungAction>(in, 0.05, number_of_photons, 20.0);
+  const auto act = std::make_unique<BremsstrahlungActionPhoton>(
+      in, 0.05, number_of_photons, 20.0);
   act->add_single_process();
 
   // Sample photons, implicitly test sample_3body_phasespace() and
@@ -297,20 +297,20 @@ TEST(bremsstrahlung_reaction_type_function) {
   const ParticleList l1{pip, pim}, l2{piz, pim}, l3{pip, pip}, l4{piz, piz},
       l5{pim, pim}, l6{pip, piz}, l7{p, pim}, l8{pip, eta};
 
-  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l1) ==
-         BremsstrahlungAction::ReactionType::pi_p_pi_m);
-  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l2) ==
-         BremsstrahlungAction::ReactionType::pi_z_pi_m);
-  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l3) ==
-         BremsstrahlungAction::ReactionType::pi_p_pi_p);
-  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l4) ==
-         BremsstrahlungAction::ReactionType::pi_z_pi_z);
-  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l5) ==
-         BremsstrahlungAction::ReactionType::pi_m_pi_m);
-  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l6) ==
-         BremsstrahlungAction::ReactionType::pi_z_pi_p);
-  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l7) ==
-         BremsstrahlungAction::ReactionType::no_reaction);
-  VERIFY(BremsstrahlungAction::bremsstrahlung_reaction_type(l8) ==
-         BremsstrahlungAction::ReactionType::no_reaction);
+  VERIFY(BremsstrahlungActionPhoton::bremsstrahlung_reaction_type(l1) ==
+         BremsstrahlungActionPhoton::ReactionType::pi_p_pi_m);
+  VERIFY(BremsstrahlungActionPhoton::bremsstrahlung_reaction_type(l2) ==
+         BremsstrahlungActionPhoton::ReactionType::pi_z_pi_m);
+  VERIFY(BremsstrahlungActionPhoton::bremsstrahlung_reaction_type(l3) ==
+         BremsstrahlungActionPhoton::ReactionType::pi_p_pi_p);
+  VERIFY(BremsstrahlungActionPhoton::bremsstrahlung_reaction_type(l4) ==
+         BremsstrahlungActionPhoton::ReactionType::pi_z_pi_z);
+  VERIFY(BremsstrahlungActionPhoton::bremsstrahlung_reaction_type(l5) ==
+         BremsstrahlungActionPhoton::ReactionType::pi_m_pi_m);
+  VERIFY(BremsstrahlungActionPhoton::bremsstrahlung_reaction_type(l6) ==
+         BremsstrahlungActionPhoton::ReactionType::pi_z_pi_p);
+  VERIFY(BremsstrahlungActionPhoton::bremsstrahlung_reaction_type(l7) ==
+         BremsstrahlungActionPhoton::ReactionType::no_reaction);
+  VERIFY(BremsstrahlungActionPhoton::bremsstrahlung_reaction_type(l8) ==
+         BremsstrahlungActionPhoton::ReactionType::no_reaction);
 }

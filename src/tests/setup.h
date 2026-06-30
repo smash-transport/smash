@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015,2017-2025
+ *    Copyright (c) 2015,2017-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -103,7 +103,7 @@ inline ParticleData smashon(int id = -1) {
  * Create a particle with 0 momentum vector, the given \p position, and
  * optionally a given \p id.
  */
-inline ParticleData smashon(const Position &position, int id = -1) {
+inline ParticleData smashon(const Position& position, int id = -1) {
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4position(position);
   p.set_formation_time(position[0]);
@@ -113,7 +113,7 @@ inline ParticleData smashon(const Position &position, int id = -1) {
  * Create a particle with 0 position vector, the given \p momentum, and
  * optionally a given \p id.
  */
-inline ParticleData smashon(const Momentum &momentum, int id = -1) {
+inline ParticleData smashon(const Momentum& momentum, int id = -1) {
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4momentum(momentum);
   return p;
@@ -122,7 +122,7 @@ inline ParticleData smashon(const Momentum &momentum, int id = -1) {
  * Create a particle with the given \p position and \p momentum vectors, and
  * optionally a given \p id.
  */
-inline ParticleData smashon(const Position &position, const Momentum &momentum,
+inline ParticleData smashon(const Position& position, const Momentum& momentum,
                             int id = -1) {
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4position(position);
@@ -138,7 +138,7 @@ inline ParticleData smashon(const Position &position, const Momentum &momentum,
  * Convenience overload of the above to allow arbitrary order of momentum and
  * position.
  */
-inline ParticleData smashon(const Momentum &momentum, const Position &position,
+inline ParticleData smashon(const Momentum& momentum, const Position& position,
                             int id = -1) {
   ParticleData p{ParticleType::find(0x661), id};
   p.set_4position(position);
@@ -174,7 +174,7 @@ inline std::unique_ptr<ExperimentBase> experiment(Configuration c) {
  * Generate a list of particles from the given generator function.
  */
 template <typename G>
-inline ParticleList create_particle_list(std::size_t n, G &&generator) {
+inline ParticleList create_particle_list(std::size_t n, G&& generator) {
   ParticleList list;
   list.reserve(n);
   for (auto i = n; i; --i) {
@@ -191,7 +191,7 @@ using ParticlesPtr = std::unique_ptr<Particles>;
  * \p generator function.
  */
 template <typename G>
-inline ParticlesPtr create_particles(int n, G &&generator) {
+inline ParticlesPtr create_particles(int n, G&& generator) {
   ParticlesPtr p = std::make_unique<Particles>();
   for (auto i = n; i; --i) {
     p->insert(generator());
@@ -204,9 +204,9 @@ inline ParticlesPtr create_particles(int n, G &&generator) {
  * initializer_list to this function.
  */
 inline ParticlesPtr create_particles(
-    const std::initializer_list<ParticleData> &init) {
+    const std::initializer_list<ParticleData>& init) {
   ParticlesPtr p = std::make_unique<Particles>();
-  for (const auto &data : init) {
+  for (const auto& data : init) {
     p->insert(data);
   }
   return p;
@@ -251,6 +251,7 @@ inline ExperimentParameters default_parameters(
       criterion,                             // collision criterion
       true,                                  // two_to_one
       included_2to2,
+      CharmRescattering::Resonances,
       no_multiparticle_reactions(),
       strings,
       1.0,
@@ -266,8 +267,9 @@ inline ExperimentParameters default_parameters(
       true,   // force decays at the end
       false,  // do weak decays
       true,   // decay initial particles
-      SpinInteractionType::Off,  // no spin interactions
-      std::nullopt               // use monash tune, not known
+      DileptonBremsPionFormFactor::Off,  // no form factor
+      SpinInteractionType::Off,          // no spin interactions
+      std::nullopt                       // use monash tune, not known
   };
 }
 
@@ -321,30 +323,9 @@ inline EventInfo default_event_info(double impact_parameter = 0.0,
 
 /// Creates a default StringProcessInterface object for testing
 inline std::unique_ptr<StringProcess> default_string_process_interface() {
-  return std::make_unique<StringProcess>(
-      1.0,      // String_Tension
-      1.0,      // String_Formation_Time
-      0.5,      // Gluon_Beta
-      0.001,    // Gluon_Pmin
-      2.0,      // Quark_Alpha
-      7.0,      // Quark_Beta
-      0.16,     // Strange_Supp
-      0.036,    // Diquark_Supp
-      0.42,     // Sigma_Perp
-      0.2,      // StringZ_A_Leading
-      2.0,      // StringZ_B_Leading
-      2.0,      // StringZ_A
-      0.55,     // StringZ_B
-      0.5,      // String_Sigma_T
-      1.0,      // Form_Time_Factor
-      false,    // Mass_Dependent_Formation_Times
-      1. / 3.,  // Prob_proton_to_d_uu
-      true,     // Separate_Fragment_Baryon
-      0.15,     // Popcorn_Rate
-      false,    // Use_Monash_Tune
-      0.7);     // Additional_xsec_supp
+  Configuration config{""};
+  return std::make_unique<StringProcess>(config);
 }
-
 /// Creates default parameters for dynamic IC
 inline InitialConditionParameters default_dynamic_IC_parameters() {
   InitialConditionParameters parameters{};

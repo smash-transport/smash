@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -12,6 +12,7 @@
 #include <set>
 
 #include "clock.h"
+#include "forwarddeclarations.h"
 
 namespace smash {
 
@@ -66,6 +67,9 @@ struct ExperimentParameters {
 
   /// This indicates which two to two reactions are switched off.
   const ReactionsBitSet included_2to2;
+
+  /// Method to use for charm rescattering.
+  const CharmRescattering charm_rescattering;
 
   /// This indicates which multi-particle reactions are switched on.
   const MultiParticleReactionsBitSet included_multi;
@@ -163,6 +167,11 @@ struct ExperimentParameters {
    * Whether to decay initial state particles.
    */
   bool decay_initial_particles;
+
+  /**
+   * Setting the specific form factor for dilepton bremsstrahlung (optional).
+   */
+  DileptonBremsPionFormFactor dilepton_brems_pion_form_factor_type;
 
   /**
    * Whether to include spin interactions.

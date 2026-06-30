@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -449,7 +449,7 @@ static ExperimentParameters default_parameters_vdf(
       triangular_smearing_range,            // triangular smearing range
       CollisionCriterion::Geometric,
       false,  // two_to_one
-      false, Test::no_multiparticle_reactions(),
+      false, CharmRescattering::Resonances, Test::no_multiparticle_reactions(),
       false,  // strings switch
       1.0, NNbarTreatment::NoAnnihilation,
       0.,     // low energy sigma_NN cut-off
@@ -463,8 +463,9 @@ static ExperimentParameters default_parameters_vdf(
       true,   // force decays at the end
       false,  // do non-strong decays
       true,   // can decay initial particles
-      SpinInteractionType::Off,  // no spin interactions
-      std::nullopt               // use monash tune, not known
+      DileptonBremsPionFormFactor::Off,  // no form factor
+      SpinInteractionType::Off,          // no spin interactions
+      std::nullopt                       // use monash tune, not known
   };
 }
 

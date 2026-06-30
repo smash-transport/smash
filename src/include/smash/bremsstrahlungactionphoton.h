@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef SRC_INCLUDE_SMASH_BREMSSTRAHLUNGACTION_H_
-#define SRC_INCLUDE_SMASH_BREMSSTRAHLUNGACTION_H_
+#ifndef SRC_INCLUDE_SMASH_BREMSSTRAHLUNGACTIONPHOTON_H_
+#define SRC_INCLUDE_SMASH_BREMSSTRAHLUNGACTIONPHOTON_H_
 
 #include <utility>
 
@@ -23,7 +23,7 @@ namespace smash {
  * The final state particles are not further propagated, only written
  * to the photon output.
  */
-class BremsstrahlungAction : public ScatterAction {
+class BremsstrahlungActionPhoton : public ScatterAction {
  public:
   /**
    * Construct a ScatterActionBrems object.
@@ -38,11 +38,11 @@ class BremsstrahlungAction : public ScatterAction {
    * \return The constructed object.
    */
 
-  BremsstrahlungAction(const ParticleList &in, const double time,
-                       const int n_frac_photons,
-                       const double hadronic_cross_section_input,
-                       const SpinInteractionType spin_interaction_type =
-                           SpinInteractionType::Off);
+  BremsstrahlungActionPhoton(const ParticleList &in, const double time,
+                             const int n_frac_photons,
+                             const double hadronic_cross_section_input,
+                             const SpinInteractionType spin_interaction_type =
+                                 SpinInteractionType::Off);
   /**
    * Create the final state and write to output.
    *
@@ -134,7 +134,7 @@ class BremsstrahlungAction : public ScatterAction {
    * \param[in] in ParticleList of incoming particles.
    * \return bool if photon reaction implemented.
    */
-  static bool is_bremsstrahlung_reaction(const ParticleList &in) {
+  static bool is_photon_brems_reaction(const ParticleList &in) {
     return bremsstrahlung_reaction_type(in) != ReactionType::no_reaction;
   }
 
@@ -198,4 +198,4 @@ class BremsstrahlungAction : public ScatterAction {
 
 }  // namespace smash
 
-#endif  // SRC_INCLUDE_SMASH_BREMSSTRAHLUNGACTION_H_
+#endif  // SRC_INCLUDE_SMASH_BREMSSTRAHLUNGACTIONPHOTON_H_

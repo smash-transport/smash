@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_INPUT_KEYS_H_
 
 #include <array>
+#include <filesystem>
 #include <functional>
 #include <map>
 #include <set>
@@ -21,6 +22,7 @@
 
 #include "einhard.hpp"
 
+#include "constants.h"
 #include "forwarddeclarations.h"
 #include "key.h"
 #include "pdgcode.h"
@@ -474,12 +476,12 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  * tuning possibilities, see the following pages:
  * - \ref doxypage_input_conf_ct_pauliblocker
  * - \ref doxypage_input_conf_ct_string_transition
+ * - \ref doxypage_input_conf_ct_hard_string_transition
  * - \ref doxypage_input_conf_ct_string_parameters
  * - \ref doxypage_input_conf_ct_dileptons
  * - \ref doxypage_input_conf_ct_photons
  * - \ref doxypage_input_conf_ct_heavy_flavor
  * - \ref doxypage_input_conf_ct_spin_interactions
- * - \ref doxypage_input_conf_ct_hard_string_transition
  */
 
 /*!\Userguide
@@ -577,38 +579,57 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  * hard components.
  *
  * The transition mode is selected via the `Mode` key:
- * - `Exponential`: use the legacy exponential splitting of the non-diffractive
+ * - `Exponential`: use the exponential splitting of the non-diffractive
  *   cross section. The probability for a purely soft non-diffractive
- interaction
- *   is given by
+ *   interaction is given by
  *   \f[
- *     P_{\mathrm{soft}} = \exp\!\left(-\frac{\sigma_{\mathrm{hard}}}
- *     {\sigma_{\mathrm{ND}}}\right),
+ *     P_{\mathrm{soft}} =
+ *     \exp\!\left(-\frac{\sigma_{\mathrm{hard}}}
+ *                       {\sigma_{\mathrm{ND}}}\right),
  *   \f]
  *   where \f$\sigma_{\mathrm{hard}}\f$ is the hard string cross section and
  *   \f$\sigma_{\mathrm{ND}}\f$ the total non-diffractive cross section. The
- hard
- *   non-diffractive contribution follows from
- *   \f$\sigma_{\mathrm{ND,hard}} = \sigma_{\mathrm{ND}} -
- *   \sigma_{\mathrm{ND,soft}}\f$.
+ *   hard non-diffractive contribution follows from
+ *   \f$\sigma_{\mathrm{ND,hard}} =
+ *     \sigma_{\mathrm{ND}} - \sigma_{\mathrm{ND,soft}}\f$.
  * - `Custom_Range`: use a smooth, user-defined transition from soft to hard
  *   string excitation as a function of the collision energy.
  *
- * For `Custom_Range`, the transition is controlled by `Start_Energy` and
- * `End_Energy` (in \f$\sqrt{s}\f$ measured in GeV). Below this range only soft
- * string excitation is used, above it only hard string excitation is used, and
- * inside the range the probability for hard string excitation increases
- * smoothly with energy.
+ * For `Custom_Range`, the transition is controlled by `Energy_Range`
+ * (in \f$\sqrt{s}\f$ measured in GeV). The first value specifies the lower
+ * bound and the second value the upper bound of the transition region.
+ * Below this range only soft string excitation is used, above it only hard
+ * string excitation is used, and inside the range the probability for hard
+ * string excitation increases smoothly with energy.
  *
  * For example:
- *\verbatim
+ * \verbatim
  Collision_Term:
      Hard_String_Transition:
          Mode: Custom_Range
-         Start_Energy: 10.0
-         End_Energy: 20.0
+         Energy_Range: [10.0, 20.0]
  \endverbatim
- */
+* Enabling hard string interactions at lower collision energies changes
+* baryon stopping. Therefore, some string-fragmentation and MPI parameters
+* may need to be adjusted. The following setup can be used as a starting
+* point for studies with an early hard-string transition:
+*\verbatim
+Collision_Term:
+  Hard_String_Transition:
+    Mode: Custom_Range
+    Energy_Range: [10.0, 11.0]
+  String_Parameters:
+    StringZ_A_Leading: 0.2
+    StringZ_B_Leading: 5.0
+    Damp_Popcorn: 0.0
+    String_Sigma_T: 0.3
+    Pythia_Settings:
+      - "MultipartonInteractions:ecmPow = 0.152"
+\endverbatim
+* These parameters are intended as a phenomenological starting point for
+* dedicated studies. They should not be interpreted as a tuned parameter set,
+* and further tuning may be required for quantitative applications.
+*/
 
 /*!\Userguide
  * \page doxypage_input_conf_modi
@@ -1178,12 +1199,12 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  *            as for the other existing keys. In particular, one of the Doxygen
  *            aliases among `\required_key`, `\required_key_no_line`,
  *            `\optional_key` and `\optional_key_no_line` should be used. The
- *            first two need three arguments (anchor in documentation, key name,
- *            key type) while the last two need 4 (the same three as for
- *            required keys plus the default key value). Add as well a Doxygen
- *            documentation to the new class member, by simply using there the
- *            `\see_key` alias that needs as single argument the key anchor in
- *            documentation you defined in the user guide.
+ *            first two need four arguments (anchor in documentation, key name,
+ *            key type, validator) while the last two need 5 (the same four as
+ *            for required keys plus the default key value). Add as well a
+ *            Doxygen documentation to the new class member, by simply using
+ *            there the `\see_key` alias that needs as single argument the key
+ *            anchor in documentation you defined in the user guide.
  *         -# If the newly introduced key has a new type w.r.t. all existing
  *            keys, you need to add it to the \c key_references_variant alias.
  *            In particular, you need to add a type to the \c std::variant which
@@ -1192,6 +1213,18 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  *         -# Add a reference to the newly introduced variable to the
  *            InputKeys::list container. This must be done using \c std::cref as
  *            for the other references. Respecting the members order is welcome.
+ *
+ * @note Validators are functions that take a value of the key type as an
+ *       argument and return a boolean indicating whether the value is valid or
+ *       not. If a key does not require a validator, use the default one
+ *       provided in the `detail` namespace. The C++ type system together with
+ *       how the Configuration class is implemented (cf. Configuration::Value
+ *       conversion operators) ensure that keys of types like `enum` (or `bool`)
+ *       cannot be assigned invalid values, so they do not require a validator.
+ *       However, this is an implementation detail and in the user guide all of
+ *       these keys are simply strings. Therefore, it is important to specify
+ *       that only valid values are accepted for such keys, which can be done by
+ *       using the <tt>\\any_valid</tt> Doxygen alias.
  *
  * @attention If you need to deprecate or to mark a key as not valid anymore,
  *            add the corresponding SMASH version to the \c Key member
@@ -1221,13 +1254,65 @@ inline constexpr Section p_vdf = InputSections::potentials + "VDF";
  */
 struct InputKeys {
   /**
-   * \see_key{input_configuration_copy_mechanism_}
+   * Get the list of valid quantity labels object.
+   *
+   * \note This function uses the construct-on-first-use idiom to create the
+   * list of valid quantity labels as a function-local static variable. This
+   * makes it possible to use the list at static storage initialization time.
+   *
+   * \return A constant reference to the list of valid quantity labels, which is
+   *         a \c std::set of <tt>std::string_view</tt>.
    */
-  inline static const Key<std::string> particles{{"particles"}, {"0.30"}};
+  static const std::set<std::string_view>
+      &get_list_of_valid_quantity_labels() noexcept {
+    static const std::set<std::string_view> valid_labels{"t",
+                                                         "x",
+                                                         "y",
+                                                         "z",
+                                                         "mass",
+                                                         "p0",
+                                                         "px",
+                                                         "py",
+                                                         "pz",
+                                                         "pdg",
+                                                         "ID",
+                                                         "id",
+                                                         "charge",
+                                                         "ncoll",
+                                                         "form_time",
+                                                         "xsecfac",
+                                                         "proc_id_origin",
+                                                         "proc_type_origin",
+                                                         "time_last_coll",
+                                                         "pdg_mother1",
+                                                         "pdg_mother2",
+                                                         "baryon_number",
+                                                         "strangeness",
+                                                         "0",
+                                                         "tau",
+                                                         "eta",
+                                                         "eta_s",
+                                                         "mt",
+                                                         "Rap",
+                                                         "y_rap",
+                                                         "spin0",
+                                                         "spinx",
+                                                         "spiny",
+                                                         "spinz",
+                                                         "perturbative_weight"};
+    return valid_labels;
+  }
+
   /**
    * \see_key{input_configuration_copy_mechanism_}
    */
-  inline static const Key<std::string> decaymodes{{"decaymodes"}, {"0.30"}};
+  inline static const Key<std::string> particles{
+      {"particles"}, {"0.30"}, detail::get_default_validator<std::string>()};
+  /**
+   * \see_key{input_configuration_copy_mechanism_}
+   */
+  inline static const Key<std::string> decaymodes{
+      {"decaymodes"}, {"0.30"}, detail::get_default_validator<std::string>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1237,7 +1322,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \required_key_no_line{key_gen_end_time_,End_Time,double}
+   * \required_key_no_line{key_gen_end_time_,End_Time,double,\f$x>0\f$}
    *
    * The time \unit{in fm} after which the evolution is stopped. Note
    * that the starting time depends on the chosen `Modus`.
@@ -1246,11 +1331,13 @@ struct InputKeys {
    * \see_key{key_gen_end_time_}
    */
   inline static const Key<double> gen_endTime{
-      InputSections::general + "End_Time", {"0.50"}};
+      InputSections::general + "End_Time",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \required_key{key_gen_modus_,Modus,string}
+   * \required_key{key_gen_modus_,Modus,string,\any_valid}
    *
    * Selects a modus for the calculation, e.g.\ infinite matter
    * calculation, collision of two particles or collision of nuclei. The modus
@@ -1272,11 +1359,17 @@ struct InputKeys {
    * \see_key{key_gen_modus_}
    */
   inline static const Key<std::string> gen_modus{
-      InputSections::general + "Modus", {"0.50"}};
+      InputSections::general + "Modus",
+      {"0.50"},
+      [](const std::string &value) noexcept {
+        const std::set<std::string> valid_values = {"Box", "Collider", "List",
+                                                    "ListBox", "Sphere"};
+        return valid_values.count(value) > 0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \required_key{key_gen_nevents_,Nevents,int}
+   * \required_key{key_gen_nevents_,Nevents,int,\f$x>0\f$}
    *
    * Number of events to calculate.
    *
@@ -1287,12 +1380,14 @@ struct InputKeys {
   /**
    * \see_key{key_gen_nevents_}
    */
-  inline static const Key<int> gen_nevents{InputSections::general + "Nevents",
-                                           {"0.50"}};
+  inline static const Key<int> gen_nevents{
+      InputSections::general + "Nevents",
+      {"0.50"},
+      [](const int &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \required_key{key_gen_randomseed_,Randomseed,64bits-int}
+   * \required_key{key_gen_randomseed_,Randomseed,64bits-int,\none}
    *
    * Initial seed for the random number generator. If this is negative, the
    * seed will be randomly generated by the operating system.
@@ -1301,11 +1396,13 @@ struct InputKeys {
    * \see_key{key_gen_randomseed_}
    */
   inline static const Key<int64_t> gen_randomseed{
-      InputSections::general + "Randomseed", {"0.50"}};
+      InputSections::general + "Randomseed",
+      {"0.50"},
+      detail::get_default_validator<int64_t>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general_mne
-   * \required_key{key_gen_mnee_maximum_ensembles_,Maximum_Ensembles_Run,int}
+   * \required_key{key_gen_mnee_maximum_ensembles_,Maximum_Ensembles_Run,int,\f$x>0\f$}
    *
    * Maximum number of ensembles run. This number serves as a safeguard
    * against SMASH unexpectedly running for a long time.
@@ -1314,11 +1411,13 @@ struct InputKeys {
    * \see_key{key_gen_mnee_maximum_ensembles_}
    */
   inline static const Key<int> gen_minNonEmptyEnsembles_maximumEnsembles{
-      InputSections::g_minEnsembles + "Maximum_Ensembles_Run", {"2.2"}};
+      InputSections::g_minEnsembles + "Maximum_Ensembles_Run",
+      {"2.2"},
+      [](const int &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general_mne
-   * \required_key{key_gen_mnee_number_,Number,int}
+   * \required_key{key_gen_mnee_number_,Number,int,\f$x>0\f$}
    *
    * The number of desired non-empty ensembles.\n
    */
@@ -1326,7 +1425,9 @@ struct InputKeys {
    * \see_key{key_gen_mnee_number_}
    */
   inline static const Key<int> gen_minNonEmptyEnsembles_number{
-      InputSections::g_minEnsembles + "Number", {"1.3"}};
+      InputSections::g_minEnsembles + "Number",
+      {"1.3"},
+      [](const int &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
@@ -1336,7 +1437,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key_no_line{key_gen_delta_time_,Delta_Time,double,1.0}
+   * \optional_key_no_line{key_gen_delta_time_,Delta_Time,double,1.0,\f$x>0\f$}
    *
    * Fixed time step \unit{in fm} at which the collision-finding grid is
    * recreated, and, if potentials are on, momenta are updated according to the
@@ -1357,12 +1458,15 @@ struct InputKeys {
    * \see_key{key_gen_delta_time_}
    */
   inline static const Key<double> gen_deltaTime{
-      InputSections::general + "Delta_Time", 1.0, {"0.50"}};
+      InputSections::general + "Delta_Time",
+      1.0,
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
    * \optional_key{key_gen_derivatives_mode_,Derivatives_Mode,string,"Covariant
-   * Gaussian"}
+   * Gaussian",\any_valid}
    *
    * The mode of calculating the gradients, for example gradients of baryon
    * current. Currently SMASH supports two derivatives modes:
@@ -1382,11 +1486,12 @@ struct InputKeys {
   inline static const Key<DerivativesMode> gen_derivativesMode{
       InputSections::general + "Derivatives_Mode",
       DerivativesMode::CovariantGaussian,
-      {"2.1"}};
+      {"2.1"},
+      detail::get_default_validator<DerivativesMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_discrete_weight_,Discrete_Weight,double,1./3}
+   * \optional_key{key_gen_discrete_weight_,Discrete_Weight,double,1./3,\f$\frac{1}{7}<x<1\f$}
    *
    * Parameter for Discrete smearing: Weight given to particle density at the
    * the center node; cannot be smaller than 1./7 (the boundary case of 1./7
@@ -1397,11 +1502,16 @@ struct InputKeys {
    * \see_key{key_gen_discrete_weight_}
    */
   inline static const Key<double> gen_smearingDiscreteWeight{
-      InputSections::general + "Discrete_Weight", 1. / 3, {"2.1"}};
+      InputSections::general + "Discrete_Weight",
+      1. / 3,
+      {"2.1"},
+      [](const double &value) noexcept {
+        return value > 1. / 7. && value < 1.;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_ensembles_,Ensembles,int,1}
+   * \optional_key{key_gen_ensembles_,Ensembles,int,1,\f$x>0\f$}
    *
    * Number of parallel ensembles in the simulation.
    *
@@ -1427,11 +1537,14 @@ struct InputKeys {
    * \see_key{key_gen_ensembles_}
    */
   inline static const Key<int> gen_ensembles{
-      InputSections::general + "Ensembles", 1, {"2.1"}};
+      InputSections::general + "Ensembles",
+      1,
+      {"2.1"},
+      [](const int &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_expansion_rate_,Expansion_Rate,double,0.1}
+   * \optional_key{key_gen_expansion_rate_,Expansion_Rate,double,0.1,\none}
    *
    * Corresponds to the speed of expansion of the universe in non-Minkowski
    * metrics if <tt>\ref key_gen_metric_type_ "Metric_Type"</tt> is any other
@@ -1440,17 +1553,23 @@ struct InputKeys {
    * It corresponds to \f$b_r/l_0\f$ if the metric type is `"MasslessFRW"` or
    * `"MassiveFRW"`, and to the parameter b in the exponential expansion where
    * \f$a(t) ~ e^{bt/2}\f$.
+   *
+   * Refer to section 2 of \iref{Tindall:2016try} for more information about
+   * possible range of values and their physical meaning.
    */
   /**
    * \see_key{key_gen_expansion_rate_}
    */
   inline static const Key<double> gen_expansionRate{
-      InputSections::general + "Expansion_Rate", 0.1, {"1.1"}};
+      InputSections::general + "Expansion_Rate",
+      0.1,
+      {"1.1"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
    * \optional_key{key_gen_field_derivatives_mode_,Field_Derivatives_Mode,string,
-   * "Chain Rule"}
+   * "Chain Rule",\any_valid}
    *
    * The mode of calculating field derivatives entering the equations of motion
    * (only available for the VDF potentials). The mean-field equations of motion
@@ -1461,7 +1580,7 @@ struct InputKeys {
    * take finite differences of the baryon number density (chain rule field
    * derivatives). Using direct field derivatives is numerically (slightly) more
    * stable. For more information and explicit equations, see section 4.2.5 (p.
-   * 130) and Table 4.3 (p. 137) of https://arxiv.org/abs/2109.08105.
+   * 130) and Table 4.3 (p. 137) of \iref{Sorensen:2021zxd}.
    *
    * - `"Direct"` &rarr; Induces using the computed values of the baryon
    *   4-current on the lattice to calculate a lattice of the 4-field
@@ -1476,37 +1595,50 @@ struct InputKeys {
   inline static const Key<FieldDerivativesMode> gen_fieldDerivativesMode{
       InputSections::general + "Field_Derivatives_Mode",
       FieldDerivativesMode::ChainRule,
-      {"2.1"}};
+      {"2.1"},
+      detail::get_default_validator<FieldDerivativesMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_gauss_cutoff_in_sigma_,Gauss_Cutoff_In_Sigma,double,4.0}
+   * \optional_key{key_gen_gauss_cutoff_in_sigma_,Gauss_Cutoff_In_Sigma,double,4.0,
+   * \f$2\leq x\leq10\f$}
    *
    * Parameter for Covariant Gaussian smearing: Distance in sigma at which
-   * gaussian is considered 0.
+   * gaussian is considered 0. Lower bound avoids density loss; upper bound
+   * avoids slow computation.
    */
   /**
    * \see_key{key_gen_gauss_cutoff_in_sigma_}
    */
   inline static const Key<double> gen_smearingGaussCutoffInSigma{
-      InputSections::general + "Gauss_Cutoff_In_Sigma", 4.0, {"0.80"}};
+      InputSections::general + "Gauss_Cutoff_In_Sigma",
+      4.0,
+      {"0.80"},
+      [](const double &value) noexcept {
+        return value >= 2.0 && value <= 10.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_gaussian_sigma_,Gaussian_Sigma,double,1.0}
+   * \optional_key{key_gen_gaussian_sigma_,Gaussian_Sigma,double,1.0,\f$0.1<x<3\f$}
    *
    * Parameter for Covariant Gaussian smearing: Width \unit{in fm} of Gaussian
-   * distributions that represent Wigner density of particles.
+   * distributions that represent Wigner density of particles. Technically any
+   * positive value is allowed, but other than accepted values may lead to
+   * unstable behavior.
    */
   /**
    * \see_key{key_gen_gaussian_sigma_}
    */
   inline static const Key<double> gen_smearingGaussianSigma{
-      InputSections::general + "Gaussian_Sigma", 1.0, {"0.60"}};
+      InputSections::general + "Gaussian_Sigma",
+      1.0,
+      {"0.60"},
+      [](const double &value) noexcept { return value > 0.1 && value < 3.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_metric_type_,Metric_Type,string,"NoExpansion"}
+   * \optional_key{key_gen_metric_type_,Metric_Type,string,"NoExpansion",\any_valid}
    *
    * Select which kind of expansion the metric should have. This needs only be
    * specified for the sphere modus. Possible values:
@@ -1514,6 +1646,9 @@ struct InputKeys {
    * - `"MasslessFRW"` &rarr; FRW expansion going as \f$t^{1/2}\f$
    * - `"MassiveFRW"` &rarr; FRW expansion going as \f$t^{2/3}\f$
    * - `"Exponential"` &rarr; FRW expansion going as \f$e^{t/2}\f$
+   *
+   * Refer to section 2 of \iref{Tindall:2016try} for more information about
+   * possible range of values and their physical meaning.
    */
   /**
    * \see_key{key_gen_metric_type_}
@@ -1521,7 +1656,8 @@ struct InputKeys {
   inline static const Key<ExpansionMode> gen_metricType{
       InputSections::general + "Metric_Type",
       ExpansionMode::NoExpansion,
-      {"1.1"}};
+      {"1.1"},
+      detail::get_default_validator<ExpansionMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -1535,12 +1671,13 @@ struct InputKeys {
       gen_restFrameDensityDerivativeMode{
           InputSections::general + "Rest_Frame_Density_Derivatives_Mode",
           RestFrameDensityDerivativesMode::Off,
-          {"2.1", "3.0", "3.0"}};
+          {"2.1", "3.0", "3.0"},
+          detail::get_default_validator<RestFrameDensityDerivativesMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
    * \optional_key{key_gen_smearing_mode_,Smearing_Mode,string,"Covariant
-   * Gaussian"}
+   * Gaussian",\any_valid}
    *
    * The mode of smearing for density calculation.
    *
@@ -1594,11 +1731,12 @@ struct InputKeys {
   inline static const Key<SmearingMode> gen_smearingMode{
       InputSections::general + "Smearing_Mode",
       SmearingMode::CovariantGaussian,
-      {"2.1"}};
+      {"2.1"},
+      detail::get_default_validator<SmearingMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_testparticles_,Testparticles,int,1}
+   * \optional_key{key_gen_testparticles_,Testparticles,int,1,\f$x>0\f$}
    *
    * Number of test-particles per real particle in the simulation.
    *
@@ -1624,15 +1762,25 @@ struct InputKeys {
    * \see_key{key_gen_testparticles_}
    */
   inline static const Key<int> gen_testparticles{
-      InputSections::general + "Testparticles", 1, {"0.50"}};
+      InputSections::general + "Testparticles",
+      1,
+      {"0.50"},
+      [](const int &value) noexcept {
+        if (value >= 150) {
+          logg[LogArea::Configuration::id].warn(
+              "Number of testparticles is very large, which may lead to long"
+              "runtime. Make sure that this is intended.");
+        }
+        return value > 0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_time_step_mode_,Time_Step_Mode,string,"Fixed"}
+   * \optional_key{key_gen_time_step_mode_,Time_Step_Mode,string,"Fixed",\any_valid}
    *
    * The mode of time stepping. Possible values:
    * - `"None"` &rarr; `Delta_Time` is set to the `End_Time`. This cannot be
-   * used with potentials.
+   *   used with potentials.
    * - `"Fixed"`&rarr; Fixed-sized time steps at which collision-finding grid is
    *   created. More efficient for systems with many particles. The `Delta_Time`
    *   is provided by user.
@@ -1648,11 +1796,14 @@ struct InputKeys {
    * \see_key{key_gen_time_step_mode_}
    */
   inline static const Key<TimeStepMode> gen_timeStepMode{
-      InputSections::general + "Time_Step_Mode", TimeStepMode::Fixed, {"0.85"}};
+      InputSections::general + "Time_Step_Mode",
+      TimeStepMode::Fixed,
+      {"0.85"},
+      detail::get_default_validator<TimeStepMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_triangular_range_,Triangular_Range,double,2.0}
+   * \optional_key{key_gen_triangular_range_,Triangular_Range,double,2.0,\f$x>0\f$}
    *
    * Parameter for Triangular smearing: Half of the base of a symmetric triangle
    * that represents particle density, in units of lattice spacings.
@@ -1661,11 +1812,14 @@ struct InputKeys {
    * \see_key{key_gen_triangular_range_}
    */
   inline static const Key<double> gen_smearingTriangularRange{
-      InputSections::general + "Triangular_Range", 2.0, {"2.1"}};
+      InputSections::general + "Triangular_Range",
+      2.0,
+      {"2.1"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_general
-   * \optional_key{key_gen_use_grid_,Use_Grid,bool,true}
+   * \optional_key{key_gen_use_grid_,Use_Grid,bool,true,\none}
    *
    * - `true` &rarr; A grid is used to reduce the combinatorics of interaction
    * lookup.
@@ -1675,14 +1829,17 @@ struct InputKeys {
    * \see_key{key_gen_use_grid_}
    */
   inline static const Key<bool> gen_useGrid{
-      InputSections::general + "Use_Grid", true, {"0.80"}};
+      InputSections::general + "Use_Grid",
+      true,
+      {"0.80"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * <hr>
    * <h3> Setting the default for all logging areas </h3>
    *
-   * \optional_key_no_line{key_log_default_,default,string,ALL}
+   * \optional_key_no_line{key_log_default_,default,string,ALL,\any_valid}
    *
    * It determines the default logging level for all areas. This is annotated by
    * \key ${default} in each of the following keys.
@@ -1691,7 +1848,10 @@ struct InputKeys {
    * \see_key{key_log_default_}
    */
   inline static const Key<einhard::LogLevel> log_default{
-      InputSections::logging + "default", einhard::ALL, {"0.50"}};
+      InputSections::logging + "default",
+      einhard::ALL,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1699,7 +1859,7 @@ struct InputKeys {
    * <h3> Most user-relevant logging areas </h3>
    *
    * \optional_key_no_line{key_log_box_,Box,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages specific to the box modus implementation belong to this area.
    */
@@ -1707,12 +1867,15 @@ struct InputKeys {
    * \see_key{key_log_box_}
    */
   inline static const Key<einhard::LogLevel> log_box{
-      InputSections::logging + "Box", DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Box",
+      DefaultType::Dependent,
+      {"0.30"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_collider_,Collider,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages specific to the collider modus implementation belong to this area.
    */
@@ -1720,12 +1883,15 @@ struct InputKeys {
    * \see_key{key_log_collider_}
    */
   inline static const Key<einhard::LogLevel> log_collider{
-      InputSections::logging + "Collider", DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Collider",
+      DefaultType::Dependent,
+      {"0.30"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_configuration_,%Configuration,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about the input configuration file belong to this area.
    */
@@ -1735,12 +1901,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_yamlConfiguration{
       InputSections::logging + "Configuration",
       DefaultType::Dependent,
-      {"3.0"}};
+      {"3.0"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_experiment_,%Experiment,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages mostly coming from the `Experiment` class belong to this area.
    */
@@ -1748,12 +1915,15 @@ struct InputKeys {
    * \see_key{key_log_experiment_}
    */
   inline static const Key<einhard::LogLevel> log_experiment{
-      InputSections::logging + "Experiment", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Experiment",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_grandcan_thermalizer_,GrandcanThermalizer,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about the gran-canonical thermalization belong to this area.
    */
@@ -1763,12 +1933,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_grandcanThermalizer{
       InputSections::logging + "GrandcanThermalizer",
       DefaultType::Dependent,
-      {"1.2"}};
+      {"1.2"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_initial_conditions_,InitialConditions,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about initial conditions belong to this area.
    */
@@ -1778,12 +1949,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_initialConditions{
       InputSections::logging + "InitialConditions",
       DefaultType::Dependent,
-      {"1.8"}};
+      {"1.8"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_list_,List,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages specific to the list modus implementation belong to this area.
    */
@@ -1791,12 +1963,15 @@ struct InputKeys {
    * \see_key{key_log_list_}
    */
   inline static const Key<einhard::LogLevel> log_list{
-      InputSections::logging + "List", DefaultType::Dependent, {"0.60"}};
+      InputSections::logging + "List",
+      DefaultType::Dependent,
+      {"0.60"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_main_,Main,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from top-level of the application belong to this area.
    */
@@ -1804,12 +1979,15 @@ struct InputKeys {
    * \see_key{key_log_main_}
    */
   inline static const Key<einhard::LogLevel> log_main{
-      InputSections::logging + "Main", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Main",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_output_,Output,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages output functionality belong to this area.
    */
@@ -1817,12 +1995,15 @@ struct InputKeys {
    * \see_key{key_log_output_}
    */
   inline static const Key<einhard::LogLevel> log_output{
-      InputSections::logging + "Output", DefaultType::Dependent, {"0.60"}};
+      InputSections::logging + "Output",
+      DefaultType::Dependent,
+      {"0.60"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_potentials_,Potentials,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages regarding the potentials belong to this area.
    */
@@ -1830,12 +2011,15 @@ struct InputKeys {
    * \see_key{key_log_potentials_}
    */
   inline static const Key<einhard::LogLevel> log_potentials{
-      InputSections::logging + "Potentials", DefaultType::Dependent, {"3.1"}};
+      InputSections::logging + "Potentials",
+      DefaultType::Dependent,
+      {"3.1"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_rootsolver_,RootSolver,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages specific to the root finding belong to this area.
    */
@@ -1843,12 +2027,15 @@ struct InputKeys {
    * \see_key{key_log_rootsolver_}
    */
   inline static const Key<einhard::LogLevel> log_rootsolver{
-      InputSections::logging + "RootSolver", DefaultType::Dependent, {"3.1"}};
+      InputSections::logging + "RootSolver",
+      DefaultType::Dependent,
+      {"3.1"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_sphere_,Sphere,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages specific to the sphere modus implementation belong to this area.
    */
@@ -1856,7 +2043,10 @@ struct InputKeys {
    * \see_key{key_log_sphere_}
    */
   inline static const Key<einhard::LogLevel> log_sphere{
-      InputSections::logging + "Sphere", DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Sphere",
+      DefaultType::Dependent,
+      {"0.30"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
@@ -1864,7 +2054,7 @@ struct InputKeys {
    * <h3> Most technical logging areas (in alphabetical order) </h3>
    *
    * \optional_key_no_line{key_log_action_,%Action,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages mostly coming from the `Action` class belong to this area.
    */
@@ -1872,12 +2062,15 @@ struct InputKeys {
    * \see_key{key_log_action_}
    */
   inline static const Key<einhard::LogLevel> log_action{
-      InputSections::logging + "Action", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Action",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_clock_,%Clock,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from clock implementation belong to this area.
    */
@@ -1885,12 +2078,15 @@ struct InputKeys {
    * \see_key{key_log_clock_}
    */
   inline static const Key<einhard::LogLevel> log_clock{
-      InputSections::logging + "Clock", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Clock",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_cross_sections_,%CrossSections,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about cross sections belong to this area.
    */
@@ -1900,12 +2096,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_crossSections{
       InputSections::logging + "CrossSections",
       DefaultType::Dependent,
-      {"1.3"}};
+      {"1.3"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_decay_modes_,%DecayModes,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages coming from decay tools belong to this area.
    */
@@ -1913,12 +2110,15 @@ struct InputKeys {
    * \see_key{key_log_decay_modes_}
    */
   inline static const Key<einhard::LogLevel> log_decayModes{
-      InputSections::logging + "DecayModes", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "DecayModes",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_density_,Density,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from density calculations belong to this area.
    */
@@ -1926,12 +2126,15 @@ struct InputKeys {
    * \see_key{key_log_density_}
    */
   inline static const Key<einhard::LogLevel> log_density{
-      InputSections::logging + "Density", DefaultType::Dependent, {"0.60"}};
+      InputSections::logging + "Density",
+      DefaultType::Dependent,
+      {"0.60"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_distributions_,Distributions,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about quantity distributions belong to this area.
    */
@@ -1941,12 +2144,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_distributions{
       InputSections::logging + "Distributions",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_find_scatter_,FindScatter,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages coming from search tools for scattering belong to this area.
    */
@@ -1954,11 +2158,15 @@ struct InputKeys {
    * \see_key{key_log_find_scatter_}
    */
   inline static const Key<einhard::LogLevel> log_findScatter{
-      InputSections::logging + "FindScatter", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "FindScatter",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_fpe_,Fpe,string,$\{\ref key_log_default_ "default"\}}
+   * \optional_key{key_log_fpe_,Fpe,string,$\{\ref key_log_default_
+   * "default"\},\any_valid}
    *
    * Messages about floating point exceptions belong to this area.
    */
@@ -1966,12 +2174,15 @@ struct InputKeys {
    * \see_key{key_log_fpe_}
    */
   inline static const Key<einhard::LogLevel> log_fpe{
-      InputSections::logging + "Fpe", DefaultType::Dependent, {"0.80"}};
+      InputSections::logging + "Fpe",
+      DefaultType::Dependent,
+      {"0.80"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_grid_,%Grid,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from the grid implementation belong to this area.
    */
@@ -1979,12 +2190,15 @@ struct InputKeys {
    * \see_key{key_log_grid_}
    */
   inline static const Key<einhard::LogLevel> log_grid{
-      InputSections::logging + "Grid", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Grid",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_hyper_surface_crossing_,HyperSurfaceCrossing,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about hypersurface crossing belong to this area.
    */
@@ -1994,12 +2208,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_hyperSurfaceCrossing{
       InputSections::logging + "HyperSurfaceCrossing",
       DefaultType::Dependent,
-      {"1.7"}};
+      {"1.7"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_input_parser_,InputParser,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages coming from input parsing tools belong to this area.
    */
@@ -2007,12 +2222,15 @@ struct InputKeys {
    * \see_key{key_log_input_parser_}
    */
   inline static const Key<einhard::LogLevel> log_inputParser{
-      InputSections::logging + "InputParser", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "InputParser",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_lattice_,Lattice,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from the lattice implementation belong to this area.
    */
@@ -2020,12 +2238,15 @@ struct InputKeys {
    * \see_key{key_log_lattice_}
    */
   inline static const Key<einhard::LogLevel> log_lattice{
-      InputSections::logging + "Lattice", DefaultType::Dependent, {"0.80"}};
+      InputSections::logging + "Lattice",
+      DefaultType::Dependent,
+      {"0.80"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_nucleus_,%Nucleus,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from the nucleus implementation belong to this area.
    */
@@ -2033,12 +2254,15 @@ struct InputKeys {
    * \see_key{key_log_nucleus_}
    */
   inline static const Key<einhard::LogLevel> log_nucleus{
-      InputSections::logging + "Nucleus", DefaultType::Dependent, {"0.30"}};
+      InputSections::logging + "Nucleus",
+      DefaultType::Dependent,
+      {"0.30"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_particle_type_,%ParticleType,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages coming from particle types implementation belong to this area.
    */
@@ -2048,12 +2272,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_particleType{
       InputSections::logging + "ParticleType",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_pauli_blocking_,PauliBlocking,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about Pauli blocking belong to this area.
    */
@@ -2063,12 +2288,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_pauliBlocking{
       InputSections::logging + "PauliBlocking",
       DefaultType::Dependent,
-      {"0.7.1"}};
+      {"0.7.1"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_propagation_,Propagation,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about particles propagation belong to this area.
    */
@@ -2078,12 +2304,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_propagation{
       InputSections::logging + "Propagation",
       DefaultType::Dependent,
-      {"0.7.1"}};
+      {"0.7.1"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_pythia_,Pythia,string,$\{\ref key_log_default_
-   * "default"\}}
+   * "default"\},\any_valid}
    *
    * Messages coming from Pythia usage in SMASH belong to this area.
    */
@@ -2091,12 +2318,15 @@ struct InputKeys {
    * \see_key{key_log_pythia_}
    */
   inline static const Key<einhard::LogLevel> log_pythia{
-      InputSections::logging + "Pythia", DefaultType::Dependent, {"1.0"}};
+      InputSections::logging + "Pythia",
+      DefaultType::Dependent,
+      {"1.0"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_resonances_,Resonances,string,$\{\ref
-   *key_log_default_ "default"\}}
+   *key_log_default_ "default"\},\any_valid}
    *
    ** Messages coming from resonances aspects belong to this area.
    */
@@ -2104,12 +2334,15 @@ struct InputKeys {
    * \see_key{key_log_resonances_}
    */
   inline static const Key<einhard::LogLevel> log_resonances{
-      InputSections::logging + "Resonances", DefaultType::Dependent, {"0.50"}};
+      InputSections::logging + "Resonances",
+      DefaultType::Dependent,
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_scatter_action_,%ScatterAction,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about scattering events belong to this area.
    */
@@ -2119,12 +2352,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_scatterAction{
       InputSections::logging + "ScatterAction",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
    * \optional_key{key_log_scatter_action_multi_,%ScatterActionMulti,string,$\{\ref
-   * key_log_default_ "default"\}}
+   * key_log_default_ "default"\},\any_valid}
    *
    * Messages about scattering events with multiple particles belong to this
    * area.
@@ -2135,11 +2369,13 @@ struct InputKeys {
   inline static const Key<einhard::LogLevel> log_scatterActionMulti{
       InputSections::logging + "ScatterActionMulti",
       DefaultType::Dependent,
-      {"2.0"}};
+      {"2.0"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_logging
-   * \optional_key{key_log_tmn_,Tmn,string,$\{\ref key_log_default_ "default"\}}
+   * \optional_key{key_log_tmn_,Tmn,string,$\{\ref key_log_default_
+   * "default"\},\any_valid}
    *
    * Messages about the energy momentum tensor belong to this area.
    */
@@ -2147,7 +2383,10 @@ struct InputKeys {
    * \see_key{key_log_tmn_}
    */
   inline static const Key<einhard::LogLevel> log_tmn{
-      InputSections::logging + "Tmn", DefaultType::Dependent, {"0.80"}};
+      InputSections::logging + "Tmn",
+      DefaultType::Dependent,
+      {"0.80"},
+      detail::get_default_validator<einhard::LogLevel>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -2157,12 +2396,15 @@ struct InputKeys {
   /**
    * \removed_key{key_version_,3.2}
    */
-  inline static const Key<std::string> version{{"Version"},
-                                               {"1.0", "3.0", "3.2"}};
+  inline static const Key<std::string> version{
+      {"Version"},
+      {"1.0", "3.0", "3.2"},
+      detail::get_default_validator<std::string>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_heavy_flavor
-   * \optional_key{key_CT_HF_AQM_b_suppression_,AQM_Bottom_Suppression,double,0.93}
+   * \optional_key{key_CT_HF_AQM_b_suppression_,AQM_Bottom_Suppression,double,
+   * 0.93,\f$0\leq x\leq 1\f$}
    *
    * Suppression parameter for AQM cross sections involving a bottom hadron.
    * Default value taken from Angantyr (\iref{Bierlich:2022pfr}).
@@ -2171,11 +2413,17 @@ struct InputKeys {
    * \see_key{key_CT_additional_el_cs_}
    */
   inline static const Key<double> collTerm_HF_AQMbSuppression{
-      InputSections::c_heavyFlavor + "AQM_Bottom_Suppression", 0.93, {"3.2"}};
+      InputSections::c_heavyFlavor + "AQM_Bottom_Suppression",
+      0.93,
+      {"3.2"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_heavy_flavor
-   * \optional_key{key_CT_HF_AQM_c_suppression_,AQM_Charm_Suppression,double,0.8}
+   * \optional_key{key_CT_HF_AQM_c_suppression_,AQM_Charm_Suppression,double,
+   * 0.8,\f$0\leq x\leq 1\f$}
    *
    * Suppression parameter for AQM cross sections involving a charm hadron.
    * Default value taken from Angantyr (\iref{Bierlich:2022pfr}).
@@ -2184,11 +2432,17 @@ struct InputKeys {
    * \see_key{key_CT_additional_el_cs_}
    */
   inline static const Key<double> collTerm_HF_AQMcSuppression{
-      InputSections::c_heavyFlavor + "AQM_Charm_Suppression", 0.8, {"3.2"}};
+      InputSections::c_heavyFlavor + "AQM_Charm_Suppression",
+      0.8,
+      {"3.2"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_additional_el_cs_,Additional_Elastic_Cross_Section,double,0.0}
+   * \optional_key{key_CT_additional_el_cs_,Additional_Elastic_Cross_Section,
+   * double,0.0,\none}
    *
    * Add an additional constant contribution \unit{in mb} to the elastic cross
    * section.
@@ -2202,11 +2456,61 @@ struct InputKeys {
   inline static const Key<double> collTerm_additionalElasticCrossSection{
       InputSections::collisionTerm + "Additional_Elastic_Cross_Section",
       0.0,
-      {"2.0"}};
+      {"2.0"},
+      [](const double &value) noexcept {
+        if (value < 0.0 || value > 300.0) {
+          logg[LogArea::Configuration::id].warn(
+              "The additional elastic cross section is set to a value that is "
+              "either negative or very large,\nwhich may lead to nonphysical "
+              "results. Make sure that this is intended.");
+        }
+        return true;
+      }};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_heavy_flavor
+   * \optional_key{key_CT_charm_rescattering_,Charm_Rescattering_Method,string,
+   * "resonances",\any_valid}
+   *
+   * With this key, the method of charm rescattering at lower energies can be
+   * chosen for two to two reactions including charmed hadrons that are
+   * mentioned in <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>.
+   *
+   * - `"resonances"` &rarr; Charm interactions are realized via resonance
+   *    formations.
+   * - `"T-matrix"` &rarr; Tabulated cross sections (\iref{Abreu:2011ic},
+   *    \iref{Tolos:2013kva}, \iref{Torres-Rincon:2014ffa}) are used, which
+   *    handle elastic and inelastic binary collisions.
+   *    @attention Currently, only \f$ D\pi \leftrightarrow D\pi \f$,
+   *    \f$ D\eta \leftrightarrow D\eta \f$, \f$ DK \leftrightarrow DK \f$, and
+   *    the same channels for D*(2007) and D*(2010) are implemented. All other
+   *    interactions including charmed hadrons are treated via intermediate
+   *    resonances.<br>
+   *    When using this option of charm rescattering,
+   *    <tt>\ref key_CT_force_decays_at_end_ "Force_Decays_At_End"</tt> should
+   *    be set to true to handle decays properly.
+   * - `"none"` &rarr; Interactions of charmed hadrons will not be taken into
+   *    account, i.e. their cross sections are set to zero.
+   *
+   * @note
+   * This config key facilitates disabling the two to two interactions of
+   * charmed hadrons that would otherwise be included via `"Charm_T-matrix"` in
+   * <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>, without listing
+   * every possible value except `"Charm_T-matrix"`.
+   */
+  /**
+   * \see_key{key_CT_charm_rescattering_}
+   */
+  inline static const Key<CharmRescattering> collTerm_charmRescatteringMethod{
+      InputSections::c_heavyFlavor + "Charm_Rescattering_Method",
+      CharmRescattering::Resonances,
+      {"3.4"},
+      detail::get_default_validator<CharmRescattering>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_collision_criterion_,Collision_Criterion,string,"Covariant"}
+   * \optional_key{key_CT_collision_criterion_,Collision_Criterion,string,
+   * "Covariant",\any_valid}
    *
    * The following collision criterions can be used.
    *
@@ -2251,11 +2555,12 @@ struct InputKeys {
   inline static const Key<CollisionCriterion> collTerm_collisionCriterion{
       InputSections::collisionTerm + "Collision_Criterion",
       CollisionCriterion::Covariant,
-      {"1.7"}};
+      {"1.7"},
+      detail::get_default_validator<CollisionCriterion>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_cs_scaling_,Cross_Section_Scaling,double,1.0}
+   * \optional_key{key_CT_cs_scaling_,Cross_Section_Scaling,double,1.0,\f$x>0\f$}
    *
    * Scale all cross sections by a global factor.
    * \warning Most cross sections are constrained by experimental data. Scaling
@@ -2266,11 +2571,15 @@ struct InputKeys {
    * \see_key{key_CT_cs_scaling_}
    */
   inline static const Key<double> collTerm_crossSectionScaling{
-      InputSections::collisionTerm + "Cross_Section_Scaling", 1.0, {"2.0"}};
+      InputSections::collisionTerm + "Cross_Section_Scaling",
+      1.0,
+      {"2.0"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_elastic_cross_section_,Elastic_Cross_Section,double,-1.0}
+   * \optional_key{key_CT_elastic_cross_section_,Elastic_Cross_Section,
+   * double,-1.0,\f$x>0 \lor x=-1\f$}
    *
    * If a non-negative value is given, it will override the parametrized
    * elastic cross sections (which are energy-dependent) with a constant value
@@ -2281,29 +2590,42 @@ struct InputKeys {
    * \see_key{key_CT_elastic_cross_section_}
    */
   inline static const Key<double> collTerm_elasticCrossSection{
-      InputSections::collisionTerm + "Elastic_Cross_Section", -1.0, {"1.2"}};
+      InputSections::collisionTerm + "Elastic_Cross_Section",
+      -1.0,
+      {"1.2"},
+      [](const double &value) noexcept {
+        return value > 0.0 || value == -1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_elastic_nn_cutoff_sqrts_,Elastic_NN_Cutoff_Sqrts,double,1.98}
+   * \optional_key{key_CT_elastic_nn_cutoff_sqrts_,Elastic_NN_Cutoff_Sqrts,
+   * double,1.98,\f$1.876 \leq x \leq 2.014\f$}
    *
    * The elastic collisions between two nucleons with \f$\sqrt{s}\f$ below
    * the specified value (\unit{in GeV}) cannot happen.
-   * - `Elastic_NN_Cutoff_Sqrts` < 1.88 &rarr;
-   *   Below the threshold energy of the elastic collision, no effect.
-   * - `Elastic_NN_Cutoff_Sqrts` > 2.02 &rarr;
+   * - `Elastic_NN_Cutoff_Sqrts` < 1.876 &rarr;
+   *   Below the threshold energy of the elastic collision, not accepted.
+   * - `Elastic_NN_Cutoff_Sqrts` > 2.014 &rarr;
    *   Beyond the threshold energy of the inelastic collision
-   *   \f$NN\rightarrow NN\pi\f$, not suggested.
+   *   \f$NN\rightarrow NN\pi\f$, not accepted.
    */
   /**
    * \see_key{key_CT_elastic_nn_cutoff_sqrts_}
    */
   inline static const Key<double> collTerm_elasticNNCutoffSqrts{
-      InputSections::collisionTerm + "Elastic_NN_Cutoff_Sqrts", 1.98, {"1.0"}};
+      InputSections::collisionTerm + "Elastic_NN_Cutoff_Sqrts",
+      1.98,
+      {"1.0"},
+      [](const double &value) noexcept {
+        return value >= 2 * nucleon_mass &&
+               value <= 2 * nucleon_mass + pion_mass;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,double,2.5}
+   * \optional_key{key_CT_fixed_min_cell_length_,Fixed_Min_Cell_Length,
+   * double,2.5,\f$x>0\f$}
    *
    * The (minimal) length \unit{in fm} used for the grid cells of the stochastic
    * criterion, only. Collisions are searched within grid cells only. Cell
@@ -2314,11 +2636,14 @@ struct InputKeys {
    * \see_key{key_CT_fixed_min_cell_length_}
    */
   inline static const Key<double> collTerm_fixedMinCellLength{
-      InputSections::collisionTerm + "Fixed_Min_Cell_Length", 2.5, {"2.1"}};
+      InputSections::collisionTerm + "Fixed_Min_Cell_Length",
+      2.5,
+      {"2.1"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_force_decays_at_end_,Force_Decays_At_End,bool,true}
+   * \optional_key{key_CT_force_decays_at_end_,Force_Decays_At_End,bool,true,\none}
    *
    * - `true` &rarr; Force all resonances to decay after last timestep.
    * - `false` &rarr; Don't force decays (final output can contain resonances).
@@ -2327,11 +2652,14 @@ struct InputKeys {
    * \see_key{key_CT_force_decays_at_end_}
    */
   inline static const Key<bool> collTerm_forceDecaysAtEnd{
-      InputSections::collisionTerm + "Force_Decays_At_End", true, {"0.60"}};
+      InputSections::collisionTerm + "Force_Decays_At_End",
+      true,
+      {"0.60"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_decay_initial_,Decay_Initial_Particles,bool,true}
+   * \optional_key{key_CT_decay_initial_,Decay_Initial_Particles,bool,true,\none}
    *
    * Allow or prohibit initial state particles from decaying before their first
    * collision. This is relevant when, for instance, studying the interactions
@@ -2341,11 +2669,15 @@ struct InputKeys {
    * \see_key{key_CT_decay_initial_}
    */
   inline static const Key<bool> collTerm_decayInitial{
-      InputSections::collisionTerm + "Decay_Initial_Particles", true, {"3.0"}};
+      InputSections::collisionTerm + "Decay_Initial_Particles",
+      true,
+      {"3.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_included_2to2_,Included_2to2,list of strings,["All"]}
+   * \optional_key{key_CT_included_2to2_,Included_2to2,list of
+   * strings,["All"],\any_valid}
    *
    * List that contains all possible 2 &harr; 2 process categories. Each process
    * of the listed category can be performed within the simulation. Possible
@@ -2363,6 +2695,13 @@ struct InputKeys {
    * - `"PiDeuteron_to_pidprime"` &rarr; deuteron + pion &harr; d' + pion
    * - `"NDeuteron_to_Ndprime"` &rarr; deuteron + (anti-)nucleon &harr;
    *   d' + (anti-)nucleon, and their CPT-conjugates
+   * - `"Charm_T-matrix"` &rarr; D meson + light meson &harr; D meson + light
+   *   meson and D* + light meson &harr; D* + light meson, where D* refers to
+   *   D*(2007) and D*(2010); currently, included light mesons are pions, etas,
+   *   kaons, and their corresponding antiparticles. Only taken into account if
+   *   <tt>\ref key_CT_charm_rescattering_ "Charm_Rescattering_Method"</tt> is
+   *   set to `T-matrix`. Otherwise, collisions including charmed hadrons are
+   *   treated via intermediate resonances.
    * - `"All"` &rarr; include all binary processes, no necessity to list each
    *   single category
    *
@@ -2380,7 +2719,8 @@ struct InputKeys {
   inline static const Key<ReactionsBitSet> collTerm_includedTwoToTwo{
       InputSections::collisionTerm + "Included_2to2",
       ReactionsBitSet{}.set(),  // All interactions => all bit set
-      {"1.3"}};
+      {"1.3"},
+      detail::get_default_validator<ReactionsBitSet>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -2395,12 +2735,13 @@ struct InputKeys {
   inline static const Key<bool> collTerm_includeDecaysAtTheEnd{
       InputSections::collisionTerm + "Include_Weak_And_EM_Decays_At_The_End",
       false,
-      {"2.2", "3.1", "3.2"}};
+      {"2.2", "3.1", "3.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_ignore_decay_width_end_,
-   * Ignore_Minimum_Decay_Width_For_Decays_At_The_End,bool,false}
+   * Ignore_Minimum_Decay_Width_For_Decays_At_The_End,bool,false,\none}
    *
    * If enabled, all non-strong decays are performed at the end of the
    * simulation, including weak and electro-magnetic ones. In particular, all
@@ -2422,11 +2763,12 @@ struct InputKeys {
       InputSections::collisionTerm +
           "Ignore_Minimum_Decay_Width_For_Decays_At_The_End",
       false,
-      {"3.2"}};
+      {"3.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_isotropic_,Isotropic,bool,false}
+   * \optional_key{key_CT_isotropic_,Isotropic,bool,false,\none}
    *
    * Do all collisions isotropically.
    */
@@ -2434,12 +2776,15 @@ struct InputKeys {
    * \see_key{key_CT_isotropic_}
    */
   inline static const Key<bool> collTerm_isotropic{
-      InputSections::collisionTerm + "Isotropic", false, {"0.7.1"}};
+      InputSections::collisionTerm + "Isotropic",
+      false,
+      {"0.7.1"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_max_cs_,Maximum_Cross_Section,double,
-   * 200</tt> or <tt>2000}
+   * 200</tt> or <tt>2000,\f$x>0\f$}
    *
    * The maximal cross section \unit{in mb} that should be used when looking for
    * collisions. This means that all particle pairs, whose transverse distance
@@ -2464,12 +2809,21 @@ struct InputKeys {
   inline static const Key<double> collTerm_maximumCrossSection{
       InputSections::collisionTerm + "Maximum_Cross_Section",
       DefaultType::Dependent,
-      {"2.0"}};
+      {"2.0"},
+      [](const double &value) noexcept {
+        if ((value < 200 && value > 0) || value > 2000) {
+          logg[LogArea::Configuration::id].warn(
+              "The maximum cross section is set to a value that is either "
+              "smaller than 200 mb or larger than 2000 mb,\nwhich may lead to "
+              "nonphysical results. Make sure that this is intended.");
+        }
+        return value > 0.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_mp_reactions_,Multi_Particle_Reactions,list of
-   * strings,[]}
+   * strings,[],\any_valid}
    *
    * List of reactions with more than 2 in- or outgoing particles that contains
    * all possible multi-particle process categories. Multi particle reactions
@@ -2512,11 +2866,12 @@ struct InputKeys {
       collTerm_multiParticleReactions{
           InputSections::collisionTerm + "Multi_Particle_Reactions",
           MultiParticleReactionsBitSet{}.reset(),  // Empty list => no bit set
-          {"2.0"}};
+          {"2.0"},
+          detail::get_default_validator<MultiParticleReactionsBitSet>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_nnbar_treatment_,NNbar_Treatment,string,"strings"}
+   * \optional_key{key_CT_nnbar_treatment_,NNbar_Treatment,string,"strings",\any_valid}
    *
    * - `"no annihilation"` &rarr; No annihilation of NNbar is performed.
    * - `"resonances"` &rarr; Annihilation through
@@ -2537,11 +2892,12 @@ struct InputKeys {
   inline static const Key<NNbarTreatment> collTerm_nnbarTreatment{
       InputSections::collisionTerm + "NNbar_Treatment",
       NNbarTreatment::Strings,
-      {"1.3"}};
+      {"1.3"},
+      detail::get_default_validator<NNbarTreatment>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_no_collisions_,No_Collisions,bool,false}
+   * \optional_key{key_CT_no_collisions_,No_Collisions,bool,false,\none}
    *
    * Disable all possible collisions, only allow decays to occur if not
    * forbidden by other options. Useful for running SMASH as a decay
@@ -2552,11 +2908,14 @@ struct InputKeys {
    * \see_key{key_CT_no_collisions_}
    */
   inline static const Key<bool> collTerm_noCollisions{
-      InputSections::collisionTerm + "No_Collisions", false, {"1.3"}};
+      InputSections::collisionTerm + "No_Collisions",
+      false,
+      {"1.3"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_warn_high_prob_,Only_Warn_For_High_Probability,bool,false}
+   * \optional_key{key_CT_warn_high_prob_,Only_Warn_For_High_Probability,bool,false,\none}
    *
    * Only warn and not error for reaction probabilities higher than 1.
    * This switch is meant for very long production runs with the stochastic
@@ -2570,11 +2929,13 @@ struct InputKeys {
   inline static const Key<bool> collTerm_onlyWarnForHighProbability{
       InputSections::collisionTerm + "Only_Warn_For_High_Probability",
       false,
-      {"3.0"}};
+      {"3.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,"LargestFromUnstable"}
+   * \optional_key{key_CT_pseudoresonance_,Pseudoresonance,string,
+   * "LargestFromUnstable",\any_valid}
    *
    * Due to the lack of known high-mass resonances for several processes, the
    * energy region between resonances and strings might lack inelastic
@@ -2604,11 +2965,13 @@ struct InputKeys {
   inline static const Key<PseudoResonance> collTerm_pseudoresonance{
       InputSections::collisionTerm + "Pseudoresonance",
       PseudoResonance::LargestFromUnstable,
-      {"3.1"}};
+      {"3.1"},
+      detail::get_default_validator<PseudoResonance>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_res_lifetime_mod_,Resonance_Lifetime_Modifier,double,1.0}
+   * \optional_key{key_CT_res_lifetime_mod_,Resonance_Lifetime_Modifier,double,
+   * 1.0,\f$x>0\f$}
    *
    * Multiplicative factor by which to scale the resonance lifetimes up or down.
    * This additionally has the effect of modifying the initial densities by
@@ -2620,7 +2983,7 @@ struct InputKeys {
    * other assumptions used in SMASH; notably, modifying this value **will**
    * break detailed balance in any gas which allows resonances to collide
    * inelastically, as this option breaks the relationship between the width and
-   * lifetime of resonances. Note as well that in such gases, using a value of
+   * lifetime of resonances. Note as well that in such cases, using a value of
    * 0.0 is known to make SMASH hang; it is recommended to use a small non-zero
    * value instead in these cases.
    */
@@ -2630,11 +2993,12 @@ struct InputKeys {
   inline static const Key<double> collTerm_resonanceLifetimeModifier{
       InputSections::collisionTerm + "Resonance_Lifetime_Modifier",
       1.0,
-      {"1.8"}};
+      {"1.8"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_spin_interactions
-   * \optional_key{key_CT_spin_interactions_,Spin_Interactions,string,"Off"}
+   * \optional_key{key_CT_spin_interactions_,Spin_Interactions,string,"Off",\any_valid}
    *
    * Whether or not to enable spin interactions in binary collisions.
    * \note So far we only include a spin flip in elastic scatterings.
@@ -2645,12 +3009,13 @@ struct InputKeys {
   inline static const Key<SpinInteractionType> collTerm_spinInteractions{
       InputSections::collisionTerm + "Spin_Interactions",
       SpinInteractionType::Off,
-      {"3.3"}};
+      {"3.3"},
+      detail::get_default_validator<SpinInteractionType>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_strings_,Strings,bool,
-   * (\ref key_gen_modus_ "Modus"!="Box")}
+   * (\ref key_gen_modus_ "Modus"!="Box"),\none}
    *
    * - `true` &rarr; String excitation is enabled
    * - `false` &rarr; String excitation is disabled
@@ -2661,11 +3026,12 @@ struct InputKeys {
   inline static const Key<bool> collTerm_strings{
       InputSections::collisionTerm + "Strings",
       DefaultType::Dependent,
-      {"1.0"}};
+      {"1.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_string_with_prob_,Strings_with_Probability,bool,true}
+   * \optional_key{key_CT_string_with_prob_,Strings_with_Probability,bool,true,\none}
    *
    * - `true` &rarr;
    *   String processes are triggered according to a probability increasing
@@ -2691,11 +3057,15 @@ struct InputKeys {
    * \see_key{key_CT_string_with_prob_}
    */
   inline static const Key<bool> collTerm_stringsWithProbability{
-      InputSections::collisionTerm + "Strings_with_Probability", true, {"1.3"}};
+      InputSections::collisionTerm + "Strings_with_Probability",
+      true,
+      {"1.3"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_totXsStrategy_,Total_Cross_Section_Strategy,string,"TopDownMeasured"}
+   * \optional_key{key_CT_totXsStrategy_,Total_Cross_Section_Strategy,string,
+   * "TopDownMeasured",\any_valid}
    *
    * Which strategy to use when evaluating total cross sections for collision
    * finding. Currently, possible options are
@@ -2725,11 +3095,12 @@ struct InputKeys {
   inline static const Key<TotalCrossSectionStrategy> collTerm_totXsStrategy{
       InputSections::collisionTerm + "Total_Cross_Section_Strategy",
       TotalCrossSectionStrategy::TopDownMeasured,
-      {"3.1"}};
+      {"3.1"},
+      detail::get_default_validator<TotalCrossSectionStrategy>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_two_to_one_,Two_to_One,bool,true}
+   * \optional_key{key_CT_two_to_one_,Two_to_One,bool,true,\none}
    *
    * Enable 2 &harr; 1 processes (resonance formation and decays).
    */
@@ -2737,11 +3108,14 @@ struct InputKeys {
    * \see_key{key_CT_two_to_one_}
    */
   inline static const Key<bool> collTerm_twoToOne{
-      InputSections::collisionTerm + "Two_to_One", true, {"0.85"}};
+      InputSections::collisionTerm + "Two_to_One",
+      true,
+      {"0.85"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
-   * \optional_key{key_CT_use_aqm_,Use_AQM,bool,true}
+   * \optional_key{key_CT_use_aqm_,Use_AQM,bool,true,\none}
    *
    * Turn on AQM cross-sections for exotic combination of particles
    * (baryon-baryon cross-sections are scaled from proton-proton high energy
@@ -2785,95 +3159,96 @@ struct InputKeys {
    * \see_key{key_CT_use_aqm_}
    */
   inline static const Key<bool> collTerm_useAQM{
-      InputSections::collisionTerm + "Use_AQM", true, {"1.3"}};
+      InputSections::collisionTerm + "Use_AQM",
+      true,
+      {"1.3"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_hard_string_transition
    * \optional_key{key_CT_hard_string_transition_mode_,
-   *               Mode,string,Exponential}
+   *               Mode,string,Exponential,\any_valid}
    *
    * Select the mode used for the transition from soft to hard string
    * excitation.
    *
-   * - Exponential: use the legacy exponential suppression based on the hard
+   * - Exponential: use exponential suppression based on the hard
    *   string cross section in the Pythia multiparton interaction (MPI)
    *   framework.
    * - Custom_Range: use a smooth transition from soft to hard string excitation
    *   within a user-defined invariant energy range.
    *
    *   In this mode, the transition follows a sinusoidal function within the
-   *   interval defined by Start_Energy and End_Energy, ensuring a smooth and
-   *   continuous interpolation between the soft and hard regimes.
+   *   interval defined by Energy_Range, ensuring a smooth and continuous
+   *   interpolation between the soft and hard regimes.
    *
-   * For Custom_Range, the transition is controlled by Start_Energy and
-   * End_Energy.
+   * For Custom_Range, the transition is controlled by Energy_Range.
    */
-
   /**
    * \see_key{key_CT_hard_string_transition_mode_}
    */
   inline static const Key<HardStringTransitionMode>
-      collTerm_hard_string_transition_mode{
+      collTerm_hardStringTransition_mode{
           InputSections::c_hardStringTransition + "Mode",
           HardStringTransitionMode::Exponential,
-          {"3.4"}};
+          {"3.4"},
+          detail::get_default_validator<HardStringTransitionMode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_hard_string_transition
-   * \optional_key{key_CT_hard_string_transition_start_energy_,
-   *               Start_Energy,double,10.0}
+   * \optional_key{key_CT_hard_string_transition_energyRange_,
+   *               Energy_Range,list of two doubles,[10.0\,200.0],
+   *               \f$E_1 \ge 10\f$ and \f$E_1 < E_2\f$}
    *
-   * Lower bound of the invariant mass range (\f$\sqrt{s}\f$ in GeV) for the
+   * Invariant energy range (\f$\sqrt{s}\f$) \unit{GeV} used for the custom
    * transition from soft to hard string excitation.
    *
-   * For \f$\sqrt{s}\f$ below this value, only soft string excitation is used.
-   * Above this value, the transition to hard string excitation begins.
+   * This key is only used when Mode is set to Custom_Range. For \f$\sqrt{s}\f$
+   * below the lower bound, only soft string excitation is used. For
+   * \f$\sqrt{s}\f$ above the upper bound, only hard string excitation is used.
    *
-   * Must be greater than or equal to 10 GeV and smaller than or equal to
-   * End_Energy.
+   * Within the specified range, the transition probability is interpolated
+   * smoothly from the soft to the hard regime.
    *
+   * The lower bound must be greater than or equal to 10 \unit{GeV} and strictly
+   * smaller than the upper bound.
    */
-
   /**
-   * \see_key{key_CT_hard_string_transition_start_energy_}
+   * \see_key{key_CT_hard_string_transition_energyRange_}
    */
-  inline static const Key<double> collTerm_hard_string_transition_start_energy{
-      InputSections::c_hardStringTransition + "Start_Energy", 10.0, {"3.4"}};
-
-  /*!\Userguide
-   * \page doxypage_input_conf_ct_hard_string_transition
-   * \optional_key{key_CT_hard_string_transition_end_energy_,
-   *               End_Energy,double,200.0}
-   *
-   * Upper bound of the invariant energy range for the transition from soft to
-   * hard string excitation (\f$\sqrt{s}\f$ in GeV).
-   *
-   *
-   * Must be larger than or equal to Start_Energy
-   *
-   */
-
-  /**
-   * \see_key{key_CT_hard_string_transition_end_energy_}
-   */
-  inline static const Key<double> collTerm_hard_string_transition_end_energy{
-      InputSections::c_hardStringTransition + "End_Energy", 200.0, {"3.4"}};
+  inline static const Key<std::pair<double, double>>
+      collTerm_hardStringTransition_energyRange{
+          InputSections::c_hardStringTransition + "Energy_Range",
+          std::make_pair(10.0, 200.0),
+          {"3.4"},
+          [](const std::pair<double, double> &value) noexcept {
+            return value.first >= 10.0 && value.first < value.second;
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
-   * \optional_key{key_CT_PB_gaussian_cutoff_,Gaussian_Cutoff,double,2.2}
+   * \optional_key{key_CT_PB_gaussian_cutoff_,Gaussian_Cutoff,double,
+   * 2.2,\f$1\leq x\leq10\f$}
    *
-   * Radius \unit{in fm} at which Gaussians used for smoothing are cut.
+   * Radius \unit{in fm} at which Gaussians used for smoothing are
+   * cut. It should be larger than \ref
+   * key_CT_PB_spatial_averaging_radius_ "Spatial_Averaging_Radius".
    */
   /**
    * \see_key{key_CT_PB_gaussian_cutoff_}
    */
   inline static const Key<double> collTerm_pauliBlocking_gaussianCutoff{
-      InputSections::c_pauliBlocking + "Gaussian_Cutoff", 2.2, {"0.7.1"}};
+      InputSections::c_pauliBlocking + "Gaussian_Cutoff",
+      2.2,
+      {"0.7.1"},
+      [](const double &value) noexcept {
+        return value >= 1.0 && value <= 10.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
-   * \optional_key{key_CT_PB_momentum_av_radius_,Momentum_Averaging_Radius,double,0.08}
+   * \optional_key{key_CT_PB_momentum_av_radius_,Momentum_Averaging_Radius,
+   * double,0.08,\f$x>0\f$}
    *
    * Radius \unit{in GeV} of sphere for averaging in the momentum space.
    */
@@ -2884,13 +3259,16 @@ struct InputKeys {
       collTerm_pauliBlocking_momentumAveragingRadius{
           InputSections::c_pauliBlocking + "Momentum_Averaging_Radius",
           0.08,
-          {"0.7.1"}};
+          {"0.7.1"},
+          [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_pauliblocker
-   * \optional_key{key_CT_PB_spatial_averaging_radius_,Spatial_Averaging_Radius,double,1.86}
+   * \optional_key{key_CT_PB_spatial_averaging_radius_,Spatial_Averaging_Radius,
+   * double,1.86,\f$x>0\f$}
    *
-   * Radius \unit{in fm} of sphere for averaging in the coordinate space.
+   * Radius \unit{in fm} of sphere for averaging in the coordinate space. It
+   * should be smaller than \ref key_CT_PB_gaussian_cutoff_ "Gaussian_Cutoff".
    */
   /**
    * \see_key{key_CT_PB_spatial_averaging_radius_}
@@ -2898,11 +3276,12 @@ struct InputKeys {
   inline static const Key<double> collTerm_pauliBlocking_spatialAveragingRadius{
       InputSections::c_pauliBlocking + "Spatial_Averaging_Radius",
       1.86,
-      {"0.7.1"}};
+      {"0.7.1"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_KN_offset_,KN_Offset,double,15.15}
+   * \optional_key{key_CT_ST_KN_offset_,KN_Offset,double,15.15,\none}
    *
    * Offset \unit{in GeV} to turn on the strings for KN reactions.
    */
@@ -2910,11 +3289,14 @@ struct InputKeys {
    * \see_key{key_CT_ST_KN_offset_}
    */
   inline static const Key<double> collTerm_stringTrans_KNOffset{
-      InputSections::c_stringTransition + "KN_Offset", 15.15, {"3.0"}};
+      InputSections::c_stringTransition + "KN_Offset",
+      15.15,
+      {"3.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_pipi_offset_,PiPi_Offset,double,1.12}
+   * \optional_key{key_CT_ST_pipi_offset_,PiPi_Offset,double,1.12,\none}
    *
    * Offset \unit{in GeV} to turn on the strings and elastic processes
    * for \f$\pi\pi\f$ reactions (this is an exception because the normal AQM
@@ -2925,11 +3307,14 @@ struct InputKeys {
    * \see_key{key_CT_ST_pipi_offset_}
    */
   inline static const Key<double> collTerm_stringTrans_pipiOffset{
-      InputSections::c_stringTransition + "PiPi_Offset", 1.12, {"3.0"}};
+      InputSections::c_stringTransition + "PiPi_Offset",
+      1.12,
+      {"3.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_lower_,Sqrts_Lower,double,0.9}
+   * \optional_key{key_CT_ST_lower_,Sqrts_Lower,double,0.9,\none}
    *
    * Lower end of transition region \unit{in GeV} for the remaining
    * interactions, in case of AQM this is added to the sum of masses.
@@ -2938,16 +3323,19 @@ struct InputKeys {
    * \see_key{key_CT_ST_lower_}
    */
   inline static const Key<double> collTerm_stringTrans_lower{
-      InputSections::c_stringTransition + "Sqrts_Lower", 0.9, {"3.0"}};
+      InputSections::c_stringTransition + "Sqrts_Lower",
+      0.9,
+      {"3.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_rangeNN_,Sqrts_Range_NN,list of two
-   * doubles,[3.5\,4.5]}
+   * \optional_key{key_CT_ST_rangeNN_,Sqrts_Range_NN,list of two doubles,
+   * [3.5\,4.5],\f$x_1 \geq 1.876 \land x_1 < x_2\f$}
    *
    * Transition range in NN collisions \unit{in GeV}. The lowest value for the
-   * first parameter is the mass threshold 1.88. The default is tuned to
-   * reproduce experimental exclusive cross section data, and at the same
+   * first parameter is the mass threshold 1.876. The default is tuned to
+   * reproduce experimental exclusive cross section data, and at the same time
    * produce excitation functions that are as smooth as possible. The default of
    * a 1 GeV range is preserved.
    */
@@ -2958,15 +3346,26 @@ struct InputKeys {
       collTerm_stringTrans_rangeNN{
           InputSections::c_stringTransition + "Sqrts_Range_NN",
           std::make_pair(3.5, 4.5),
-          {"3.0"}};
+          {"3.0"},
+          [](const std::pair<double, double> &value) noexcept {
+            const bool valid =
+                value.first >= 2 * nucleon_mass && value.first < value.second;
+            if (valid && std::abs(value.second - value.first) != 1.0) {
+              logg[LogArea::Configuration::id].warn(
+                  "The string transition range for NN collisions is set to a "
+                  "range larger than 1 GeV, which may lead to nonphysical\n"
+                  "results. Make sure that this is intended.");
+            }
+            return valid;
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_rangeNPi_,Sqrts_Range_Npi,list of two
-   * doubles,[1.9\,2.2]}
+   * \optional_key{key_CT_ST_rangeNPi_,Sqrts_Range_Npi,list of two doubles,
+   * [1.9\,2.2],\f$x_1 \geq 1.076 \land x_1 < x_2\f$}
    *
    * Transition region in N\f$\pi\f$ scatterings \unit{in GeV}. The lowest value
-   * for the first parameter is the mass threshold 1.08.
+   * for the first parameter is the mass threshold 1.076.
    */
   /**
    * \see_key{key_CT_ST_rangeNPi_}
@@ -2975,11 +3374,15 @@ struct InputKeys {
       collTerm_stringTrans_rangeNpi{
           InputSections::c_stringTransition + "Sqrts_Range_Npi",
           std::make_pair(1.9, 2.2),
-          {"3.0"}};
+          {"3.0"},
+          [](const std::pair<double, double> &value) noexcept {
+            return value.first >= nucleon_mass + pion_mass &&
+                   value.first < value.second;
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_transition
-   * \optional_key{key_CT_ST_range_width_,Sqrts_Range_Width,double,1.0}
+   * \optional_key{key_CT_ST_range_width_,Sqrts_Range_Width,double,1.0,\none}
    *
    * Width of the transition region \unit{in GeV} for the remaining
    * interactions, in case of AQM this is added to <tt>\ref key_CT_ST_lower_
@@ -2989,11 +3392,15 @@ struct InputKeys {
    * \see_key{key_CT_ST_range_width_}
    */
   inline static const Key<double> collTerm_stringTrans_range_width{
-      InputSections::c_stringTransition + "Sqrts_Range_Width", 1.0, {"3.0"}};
+      InputSections::c_stringTransition + "Sqrts_Range_Width",
+      1.0,
+      {"3.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_diquark_supp_,Diquark_Supp,double,0.036}
+   * \optional_key{key_CT_SP_diquark_supp_,Diquark_Supp,double,0.04,
+   * \f$0\leq x\leq 1\f$}
    *
    * Diquark suppression factor. Defines the probability to produce a diquark
    * antidiquark pair relative to producing a qurk antiquark pair.
@@ -3002,11 +3409,17 @@ struct InputKeys {
    * \see_key{key_CT_SP_diquark_supp_}
    */
   inline static const Key<double> collTerm_stringParam_diquarkSuppression{
-      InputSections::c_stringParameters + "Diquark_Supp", 0.036, {"1.3"}};
+      InputSections::c_stringParameters + "Diquark_Supp",
+      0.04,
+      {"1.3"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_form_time_factor_,Form_Time_Factor,double,1.0}
+   * \optional_key{key_CT_SP_form_time_factor_,Form_Time_Factor,double,
+   * 1.0,\f$x>0\f$}
    *
    * Factor to be multiplied with the formation time of string fragments from
    * the soft string routine.
@@ -3015,11 +3428,14 @@ struct InputKeys {
    * \see_key{key_CT_SP_form_time_factor_}
    */
   inline static const Key<double> collTerm_stringParam_formTimeFactor{
-      InputSections::c_stringParameters + "Form_Time_Factor", 1.0, {"1.4"}};
+      InputSections::c_stringParameters + "Form_Time_Factor",
+      1.0,
+      {"1.4"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_formation_time_,Formation_Time,double,1.0}
+   * \optional_key{key_CT_SP_formation_time_,Formation_Time,double,1.0,\f$x>0\f$}
    *
    * Parameter for formation time in string fragmentation, \unit{in fm}.
    */
@@ -3027,11 +3443,14 @@ struct InputKeys {
    * \see_key{key_CT_SP_formation_time_}
    */
   inline static const Key<double> collTerm_stringParam_formationTime{
-      InputSections::c_stringParameters + "Formation_Time", 1.0, {"1.0"}};
+      InputSections::c_stringParameters + "Formation_Time",
+      1.0,
+      {"1.0"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_gluon_beta_,Gluon_Beta,double,0.5}
+   * \optional_key{key_CT_SP_gluon_beta_,Gluon_Beta,double,0.5,\f$x>0\f$}
    *
    * Parameter \f$\beta\f$ in parton distribution function for gluons,
    * \f[\mathrm{PDF}_g(x) \propto \frac{1}{x}(1-x)^{\beta+1}\;.\f]
@@ -3040,11 +3459,14 @@ struct InputKeys {
    * \see_key{key_CT_SP_gluon_beta_}
    */
   inline static const Key<double> collTerm_stringParam_gluonBeta{
-      InputSections::c_stringParameters + "Gluon_Beta", 0.5, {"1.3"}};
+      InputSections::c_stringParameters + "Gluon_Beta",
+      0.5,
+      {"1.3"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_gluon_pmin_,Gluon_Pmin,double,0.001}
+   * \optional_key{key_CT_SP_gluon_pmin_,Gluon_Pmin,double,0.001,\f$x>0\f$}
    *
    * Smallest possible scale for gluon lightcone momentum \unit{in GeV}.
    * This is divided by \f$\sqrt{s}\f$ to get the minimum fraction to be sampled
@@ -3054,11 +3476,15 @@ struct InputKeys {
    * \see_key{key_CT_SP_gluon_pmin_}
    */
   inline static const Key<double> collTerm_stringParam_gluonPMin{
-      InputSections::c_stringParameters + "Gluon_Pmin", 0.001, {"1.3"}};
+      InputSections::c_stringParameters + "Gluon_Pmin",
+      0.001,
+      {"1.3"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_m_dependent_formation_t_,Mass_Dependent_Formation_Times,bool,false}
+   * \optional_key{key_CT_SP_m_dependent_formation_t_,
+   * Mass_Dependent_Formation_Times,bool,false,\none}
    *
    * Whether the formation time of string fragments should depend on their mass.
    * If it is set to `true`, the formation time is calculated as
@@ -3070,11 +3496,12 @@ struct InputKeys {
   inline static const Key<bool> collTerm_stringParam_mDependentFormationTimes{
       InputSections::c_stringParameters + "Mass_Dependent_Formation_Times",
       false,
-      {"1.5.2"}};
+      {"1.5.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_quark_alpha_,Quark_Alpha,double,2.0}
+   * \optional_key{key_CT_SP_quark_alpha_,Quark_Alpha,double,2.0,\f$x>0\f$}
    *
    * Parameter \f$\alpha\f$ in parton distribution function for quarks,
    * \f[\mathrm{PDF}_q\propto x^{\alpha-1}(1-x)^{\beta-1}\;.\f]
@@ -3083,11 +3510,14 @@ struct InputKeys {
    * \see_key{key_CT_SP_quark_alpha_}
    */
   inline static const Key<double> collTerm_stringParam_quarkAlpha{
-      InputSections::c_stringParameters + "Quark_Alpha", 2.0, {"1.3"}};
+      InputSections::c_stringParameters + "Quark_Alpha",
+      2.0,
+      {"1.3"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_quark_beta_,Quark_Beta,double,7.0}
+   * \optional_key{key_CT_SP_quark_beta_,Quark_Beta,double,7.0,\f$x>0\f$}
    *
    * Parameter \f$\beta\f$ in PDF for quarks shown in <tt>\ref
    * key_CT_SP_quark_alpha_ "Quark_Alpha"</tt>.
@@ -3096,11 +3526,15 @@ struct InputKeys {
    * \see_key{key_CT_SP_quark_beta_}
    */
   inline static const Key<double> collTerm_stringParam_quarkBeta{
-      InputSections::c_stringParameters + "Quark_Beta", 7.0, {"1.3"}};
+      InputSections::c_stringParameters + "Quark_Beta",
+      7.0,
+      {"1.3"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_popcorn_rate_,Popcorn_Rate,double,0.15}
+   * \optional_key{key_CT_SP_popcorn_rate_,Popcorn_Rate,double,
+   * 0.5,\f$0\leq x\leq 2\f$}
    *
    * Parameter StringFlav:popcornRate, which determines production rate of
    * popcorn mesons in string fragmentation. It is possible to produce a popcorn
@@ -3111,17 +3545,50 @@ struct InputKeys {
    * \see_key{key_CT_SP_popcorn_rate_}
    */
   inline static const Key<double> collTerm_stringParam_popcornRate{
-      InputSections::c_stringParameters + "Popcorn_Rate", 0.15, {"1.6"}};
+      InputSections::c_stringParameters + "Popcorn_Rate",
+      0.5,
+      {"1.6"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 2.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_power_part_formation_,Power_Particle_Formation,double,±1}
+   * \optional_key{key_CT_SP_damp_popcorn_,Damp_Popcorn,double,0.5,\f$0\leq
+   * x\leq 1\f$}
+   *
+   * Controls whether a diquark endpoint may hadronize via the popcorn
+   * mechanism into a leading meson before producing the baryon.
+   *
+   * A value of \f$1\f$ corresponds to normal popcorn production, while
+   * \f$0\f$ suppresses popcorn completely such that the diquark always
+   * fragments directly into a leading baryon. Intermediate values interpolate
+   * between these two limits.
+   *
+   * Corresponds to Pythia's
+   * <tt>BeamRemnants:dampPopcorn</tt> parameter.
+   */
+  /**
+   * \see_key{key_CT_SP_damp_popcorn_}
+   */
+  inline static const Key<double> collTerm_stringParam_dampPopcorn{
+      InputSections::c_stringParameters + "Damp_Popcorn",
+      0.5,
+      {"3.4"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_power_part_formation_,Power_Particle_Formation,
+   * double,±1,\none}
    *
    * The default value of this parameter is `+1` if
-   * \f$\sqrt{s}<200\,\mathrm{GeV}\f$ and `-1` otherwise. If positive, the power
-   * with which the cross section scaling factor of string fragments grows in
-   * time until it reaches 1. If negative, the scaling factor will be constant
-   * and jump to 1 once the particle forms.
+   * \f$\sqrt{s}<200\,\mathrm{GeV}\f$ and `-1` otherwise. If positive, the
+   * power with which the cross section scaling factor of string fragments
+   * grows in time until it reaches 1. If negative, the scaling factor will be
+   * constant and jump to 1 once the particle forms.
    */
   /**
    * \see_key{key_CT_SP_power_part_formation_}
@@ -3129,11 +3596,13 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_powerParticleFormation{
       InputSections::c_stringParameters + "Power_Particle_Formation",
       DefaultType::Dependent,
-      {"1.4"}};
+      {"1.4"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_probability_p_to_duu_,Prob_proton_to_d_uu,double,1./3}
+   * \optional_key{key_CT_SP_probability_p_to_duu_,Prob_proton_to_d_uu,
+   * double,1./3,\f$0<x\leq 1\f$}
    *
    * Probability of splitting an (anti)nucleon into the quark it has only once
    * and the diquark it contains twice in terms of flavour in the soft string
@@ -3145,11 +3614,13 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_probabilityPToDUU{
       InputSections::c_stringParameters + "Prob_proton_to_d_uu",
       1.0 / 3,
-      {"1.5"}};
+      {"1.5"},
+      [](const double &value) noexcept { return value > 0.0 && value <= 1.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_separate_fragment_bar_,Separate_Fragment_Baryon,bool,true}
+   * \optional_key{key_CT_SP_separate_fragment_bar_,Separate_Fragment_Baryon,
+   * bool,true,\none}
    *
    * Whether to use a separate fragmentation function for leading baryons in
    * non-diffractive string processes.
@@ -3160,11 +3631,12 @@ struct InputKeys {
   inline static const Key<bool> collTerm_stringParam_separateFragmentBaryon{
       InputSections::c_stringParameters + "Separate_Fragment_Baryon",
       true,
-      {"1.6"}};
+      {"1.6"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_sigma_perp_,Sigma_Perp,double,0.42}
+   * \optional_key{key_CT_SP_sigma_perp_,Sigma_Perp,double,0.42,\f$x>0\f$}
    *
    * Parameter \f$\sigma_\perp\f$ \unit{in GeV} in the distribution for
    * transverse momentum transfer between colliding hadrons \f$p_\perp\f$ and
@@ -3178,11 +3650,15 @@ struct InputKeys {
    * \see_key{key_CT_SP_sigma_perp_}
    */
   inline static const Key<double> collTerm_stringParam_sigmaPerp{
-      InputSections::c_stringParameters + "Sigma_Perp", 0.42, {"1.3"}};
+      InputSections::c_stringParameters + "Sigma_Perp",
+      0.42,
+      {"1.3"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_strange_supp_,Strange_Supp,double,0.16}
+   * \optional_key{key_CT_SP_strange_supp_,Strange_Supp,double,0.16,
+   * \f$0\leq x\leq 1\f$}
    *
    * Strangeness suppression factor \f$\lambda\f$,
    * \f[\lambda=
@@ -3196,11 +3672,17 @@ struct InputKeys {
    * \see_key{key_CT_SP_strange_supp_}
    */
   inline static const Key<double> collTerm_stringParam_strangeSuppression{
-      InputSections::c_stringParameters + "Strange_Supp", 0.16, {"1.3"}};
+      InputSections::c_stringParameters + "Strange_Supp",
+      0.16,
+      {"1.3"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_string_sigma_t_,String_Sigma_T,double,0.5}
+   * \optional_key{key_CT_SP_string_sigma_t_,String_Sigma_T,double,
+   * 0.5,\f$0\le x\le 1\f$}
    *
    * Standard deviation \unit{in GeV} in Gaussian for transverse momentum
    * distributed to string fragments during fragmentation.
@@ -3209,26 +3691,36 @@ struct InputKeys {
    * \see_key{key_CT_SP_string_sigma_t_}
    */
   inline static const Key<double> collTerm_stringParam_stringSigmaT{
-      InputSections::c_stringParameters + "String_Sigma_T", 0.5, {"1.3"}};
+      InputSections::c_stringParameters + "String_Sigma_T",
+      0.5,
+      {"1.3"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_string_tension_,String_Tension,double,1.0}
+   * \optional_key{key_CT_SP_string_tension_,String_Tension,double,1.0,
+   * \f$x\geq 0\f$}
    *
-   * String tension \f$\kappa\f$ \unit{in GeV/fm} connecting massless quarks in
-   * Hamiltonian, \f[H=|p_1|+|p_2|+\kappa |x_1-x_2|\;.\f]
-   * This parameter is only used to determine particles' formation times
-   * according to the yo-yo formalism (in the soft string routine for now).
+   * String tension \f$\kappa\f$ \unit{in GeV/fm} connecting massless quarks
+   * in Hamiltonian, \f[H=|p_1|+|p_2|+\kappa |x_1-x_2|\;.\f] This parameter is
+   * only used to determine particles' formation times according to the yo-yo
+   * formalism (in the soft string routine for now).
    */
   /**
    * \see_key{key_CT_SP_string_tension_}
    */
   inline static const Key<double> collTerm_stringParam_stringTension{
-      InputSections::c_stringParameters + "String_Tension", 1.0, {"1.3"}};
+      InputSections::c_stringParameters + "String_Tension",
+      1.0,
+      {"1.3"},
+      [](const double &value) noexcept { return value >= 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_a_,StringZ_A,double,2.0}
+   * \optional_key{key_CT_SP_stringz_a_,StringZ_A,double,1.0,
+   * \f$0\leq x\leq 2\f$}
    *
    * Parameter \f$a\f$ in Pythia fragmentation function \f$f(z)\f$,
    * \f[f(z) = \frac{1}{z} (1-z)^a \exp\left(-b\frac{m_T^2}{z}\right)\;.\f]
@@ -3237,11 +3729,17 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_a_}
    */
   inline static const Key<double> collTerm_stringParam_stringZA{
-      InputSections::c_stringParameters + "StringZ_A", 2.0, {"1.3"}};
+      InputSections::c_stringParameters + "StringZ_A",
+      1.0,
+      {"1.3"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 2.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.2}
+   * \optional_key{key_CT_SP_stringz_a_leading_,StringZ_A_Leading,double,0.0,
+   * \f$0\leq x\leq 2\f$}
    *
    * Parameter \f$a\f$ in Lund fragmentation function (see <tt>\ref
    * key_CT_SP_stringz_a_ "StringZ_A"</tt>) used to sample the light cone
@@ -3251,11 +3749,17 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_a_leading_}
    */
   inline static const Key<double> collTerm_stringParam_stringZALeading{
-      InputSections::c_stringParameters + "StringZ_A_Leading", 0.2, {"1.6"}};
+      InputSections::c_stringParameters + "StringZ_A_Leading",
+      0.0,
+      {"1.6"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 2.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.55}
+   * \optional_key{key_CT_SP_stringz_b_,StringZ_B,double,0.3,
+   * \f$0\leq x\leq 2\f$}
    *
    * Parameter \f$b\f$ \unit{in 1/GeV²} in Pythia fragmentation function shown
    * in <tt>\ref key_CT_SP_stringz_a_ "StringZ_A"</tt>.
@@ -3264,11 +3768,17 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_b_}
    */
   inline static const Key<double> collTerm_stringParam_stringZB{
-      InputSections::c_stringParameters + "StringZ_B", 0.55, {"1.3"}};
+      InputSections::c_stringParameters + "StringZ_B",
+      0.3,
+      {"1.3"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 2.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_stringz_b_leading_,StringZ_B_Leading,double,2.0}
+   * \optional_key{key_CT_SP_stringz_b_leading_,StringZ_B_Leading,double,
+   * 3.0,\f$0.2\leq x\leq 5\f$}
    *
    * Parameter \f$b\f$ \unit{in 1/GeV²} in Lund fraghmentation function (see
    * <tt>\ref key_CT_SP_stringz_a_ "StringZ_B"</tt>) used to sample the light
@@ -3279,13 +3789,18 @@ struct InputKeys {
    * \see_key{key_CT_SP_stringz_b_leading_}
    */
   inline static const Key<double> collTerm_stringParam_stringZBLeading{
-      InputSections::c_stringParameters + "StringZ_B_Leading", 2.0, {"1.6"}};
+      InputSections::c_stringParameters + "StringZ_B_Leading",
+      3.0,
+      {"1.6"},
+      [](const double &value) noexcept {
+        return value >= 0.2 && value <= 5.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_use_monash_tune_,Use_Monash_Tune,bool,
    * (\ref key_gen_modus_ "Modus" == "Collider" &&
-   *  \ref key_MC_sqrtsnn_ "Sqrtsnn" >= 200)}
+   *  \ref key_MC_sqrtsnn_ "Sqrtsnn" >= 200),\none}
    *
    * Whether to use the monash tune \iref{Skands:2014pea} for all string
    * processes. If nothing is specified, this option will be generally `false`
@@ -3298,15 +3813,16 @@ struct InputKeys {
   inline static const Key<bool> collTerm_stringParam_useMonashTune{
       InputSections::c_stringParameters + "Use_Monash_Tune",
       DefaultType::Dependent,
-      {"3.0"}};
-
+      {"3.0"},
+      detail::get_default_validator<bool>()};
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
-   * \optional_key{key_CT_SP_unformed_xsec_suppression,Unformed_Xsec_Suppression,
-   *               double,0.7}
+   * \optional_key{key_CT_SP_unformed_xsec_suppression_,
+   *               Unformed_Xsec_Suppression,double,0.7,
+   *               \f$0 \le x \le 1\f$}
    *
-   * Applies an additional suppression factor to the interaction cross sections
-   * of unformed hadrons.
+   * Applies an additional suppression factor to the interaction cross
+   * sections of unformed hadrons.
    *
    * This parameter rescales the effective cross sections of hadrons during
    * their formation time and can be used to tune the interaction strength of
@@ -3319,43 +3835,127 @@ struct InputKeys {
    * - This parameter serves as a phenomenological tuning knob.
    */
   /**
-   * \see_key{key_CT_SP_unformed_xsec_suppression}
+   * \see_key{key_CT_SP_unformed_xsec_suppression_}
    */
+
   inline static const Key<double> collTerm_stringParam_unformedXsecSuppression{
       InputSections::c_stringParameters + "Unformed_Xsec_Suppression",
       0.7,
-      {"3.4"}};
+      {"3.4"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_string_parameters
+   * \optional_key{key_CT_SP_pythia_settings_,
+   *               Pythia_Settings,list,[],\none}
+   *
+   * Additional Pythia 8 settings passed directly to the internal Pythia
+   * instances used for string fragmentation.
+   *
+   * These settings are applied after the corresponding SMASH string
+   * parameters. Consequently, if a setting is specified both through a SMASH
+   * input key and in `Pythia_Settings`, the value given in
+   * `Pythia_Settings` takes precedence.
+   *
+   * Invalid settings cause SMASH to terminate during initialization.
+   */
+  /**
+   * \see_key{key_CT_SP_pythia_settings_}
+   */
+  inline static const Key<std::vector<std::string>>
+      collTerm_stringParam_pythiaSettings{
+          InputSections::c_stringParameters + "Pythia_Settings",
+          std::vector<std::string>{},
+          {"3.4"},
+          detail::get_default_validator<std::vector<std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_dileptons
-   * \optional_key{key_CT_dileptons_decays_,Decays,bool,false}
+   * \optional_key{key_CT_dileptons_decays_,Decays,bool,false,\none}
    *
-   * Whether or not to enable dilepton production from hadron decays.
-   * This includes direct decays as well as Dalitz decays. Dilepton decays
-   * additionally have to be uncommented in the used *decaymodes.txt* file
-   * (see also \ref input_collision_term_dileptons_note_ "this note").
+   * Whether or not to enable dilepton production
+   * from hadron decays. This includes direct
+   * decays as well as Dalitz decays. Dilepton
+   * decays additionally have to be uncommented in
+   * the used *decaymodes.txt* file (see also \ref
+   * input_collision_term_dileptons_note_ "this
+   * note").
    */
   /**
    * \see_key{key_CT_dileptons_decays_}
    */
   inline static const Key<bool> collTerm_dileptons_decays{
-      InputSections::c_dileptons + "Decays", false, {"0.50"}};
+      InputSections::c_dileptons + "Decays",
+      false,
+      {"0.50"},
+      detail::get_default_validator<bool>()};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_dileptons
+   * \optional_key{key_CT_dileptons_bremsstrahlung_,Bremsstrahlung,bool,false,
+   * \none}
+   *
+   * Whether or not to enable dilepton production via bremsstrahlung in
+   * neutron-proton interactions. The approach follows the meson-exchange
+   * approximation depicted in \iref{Shyam:2010vr}.
+   */
+  /**
+   * \see_key{key_CT_dileptons_bremsstrahlung_}
+   */
+  inline static const Key<bool> collTerm_dileptons_bremsstrahlung{
+      InputSections::c_dileptons + "Bremsstrahlung",
+      false,
+      {"3.4"},
+      detail::get_default_validator<bool>()};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_dileptons
+   * \optional_key{key_CT_dileptons_pion_form_factor_,Pion_Form_Factor,string,
+   * "Off",\any_valid}
+   *
+   * - `"Off"` &rarr; Implicitly using a factor of 1.
+   * - `"FF1"` &rarr; Photon couples to pion direclty via \f$\rho_0\f$ meson.
+   * - `"FF2"` &rarr; Photon couples 40% directly to intrinsic quark structure
+   * of pion and 60% indirectly via \f$\rho_0\f$ meson.
+   *
+   * This key is only relevant if \key Bremsstrahlung is `true`.
+   * Note that selecting option "FF2" leads to unphysical peaks at \f$\lambda\f$
+   * cutoff. Usage is therefore not recommended above the energy scales
+   * investigated by \iref{Shyam:2010vr}.
+   */
+  /**
+   * \see_key{key_CT_dileptons_pion_form_factor_}
+   */
+  inline static const Key<DileptonBremsPionFormFactor>
+      collTerm_dileptons_pion_form_factor{
+          InputSections::c_dileptons + "Pion_Form_Factor",
+          DileptonBremsPionFormFactor::Off,
+          {"3.4"},
+          detail::get_default_validator<DileptonBremsPionFormFactor>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
-   * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false}
+   * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false,
+   * \none}
    *
-   * Whether or not to enable photon production in mesonic scattering processes.
+   * Whether or not to enable photon production in mesonic scattering
+   * processes.
    */
   /**
    * \see_key{key_CT_photons_2to2_scatterings_}
    */
   inline static const Key<bool> collTerm_photons_twoToTwoScatterings{
-      InputSections::c_photons + "2to2_Scatterings", false, {"1.8"}};
+      InputSections::c_photons + "2to2_Scatterings",
+      false,
+      {"1.8"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
-   * \optional_key{key_CT_photons_bremsstrahlung_,Bremsstrahlung,bool,false}
+   * \optional_key{key_CT_photons_bremsstrahlung_,Bremsstrahlung,bool,false,
+   * \none}
    *
    * Whether or not to enable photon production in bremsstrahlung processes.
    */
@@ -3363,11 +3963,15 @@ struct InputKeys {
    * \see_key{key_CT_photons_bremsstrahlung_}
    */
   inline static const Key<bool> collTerm_photons_bremsstrahlung{
-      InputSections::c_photons + "Bremsstrahlung", false, {"1.8"}};
+      InputSections::c_photons + "Bremsstrahlung",
+      false,
+      {"1.8"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
-   * \required_key{key_CT_photons_fractional_photons,Fractional_Photons,int}
+   * \required_key{key_CT_photons_fractional_photons,Fractional_Photons,
+   * int,\f$x\geq 1\f$}
    *
    * Number of fractional photons sampled per single perturbatively produced
    * photon.
@@ -3376,18 +3980,28 @@ struct InputKeys {
    * \see_key{key_CT_photons_fractional_photons}
    */
   inline static const Key<int> collTerm_photons_fractionalPhotons{
-      InputSections::c_photons + "Fractional_Photons", {"1.8"}};
+      InputSections::c_photons + "Fractional_Photons",
+      {"1.8"},
+      [](const int &value) noexcept {
+        if (value > 100'000) {
+          logg[LogArea::Configuration::id].warn(
+              "The number of fractional photons per perturbatively produced "
+              "photon is set to a very large value, which may lead to long\n"
+              "runtimes. Make sure that this is intended.");
+        }
+        return value >= 1;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
    *
    * \par Ways to specify incident energies &rarr; Only one can be given!
    *
-   * \required_key_no_line{key_MC_e_kin_,E_Kin,double}
+   * \required_key_no_line{key_MC_e_kin_,E_Kin,double,\f$x>0\f$}
    *
    * Defines the energy of the collision by the kinetic energy per nucleon of
-   * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus is
-   * at rest. Note, this can also be given per-beam as described in \ref
+   * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus
+   * is at rest. Note, this can also be given per-beam as described in \ref
    * doxypage_input_conf_modi_C_proj_targ. This key can be
    * omitted if the incident energy is specified in a different way.
    */
@@ -3395,15 +4009,17 @@ struct InputKeys {
    * \see_key{key_MC_e_kin_}
    */
   inline static const Key<double> modi_collider_eKin{
-      InputSections::m_collider + "E_Kin", {"0.50"}};
+      InputSections::m_collider + "E_Kin",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \required_key_no_line{key_MC_e_tot_,E_Tot,double}
+   * \required_key_no_line{key_MC_e_tot_,E_Tot,double,\f$x>0\f$}
    *
    * Defines the energy of the collision by the total energy per nucleon of
-   * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus is
-   * at rest. Note, this can also be given per-beam as described in \ref
+   * the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus
+   * is at rest. Note, this can also be given per-beam as described in \ref
    * doxypage_input_conf_modi_C_proj_targ. This key can be
    * omitted if the incident energy is specified in a different way.
    */
@@ -3411,44 +4027,50 @@ struct InputKeys {
    * \see_key{key_MC_e_tot_}
    */
   inline static const Key<double> modi_collider_eTot{
-      InputSections::m_collider + "E_Tot", {"2.0.2"}};
+      InputSections::m_collider + "E_Tot",
+      {"2.0.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \required_key_no_line{key_MC_p_lab_,P_Lab,double}
+   * \required_key_no_line{key_MC_p_lab_,P_Lab,double,\f$x>0\f$}
    *
    * Defines the energy of the collision by the initial momentum per nucleon
-   * of the projectile nucleus, \unit{in AGeV}. This assumes the target nucleus
-   * is at rest.  This must be positive.  Note, this can also be given per-beam
-   * as described in \ref doxypage_input_conf_modi_C_proj_targ.
-   * This key can be omitted if the incident energy is specified in a different
+   * of the projectile nucleus, \unit{in AGeV}. This assumes the target
+   * nucleus is at rest.  This must be positive.  Note, this can also be given
+   * per-beam as described in \ref doxypage_input_conf_modi_C_proj_targ. This
+   * key can be omitted if the incident energy is specified in a different
    * way.
    */
   /**
    * \see_key{key_MC_p_lab_}
    */
   inline static const Key<double> modi_collider_pLab{
-      InputSections::m_collider + "P_Lab", {"0.50"}};
+      InputSections::m_collider + "P_Lab",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \required_key_no_line{key_MC_sqrtsnn_,Sqrtsnn,double}
+   * \required_key_no_line{key_MC_sqrtsnn_,Sqrtsnn,double,\f$x>0\f$}
    *
-   * Defines the energy of the collision \unit{in GeV} as center-of-mass energy
-   * in the collision of two hadrons, one for each nucleus, having the average
-   * mass of all the hadrons composing the given nucleus. This key can be
-   * omitted if the incident energy is specified in a different way.
+   * Defines the energy of the collision \unit{in GeV} as center-of-mass
+   * energy in the collision of two hadrons, one for each nucleus, having the
+   * average mass of all the hadrons composing the given nucleus. This key can
+   * be omitted if the incident energy is specified in a different way.
    */
   /**
    * \see_key{key_MC_sqrtsnn_}
    */
   inline static const Key<double> modi_collider_sqrtSNN{
-      InputSections::m_collider + "Sqrtsnn", {"0.50"}};
+      InputSections::m_collider + "Sqrtsnn",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \optional_key{key_MC_calc_frame_,Calculation_Frame,string,"center of
-   * velocity"}
+   * \optional_key{key_MC_calc_frame_,Calculation_Frame,string,
+   * "center of velocity",\any_valid}
    *
    * The frame in which the collision is calculated. Possible values are
    * - `"center of velocity"`
@@ -3458,10 +4080,10 @@ struct InputKeys {
    * \note
    * Using `E_Tot`, `E_kin` or `P_Lab` to quantify the collision energy is not
    * sufficient to configure a collision in a fixed target frame. You need to
-   * additionally change the `Calculation_Frame`. Any format of incident energy
-   * can however be combined with any calculation frame, the provided incident
-   * energy is then intrinsically translated to the quantity needed for the
-   * computation.
+   * additionally change the `Calculation_Frame`. Any format of incident
+   * energy can however be combined with any calculation frame, the provided
+   * incident energy is then intrinsically translated to the quantity needed
+   * for the computation.
    */
   /**
    * \see_key{key_MC_calc_frame_}
@@ -3469,11 +4091,13 @@ struct InputKeys {
   inline static const Key<CalculationFrame> modi_collider_calculationFrame{
       InputSections::m_collider + "Calculation_Frame",
       CalculationFrame::CenterOfVelocity,
-      {"0.50"}};
+      {"0.50"},
+      detail::get_default_validator<CalculationFrame>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \optional_key{key_MC_collision_within_nucleus_,Collisions_Within_Nucleus,bool,false}
+   * \optional_key{key_MC_collision_within_nucleus_,Collisions_Within_Nucleus,
+   * bool,false,\none}
    *
    * Determine whether to allow the first collisions within the same nucleus.
    * - `true` &rarr; First collisions within the same nucleus allowed.
@@ -3483,14 +4107,17 @@ struct InputKeys {
    * \see_key{key_MC_collision_within_nucleus_}
    */
   inline static const Key<bool> modi_collider_collisionWithinNucleus{
-      InputSections::m_collider + "Collisions_Within_Nucleus", false, {"1.0"}};
+      InputSections::m_collider + "Collisions_Within_Nucleus",
+      false,
+      {"1.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \optional_key{key_MC_fermi_motion_,Fermi_Motion,string,"off"}
+   * \optional_key{key_MC_fermi_motion_,Fermi_Motion,string,"off",\any_valid}
    *
-   * - `"on"` &rarr; Switch Fermi motion on, it is recommended to also activate
-   * potentials.
+   * - `"on"` &rarr; Switch Fermi motion on, it is recommended to also
+   * activate potentials.
    * - `"off"` &rarr; Switch Fermi motion off.
    * - `"frozen"` &rarr; Use "frozen" if you want to use Fermi motion
    * without potentials.
@@ -3499,11 +4126,15 @@ struct InputKeys {
    * \see_key{key_MC_fermi_motion_}
    */
   inline static const Key<FermiMotion> modi_collider_fermiMotion{
-      InputSections::m_collider + "Fermi_Motion", FermiMotion::Off, {"0.60"}};
+      InputSections::m_collider + "Fermi_Motion",
+      FermiMotion::Off,
+      {"0.60"},
+      detail::get_default_validator<FermiMotion>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_collider
-   * \optional_key{key_MC_initial_distance_,Initial_Distance,double,4.0}
+   * \optional_key{key_MC_initial_distance_,Initial_Distance,
+   * double,4.0,\f$x>0\f$}
    *
    * The initial distance of the two nuclei \unit{in fm}:
    * \f$z_{\rm min}^{\rm target} - z_{\rm max}^{\rm projectile}\f$.
@@ -3515,16 +4146,18 @@ struct InputKeys {
    * \see_key{key_MC_initial_distance_}
    */
   inline static const Key<double> modi_collider_initialDistance{
-      InputSections::m_collider + "Initial_Distance", 4.0, {"0.50"}};
+      InputSections::m_collider + "Initial_Distance",
+      4.0,
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key{key_MC_PT_diffusiveness_,Diffusiveness,double,</tt>\f$d(A)\f$<tt>}
+   * \optional_key{key_MC_PT_diffusiveness_,Diffusiveness,double,
+   * </tt>\f$d(A)\f$<tt>, \f$0\le d \le1\f$}
    *
-   * Diffusiveness of the Woods-Saxon distribution for the nucleus \unit{in fm}.
-   * In general, the default value is
-   * \f[
-   * d(A)=\begin{cases}
+   * Diffusiveness of the Woods-Saxon distribution for the nucleus \unit{in
+   * fm}. In general, the default value is \f[ d(A)=\begin{cases}
    * 0.545 & A \le 16\\
    * 0.54  & A > 16
    * \end{cases}\;.
@@ -3538,18 +4171,20 @@ struct InputKeys {
   inline static const Key<double> modi_collider_projectile_diffusiveness{
       InputSections::m_c_projectile + "Diffusiveness",
       DefaultType::Dependent,
-      {"0.90"}};
+      {"0.90"},
+      [](const double &value) noexcept { return value >= 0 && value <= 1; }};
   /**
    * \see_key{key_MC_PT_diffusiveness_}
    */
   inline static const Key<double> modi_collider_target_diffusiveness{
       InputSections::m_c_target + "Diffusiveness",
       DefaultType::Dependent,
-      {"0.90"}};
+      {"0.90"},
+      [](const double &value) noexcept { return value >= 0 && value <= 1; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \required_key{key_MC_PT_particles_,%Particles,map<int\,int>}
+   * \required_key{key_MC_PT_particles_,%Particles,map<int\,int>,\none}
    *
    * A map in which the keys are PDG codes and the values are number of
    * particles with that PDG code that should be in the current nucleus.
@@ -3564,17 +4199,31 @@ struct InputKeys {
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_collider_projectile_particles{
-          InputSections::m_c_projectile + "Particles", {"0.50"}};
+          InputSections::m_c_projectile + "Particles",
+          {"0.50"},
+          [](const auto &value) noexcept {
+            return !value.empty() && std::all_of(value.begin(), value.end(),
+                                                 [](const auto &entry) {
+                                                   return entry.second > 0;
+                                                 });
+          }};
   /**
    * \see_key{key_MC_PT_particles_}
    */
   inline static const Key<std::map<PdgCode, int>>
-      modi_collider_target_particles{InputSections::m_c_target + "Particles",
-                                     {"0.50"}};
+      modi_collider_target_particles{
+          InputSections::m_c_target + "Particles",
+          {"0.50"},
+          [](const auto &value) noexcept {
+            return !value.empty() && std::all_of(value.begin(), value.end(),
+                                                 [](const auto &entry) {
+                                                   return entry.second > 0;
+                                                 });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key{key_MC_PT_radius_,Radius,double,</tt>\f$r(A)\f$<tt>}
+   * \optional_key{key_MC_PT_radius_,Radius,double,</tt>\f$r(A)\f$<tt>,\f$r>0\f$}
    *
    * Radius of nucleus \unit{in fm}. In general, the default value is
    * \f[
@@ -3592,17 +4241,22 @@ struct InputKeys {
   inline static const Key<double> modi_collider_projectile_radius{
       InputSections::m_c_projectile + "Radius",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
   /**
    * \see_key{key_MC_PT_radius_}
    */
   inline static const Key<double> modi_collider_target_radius{
-      InputSections::m_c_target + "Radius", DefaultType::Dependent, {"0.50"}};
+      InputSections::m_c_target + "Radius",
+      DefaultType::Dependent,
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * \optional_key{key_MC_PT_saturation_density_,Saturation_Density,double,
-   * </tt>\f$\int\rho(r)\:\mathrm{d}^3r=N_{nucleons}\f$<tt>}
+   * </tt>\f$\int\rho(r)\:\mathrm{d}^3r=N_{nucleons}\f$<tt>,
+   * \f$0.1\le\rho\le0.2\f$}
    *
    * Saturation density of the nucleus \unit{in 1/fm³}.
    * If not any value is specified, the saturation density is calculated such
@@ -3615,92 +4269,115 @@ struct InputKeys {
   inline static const Key<double> modi_collider_projectile_saturationDensity{
       InputSections::m_c_projectile + "Saturation_Density",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      [](const double &value) noexcept {
+        return value >= 0.1 && value <= 0.2;
+      }};
   /**
    * \see_key{key_MC_PT_saturation_density_}
    */
   inline static const Key<double> modi_collider_target_saturationDensity{
       InputSections::m_c_target + "Saturation_Density",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      [](const double &value) noexcept {
+        return value >= 0.1 && value <= 0.2;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
    * \par Possible incident energies given per beam
    *
-   * \required_key_no_line{key_MC_PT_e_kin_,E_Kin,double}
+   * \required_key_no_line{key_MC_PT_e_kin_,E_Kin,double,\f$x>0\f$}
    *
    * Set the kinetic energy \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
-   * key can be omitted if the incident energy is specified in a different way.
+   * key can be omitted if the incident energy is specified in a different
+   * way.
    */
   /**
    * \see_key{key_MC_PT_e_kin_}
    */
   inline static const Key<double> modi_collider_projectile_eKin{
-      InputSections::m_c_projectile + "E_Kin", {"0.50"}};
+      InputSections::m_c_projectile + "E_Kin",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
   /**
    * \see_key{key_MC_PT_e_kin_}
    */
   inline static const Key<double> modi_collider_target_eKin{
-      InputSections::m_c_target + "E_Kin", {"0.50"}};
+      InputSections::m_c_target + "E_Kin",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \required_key_no_line{key_MC_PT_e_tot_,E_Tot,double}
+   * \required_key_no_line{key_MC_PT_e_tot_,E_Tot,double,\f$x>0\f$}
    *
    * Set the totat energy \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
-   * key can be omitted if the incident energy is specified in a different way.
+   * key can be omitted if the incident energy is specified in a different
+   * way.
    */
   /**
    * \see_key{key_MC_PT_e_tot_}
    */
   inline static const Key<double> modi_collider_projectile_eTot{
-      InputSections::m_c_projectile + "E_Tot", {"2.0.2"}};
+      InputSections::m_c_projectile + "E_Tot",
+      {"2.0.2"},
+      [](const double &value) noexcept { return value > 0; }};
   /**
    * \see_key{key_MC_PT_e_tot_}
    */
   inline static const Key<double> modi_collider_target_eTot{
-      InputSections::m_c_target + "E_Tot", {"2.0.2"}};
+      InputSections::m_c_target + "E_Tot",
+      {"2.0.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \required_key_no_line{key_MC_PT_p_lab_,P_Lab,double}
+   * \required_key_no_line{key_MC_PT_p_lab_,P_Lab,double,\f$x>0\f$}
    *
    * Set the momentum \unit{in GeV} per particle of the beam. This key,
    * if used, must be present in both `Projectile` and `Target` section. This
-   * key can be omitted if the incident energy is specified in a different way.
+   * key can be omitted if the incident energy is specified in a different
+   * way.
    *
    * \note
    * If the beam specific kinetic energy or momentum is set using either of
-   * these keys, then it must be specified in the same way (not necessarily same
-   * value) for both beams. This is for example useful to simulate for p-Pb
-   * collisions at the LHC, where the centre-of-mass system does not correspond
-   * to the laboratory system (see \ref
+   * these keys, then it must be specified in the same way (not necessarily
+   * same value) for both beams. This is for example useful to simulate for
+   * p-Pb collisions at the LHC, where the centre-of-mass system does not
+   * correspond to the laboratory system (see \ref
    * input_modi_collider_projectile_and_target_ex1_ "example").
    */
   /**
    * \see_key{key_MC_PT_p_lab_}
    */
   inline static const Key<double> modi_collider_projectile_pLab{
-      InputSections::m_c_projectile + "P_Lab", {"0.50"}};
+      InputSections::m_c_projectile + "P_Lab",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
   /**
    * \see_key{key_MC_PT_p_lab_}
    */
   inline static const Key<double> modi_collider_target_pLab{
-      InputSections::m_c_target + "P_Lab", {"0.50"}};
+      InputSections::m_c_target + "P_Lab",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
    * <h3> Custom nuclei </h3>
    *
-   * It is possible to further customize the projectile and/or target using the
-   * `Custom` section, which should then contain few required keys, if given.
+   * It is possible to further customize the projectile and/or target using
+   * the `Custom` section, which should then contain few required keys, if
+   * given.
    *
-   * \required_key_no_line{key_MC_PT_custom_file_dir_,File_Directory,string}
+   * \required_key_no_line{key_MC_PT_custom_file_dir_,File_Directory,
+   * string, <b>Existing directory</b>}
    *
    * The directory where the external list with the nucleon configurations
    * is located. <b>Make sure to use an absolute path!</b>
@@ -3710,17 +4387,26 @@ struct InputKeys {
    */
   inline static const Key<std::string>
       modi_collider_projectile_custom_fileDirectory{
-          InputSections::m_c_p_custom + "File_Directory", {"1.6"}};
+          InputSections::m_c_p_custom + "File_Directory",
+          {"1.6"},
+          [](const std::string &value) noexcept {
+            return std::filesystem::is_directory(value);
+          }};
   /**
    * \see_key{key_MC_PT_custom_file_dir_}
    */
   inline static const Key<std::string>
       modi_collider_target_custom_fileDirectory{
-          InputSections::m_c_t_custom + "File_Directory", {"1.6"}};
+          InputSections::m_c_t_custom + "File_Directory",
+          {"1.6"},
+          [](const std::string &value) noexcept {
+            return std::filesystem::is_directory(value);
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \required_key_no_line{key_MC_PT_custom_file_name_,File_Name,string}
+   * \required_key_no_line{key_MC_PT_custom_file_name_,File_Name,string,
+   * <b>Possible filename on Linux OS</b>}
    *
    * The file name of the external list with the nucleon configurations.
    */
@@ -3728,12 +4414,28 @@ struct InputKeys {
    * \see_key{key_MC_PT_custom_file_name_}
    */
   inline static const Key<std::string> modi_collider_projectile_custom_fileName{
-      InputSections::m_c_p_custom + "File_Name", {"1.6"}};
+      InputSections::m_c_p_custom + "File_Name",
+      {"1.6"},
+      [](const std::string &value) noexcept {
+        if (value.empty() || value == "." || value == "..")
+          return false;
+        else
+          return std::none_of(value.begin(), value.end(),
+                              [](auto c) { return c == '/' || c == '\0'; });
+      }};
   /**
    * \see_key{key_MC_PT_custom_file_name_}
    */
   inline static const Key<std::string> modi_collider_target_custom_fileName{
-      InputSections::m_c_t_custom + "File_Name", {"1.6"}};
+      InputSections::m_c_t_custom + "File_Name",
+      {"1.6"},
+      [](const std::string &value) noexcept {
+        if (value.empty() || value == "." || value == "..")
+          return false;
+        else
+          return std::none_of(value.begin(), value.end(),
+                              [](auto c) { return c == '/' || c == '\0'; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3741,9 +4443,10 @@ struct InputKeys {
    * <h3> Deformed nuclei </h3>
    *
    * It is possible to deform the projectile and/or target nuclei using the
-   * `Deformed` section, which should then contain some configuration, if given.
+   * `Deformed` section, which should then contain some configuration, if
+   * given.
    *
-   * \required_key_no_line{key_MC_PT_deformed_auto_,Automatic,bool}
+   * \required_key_no_line{key_MC_PT_deformed_auto_,Automatic,bool,\none}
    *
    * - `true` &rarr; Set parameters of spherical deformation based on mass
    *   number of the nucleus. Currently the following deformed nuclei are
@@ -3769,76 +4472,99 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_auto_}
    */
   inline static const Key<bool> modi_collider_projectile_deformed_automatic{
-      InputSections::m_c_p_deformed + "Automatic", {"1.5"}};
+      InputSections::m_c_p_deformed + "Automatic",
+      {"1.5"},
+      detail::get_default_validator<bool>()};
   /**
    * \see_key{key_MC_PT_deformed_auto_}
    */
   inline static const Key<bool> modi_collider_target_deformed_automatic{
-      InputSections::m_c_t_deformed + "Automatic", {"1.5"}};
+      InputSections::m_c_t_deformed + "Automatic",
+      {"1.5"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_betaII_,Beta_2,double,0.0}
+   * \optional_key_no_line{key_MC_PT_deformed_betaII_,Beta_2,double,0.0,
+   * \f$-1\le\beta_2\le1\f$}
    *
    * The deformation coefficient \f$\beta_2\f$ for the spherical harmonic
-   * \f$Y_2^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
+   * \f$Y_2^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_
+   * "above".
    */
   /**
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta2{
-      InputSections::m_c_p_deformed + "Beta_2", 0.0, {"1.5"}};
+      InputSections::m_c_p_deformed + "Beta_2",
+      0.0,
+      {"1.5"},
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
   /**
    * \see_key{key_MC_PT_deformed_betaII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta2{
       InputSections::m_c_t_deformed + "Beta_2",
       InputKeys::modi_collider_projectile_deformed_beta2.default_value(),
-      {"1.5"}};
+      {"1.5"},
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_betaIII_,Beta_3,double,0.0}
+   * \optional_key_no_line{key_MC_PT_deformed_betaIII_,Beta_3,double,0.0,
+   * \f$-1\le\beta_3\le1\f$}
    *
    * The deformation coefficient \f$\beta_3\f$ for the spherical harmonic
-   * \f$Y_3^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
+   * \f$Y_3^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_
+   * "above".
    */
   /**
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta3{
-      InputSections::m_c_p_deformed + "Beta_3", 0.0, {"3.0"}};
+      InputSections::m_c_p_deformed + "Beta_3",
+      0.0,
+      {"3.0"},
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
   /**
    * \see_key{key_MC_PT_deformed_betaIII_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta3{
       InputSections::m_c_t_deformed + "Beta_3",
       InputKeys::modi_collider_projectile_deformed_beta3.default_value(),
-      {"3.0"}};
+      {"3.0"},
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_betaIV_,Beta_4,double,0.0}
+   * \optional_key_no_line{key_MC_PT_deformed_betaIV_,Beta_4,double,0.0,
+   * \f$-1\le\beta_4\le1\f$}
    *
    * The deformation coefficient \f$\beta_4\f$ for the spherical harmonic
-   * \f$Y_4^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
+   * \f$Y_4^0\f$ in \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_
+   * "above".
    */
   /**
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_beta4{
-      InputSections::m_c_p_deformed + "Beta_4", 0.0, {"1.5"}};
+      InputSections::m_c_p_deformed + "Beta_4",
+      0.0,
+      {"1.5"},
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
   /**
    * \see_key{key_MC_PT_deformed_betaIV_}
    */
   inline static const Key<double> modi_collider_target_deformed_beta4{
       InputSections::m_c_t_deformed + "Beta_4",
       InputKeys::modi_collider_projectile_deformed_beta4.default_value(),
-      {"1.5"}};
+      {"1.5"},
+      [](const double &value) noexcept { return value >= -1 && value <= 1; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_deformed_gamma_,Gamma,double,0.0}
+   * \optional_key_no_line{key_MC_PT_deformed_gamma_,Gamma,double,0.0,
+   * \f$0\le\gamma\le\pi\f$}
    *
    * The parameter describes triaxiality \f$\gamma\f$ of the nucleus in
    * \f$R(\theta,\phi)\f$ \ref key_MC_PT_deformed_auto_ "above".
@@ -3847,37 +4573,38 @@ struct InputKeys {
    * \see_key{key_MC_PT_deformed_gamma_}
    */
   inline static const Key<double> modi_collider_projectile_deformed_gamma{
-      InputSections::m_c_p_deformed + "Gamma", 0.0, {"3.0"}};
+      InputSections::m_c_p_deformed + "Gamma",
+      0.0,
+      {"3.0"},
+      [](const double &value) noexcept { return value >= 0 && value <= M_PI; }};
   /**
    * \see_key{key_MC_PT_deformed_gamma_}
    */
   inline static const Key<double> modi_collider_target_deformed_gamma{
       InputSections::m_c_t_deformed + "Gamma",
       InputKeys::modi_collider_projectile_deformed_gamma.default_value(),
-      {"3.0"}};
+      {"3.0"},
+      [](const double &value) noexcept { return value >= 0 && value <= M_PI; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
    * <hr>
    * <h3> Alpha-Clustered oxygen nuclei </h3>
    *
-   * It is possible to have alpha-clustered projectile and/or target **oxygen**
-   * nuclei using the `Alpha_Clustered` section, which should then contain some
-   * configuration, if given. This will create four Helium nuclei that are
-   * placed on the vertices of a regular tetrahedron with center in the origin,
-   * \f$\left(0,0,0\right)\f$. The initial positions of these vertices are the
-   * following:
-   * \f[
-   * \left(1,0,0\right),\;
-   * \left(-\frac{1}{3}, \frac{\sqrt{8}}{3}, 0\right),\;
-   * \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6}, \frac{\sqrt{24}}{6}\right),\;
-   * \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6}, -\frac{\sqrt{24}}{6}\right)\quad.
-   * \f]
-   * This means there is one vertex on the x-axis and the rest lie on a plane
-   * parallel to the y-z plane. For colliding them with a specific orientation
-   * refer to the `Orientation` section.
+   * It is possible to have alpha-clustered projectile and/or target
+   * **oxygen** nuclei using the `Alpha_Clustered` section, which should then
+   * contain some configuration, if given. This will create four Helium nuclei
+   * that are placed on the vertices of a regular tetrahedron with center in
+   * the origin, \f$\left(0,0,0\right)\f$. The initial positions of these
+   * vertices are the following: \f[ \left(1,0,0\right),\; \left(-\frac{1}{3},
+   * \frac{\sqrt{8}}{3}, 0\right),\; \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6},
+   * \frac{\sqrt{24}}{6}\right),\; \left(-\frac{1}{3}, -\frac{\sqrt{8}}{6},
+   * -\frac{\sqrt{24}}{6}\right)\quad. \f] This means there is one vertex on
+   * the x-axis and the rest lie on a plane parallel to the y-z plane. For
+   * colliding them with a specific orientation refer to the `Orientation`
+   * section.
    *
-   * \required_key_no_line{key_MC_PT_alphaClustered_auto_,Automatic,bool}
+   * \required_key_no_line{key_MC_PT_alphaClustered_auto_,Automatic,bool,\none}
    *
    * - `true` &rarr; Automatically set the side length of the tetrahedron used
    * for alpha-clustering.
@@ -3889,16 +4616,21 @@ struct InputKeys {
    */
   inline static const Key<bool>
       modi_collider_projectile_alphaClustered_automatic{
-          InputSections::m_c_p_alphaClustered + "Automatic", {"3.2"}};
+          InputSections::m_c_p_alphaClustered + "Automatic",
+          {"3.2"},
+          detail::get_default_validator<bool>()};
   /**
    * \see_key{key_MC_PT_alphaClustered_auto_}
    */
   inline static const Key<bool> modi_collider_target_alphaClustered_automatic{
-      InputSections::m_c_t_alphaClustered + "Automatic", {"3.2"}};
+      InputSections::m_c_t_alphaClustered + "Automatic",
+      {"3.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_alphaClustered_sideLength_,Side_Length,double,3.42}
+   * \optional_key_no_line{key_MC_PT_alphaClustered_sideLength_,Side_Length,
+   * double,3.42,\f$x>0\f$}
    *
    * The sidelength \unit{in fm} of the regular tetrahedron used for
    * alpha-clustering. The default value of 3.42 fm was taken from
@@ -3909,7 +4641,10 @@ struct InputKeys {
    */
   inline static const Key<double>
       modi_collider_projectile_alphaClustered_sideLength{
-          InputSections::m_c_p_alphaClustered + "Side_Length", 3.42, {"3.2"}};
+          InputSections::m_c_p_alphaClustered + "Side_Length",
+          3.42,
+          {"3.2"},
+          [](const double &value) noexcept { return value > 0; }};
   /**
    * \see_key{key_MC_PT_alphaClustered_sideLength_}
    */
@@ -3918,7 +4653,8 @@ struct InputKeys {
           InputSections::m_c_t_alphaClustered + "Side_Length",
           InputKeys::modi_collider_projectile_alphaClustered_sideLength
               .default_value(),
-          {"3.2"}};
+          {"3.2"},
+          [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
@@ -3926,14 +4662,15 @@ struct InputKeys {
    * <h3> Defining orientation </h3>
    *
    * In the `Orientation` section it is possible to specify the orientation of
-   * the nucleus by rotations which are performed about the axes of a coordinate
-   * system that is fixed with respect to the nucleus and whose axes are
-   * parallel to those of the computational frame before the first rotation.
-   * Note that the nucleus is first rotated around the z-axis by phi, then
-   * around the now rotated x-axis by theta and then around the rotated z-axis
-   * by psi.
+   * the nucleus by rotations which are performed about the axes of a
+   * coordinate system that is fixed with respect to the nucleus and whose
+   * axes are parallel to those of the computational frame before the first
+   * rotation. Note that the nucleus is first rotated around the z-axis by
+   * phi, then around the now rotated x-axis by theta and then around the
+   * rotated z-axis by psi.
    *
-   * \optional_key_no_line{key_MC_PT_orientation_phi_,Phi,double,0.0}
+   * \optional_key_no_line{key_MC_PT_orientation_phi_,Phi,double,0.0,
+   * \f$0\le\phi\le 2\pi\f$}
    *
    * The angle by which to rotate the nucleus about the z-axis.
    */
@@ -3941,17 +4678,26 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_phi_}
    */
   inline static const Key<double> modi_collider_projectile_orientation_phi{
-      InputSections::m_c_p_orientation + "Phi", 0.0, {"0.50"}};
+      InputSections::m_c_p_orientation + "Phi",
+      0.0,
+      {"0.50"},
+      [](const double &value) noexcept {
+        return value >= 0 && value <= 2 * M_PI;
+      }};
   /**
    * \see_key{key_MC_PT_orientation_phi_}
    */
   inline static const Key<double> modi_collider_target_orientation_phi{
       InputSections::m_c_t_orientation + "Phi",
       InputKeys::modi_collider_projectile_orientation_phi.default_value(),
-      {"0.50"}};
+      {"0.50"},
+      [](const double &value) noexcept {
+        return value >= 0 && value <= 2 * M_PI;
+      }};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_orientation_theta_,Theta,double,0.0}
+   * \optional_key_no_line{key_MC_PT_orientation_theta_,Theta,double,0.0,
+   * \f$0\le\theta\le\pi\f$}
    *
    * The angle by which to rotate the nucleus about the rotated x-axis.
    */
@@ -3959,17 +4705,22 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_theta_}
    */
   inline static const Key<double> modi_collider_projectile_orientation_theta{
-      InputSections::m_c_p_orientation + "Theta", 0.0, {"0.50"}};
+      InputSections::m_c_p_orientation + "Theta",
+      0.0,
+      {"0.50"},
+      [](const double &value) noexcept { return value >= 0 && value <= M_PI; }};
   /**
    * \see_key{key_MC_PT_orientation_theta_}
    */
   inline static const Key<double> modi_collider_target_orientation_theta{
       InputSections::m_c_t_orientation + "Theta",
       InputKeys::modi_collider_projectile_orientation_theta.default_value(),
-      {"0.50"}};
+      {"0.50"},
+      [](const double &value) noexcept { return value >= 0 && value <= M_PI; }};
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_orientation_psi_,Psi,double,0.0}
+   * \optional_key_no_line{key_MC_PT_orientation_psi_,Psi,double,0.0,
+   * \f$0\le\psi\le 2\pi\f$}
    *
    * The angle by which to rotate the nucleus about the rotated z-axis.
    */
@@ -3977,18 +4728,27 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_psi_}
    */
   inline static const Key<double> modi_collider_projectile_orientation_psi{
-      InputSections::m_c_p_orientation + "Psi", 0.0, {"3.0"}};
+      InputSections::m_c_p_orientation + "Psi",
+      0.0,
+      {"3.0"},
+      [](const double &value) noexcept {
+        return value >= 0 && value <= 2 * M_PI;
+      }};
   /**
    * \see_key{key_MC_PT_orientation_psi_}
    */
   inline static const Key<double> modi_collider_target_orientation_psi{
       InputSections::m_c_t_orientation + "Psi",
       InputKeys::modi_collider_projectile_orientation_psi.default_value(),
-      {"3.0"}};
+      {"3.0"},
+      [](const double &value) noexcept {
+        return value >= 0 && value <= 2 * M_PI;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_proj_targ
-   * \optional_key_no_line{key_MC_PT_orientation_random_,Random_Rotation,bool,false}
+   * \optional_key_no_line{key_MC_PT_orientation_random_,Random_Rotation,
+   * bool,false,\none}
    *
    * Whether the created nucleus object should be randomly rotated in space.
    */
@@ -3996,18 +4756,22 @@ struct InputKeys {
    * \see_key{key_MC_PT_orientation_random_}
    */
   inline static const Key<bool> modi_collider_projectile_orientation_randRot{
-      InputSections::m_c_p_orientation + "Random_Rotation", false, {"1.7"}};
+      InputSections::m_c_p_orientation + "Random_Rotation",
+      false,
+      {"1.7"},
+      detail::get_default_validator<bool>()};
   /**
    * \see_key{key_MC_PT_orientation_random_}
    */
   inline static const Key<bool> modi_collider_target_orientation_randRot{
       InputSections::m_c_t_orientation + "Random_Rotation",
       InputKeys::modi_collider_projectile_orientation_randRot.default_value(),
-      {"1.7"}};
+      {"1.7"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_max_,Max,double,0.0}
+   * \optional_key{key_MC_impact_max_,Max,double,0.0,\f$x\ge0\f$}
    *
    * Like `Range: [0.0, Max]`. Note that if both `Range` and `Max` are
    * specified, `Max` takes precedence (\unit{in fm}).
@@ -4016,27 +4780,35 @@ struct InputKeys {
    * \see_key{key_MC_impact_max_}
    */
   inline static const Key<double> modi_collider_impact_max{
-      InputSections::m_c_impact + "Max", 0.0, {"0.50"}};
+      InputSections::m_c_impact + "Max",
+      0.0,
+      {"0.50"},
+      [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_rnd_reaction_plane_,Random_Reaction_Plane,bool,false}
+   * \optional_key{key_MC_impact_rnd_reaction_plane_,Random_Reaction_Plane,
+   * bool,false,\none}
    *
-   * Rotate the direction of the separation of the two nuclei due to the impact
-   * parameter with a uniform random angle in the x-y plane.
+   * Rotate the direction of the separation of the two nuclei due to the
+   * impact parameter with a uniform random angle in the x-y plane.
    */
   /**
    * \see_key{key_MC_impact_rnd_reaction_plane_}
    */
   inline static const Key<bool> modi_collider_impact_randomReactionPlane{
-      InputSections::m_c_impact + "Random_Reaction_Plane", false, {"1.8"}};
+      InputSections::m_c_impact + "Random_Reaction_Plane",
+      false,
+      {"1.8"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_range_,Range,list of two doubles,[0.0\,0.0]}
+   * \optional_key{key_MC_impact_range_,Range,list of two doubles,[0.0\,0.0],
+   * \f$x_i\ge0\f$}
    *
-   * A list of minimal and maximal impact parameters \unit{in fm} between which
-   * \f$b\f$ should be chosen. The order of these is not important.
+   * A list of minimal and maximal impact parameters \unit{in fm} between
+   * which \f$b\f$ should be chosen. The order of these is not important.
    */
   /**
    * \see_key{key_MC_impact_range_}
@@ -4044,11 +4816,14 @@ struct InputKeys {
   inline static const Key<std::array<double, 2>> modi_collider_impact_range{
       InputSections::m_c_impact + "Range",
       std::array<double, 2>{{0.0, 0.0}},
-      {"0.50"}};
+      {"0.50"},
+      [](const std::array<double, 2> &value) noexcept {
+        return value[0] >= 0 && value[1] >= 0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_sample_,Sample,string,"quadratic"}
+   * \optional_key{key_MC_impact_sample_,Sample,string,"quadratic",\any_valid}
    *
    * Distribution according to which the impact parameter is sampled.
    * Possible alternatives:
@@ -4071,11 +4846,14 @@ struct InputKeys {
    * \see_key{key_MC_impact_sample_}
    */
   inline static const Key<Sampling> modi_collider_impact_sample{
-      InputSections::m_c_impact + "Sample", Sampling::Quadratic, {"0.50"}};
+      InputSections::m_c_impact + "Sample",
+      Sampling::Quadratic,
+      {"0.50"},
+      detail::get_default_validator<Sampling>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \optional_key{key_MC_impact_value_,Value,double,0.0}
+   * \optional_key{key_MC_impact_value_,Value,double,0.0,\f$x\ge0\f$}
    *
    * Fixed value for the impact parameter \unit{in fm}.
    * \attention If this value is set, all further `Impact` keys are ignored.
@@ -4084,46 +4862,64 @@ struct InputKeys {
    * \see_key{key_MC_impact_value_}
    */
   inline static const Key<double> modi_collider_impact_value{
-      InputSections::m_c_impact + "Value", 0.0, {"0.50"}};
+      InputSections::m_c_impact + "Value",
+      0.0,
+      {"0.50"},
+      [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
    * <hr>
    * \par Custom sampling
-   * \required_key_no_line{key_MC_impact_values_,Values,list of doubles}
+   * \required_key_no_line{key_MC_impact_values_,Values,list of doubles,
+   * \f$x_i\ge0\f$}
    *
    * Impact parameter `Values` \unit{in fm} used to build the custom
    * distribution. Each element of `Values` corresponds to an element of
-   * `Yields`, these are connected through piecewise linear functions to create
-   * the distribution. Must be same length as `Yields`. This key can be omitted
-   * if `Sample` is not set to `"custom"`.
+   * `Yields`, these are connected through piecewise linear functions to
+   * create the distribution. Must be same length as `Yields`. This key can be
+   * omitted if `Sample` is not set to `"custom"`.
    */
   /**
    * \see_key{key_MC_impact_values_}
    */
   inline static const Key<std::vector<double>> modi_collider_impact_values{
-      InputSections::m_c_impact + "Values", {"0.80"}};
+      InputSections::m_c_impact + "Values",
+      {"0.80"},
+      [](const std::vector<double> &value) noexcept {
+        return std::all_of(
+            value.begin(), value.end(),
+            [](const double entry) noexcept { return entry >= 0; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_impact_parameter
-   * \required_key_no_line{key_MC_impact_yields_,Yields,list of doubles}
+   * \required_key_no_line{key_MC_impact_yields_,Yields,list of doubles,
+   * \f$x_i\ge0\f$}
    *
    * Each element of `Yields` indicates the likelihood of sampling the
-   * corresponding impact parameter in `Values`. Between the specified points of
-   * `Values` and `Yields`, linear interpolation is used to build the custom
-   * distribution. `Yields` must be same length as `Values`. It does not need to
-   * be normed. This key can be omitted if `Sample` is not set to `"custom"`.
+   * corresponding impact parameter in `Values`. Between the specified points
+   * of `Values` and `Yields`, linear interpolation is used to build the
+   * custom distribution. `Yields` must be same length as `Values`. It does
+   * not need to be normed. This key is needed if and only if `Sample` is set
+   * to `"custom"`.
    */
   /**
    * \see_key{key_MC_impact_sample_}
    */
   inline static const Key<std::vector<double>> modi_collider_impact_yields{
-      InputSections::m_c_impact + "Yields", {"0.80"}};
+      InputSections::m_c_impact + "Yields",
+      {"0.80"},
+      [](const std::vector<double> &value) noexcept {
+        return std::all_of(
+            value.begin(), value.end(),
+            [](const double entry) noexcept { return entry >= 0; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    *
-   * \required_key_no_line{key_MC_IC_type_,Type,string}
+   * \required_key_no_line{key_MC_IC_type_,Type,string,\any_valid}
    *
    * Type of initial conditions provided. Possible values are:
    * - `"Constant_Tau"` &rarr; a hypersurface of constant \f$\tau\f$ is used.
@@ -4138,12 +4934,15 @@ struct InputKeys {
    */
   inline static const Key<FluidizationType>
       modi_collider_initialConditions_type{
-          InputSections::m_c_initialConditions + "Type", {"3.2"}};
+          InputSections::m_c_initialConditions + "Type",
+          {"3.2"},
+          detail::get_default_validator<FluidizationType>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * <h3> Parameters for fluidization at constant tau </h3>
-   * \optional_key_no_line{key_MC_IC_lower_bound_,Lower_Bound,double,0.5}
+   * \optional_key_no_line{key_MC_IC_lower_bound_,Lower_Bound,double,
+   * 0.5,\f$x>0\f$}
    *
    * Lower bound \unit{in fm} for the IC proper time if
    * <tt>\ref key_MC_IC_proper_time_ "Proper_Time"</tt> is not provided. It is
@@ -4153,22 +4952,24 @@ struct InputKeys {
    * \see_key{key_MC_IC_lower_bound_}
    */
   inline static const Key<double> modi_collider_initialConditions_lowerBound{
-      InputSections::m_c_initialConditions + "Lower_Bound", 0.5, {"3.2"}};
+      InputSections::m_c_initialConditions + "Lower_Bound",
+      0.5,
+      {"3.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_proper_time_,Proper_Time,double,
-   * </tt>\f$f(t_{np})\f$<tt>}
+   * </tt>\f$f(t_{np})\f$<tt>, \f$x>0\f$}
    *
    * Proper time \unit{in fm} at which hypersurface is created. Its default
    * value depends on the nuclei passing time \f$t_{np}\f$ as follows,
    * \f[
    * f(t_{np})=\begin{cases}
-   * \mathrm{\texttt{Lower_Bound}}  & t_{np} \le \mathrm{\texttt{Lower_Bound}}\\
-   * t_{np} & t_{np} > \mathrm{\texttt{Lower_Bound}}
-   * \end{cases}\;.
-   * \f]
-   * It is only used if the constant tau initial condition is active.
+   * \mathrm{\texttt{Lower_Bound}}  & t_{np} \le
+   * \mathrm{\texttt{Lower_Bound}}\\ t_{np} & t_{np} >
+   * \mathrm{\texttt{Lower_Bound}} \end{cases}\;. \f] It is only used if the
+   * constant tau initial condition is active.
    */
   /**
    * \see_key{key_MC_IC_proper_time_}
@@ -4176,12 +4977,13 @@ struct InputKeys {
   inline static const Key<double> modi_collider_initialConditions_properTime{
       InputSections::m_c_initialConditions + "Proper_Time",
       DefaultType::Dependent,
-      {"3.2"}};
+      {"3.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
-   * \optional_key_no_line{key_MC_IC_proper_time_scaling_,Proper_Time_Scaling,double,
-   * 1.0}
+   * \optional_key_no_line{key_MC_IC_proper_time_scaling_,Proper_Time_Scaling,
+   * double,1.0,\f$x>0\f$}
    *
    * A scaling factor by which the proper time at which the switching
    * hypersurface is created is multiplied. This parameter is used in the
@@ -4195,16 +4997,17 @@ struct InputKeys {
   inline static const Key<double> modi_collider_initialConditions_scaling{
       InputSections::m_c_initialConditions + "Proper_Time_Scaling",
       1.0,
-      {"3.3"}};
+      {"3.3"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_pt_cut_,pT_Cut,double,
-   * </tt>No cut is done<tt>}
+   * </tt>No cut is done<tt>,\f$x\ge0\f$}
    *
-   * If set, employ a transverse momentum cut for particles contributing to the
-   * initial conditions for hydrodynamics. A positive value \unit{in GeV} is
-   * expected. Only particles characterized by
+   * If set, employ a transverse momentum cut for particles contributing to
+   * the initial conditions for hydrodynamics. A positive value \unit{in GeV}
+   * is expected. Only particles characterized by
    * \f$0<p_T<\mathrm{\texttt{pT_Cut}}\f$ are printed to the output file.
    * A value of 0 corresponds to no cut. It is only used if the constant tau
    * initial condition is active.
@@ -4213,12 +5016,15 @@ struct InputKeys {
    * \see_key{key_output_IC_pt_cut_}
    */
   inline static const Key<double> modi_collider_initialConditions_pTCut{
-      InputSections::m_c_initialConditions + "pT_Cut", 0.0, {"3.2"}};
+      InputSections::m_c_initialConditions + "pT_Cut",
+      0.0,
+      {"3.2"},
+      [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_rapidity_cut_,Rapidity_Cut,double,
-   * </tt>No cut is done<tt>}
+   * </tt>No cut is done<tt>,\f$x\ge0\f$}
    *
    * If set, employ a rapidity cut for particles contributing to the initial
    * conditions for hydrodynamics. A positive value is expected and the cut is
@@ -4231,13 +5037,17 @@ struct InputKeys {
    * \see_key{key_MC_IC_rapidity_cut_}
    */
   inline static const Key<double> modi_collider_initialConditions_rapidityCut{
-      InputSections::m_c_initialConditions + "Rapidity_Cut", 0.0, {"3.2"}};
+      InputSections::m_c_initialConditions + "Rapidity_Cut",
+      0.0,
+      {"3.2"},
+      [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * <hr>
    * <h3> Parameters for dynamic fluidization </h3>
-   * \optional_key_no_line{key_MC_IC_eden_threshold_,Energy_Density_Threshold,double,0.5}
+   * \optional_key_no_line{key_MC_IC_eden_threshold_,Energy_Density_Threshold,
+   * double,0.5,\f$x>0\f$}
    *
    * Set the minimum energy density \unit{in GeV/fm³} for a particle to be
    * considered fluid. It is only used if the dynamic initial condition is
@@ -4249,11 +5059,13 @@ struct InputKeys {
   inline static const Key<double> modi_collider_initialConditions_eDenThreshold{
       InputSections::m_c_initialConditions + "Energy_Density_Threshold",
       0.5,
-      {"3.2"}};
+      {"3.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
-   * \optional_key_no_line{key_MC_IC_mintime_,Minimum_Time,double,0}
+   * \optional_key_no_line{key_MC_IC_mintime_,Minimum_Time,double,0.0,
+   * \f$x\ge0\f$}
    *
    * Set the minimum time \unit{in fm} for a particle to be considered fluid.
    * If larger than 10 fm, the initial lattice size also increases. It is only
@@ -4263,11 +5075,14 @@ struct InputKeys {
    * \see_key{key_MC_IC_mintime_}
    */
   inline static const Key<double> modi_collider_initialConditions_minTime{
-      InputSections::m_c_initialConditions + "Minimum_Time", 0, {"3.2"}};
+      InputSections::m_c_initialConditions + "Minimum_Time",
+      0.0,
+      {"3.2"},
+      [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
-   * \optional_key_no_line{key_MC_IC_maxtime_,Maximum_Time,double,100}
+   * \optional_key_no_line{key_MC_IC_maxtime_,Maximum_Time,double,100,\f$x>0\f$}
    *
    * Set the maximum time \unit{in fm} for a particle to be considered fluid.
    * For efficiency in production runs, it is recommended to set to a lower
@@ -4277,14 +5092,18 @@ struct InputKeys {
    * \see_key{key_MC_IC_maxtime_}
    */
   inline static const Key<double> modi_collider_initialConditions_maxTime{
-      InputSections::m_c_initialConditions + "Maximum_Time", 100, {"3.2"}};
+      InputSections::m_c_initialConditions + "Maximum_Time",
+      100,
+      {"3.2"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
-   * \optional_key_no_line{key_MC_IC_fluid_cells_,Fluidization_Cells,int,80}
+   * \optional_key_no_line{key_MC_IC_fluid_cells_,Fluidization_Cells,int,80,
+   * \f$x\ge2\f$}
    *
    * Fixed number of cells in each direction to select fluidizing particles.
-   * Ideally the cell should be small enough for a meaningful interpolation,
+   * Ideally the cell should be small enough for a meaningful interpolation.
    */
   /**
    * \see_key{key_MC_IC_fluid_cells_}
@@ -4292,15 +5111,16 @@ struct InputKeys {
   inline static const Key<int> modi_collider_initialConditions_fluidCells{
       InputSections::m_c_initialConditions + "Fluidization_Cells",
       100,
-      {"3.2"}};
+      {"3.2"},
+      [](const int &value) noexcept { return value >= 2; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_fluidizable_processes,Fluidizable_Processes,
-   * list of strings,"All"}
+   * list of strings,"All",\any_valid}
    *
-   * Determines which process types can have outgoing particles as fluidizable.
-   * Possible values are:
+   * Determines which process types can have outgoing particles as
+   * fluidizable. Possible values are:
    * - `"All"`
    * - `"Elastic"`: Elastic \f$2\to2\f$
    * - `"Decay"`: All \f$1\to N\f$ processes
@@ -4308,11 +5128,11 @@ struct InputKeys {
    * - `"SoftString"`
    * - `"HardString"`
    *
-   * The argument for allowing string processes to produce fluidizable hadrons,
-   * even though they break detailed balance, is that the system is expanding,
-   * so the fragmentation products are driven towards equilibration when the
-   * medium becomes large enough, which happens if the fluidization happens
-   * after their formation time.
+   * The argument for allowing string processes to produce fluidizable
+   * hadrons, even though they break detailed balance, is that the system is
+   * expanding, so the fragmentation products are driven towards equilibration
+   * when the medium becomes large enough, which happens if the fluidization
+   * happens after their formation time.
    */
   /**
    * \see_key{key_MC_IC_fluidizable_processes}
@@ -4321,16 +5141,17 @@ struct InputKeys {
       modi_collider_initialConditions_fluidProcesses{
           InputSections::m_c_initialConditions + "Fluidizable_Processes",
           FluidizableProcessesBitSet{}.set(),  // all processes
-          {"3.2"}};
+          {"3.2"},
+          detail::get_default_validator<FluidizableProcessesBitSet>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_delay_initial_elastic,Delay_Initial_Elastic,
-   * bool,true}
+   * bool,true,\none}
    *
-   * Whether the first elastic scatterings of initial nucleons are excluded from
-   * the list of fluidizable processes. Since the core-corona interaction is
-   * only elastic, this prevents some instantaneous fluidization.
+   * Whether the first elastic scatterings of initial nucleons are excluded
+   * from the list of fluidizable processes. Since the core-corona interaction
+   * is only elastic, this prevents some instantaneous fluidization.
    */
   /**
    * \see_key{key_MC_IC_delay_initial_elastic}
@@ -4339,15 +5160,16 @@ struct InputKeys {
       modi_collider_initialConditions_delayInitialElastic{
           InputSections::m_c_initialConditions + "Delay_Initial_Elastic",
           true,
-          {"3.3"}};
+          {"3.3"},
+          detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_C_initial_conditions
    * \optional_key_no_line{key_MC_IC_form_time_fraction_,Formation_Time_Fraction,
-   * double,1.0}
+   * double,1.0,\f$x\ge0\f$}
    *
    * Fraction of the formation time after which a particle can fluidize. It is
-   * is non-negative, and can assume values above 1. Setting it to 0 corresponds
+   * non-negative, and can assume values above 1. Setting it to 0 corresponds
    * to ignoring formation time. This is only relevant if string fragmentation
    * can produce fluidizable particles.
    */
@@ -4358,7 +5180,8 @@ struct InputKeys {
       modi_collider_initialConditions_formTimeFraction{
           InputSections::m_c_initialConditions + "Formation_Time_Fraction",
           1.0,
-          {"3.2"}};
+          {"3.2"},
+          [](const double &value) noexcept { return value >= 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4367,12 +5190,13 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key_no_line{key_MS_init_mult_,Init_Multiplicities,map<int\,int>}
+   * \required_key_no_line{key_MS_init_mult_,Init_Multiplicities,
+   * map<int\,int>,\f$n_i>0\f$}
    *
-   * Initial multiplicities per particle species. The value of this key shall be
-   * a map of PDG number and amount corresponding to it. Use this key to specify
-   * how many particles of each species will be initialized. This key cannot be
-   * used if <tt>\ref key_MS_use_thermal_mult_
+   * Initial multiplicities per particle species. The value of this key shall
+   * be a map of PDG number and amount \f$n_i\f$ corresponding to it. Use this
+   * key to specify how many particles of each species will be initialized.
+   * This key cannot be used if <tt>\ref key_MS_use_thermal_mult_
    * "Use_Thermal_Multiplicities"</tt> is `true`.
    */
   /**
@@ -4380,11 +5204,18 @@ struct InputKeys {
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_sphere_initialMultiplicities{
-          InputSections::m_sphere + "Init_Multiplicities", {"0.50"}};
+          InputSections::m_sphere + "Init_Multiplicities",
+          {"0.50"},
+          [](const auto &value) noexcept {
+            return !value.empty() && std::all_of(value.begin(), value.end(),
+                                                 [](const auto &entry) {
+                                                   return entry.second > 0;
+                                                 });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key{key_MS_radius_,Radius,double}
+   * \required_key{key_MS_radius_,Radius,double,\f$x>0\f$}
    *
    * Radius of the sphere \unit{in fm}.
    */
@@ -4392,11 +5223,13 @@ struct InputKeys {
    * \see_key{key_MS_radius_}
    */
   inline static const Key<double> modi_sphere_radius{
-      InputSections::m_sphere + "Radius", {"0.50"}};
+      InputSections::m_sphere + "Radius",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key{key_MS_start_time_,Start_Time,double}
+   * \required_key{key_MS_start_time_,Start_Time,double,\none}
    *
    * Starting time of sphere calculation \unit{in fm}.
    */
@@ -4404,11 +5237,13 @@ struct InputKeys {
    * \see_key{key_MS_start_time_}
    */
   inline static const Key<double> modi_sphere_startTime{
-      InputSections::m_sphere + "Start_Time", {"0.50"}};
+      InputSections::m_sphere + "Start_Time",
+      {"0.50"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key{key_MS_temperature_,Temperature,double}
+   * \required_key{key_MS_temperature_,Temperature,double,\f$x>0\f$}
    *
    * Temperature \unit{in GeV} to sample momenta in the sphere.
    */
@@ -4416,7 +5251,9 @@ struct InputKeys {
    * \see_key{key_MS_radius_}
    */
   inline static const Key<double> modi_sphere_temperature{
-      InputSections::m_sphere + "Temperature", {"1.5.2"}};
+      InputSections::m_sphere + "Temperature",
+      {"1.5.2"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4426,7 +5263,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key_no_line{key_MS_account_res_widths_,Account_Resonance_Widths,bool,true}
+   * \optional_key_no_line{key_MS_account_res_widths_,Account_Resonance_Widths,
+   * bool,true,\none}
    *
    * This key is considered only in case of thermal initialization and the
    * following two behaviors can be chosen:
@@ -4438,18 +5276,22 @@ struct InputKeys {
    * \see_key{key_MS_account_res_widths_}
    */
   inline static const Key<bool> modi_sphere_accountResonanceWidths{
-      InputSections::m_sphere + "Account_Resonance_Widths", true, {"1.7"}};
+      InputSections::m_sphere + "Account_Resonance_Widths",
+      true,
+      {"1.7"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,-1.0}
+   * \optional_key{key_MS_add_radial_velocity_,Add_Radial_Velocity,double,0.0,
+   * \f$0 \le x \le 1\f$}
    *
-   * This can be used in order to give each particle in the sphere an additional
-   * velocity in radial direction of the size \f$u_r = u_0 \,
+   * This can be used in order to give each particle in the sphere an
+   * additional velocity in radial direction of the size \f$u_r = u_0 \,
    * \left(\frac{r}{R}\right)^n\f$ with \f$u_0\f$ being the parameter of this
    * feature, \f$r\f$ the radial coordinate of the particle and \f$R\f$ the
-   * total radius of the sphere. \f$u_0\f$ can only take values in \f$[0, 1]\f$
-   * and a negative value is equivalent to omitting this key (i.e. not
+   * total radius of the sphere. \f$u_0\f$ can only take values in \f$[0,
+   * 1]\f$ and a value of 0 is equivalent to omitting this key (i.e. not
    * attributing any additional radial velocity). The exponent \f$n\f$ is set
    * by <tt>\ref key_MS_add_radial_velocity_exponent
    * "Add_Radial_Velocity_Exponent"</tt>.
@@ -4458,26 +5300,34 @@ struct InputKeys {
    * \see_key{key_MS_add_radial_velocity_}
    */
   inline static const Key<double> modi_sphere_addRadialVelocity{
-      InputSections::m_sphere + "Add_Radial_Velocity", -1.0, {"2.2"}};
+      InputSections::m_sphere + "Add_Radial_Velocity",
+      0.0,
+      {"2.2"},
+      [](const double &value) noexcept {
+        return value >= 0.0 && value <= 1.0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_add_radial_velocity_exponent,
-   * Add_Radial_Velocity_Exponent,double,1.0}
+   * Add_Radial_Velocity_Exponent,double,1.0,\f$x\ge 0\f$}
    *
-   * Exponent in the initial radial flow profile (see <tt>\ref
-   * key_MS_add_radial_velocity_ "Add_Radial_Velocity"</tt>). It cannot be
-   * negative.
+   * Exponent in the initial radial flow profile (see
+   * <tt>\ref key_MS_add_radial_velocity_ "Add_Radial_Velocity"</tt>).
    */
   /**
    * \see_key{key_MS_add_radial_velocity_exponent}
    */
   inline static const Key<double> modi_sphere_addRadialVelocityExponent{
-      InputSections::m_sphere + "Add_Radial_Velocity_Exponent", 1.0, {"3.3"}};
+      InputSections::m_sphere + "Add_Radial_Velocity_Exponent",
+      1.0,
+      {"3.3"},
+      [](const double &value) noexcept { return value >= 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_use_bar_chem_pot_,Baryon_Chemical_Potential,double,0.0}
+   * \optional_key{key_MS_use_bar_chem_pot_,Baryon_Chemical_Potential,double,
+   * 0.0,\none}
    *
    * Baryon chemical potential \f$\mu_B\f$ \unit{in GeV}. This key is used to
    * compute thermal densities \f$n_i\f$ only if
@@ -4488,11 +5338,15 @@ struct InputKeys {
    * \see_key{key_MS_use_bar_chem_pot_}
    */
   inline static const Key<double> modi_sphere_baryonChemicalPotential{
-      InputSections::m_sphere + "Baryon_Chemical_Potential", 0.0, {"1.0"}};
+      InputSections::m_sphere + "Baryon_Chemical_Potential",
+      0.0,
+      {"1.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_charge_chem_pot_,Charge_Chemical_Potential,double,0.0}
+   * \optional_key{key_MS_charge_chem_pot_,Charge_Chemical_Potential,double,
+   * 0.0,\none}
    *
    * Charge chemical potential \f$\mu_Q\f$ \unit{in GeV}. This key is used to
    * compute thermal densities \f$n_i\f$ only if
@@ -4503,12 +5357,15 @@ struct InputKeys {
    * \see_key{key_MS_charge_chem_pot_}
    */
   inline static const Key<double> modi_sphere_chargeChemicalPotential{
-      InputSections::m_sphere + "Charge_Chemical_Potential", 0.0, {"2.1"}};
+      InputSections::m_sphere + "Charge_Chemical_Potential",
+      0.0,
+      {"2.1"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * \optional_key{key_MS_initial_cond_,Initial_Condition,string,
-   * "thermal momenta"}
+   * "thermal momenta",\any_valid}
    *
    * Initial distribution to use for momenta of particles. Mainly used in the
    * expanding universe scenario, options are:
@@ -4529,37 +5386,42 @@ struct InputKeys {
   inline static const Key<SphereInitialCondition> modi_sphere_initialCondition{
       InputSections::m_sphere + "Initial_Condition",
       SphereInitialCondition::ThermalMomentaBoltzmann,
-      {"1.1"}};
+      {"1.1"},
+      detail::get_default_validator<SphereInitialCondition>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
+   * \optional_key{key_MS_strange_chem_pot_,Strange_Chemical_Potential,double,
+   * 0.0,\none}
    *
-   * Strangeness chemical potential \f$\mu_S\f$ \unit{in GeV}. This key is used
-   * to compute thermal densities \f$n_i\f$ only if
-   * <tt>\ref key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities"</tt> is
-   * `true`.
+   * Strangeness chemical potential \f$\mu_S\f$ \unit{in GeV}. This key is
+   * used to compute thermal densities \f$n_i\f$ only if <tt>\ref
+   * key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities"</tt> is `true`.
    */
   /**
    * \see_key{key_MS_strange_chem_pot_}
    */
   inline static const Key<double> modi_sphere_strangeChemicalPotential{
-      InputSections::m_sphere + "Strange_Chemical_Potential", 0.0, {"1.0"}};
+      InputSections::m_sphere + "Strange_Chemical_Potential",
+      0.0,
+      {"1.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_hf_multiplier_,Heavy_Flavor_Multiplier,double,0.0}
+   * \optional_key{key_MS_hf_multiplier_,Heavy_Flavor_Multiplier,double,
+   * 0.0,\none}
    *
-   * Multiply the thermal multiplicity of heavy flavor particles. This is a way
-   * to perturbatively obtain more statistics on heavy hadron observables with
-   * fewer events, under the assumption that these hadrons are sufficiently rare
-   * to not interact with each other. It is the user's responsibility to ensure
-   * that such assumption holds and that particle yields are properly normalized
-   * in the analysis.
+   * Multiply the thermal multiplicity of heavy flavor particles. This is a
+   * way to perturbatively obtain more statistics on heavy hadron observables
+   * with fewer events, under the assumption that these hadrons are
+   * sufficiently rare to not interact with each other. It is the user's
+   * responsibility to ensure that such assumption holds and that particle
+   * yields are properly normalized in the analysis.
    *
-   * By default, it is set to 0 so that no heavy flavor is initialized. For any
-   * positive value, a partial density is computed as described in \ref
-   * key_MS_use_thermal_mult_  "Use_Thermal_Multiplicities" and multiplied by
+   * By default, it is set to 0 so that no heavy flavor is initialized. For
+   * any positive value, a partial density is computed as described in \ref
+   * key_MS_use_thermal_mult_ "Use_Thermal_Multiplicities" and multiplied by
    * it. Naturally, with a value of 1, each hadron corresponds to a real
    * thermalized hadron.
    */
@@ -4567,19 +5429,23 @@ struct InputKeys {
    * \see_key{key_MS_hf_multiplier_}
    */
   inline static const Key<double> modi_sphere_heavyFlavorMultiplier{
-      InputSections::m_sphere + "Heavy_Flavor_Multiplier", 0.0, {"3.3"}};
+      InputSections::m_sphere + "Heavy_Flavor_Multiplier",
+      0.0,
+      {"3.3"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key{key_MS_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
+   * \optional_key{key_MS_use_thermal_mult_,Use_Thermal_Multiplicities,bool,
+   * false,\none}
    *
    * The system is initialized with all particle species of the particle table
    * that belong to the hadron gas equation of state, see
    * HadronGasEos::is_eos_particle(). The multiplicities are sampled from
    * Poisson distributions \f$\mathrm{Poi}(n_i V)\f$, where \f$n_i\f$ are the
-   * grand-canonical thermal densities of the corresponding species and \f$V\f$
-   * is the system volume. This option simulates the grand-canonical ensemble,
-   * where the number of particles is not fixed from event to event.
+   * grand-canonical thermal densities of the corresponding species and
+   * \f$V\f$ is the system volume. This option simulates the grand-canonical
+   * ensemble, where the number of particles is not fixed from event to event.
    *
    * If this option is set to `true`, <tt>\ref key_MS_init_mult_
    * "Init_Multiplicities"</tt> cannot be used.
@@ -4588,7 +5454,10 @@ struct InputKeys {
    * \see_key{key_MS_use_thermal_mult_}
    */
   inline static const Key<bool> modi_sphere_useThermalMultiplicities{
-      InputSections::m_sphere + "Use_Thermal_Multiplicities", false, {"1.0"}};
+      InputSections::m_sphere + "Use_Thermal_Multiplicities",
+      false,
+      {"1.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
@@ -4603,7 +5472,7 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \required_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int}
+   * \required_key_no_line{key_MS_jet_jet_pdg_,Jet_PDG,int,\none}
    *
    * The type of particle to be used as a jet, as given by its PDG code.
    */
@@ -4611,11 +5480,14 @@ struct InputKeys {
    * \see_key{key_MS_jet_jet_pdg_}
    */
   inline static const Key<PdgCode> modi_sphere_jet_jetPdg{
-      InputSections::m_s_jet + "Jet_PDG", {"1.5.2"}};
+      InputSections::m_s_jet + "Jet_PDG",
+      {"1.5.2"},
+      detail::get_default_validator<PdgCode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key_no_line{key_MS_jet_jet_momentum_,Jet_Momentum,double,20.0}
+   * \optional_key_no_line{key_MS_jet_jet_momentum_,Jet_Momentum,double,20.0,
+   * \f$x>0\f$}
    *
    * The initial momentum \unit{in GeV} to give to the jet particle.
    */
@@ -4623,12 +5495,15 @@ struct InputKeys {
    * \see_key{key_MS_jet_jet_momentum_}
    */
   inline static const Key<double> modi_sphere_jet_jetMomentum{
-      InputSections::m_s_jet + "Jet_Momentum", 20.0, {"1.5.2"}};
+      InputSections::m_s_jet + "Jet_Momentum",
+      20.0,
+      {"1.5.2"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * \optional_key_no_line{key_MS_jet_jet_position_,Jet_Position,
-   * list of 3 doubles,[0.0\, 0.0\, 0.0]}
+   * list of 3 doubles,[0.0\, 0.0\, 0.0],\none}
    *
    * Coordinates (x,y,z) \unit{in fm} where the jet particle is initially
    * positioned.
@@ -4639,26 +5514,30 @@ struct InputKeys {
   inline static const Key<std::array<double, 3>> modi_sphere_jet_jetPosition{
       InputSections::m_s_jet + "Jet_Position",
       std::array<double, 3>{{0.0, 0.0, 0.0}},
-      {"3.3"}};
+      {"3.3"},
+      detail::get_default_validator<std::array<double, 3>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
-   * \optional_key_no_line{key_MS_jet_backtoback_,Back_To_Back,bool,false}
+   * \optional_key_no_line{key_MS_jet_backtoback_,Back_To_Back,bool,false,\none}
    *
-   * Whether to create a jet with the corresponding antiparticle in the opposite
-   * direction with the same momentum. If the particle is a singlet, such as the
-   * neutral pion, it is considered its own antiparticle.
+   * Whether to create a jet with the corresponding antiparticle in the
+   * opposite direction with the same momentum. If the particle is a singlet,
+   * such as the neutral pion, it is considered its own antiparticle.
    */
   /**
    * \see_key{key_MS_jet_backtoback_}
    */
   inline static const Key<bool> modi_sphere_jet_backToBack{
-      InputSections::m_s_jet + "Back_To_Back", false, {"3.3"}};
+      InputSections::m_s_jet + "Back_To_Back",
+      false,
+      {"3.3"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_sphere
    * \optional_key_no_line{key_MS_jet_b2b_separation,Back_To_Back_Separation,
-   * double,0.01}
+   * double,0.01,\f$x>0\f$}
    *
    * Separation \unit{in fm} between the back to back jets. Each jet particle
    * is translated by half of this value in the direction of motion. Can only
@@ -4669,7 +5548,10 @@ struct InputKeys {
    * \see_key{key_MS_jet_b2b_separation}
    */
   inline static const Key<double> modi_sphere_jet_backToBackSeparation{
-      InputSections::m_s_jet + "Back_To_Back_Separation", 0.01, {"3.3"}};
+      InputSections::m_s_jet + "Back_To_Back_Separation",
+      0.01,
+      {"3.3"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4679,7 +5561,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key_no_line{key_MB_init_mult_,Init_Multiplicities,map<int\,int>}
+   * \required_key_no_line{key_MB_init_mult_,Init_Multiplicities,
+   * map<int\,int>,\f$n_i>0\f$}
    *
    * See &nbsp;
    * <tt>\ref key_MS_init_mult_ "Sphere: Init_Multiplicities"</tt>.
@@ -4689,11 +5572,18 @@ struct InputKeys {
    */
   inline static const Key<std::map<PdgCode, int>>
       modi_box_initialMultiplicities{
-          InputSections::m_box + "Init_Multiplicities", {"0.50"}};
+          InputSections::m_box + "Init_Multiplicities",
+          {"0.50"},
+          [](const auto &value) noexcept {
+            return !value.empty() && std::all_of(value.begin(), value.end(),
+                                                 [](const auto &entry) {
+                                                   return entry.second > 0;
+                                                 });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key{key_MB_initial_condition_,Initial_Condition,string}
+   * \required_key{key_MB_initial_condition_,Initial_Condition,string,\any_valid}
    *
    * Controls initial momentum distribution of particles.
    * - `"peaked momenta"` &rarr; All particles have momentum \f$p=3\,T\f$,
@@ -4701,19 +5591,21 @@ struct InputKeys {
    *   distributed.
    * - `"thermal momenta"` &rarr; Momenta are sampled from a Maxwell-Boltzmann
    *   distribution.
-   * - `"thermal momenta quantum"` &rarr; Momenta are sampled from a Fermi-Dirac
-   *   distribution or a Bose-Einstein distribution, depending on the type of
-   *   particle.
+   * - `"thermal momenta quantum"` &rarr; Momenta are sampled from a
+   * Fermi-Dirac distribution or a Bose-Einstein distribution, depending on
+   * the type of particle.
    */
   /**
    * \see_key{key_MB_initial_condition_}
    */
   inline static const Key<BoxInitialCondition> modi_box_initialCondition{
-      InputSections::m_box + "Initial_Condition", {"0.50"}};
+      InputSections::m_box + "Initial_Condition",
+      {"0.50"},
+      detail::get_default_validator<BoxInitialCondition>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key{key_MB_length_,Length,double}
+   * \required_key{key_MB_length_,Length,double,\f$x>0\f$}
    *
    * Length of the cube's edge \unit{in fm}.
    */
@@ -4721,24 +5613,28 @@ struct InputKeys {
    * \see_key{key_MB_length_}
    */
   inline static const Key<double> modi_box_length{
-      InputSections::m_box + "Length", {"0.50"}};
+      InputSections::m_box + "Length",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key{key_MB_start_time_,Start_Time,double}
+   * \required_key{key_MB_start_time_,Start_Time,double,\none}
    *
-   * Starting time of the simulation \unit{in fm}. All particles in the box are
-   * initialized with \f$x^0=\f$`Start_Time`.
+   * Starting time of the simulation \unit{in fm}. All particles in the box
+   * are initialized with \f$x^0=\f$`Start_Time`.
    */
   /**
    * \see_key{key_MB_start_time_}
    */
   inline static const Key<double> modi_box_startTime{
-      InputSections::m_box + "Start_Time", {"0.50"}};
+      InputSections::m_box + "Start_Time",
+      {"0.50"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key{key_MB_temperature_,Temperature,double}
+   * \required_key{key_MB_temperature_,Temperature,double,\f$x>0\f$}
    *
    * Temperature \unit{in GeV} of the box.
    */
@@ -4746,7 +5642,9 @@ struct InputKeys {
    * \see_key{key_MB_temperature_}
    */
   inline static const Key<double> modi_box_temperature{
-      InputSections::m_box + "Temperature", {"0.50"}};
+      InputSections::m_box + "Temperature",
+      {"0.50"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4756,7 +5654,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key_no_line{key_MB_account_res_widths_,Account_Resonance_Widths,bool,true}
+   * \optional_key_no_line{key_MB_account_res_widths_,Account_Resonance_Widths,
+   * bool,true,\none}
    *
    * See &nbsp;
    * <tt>\ref key_MS_account_res_widths_
@@ -4775,53 +5674,71 @@ struct InputKeys {
    * \see_key{key_MB_account_res_widths_}
    */
   inline static const Key<bool> modi_box_accountResonanceWidths{
-      InputSections::m_box + "Account_Resonance_Widths", true, {"1.7"}};
+      InputSections::m_box + "Account_Resonance_Widths",
+      true,
+      {"1.7"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_use_bar_chem_pot_,Baryon_Chemical_Potential,double,0.0}
+   * \optional_key{key_MB_use_bar_chem_pot_,Baryon_Chemical_Potential,
+   * double,0.0,\none}
    *
    * See &nbsp;
-   * <tt>\ref key_MS_use_bar_chem_pot_ "Sphere: Baryon_Chemical_Potential"</tt>.
+   * <tt>\ref key_MS_use_bar_chem_pot_ "Sphere:
+   * Baryon_Chemical_Potential"</tt>.
    */
   /**
    * \see_key{key_MB_use_bar_chem_pot_}
    */
   inline static const Key<double> modi_box_baryonChemicalPotential{
-      InputSections::m_box + "Baryon_Chemical_Potential", 0.0, {"1.0"}};
+      InputSections::m_box + "Baryon_Chemical_Potential",
+      0.0,
+      {"1.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_charge_chem_pot_,Charge_Chemical_Potential,bool,false}
+   * \optional_key{key_MB_charge_chem_pot_,Charge_Chemical_Potential,
+   * double,0.0,\none}
    *
    * See &nbsp;
-   * <tt>\ref key_MS_charge_chem_pot_ "Sphere: Charge_Chemical_Potential"</tt>.
+   * <tt>\ref key_MS_charge_chem_pot_ "Sphere:
+   * Charge_Chemical_Potential"</tt>.
    */
   /**
    * \see_key{key_MB_charge_chem_pot_}
    */
   inline static const Key<double> modi_box_chargeChemicalPotential{
-      InputSections::m_box + "Charge_Chemical_Potential", 0.0, {"2.0"}};
+      InputSections::m_box + "Charge_Chemical_Potential",
+      0.0,
+      {"2.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_equilibration_time_,Equilibration_Time,double, -1.0}
+   * \optional_key{key_MB_equilibration_time_,Equilibration_Time,double,-1.0,\none}
    *
    * Time \unit{in fm} after which the output of the box is written out. The
-   * first time however will be printed. This is useful if one wants to simulate
-   * boxes for very long times and knows at which time the box reaches its
-   * thermal and chemical equilibrium. The default set to -1 is meaning that
-   * output is written from beginning on, if this key is not given.
+   * first time however will be printed. This is useful if one wants to
+   * simulate boxes for very long times and knows at which time the box
+   * reaches its thermal and chemical equilibrium. The default set to -1 is
+   * meaning that output is written from beginning on, if this key is not
+   * given.
    */
   /**
    * \see_key{key_MB_equilibration_time_}
    */
   inline static const Key<double> modi_box_equilibrationTime{
-      InputSections::m_box + "Equilibration_Time", -1.0, {"1.8"}};
+      InputSections::m_box + "Equilibration_Time",
+      -1.0,
+      {"1.8"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_strange_chem_pot_,Strange_Chemical_Potential,double,0.0}
+   * \optional_key{key_MB_strange_chem_pot_,Strange_Chemical_Potential,
+   * double,0.0,\none}
    *
    * See &nbsp;
    * <tt>\ref key_MS_strange_chem_pot_
@@ -4831,11 +5748,15 @@ struct InputKeys {
    * \see_key{key_MB_strange_chem_pot_}
    */
   inline static const Key<double> modi_box_strangeChemicalPotential{
-      InputSections::m_box + "Strange_Chemical_Potential", 0.0, {"1.0"}};
+      InputSections::m_box + "Strange_Chemical_Potential",
+      0.0,
+      {"1.0"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key{key_MB_use_thermal_mult_,Use_Thermal_Multiplicities,bool,false}
+   * \optional_key{key_MB_use_thermal_mult_,Use_Thermal_Multiplicities,
+   * bool,false,\none}
    *
    * See &nbsp;
    * <tt>\ref key_MS_use_thermal_mult_
@@ -4845,7 +5766,10 @@ struct InputKeys {
    * \see_key{key_MB_use_thermal_mult_}
    */
   inline static const Key<bool> modi_box_useThermalMultiplicities{
-      InputSections::m_box + "Use_Thermal_Multiplicities", false, {"1.0"}};
+      InputSections::m_box + "Use_Thermal_Multiplicities",
+      false,
+      {"1.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
@@ -4855,13 +5779,14 @@ struct InputKeys {
    * The `Jet` section can be specified in the `Box` section with the same
    * meaning it has for the `Sphere` modus. It is namely possible to put a
    * jet in the center of the box, on a outbound trajectory along the x-axis.
-   * Also here, if no PDG code is specified, but the section is given, an error
-   * about the missing key is raised.
+   * Also here, if no PDG code is specified, but the section is given, an
+   * error about the missing key is raised.
    */
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \optional_key_no_line{key_MB_jet_jet_momentum_,Jet_Momentum,double,20.0}
+   * \optional_key_no_line{key_MB_jet_jet_momentum_,Jet_Momentum,
+   * double,20.0,\f$x>0\f$}
    *
    * See &nbsp;
    * <tt>\ref key_MS_jet_jet_momentum_ "Sphere: Jet: Jet_Momentum"</tt>.
@@ -4870,11 +5795,14 @@ struct InputKeys {
    * \see_key{key_MB_jet_jet_momentum_}
    */
   inline static const Key<double> modi_box_jet_jetMomentum{
-      InputSections::m_b_jet + "Jet_Momentum", 20.0, {"1.7"}};
+      InputSections::m_b_jet + "Jet_Momentum",
+      20.0,
+      {"1.7"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_box
-   * \required_key_no_line{key_MB_jet_jet_pdg_,Jet_PDG,int}
+   * \required_key_no_line{key_MB_jet_jet_pdg_,Jet_PDG,int,\none}
    *
    * See &nbsp;
    * <tt>\ref key_MS_jet_jet_pdg_ "Sphere: Jet: Jet_PDG"</tt>.
@@ -4883,11 +5811,14 @@ struct InputKeys {
    * \see_key{key_MB_jet_jet_pdg_}
    */
   inline static const Key<PdgCode> modi_box_jet_jetPdg{
-      InputSections::m_b_jet + "Jet_PDG", {"1.7"}};
+      InputSections::m_b_jet + "Jet_PDG",
+      {"1.7"},
+      detail::get_default_validator<PdgCode>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
-   * \required_key{key_ML_file_dir_,File_Directory,string}
+   * \required_key{key_ML_file_dir_,File_Directory,string,
+   * <b>Existing directory</b>}
    *
    * Directory for the external particle lists. Although relative paths to the
    * execution directory should work, you are encouraged to <b>prefer absolute
@@ -4897,26 +5828,39 @@ struct InputKeys {
    * \see_key{key_ML_file_dir_}
    */
   inline static const Key<std::string> modi_list_fileDirectory{
-      InputSections::m_list + "File_Directory", {"0.60"}};
+      InputSections::m_list + "File_Directory",
+      {"0.60"},
+      [](const std::string &value) noexcept {
+        return std::filesystem::is_directory(value);
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
-   * \required_key{key_ML_filename_,Filename,string}
+   * \required_key{key_ML_filename_,Filename,string,
+   * <b>Possible filename on Linux OS</b>}
    *
    * External particle lists filename. This key shall be omitted if
    * <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt> is used. By using
-   * this key, it is understood that all events to be processed are contained in
-   * the given file, as this is the only one which will be read.
+   * this key, it is understood that all events to be processed are contained
+   * in the given file, as this is the only one which will be read.
    */
   /**
    * \see_key{key_ML_filename_}
    */
   inline static const Key<std::string> modi_list_filename{
-      InputSections::m_list + "Filename", {"3.1"}};
+      InputSections::m_list + "Filename",
+      {"3.1"},
+      [](const std::string &value) noexcept {
+        if (value.empty() || value == "." || value == "..")
+          return false;
+        else
+          return std::none_of(value.begin(), value.end(),
+                              [](auto c) { return c == '/' || c == '\0'; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
-   * \required_key{key_ML_file_prefix_,File_Prefix,string}
+   * \required_key{key_ML_file_prefix_,File_Prefix,string,\none}
    *
    * Prefix for the external particle lists file. This key shall be omitted if
    * <tt>\ref key_ML_filename_ "List: Filename"</tt> is used.
@@ -4925,29 +5869,34 @@ struct InputKeys {
    * \see_key{key_ML_file_prefix_}
    */
   inline static const Key<std::string> modi_list_filePrefix{
-      InputSections::m_list + "File_Prefix", {"0.60"}};
+      InputSections::m_list + "File_Prefix",
+      {"0.60"},
+      detail::get_default_validator<std::string>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
-   * \optional_key{key_ML_shift_id_,Shift_Id,int,0}
+   * \optional_key{key_ML_shift_id_,Shift_Id,int,0,\none}
    *
    * Index of the \b first processed particle list file. Files with index
-   * smaller than the specidifed value are skipped. This key is considered when
-   * <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt> is used to specify
-   * which particles list file(s) should be read. If, instead, the user
-   * specifies the <tt>\ref key_ML_filename_ "List: Filename"</tt> key, this key
-   * is ignored.
+   * smaller than the specidifed value are skipped. This key is considered
+   * when <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt> is used to
+   * specify which particles list file(s) should be read. If, instead, the
+   * user specifies the <tt>\ref key_ML_filename_ "List: Filename"</tt> key,
+   * this key is ignored.
    */
   /**
    * \see_key{key_ML_shift_id_}
    */
   inline static const Key<int> modi_list_shiftId{
-      InputSections::m_list + "Shift_Id", 0, {"0.60"}};
+      InputSections::m_list + "Shift_Id",
+      0,
+      {"0.60"},
+      detail::get_default_validator<int>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_list
    * \optional_key{key_ML_optional_quantities_,Optional_Quantities,list of
-   * strings,["ID"\, "charge"]}
+   * strings,["ID"\, "charge"],\any_valid}
    *
    * Extra columns to be expected in the input file containing the list of
    * particles. This is useful to e.g. continue a SMASH run that was paused
@@ -4957,44 +5906,46 @@ struct InputKeys {
    * The order of the quantities in the key value should respect the order of
    * the extra columns in the input file.
    *
-   * \attention It will cause wrong read-ins to leave out columns in between and
-   * there is no safety mechanism in place.
+   * \attention It will cause wrong read-ins to leave out columns in between
+   * and there is no safety mechanism in place.
    *
    * Available quantities:
-   * - "ID" &rarr; Particle identifier represented by an integer, unique for
-   *    each particle in an event. Even if provided, the IDs will be set
-   *    during the SMASH run in the order the particles are initialized.
-   * - "charge" &rarr; The particle's electric charge in units of the elementary
-   *    charge e. This is only used for a consistency check and the charge will
-   *    be set according to the PDG code data.
-   * - "ncoll" &rarr; Number of collisions the particle already went through.
-   * - "form_time" &rarr;  Formation time. By default it is set to the time
-   *    coordinate (first column in the input).
-   * - "xsecfac" &rarr;  Scaling factor for the cross section, limited between 0
-   *    and 1. By default it is 1.
-   * - "proc_type" &rarr; Type of the last interaction (See
+   * - <tt>"ID"</tt> &rarr; Particle identifier represented by an integer,
+   *    unique for each particle in an event. Even if provided, the IDs will
+   * be set during the SMASH run in the order the particles are initialized.
+   * - <tt>"charge"</tt> &rarr; The particle's electric charge in units of the
+   *    elementary charge e. This is only used for a consistency check and the
+   *    charge will be set according to the PDG code data.
+   * - <tt>"ncoll"</tt> &rarr; Number of collisions the particle already went
+   *    through.
+   * - <tt>"form_time"</tt> &rarr;  Formation time. By default it is set to
+   * the time coordinate (first column in the input).
+   * - <tt>"xsecfac"</tt> &rarr;  Scaling factor for the cross section,
+   * limited between 0 and 1. By default it is 1.
+   * - <tt>"proc_type"</tt> &rarr; Type of the last interaction (See
    *   \ref doxypage_output_process_types)
-   * - "time_last_coll" &rarr; Time when the last interaction happened.
-   * - "pdg_mother1" &rarr; Parent of the particle.
-   * - "pdg_mother2" &rarr; Second parent of the particle.
-   * - "spin0" &rarr; 0-th component of the spin vector.
-   * - "spin1" &rarr; 1-st component of the spin vector.
-   * - "spin2" &rarr; 2-nd component of the spin vector.
-   * - "spin3" &rarr; 3-rd component of the spin vector.
-   * - "perturbative_weight" &rarr; weight for treating heavy flavor hadrons
-   * perturbatively.
+   * - <tt>"time_last_coll"</tt> &rarr; Time when the last interaction
+   * happened.
+   * - <tt>"pdg_mother1"</tt> &rarr; Parent of the particle.
+   * - <tt>"pdg_mother2"</tt> &rarr; Second parent of the particle.
+   * - <tt>"spin0"</tt> &rarr; 0-th component of the spin vector.
+   * - <tt>"spinx"</tt> &rarr; 1-st component of the spin vector.
+   * - <tt>"spiny"</tt> &rarr; 2-nd component of the spin vector.
+   * - <tt>"spinz"</tt> &rarr; 3-rd component of the spin vector.
+   * - <tt>"perturbative_weight"</tt> &rarr; weight for treating heavy flavor
+   *    hadrons perturbatively.
    *
-   * Be aware that the default setting of this key considers "ID" and "charge",
-   * which also have to be set by the user if these quantities are in the
-   * provided particle lists and other optional quantities are included as well.
-   * Hence, it is possible to leave out "ID" and "charge" in the input lists.
-   * Optional quantities that are not provided by the user as extra column in
-   * the input file are set to their default value when SMASH reads in the input
-   * file with the list of particles. Unless stated differently, this default
-   * value is 0.
+   * Be aware that the default setting of this key considers "ID" and
+   * "charge", which also have to be set by the user if these quantities are
+   * in the provided particle lists and other optional quantities are included
+   * as well. Hence, it is possible to leave out "ID" and "charge" in the
+   * input lists. Optional quantities that are not provided by the user as
+   * extra column in the input file are set to their default value when SMASH
+   * reads in the input file with the list of particles. Unless stated
+   * differently, this default value is 0.
    *
-   * \attention The code does a minimal validation to see if the quantities are
-   * internally meaningful, but no check is done on the physics content.
+   * \attention The code does a minimal validation to see if the quantities
+   * are internally meaningful, but no check is done on the physics content.
    * For instance, SMASH will not complain if a proton is said to originate
    * from a pion via wall crossing. Ensuring the correctness of the input is
    * the user's resposibility.
@@ -5008,11 +5959,33 @@ struct InputKeys {
       modi_list_optionalQuantities{
           InputSections::m_list + "Optional_Quantities",
           std::vector<std::string>{"ID", "charge"},
-          {"3.3"}};
+          {"3.3"},
+          [](const std::vector<std::string> &value) noexcept {
+            const std::set<std::string> valid_quantities{"ID",
+                                                         "charge",
+                                                         "ncoll",
+                                                         "form_time",
+                                                         "xsecfac",
+                                                         "proc_type",
+                                                         "time_last_coll",
+                                                         "pdg_mother1",
+                                                         "pdg_mother2",
+                                                         "spin0",
+                                                         "spinx",
+                                                         "spiny",
+                                                         "spinz",
+                                                         "perturbative_weight"};
+            return std::all_of(
+                value.begin(), value.end(),
+                [&valid_quantities](const std::string &quantity) {
+                  return valid_quantities.count(quantity) > 0;
+                });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \required_key{key_MLB_file_dir_,File_Directory,string}
+   * \required_key{key_MLB_file_dir_,File_Directory,string,
+   * <b>Existing directory</b>}
    *
    * See &nbsp;
    * <tt>\ref key_ML_file_dir_ "List: File_Directory"</tt>.
@@ -5021,11 +5994,16 @@ struct InputKeys {
    * \see_key{key_MLB_file_dir_}
    */
   inline static const Key<std::string> modi_listBox_fileDirectory{
-      InputSections::m_listBox + "File_Directory", {"2.1"}};
+      InputSections::m_listBox + "File_Directory",
+      {"2.1"},
+      [](const std::string &value) noexcept {
+        return std::filesystem::is_directory(value);
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \required_key{key_MLB_filename_,Filename,string}
+   * \required_key{key_MLB_filename_,Filename,string,
+   * <b>Possible filename on Linux OS</b>}
    *
    * See &nbsp;
    * <tt>\ref key_ML_filename_ "List: Filename"</tt>.
@@ -5034,11 +6012,19 @@ struct InputKeys {
    * \see_key{key_MLB_filename_}
    */
   inline static const Key<std::string> modi_listBox_filename{
-      InputSections::m_listBox + "Filename", {"3.1"}};
+      InputSections::m_listBox + "Filename",
+      {"3.1"},
+      [](const std::string &value) noexcept {
+        if (value.empty() || value == "." || value == "..")
+          return false;
+        else
+          return std::none_of(value.begin(), value.end(),
+                              [](auto c) { return c == '/' || c == '\0'; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \required_key{key_MLB_file_prefix_,File_Prefix,string}
+   * \required_key{key_MLB_file_prefix_,File_Prefix,string,\none}
    *
    * See &nbsp;
    * <tt>\ref key_ML_file_prefix_ "List: File_Prefix"</tt>.
@@ -5047,11 +6033,13 @@ struct InputKeys {
    * \see_key{key_MLB_file_prefix_}
    */
   inline static const Key<std::string> modi_listBox_filePrefix{
-      InputSections::m_listBox + "File_Prefix", {"2.1"}};
+      InputSections::m_listBox + "File_Prefix",
+      {"2.1"},
+      detail::get_default_validator<std::string>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \required_key{key_MLB_length_,Length,double}
+   * \required_key{key_MLB_length_,Length,double,\f$x>0\f$}
    *
    * See &nbsp;
    * <tt>\ref key_MB_length_ "Box: Length"</tt>.
@@ -5060,11 +6048,13 @@ struct InputKeys {
    * \see_key{key_MLB_length_}
    */
   inline static const Key<double> modi_listBox_length{
-      InputSections::m_listBox + "Length", {"2.1"}};
+      InputSections::m_listBox + "Length",
+      {"2.1"},
+      [](const double &value) noexcept { return value > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
-   * \optional_key{key_MLB_shift_id_,Shift_Id,int,0}
+   * \optional_key{key_MLB_shift_id_,Shift_Id,int,0,\none}
    *
    * See &nbsp;
    * <tt>\ref key_ML_shift_id_ "List: Shift_Id"</tt>.
@@ -5073,12 +6063,15 @@ struct InputKeys {
    * \see_key{key_MLB_shift_id_}
    */
   inline static const Key<int> modi_listBox_shiftId{
-      InputSections::m_listBox + "Shift_Id", 0, {"2.1"}};
+      InputSections::m_listBox + "Shift_Id",
+      0,
+      {"2.1"},
+      detail::get_default_validator<int>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_modi_listbox
    * \optional_key{key_MLB_optional_quantities_,Optional_Quantities,list of
-   * strings,["ID"\, "charge"]}
+   * strings,["ID"\, "charge"],\any_valid}
    *
    * See &nbsp;
    * <tt>\ref key_ML_optional_quantities_ "List: Optional_Quantities"</tt>.
@@ -5090,14 +6083,36 @@ struct InputKeys {
       modi_listBox_optionalQuantities{
           InputSections::m_listBox + "Optional_Quantities",
           std::vector<std::string>{"ID", "charge"},
-          {"3.3"}};
+          {"3.3"},
+          [](const std::vector<std::string> &value) noexcept {
+            const std::set<std::string> valid_quantities{"ID",
+                                                         "charge",
+                                                         "ncoll",
+                                                         "form_time",
+                                                         "xsecfac",
+                                                         "proc_type",
+                                                         "time_last_coll",
+                                                         "pdg_mother1",
+                                                         "pdg_mother2",
+                                                         "spin0",
+                                                         "spinx",
+                                                         "spiny",
+                                                         "spinz",
+                                                         "perturbative_weight"};
+            return std::all_of(
+                value.begin(), value.end(),
+                [&valid_quantities](const std::string &quantity) {
+                  return valid_quantities.count(quantity) > 0;
+                });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    *
    * <h2> General output configuration parameters </h2>
    *
-   * \optional_key_no_line{key_output_density_type_,Density_Type,string,"none"}
+   * \optional_key_no_line{key_output_density_type_,Density_Type,string,
+   * "none",\any_valid}
    *
    * Determines which kind of density is printed into the headers of the
    * collision files. Possible values are:
@@ -5111,12 +6126,15 @@ struct InputKeys {
    * \see_key{key_output_density_type_}
    */
   inline static const Key<DensityType> output_densityType{
-      InputSections::output + "Density_Type", DensityType::None, {"0.60"}};
+      InputSections::output + "Density_Type",
+      DensityType::None,
+      {"0.60"},
+      detail::get_default_validator<DensityType>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key{key_output_out_interval_,Output_Interval,double,
-   * \ref key_gen_end_time_ "End_Time"}
+   * \ref key_gen_end_time_ "End_Time",\f$x>0\f$}
    *
    * Defines the period of intermediate output of the status of the simulated
    * system in Standard Output and other output formats which support this
@@ -5128,18 +6146,22 @@ struct InputKeys {
   inline static const Key<double> output_outputInterval{
       InputSections::output + "Output_Interval",
       DefaultType::Dependent,
-      {"0.50"}};
+      {"0.50"},
+      [](double x) noexcept { return x > 0.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key{key_output_out_times_,Output_Times,list of doubles,
-   * use \ref key_output_out_interval_ "Output_Interval"}
+   * use \ref key_output_out_interval_ "Output_Interval", \none}
    *
-   * Explicitly defines the times \unit{in fm} where output is generated in the
-   * form of a list. This cannot be used in combination with `Output_Interval`.
+   * Explicitly defines the times \unit{in fm} where output is generated in
+   the
+   * form of a list. This cannot be used in combination with
+   `Output_Interval`.
    * Output times outside the simulation time are ignored and both the initial
    * and final time are always considered. The following example will produce
-   * output at event start, event end and at the specified times as long as they
+   * output at event start, event end and at the specified times as long as
+   they
    * are within the simulation time.
    *\verbatim
    Output:
@@ -5150,7 +6172,10 @@ struct InputKeys {
    * \see_key{key_output_out_times_}
    */
   inline static const Key<std::vector<double>> output_outputTimes{
-      InputSections::output + "Output_Times", DefaultType::Dependent, {"1.7"}};
+      InputSections::output + "Output_Times",
+      DefaultType::Dependent,
+      {"1.7"},
+      detail::get_default_validator<std::vector<double>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5158,27 +6183,28 @@ struct InputKeys {
    * <h2> Output format independently of the specific output content </h2>
    *
    * A dedicated subsection in the `Output` section exists for every single
-   * output content and dedicated options are described further below. Refer to
-   * \ref output_contents_ "output contents" for the list of possible
+   * output content and dedicated options are described further below. Refer
+   * to \ref output_contents_ "output contents" for the list of possible
    * contents. Independently of the content, i.e. in every subsection, it is
-   * always necessary (i.e. it is probably desired) to provide the format in
-   * which the output should be generated.
+   * always necessary (and probably desired) to provide the format in which
+   * the output should be generated.
    *
-   * \required_key_no_line{key_output_content_format_,Format,list of strings}
+   * \required_key_no_line{key_output_content_format_,Format, list of strings,
+   * \any_valid}
    *
-   * List of formats for writing particular content. Available formats for every
-   * content are listed and described \ref output_contents_ "here", while
-   * \ref list_of_output_formats "here" all possible output formats are
+   * List of formats for writing particular content. Available formats for
+   * every content are listed and described \ref output_contents_ "here",
+   * while \ref list_of_output_formats "here" all possible output formats are
    * given.
    *
    * \warning If a `Format` list in a content `section` is not given or it is
    * left empty, i.e. `Format: []`, SMASH will abort with a fatal error.
    * Furthermore, SMASH also aborts if a not existing format is given in the
    * formats list. This is meant to prevent against e.g. losing output
-   * information because of a typo in the configuration file. If no output for a
-   * given content is desired, you can suppress it by using `Format: ["None"]`.
-   * However, it is not allowed to use valid formats together with the `"None"`
-   * special "format" string.
+   * information because of a typo in the configuration file. If no output for
+   * a given content is desired, you can suppress it by using `Format:
+   * ["None"]`. However, it is not allowed to use valid formats together with
+   * the `"None"` special "format" string.
    */
   /**
    * \see_key{key_output_content_format_}
@@ -5188,52 +6214,176 @@ struct InputKeys {
    */
   inline static const Key<std::vector<std::string>> output_particles_format{
       InputSections::o_particles + "Format",
-      std::vector<std::string>{},
-      {"1.2"}};
+      {"1.2"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {
+            "ASCII",         "Oscar1999",     "Oscar2013", "Binary",
+            "Oscar2013_bin", "Root",          "VTK",       "HepMC",
+            "HepMC_asciiv3", "HepMC_treeroot"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_collisions_format{
       InputSections::o_collisions + "Format",
-      std::vector<std::string>{},
-      {"1.2"}};
+      {"1.2"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {
+            "ASCII",  "Oscar1999",     "Oscar2013",
+            "Binary", "Oscar2013_bin", "Root",
+            "HepMC",  "HepMC_asciiv3", "HepMC_treeroot"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_dileptons_format{
       InputSections::o_dileptons + "Format",
-      std::vector<std::string>{},
-      {"0.85"}};
+      {"0.85"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {"ASCII",         "Oscar1999",
+                                             "Oscar2013",     "Binary",
+                                             "Oscar2013_bin", "Root"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_photons_format{
-      InputSections::o_photons + "Format", std::vector<std::string>{}, {"1.0"}};
+      InputSections::o_photons + "Format",
+      {"1.0"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {"ASCII",         "Oscar1999",
+                                             "Oscar2013",     "Binary",
+                                             "Oscar2013_bin", "Root"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>>
       output_initialConditions_format{
           InputSections::o_initialConditions + "Format",
-          std::vector<std::string>{},
-          {"1.7"}};
+          {"1.7"},
+          [](const std::vector<std::string> &values) noexcept {
+            if (values.empty())
+              return false;
+            bool has_none =
+                std::any_of(values.begin(), values.end(),
+                            [](const std::string &s) { return s == "None"; });
+            if (has_none)
+              return values.size() == 1;
+            std::set<std::string> allowed_set = {
+                "For_vHLLE", "ASCII",         "Oscar1999", "Oscar2013",
+                "Binary",    "Oscar2013_bin", "Root"};
+            return std::none_of(values.begin(), values.end(),
+                                [&allowed_set](const std::string &s) {
+                                  return allowed_set.count(s) == 0;
+                                });
+          }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_format{
-      InputSections::o_rivet + "Format", std::vector<std::string>{}, {"2.0.2"}};
+      InputSections::o_rivet + "Format",
+      {"2.0.2"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {"YODA", "YODA-full"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>> output_coulomb_format{
-      InputSections::o_coulomb + "Format", std::vector<std::string>{}, {"2.1"}};
+      InputSections::o_coulomb + "Format",
+      {"2.1"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return false;
+        bool has_none =
+            std::any_of(values.begin(), values.end(),
+                        [](const std::string &s) { return s == "None"; });
+        if (has_none)
+          return values.size() == 1;
+        std::set<std::string> allowed_set = {"VTK"};
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
   /**
    * \see_key{key_output_content_format_}
    */
   inline static const Key<std::vector<std::string>>
-      output_thermodynamics_format{InputSections::o_thermodynamics + "Format",
-                                   std::vector<std::string>{},
-                                   {"1.2"}};
+      output_thermodynamics_format{
+          InputSections::o_thermodynamics + "Format",
+          {"1.2"},
+          [](const std::vector<std::string> &values) noexcept {
+            if (values.empty())
+              return false;
+            bool has_none =
+                std::any_of(values.begin(), values.end(),
+                            [](const std::string &s) { return s == "None"; });
+            if (has_none)
+              return values.size() == 1;
+            std::set<std::string> allowed_set = {"Lattice_ASCII",
+                                                 "Lattice_Binary", "VTK"};
+            return std::none_of(values.begin(), values.end(),
+                                [&allowed_set](const std::string &s) {
+                                  return allowed_set.count(s) == 0;
+                                });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5242,16 +6392,17 @@ struct InputKeys {
    * \anchor input_output_content_specific_
    *
    * Every possible content-specific section is documented in the following.
-   * Refer to \ref doxypage_input_conf_output_examples for a small selection of
-   * possible output configurations.
+   * Refer to \ref doxypage_input_conf_output_examples for a small selection
+   * of possible output configurations.
    *
    * <hr>
    * <h3> &diams; %Particles </h3>
    *
-   * \optional_key_no_line{key_output_particles_extended_,Extended,bool,false}
+   * \optional_key_no_line{key_output_particles_extended_,Extended,bool,
+   * false,\none}
    *
-   * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary`, `VTK`, `HepMC_asciiv3`
-   * and `HepMC_treeroot` formats.
+   * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary`, `VTK`,
+   * `HepMC_asciiv3` and `HepMC_treeroot` formats.
    * - `true` &rarr; Print extended information for each particle
    * - `false` &rarr; Regular output for each particle
    */
@@ -5259,12 +6410,15 @@ struct InputKeys {
    * \see_key{key_output_particles_extended_}
    */
   inline static const Key<bool> output_particles_extended{
-      InputSections::o_particles + "Extended", false, {"1.2"}};
+      InputSections::o_particles + "Extended",
+      false,
+      {"1.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_particles_quantities_,Quantities,list of
-   * strings,</tt><b>empty list</b><tt>}
+   * \optional_key_no_line{key_output_particles_quantities_,Quantities,
+   * list of strings,</tt><b>empty list</b><tt>,\any_valid}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
@@ -5277,11 +6431,22 @@ struct InputKeys {
   inline static const Key<std::vector<std::string>> output_particles_quantities{
       InputSections::o_particles + "Quantities",
       std::vector<std::string>{},
-      {"3.2"}};
+      {"3.2"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return true;
+        const auto &allowed_set =
+            InputKeys::get_list_of_valid_quantity_labels();
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_particles_only_final_,Only_Final,string,"Yes"}
+   * \optional_key_no_line{key_output_particles_only_final_,Only_Final,string,
+   * "Yes",\any_valid}
    *
    * &rArr; Ignored with `VTK`, `HepMC_asciiv3` and `HepMC_treeroot` formats.
    * - `"Yes"` &rarr; Print only final particle list.
@@ -5296,7 +6461,8 @@ struct InputKeys {
   inline static const Key<OutputOnlyFinal> output_particles_onlyFinal{
       InputSections::o_particles + "Only_Final",
       OutputOnlyFinal::Yes,
-      {"0.50"}};
+      {"0.50"},
+      detail::get_default_validator<OutputOnlyFinal>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5304,7 +6470,8 @@ struct InputKeys {
    * <h3> &diams; Collisions </h3>
    * &rArr; Format `VTK` not available
    *
-   * \optional_key_no_line{key_output_collisions_extended_,Extended,bool,false}
+   * \optional_key_no_line{key_output_collisions_extended_,Extended,bool,
+   * false,\none}
    *
    * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary`, `HepMC_asciiv3` and
    * `HepMC_treeroot` formats.
@@ -5315,13 +6482,15 @@ struct InputKeys {
    * \see_key{key_output_collisions_extended_}
    */
   inline static const Key<bool> output_collisions_extended{
-      InputSections::o_collisions + "Extended", false, {"1.2"}};
+      InputSections::o_collisions + "Extended",
+      false,
+      {"1.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_collisions_quantities_,Quantities,list of
-   * strings,
-   * </tt><b>empty list</b><tt>}
+   * \optional_key_no_line{key_output_collisions_quantities_,Quantities,
+   * list of strings,</tt><b>empty list</b><tt>,\any_valid}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
@@ -5332,13 +6501,25 @@ struct InputKeys {
    * \see_key{key_output_collisions_quantities_}
    */
   inline static const Key<std::vector<std::string>>
-      output_collisions_quantities{InputSections::o_collisions + "Quantities",
-                                   std::vector<std::string>{},
-                                   {"3.2"}};
+      output_collisions_quantities{
+          InputSections::o_collisions + "Quantities",
+          std::vector<std::string>{},
+          {"3.2"},
+          [](const std::vector<std::string> &values) noexcept {
+            if (values.empty())
+              return true;
+            const auto &allowed_set =
+                InputKeys::get_list_of_valid_quantity_labels();
+            return std::none_of(values.begin(), values.end(),
+                                [&allowed_set](const std::string &s) {
+                                  return allowed_set.count(s) == 0;
+                                });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_collisions_print_start_end_,Print_Start_End,bool,false}
+   * \optional_key_no_line{key_output_collisions_print_start_end_,
+   * Print_Start_End,bool,false,\none}
    *
    * &rArr; Ignored with `Root`, `HepMC_asciiv3` and `HepMC_treeroot` formats.
    * - `true` &rarr; Initial and final particle list is printed out
@@ -5348,15 +6529,19 @@ struct InputKeys {
    * \see_key{key_output_collisions_print_start_end_}
    */
   inline static const Key<bool> output_collisions_printStartEnd{
-      InputSections::o_collisions + "Print_Start_End", false, {"0.50"}};
+      InputSections::o_collisions + "Print_Start_End",
+      false,
+      {"0.50"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * <hr>
    * <h3> &diams; Dileptons </h3>
-   * &rArr; Only `ASCII` and `Binary` formats.
+   * &rArr; Only `ASCII`, `Binary` and `Root` formats.
    *
-   * \optional_key_no_line{key_output_dileptons_extended_,Extended,bool,false}
+   * \optional_key_no_line{key_output_dileptons_extended_,Extended,bool,
+   * false,\none}
    *
    * &rArr; Ignored with `Oscar1999`, `ASCII` and `Binary` formats.
    * - `true` &rarr; Print extended information for each particle
@@ -5366,13 +6551,15 @@ struct InputKeys {
    * \see_key{key_output_dileptons_extended_}
    */
   inline static const Key<bool> output_dileptons_extended{
-      InputSections::o_dileptons + "Extended", false, {"1.2"}};
+      InputSections::o_dileptons + "Extended",
+      false,
+      {"1.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_dileptons_quantities_,Quantities,list of
-   * strings,
-   * </tt><b>empty list</b><tt>}
+   * \optional_key_no_line{key_output_dileptons_quantities_,Quantities,
+   * list of strings,</tt><b>empty list</b><tt>,\any_valid}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
@@ -5385,15 +6572,26 @@ struct InputKeys {
   inline static const Key<std::vector<std::string>> output_dileptons_quantities{
       InputSections::o_dileptons + "Quantities",
       std::vector<std::string>{},
-      {"3.3"}};
+      {"3.3"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return true;
+        const auto &allowed_set =
+            InputKeys::get_list_of_valid_quantity_labels();
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * <hr>
    * <h3> &diams; Photons </h3>
-   * &rArr; Only `ASCII` and `Binary` formats.
+   * &rArr; Only `ASCII`, `Binary` and `Root` formats.
    *
-   * \optional_key_no_line{key_output_photons_extended_,Extended,bool,false}
+   * \optional_key_no_line{key_output_photons_extended_,Extended,bool,
+   * false,\none}
    *
    * &rArr; Ignored with `Oscar1999`, `ASCII` and `Binary` formats.
    * - `true` &rarr; Print extended information for each particle
@@ -5403,13 +6601,15 @@ struct InputKeys {
    * \see_key{key_output_photons_extended_}
    */
   inline static const Key<bool> output_photons_extended{
-      InputSections::o_photons + "Extended", false, {"1.5"}};
+      InputSections::o_photons + "Extended",
+      false,
+      {"1.5"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_photons_quantities_,Quantities,list of
-   * strings,
-   * </tt><b>empty list</b><tt>}
+   * \optional_key_no_line{key_output_photons_quantities_,Quantities,
+   * list of strings,</tt><b>empty list</b><tt>,\any_valid}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
@@ -5422,7 +6622,17 @@ struct InputKeys {
   inline static const Key<std::vector<std::string>> output_photons_quantities{
       InputSections::o_photons + "Quantities",
       std::vector<std::string>{},
-      {"3.3"}};
+      {"3.3"},
+      [](const std::vector<std::string> &values) noexcept {
+        if (values.empty())
+          return true;
+        const auto &allowed_set =
+            InputKeys::get_list_of_valid_quantity_labels();
+        return std::none_of(values.begin(), values.end(),
+                            [&allowed_set](const std::string &s) {
+                              return allowed_set.count(s) == 0;
+                            });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5430,9 +6640,9 @@ struct InputKeys {
    * <h3> &diams; Initial_Conditions </h3>
    * &rArr; Only `ASCII`, `Binary` and `Root`.
    *
-   * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false}
+   * \optional_key_no_line{key_output_IC_extended_,Extended,bool,false,\none}
    *
-   * &rArr; Ignored with `Oscar1999`, `ASCII`, `Binary` and `Root` formats.
+   * &rArr; Ignored with `Oscar1999`, `ASCII`, and `Binary` formats.
    * - `true` &rarr; Print extended information for each particle
    * - `false` &rarr; Regular output for each particle
    */
@@ -5440,13 +6650,15 @@ struct InputKeys {
    * \see_key{key_output_IC_extended_}
    */
   inline static const Key<bool> output_initialConditions_extended{
-      InputSections::o_initialConditions + "Extended", false, {"1.7"}};
+      InputSections::o_initialConditions + "Extended",
+      false,
+      {"1.7"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_IC_quantities_,Quantities,list of
-   * strings,
-   * </tt><b>empty list</b><tt>}
+   * \optional_key_no_line{key_output_IC_quantities_,Quantities,
+   * list of strings,</tt><b>empty list</b><tt>,\any_valid}
    *
    * &rArr; If using the `ASCII` or `Binary` format, a non-empty list must be
    * specified. An error will be produced if a non-empty `Quantities` key is
@@ -5460,7 +6672,17 @@ struct InputKeys {
       output_initialConditions_quantities{
           InputSections::o_initialConditions + "Quantities",
           std::vector<std::string>{},
-          {"3.3"}};
+          {"3.3"},
+          [](const std::vector<std::string> &values) noexcept {
+            if (values.empty())
+              return true;
+            const auto &allowed_set =
+                InputKeys::get_list_of_valid_quantity_labels();
+            return std::none_of(values.begin(), values.end(),
+                                [&allowed_set](const std::string &s) {
+                                  return allowed_set.count(s) == 0;
+                                });
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -5475,7 +6697,8 @@ struct InputKeys {
   inline static const Key<double> output_initialConditions_lowerBound{
       InputSections::o_initialConditions + "Lower_Bound",
       0.5,
-      {"1.8", "3.2", "3.3"}};
+      {"1.8", "3.2", "3.3"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -5490,7 +6713,8 @@ struct InputKeys {
   inline static const Key<double> output_initialConditions_properTime{
       InputSections::o_initialConditions + "Proper_Time",
       DefaultType::Dependent,
-      {"1.7", "3.2", "3.3"}};
+      {"1.7", "3.2", "3.3"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -5505,7 +6729,8 @@ struct InputKeys {
   inline static const Key<double> output_initialConditions_pTCut{
       InputSections::o_initialConditions + "pT_Cut",
       DefaultType::Dependent,
-      {"2.2", "3.2", "3.3"}};
+      {"2.2", "3.2", "3.3"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_removed_keys
@@ -5520,34 +6745,39 @@ struct InputKeys {
   inline static const Key<double> output_initialConditions_rapidityCut{
       InputSections::o_initialConditions + "Rapidity_Cut",
       DefaultType::Dependent,
-      {"2.2", "3.2", "3.3"}};
+      {"2.2", "3.2", "3.3"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * <hr> \anchor input_output_rivet_
    * <h3> &diams; Rivet </h3>
-   * &rArr; Only `YODA` format (see \ref doxypage_output_rivet  "here" for more
-   * information about the format).
+   * &rArr; Only `YODA` format (see \ref doxypage_output_rivet  "here" for
+   * more information about the format).
    *
    * \note In the following, <b>no default</b> means that, if the key is
    *       omitted, Rivet default behavior will be used.
    *
-   * \optional_key_no_line{key_output_rivet_analyses_,Analyses,list of strings,
-   * </tt><b>no default</b><tt>}
+   * \optional_key_no_line{key_output_rivet_analyses_,Analyses,list of
+   * strings,
+   * </tt><b>no default</b><tt>,\none}
    *
-   * This key specifies the analyses (including possible options) to add to the
-   * Rivet analysis.
+   * This key specifies the analyses (including possible options) to add to
+   * the Rivet analysis.
    */
   /**
    * \see_key{key_output_rivet_analyses_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_analyses{
-      InputSections::o_rivet + "Analyses", DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_rivet + "Analyses",
+      DefaultType::Dependent,
+      {"2.0.2"},
+      detail::get_default_validator<std::vector<std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_cross_sections_,Cross_Section,
-   * list of two doubles,</tt><b>no default</b><tt>}
+   * list of two doubles,</tt><b>no default</b><tt>,\none}
    *
    * Set the cross-section \unit{in pb}.
    */
@@ -5557,26 +6787,31 @@ struct InputKeys {
   inline static const Key<std::array<double, 2>> output_rivet_crossSection{
       InputSections::o_rivet + "Cross_Section",
       DefaultType::Dependent,
-      {"2.0.2"}};
+      {"2.0.2"},
+      detail::get_default_validator<std::array<double, 2>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_rivet_ignore_beams_,Ignore_Beams,bool,true}
+   * \optional_key_no_line{key_output_rivet_ignore_beams_,Ignore_Beams,bool,
+   * true,\none}
    *
-   * Ask Rivet to not validate beams before running analyses. This is needed if
-   * you use the <tt>\ref key_MC_fermi_motion_ "Fermi_Motion"</tt> option that
-   * disrupts the collision energy event-by-event.
+   * Ask Rivet to not validate beams before running analyses. This is needed
+   * if you use the <tt>\ref key_MC_fermi_motion_ "Fermi_Motion"</tt> option
+   * that disrupts the collision energy event-by-event.
    */
   /**
    * \see_key{key_output_rivet_ignore_beams_}
    */
   inline static const Key<bool> output_rivet_ignoreBeams{
-      InputSections::o_rivet + "Ignore_Beams", true, {"2.0.2"}};
+      InputSections::o_rivet + "Ignore_Beams",
+      true,
+      {"2.0.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_logging_,Logging,map<string\,string>,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * Specifies log levels for various parts of Rivet, including analyses. Each
    * entry is a log name followed by a log level (one among `"TRACE"`,
@@ -5587,12 +6822,15 @@ struct InputKeys {
    */
   inline static const Key<std::map<std::string, std::string>>
       output_rivet_logging{
-          InputSections::o_rivet + "Logging", DefaultType::Dependent, {"0.50"}};
+          InputSections::o_rivet + "Logging",
+          DefaultType::Dependent,
+          {"0.50"},
+          detail::get_default_validator<std::map<std::string, std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_paths_,Paths,list of strings,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * This key specifies the directories that Rivet will search for analyses
    * and data files related to the analyses.
@@ -5601,12 +6839,16 @@ struct InputKeys {
    * \see_key{key_output_rivet_paths_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_paths{
-      InputSections::o_rivet + "Paths", DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_rivet + "Paths",
+      DefaultType::Dependent,
+      {"2.0.2"},
+      detail::get_default_validator<std::vector<std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_rivet_preloads_,Preloads,list of strings,
-   * </tt><b>no default</b><tt>}
+   * \optional_key_no_line{key_output_rivet_preloads_,Preloads,list of
+   * strings,
+   * </tt><b>no default</b><tt>,\none}
    *
    * Specify data files to read into Rivet (e.g., centrality calibrations) at
    * start-up.
@@ -5615,7 +6857,10 @@ struct InputKeys {
    * \see_key{key_output_rivet_preloads_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_preloads{
-      InputSections::o_rivet + "Preloads", DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_rivet + "Preloads",
+      DefaultType::Dependent,
+      {"2.0.2"},
+      detail::get_default_validator<std::vector<std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5625,7 +6870,7 @@ struct InputKeys {
    * Some operations about weights can be customized in the `Weights` section.
    *
    * \optional_key_no_line{key_output_rivet_weights_cap_,Cap,double,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * Cap weights to this value.
    */
@@ -5633,12 +6878,15 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_cap_}
    */
   inline static const Key<double> output_rivet_weights_cap{
-      InputSections::o_r_weights + "Cap", DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_r_weights + "Cap",
+      DefaultType::Dependent,
+      {"2.0.2"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_deselect_,Deselect,
-   * list of strings, </tt><b>no default</b><tt>}
+   * list of strings, </tt><b>no default</b><tt>,\none}
    *
    * De-select these weights for processing.
    */
@@ -5646,14 +6894,16 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_deselect_}
    */
   inline static const Key<std::vector<std::string>>
-      output_rivet_weights_deselect{InputSections::o_r_weights + "Deselect",
-                                    DefaultType::Dependent,
-                                    {"2.0.2"}};
+      output_rivet_weights_deselect{
+          InputSections::o_r_weights + "Deselect",
+          DefaultType::Dependent,
+          {"2.0.2"},
+          detail::get_default_validator<std::vector<std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_nlo_smearing_,NLO_Smearing,
-   * double, </tt><b>no default</b><tt>}
+   * double, </tt><b>no default</b><tt>,\none}
    *
    * Smearing histogram binning by given fraction of bin widths to avoid NLO
    * counter events to flow into neighboring bin.
@@ -5664,12 +6914,13 @@ struct InputKeys {
   inline static const Key<double> output_rivet_weights_nloSmearing{
       InputSections::o_r_weights + "NLO_Smearing",
       DefaultType::Dependent,
-      {"2.0.2"}};
+      {"2.0.2"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_no_multi_,No_Multi,bool,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * Ask Rivet not to do multi-weight processing.
    */
@@ -5679,12 +6930,13 @@ struct InputKeys {
   inline static const Key<bool> output_rivet_weights_noMulti{
       InputSections::o_r_weights + "No_Multi",
       DefaultType::Dependent,
-      {"2.0.2"}};
+      {"2.0.2"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_nominal_,Nominal,string,
-   * </tt><b>no default</b><tt>}
+   * </tt><b>no default</b><tt>,\none}
    *
    * The nominal weight name.
    */
@@ -5694,12 +6946,13 @@ struct InputKeys {
   inline static const Key<std::string> output_rivet_weights_nominal{
       InputSections::o_r_weights + "Nominal",
       DefaultType::Dependent,
-      {"2.0.2"}};
+      {"2.0.2"},
+      detail::get_default_validator<std::string>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_rivet_weights_select_,Select,
-   * list of strings, </tt><b>no default</b><tt>}
+   * list of strings, </tt><b>no default</b><tt>,\none}
    *
    * Select these weights for processing.
    */
@@ -5707,7 +6960,10 @@ struct InputKeys {
    * \see_key{key_output_rivet_weights_select_}
    */
   inline static const Key<std::vector<std::string>> output_rivet_weights_select{
-      InputSections::o_r_weights + "Select", DefaultType::Dependent, {"2.0.2"}};
+      InputSections::o_r_weights + "Select",
+      DefaultType::Dependent,
+      {"2.0.2"},
+      detail::get_default_validator<std::vector<std::string>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
@@ -5716,11 +6972,11 @@ struct InputKeys {
    * &rArr; Only `VTK` format.
    *
    * No content-specific output options, apart from the <tt>\ref
-   * key_output_content_format_ "Format"</tt> key which only accepts `["VTK"]`.
-   * \note This output requires \ref doxypage_input_conf_pot_coulomb
-   *    "coulomb potential" to be enabled which in turn requires a
-   *    \ref doxypage_input_conf_lattice, both of which have to be specified in
-   *    the conguration file.
+   * key_output_content_format_ "Format"</tt> key which only accepts
+   * `["VTK"]`. \note This output requires \ref
+   * doxypage_input_conf_pot_coulomb "coulomb potential" to be enabled which
+   * in turn requires a \ref doxypage_input_conf_lattice, both of which have
+   * to be specified in the conguration file.
    */
 
   /*!\Userguide
@@ -5734,55 +6990,63 @@ struct InputKeys {
    * -# at a given point to ASCII output;
    * -# averaged over all particles to ASCII output.
    *
-   * <b>About 1 and 2:</b> Note that this output requires a lattice, which needs
-   * to be enabled in the conguration file and is regulated by the options of
-   * \ref doxypage_input_conf_lattice. See \ref doxypage_output_vtk for
-   * further information on 1 and \ref doxypage_output_thermodyn_lattice for 2.
+   * <b>About 1 and 2:</b> Note that this output requires a lattice, which
+   * needs to be enabled in the conguration file and is regulated by the
+   * options of \ref doxypage_input_conf_lattice. See \ref doxypage_output_vtk
+   * for further information on 1 and \ref doxypage_output_thermodyn_lattice
+   * for 2.
    *
    * <b>About 3 and 4:</b> See \ref doxypage_output_thermodyn for
    * further information.
    *
-   * \optional_key_no_line{key_output_thermo_only_part_,Only_Participants,bool,false}
+   * \optional_key_no_line{key_output_thermo_only_part_,Only_Participants,bool,
+   * false,\none}
    *
-   * If set to `true`, only participants are included in the computation of the
-   * energy momentum tensor and of the Eckart currents. In this context, a
+   * If set to `true`, only participants are included in the computation of
+   * the energy momentum tensor and of the Eckart currents. In this context, a
    * hadron is considered as a participant if it had at least one collision.
    * When using \ref doxypage_input_conf_potentials "Potentials" this option
    * must be either left unset or set to `false`. The reason behind this
-   * limitation is that in this case hadrons can influence the evolution of the
-   * system even without collisions.
+   * limitation is that in this case hadrons can influence the evolution of
+   * the system even without collisions.
    */
   /**
    * \see_key{key_output_thermo_only_part_}
    */
   inline static const Key<bool> output_thermodynamics_onlyParticipants{
-      InputSections::o_thermodynamics + "Only_Participants", false, {"2.1"}};
+      InputSections::o_thermodynamics + "Only_Participants",
+      false,
+      {"2.1"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_ignore_unformed_,Ignore_Unformed,
-   * bool, false}
+   * bool, false,\none}
    *
    * Whether the thermodynamic calculation should consider unformed (or
    * preformed) particles or not.
    *
-   * Unformed particles are traditionally those created by string fragmentation,
-   * such that their density should contribute to thermodynamics. However, we
-   * use the formation time also to ignore particles that are not really present
-   * yet in the simulation, for example in afterburner/ListModus calculations.
-   * In these cases, one might want to ignore unformed particles when evaluating
-   * thermodynamic properties.
+   * Unformed particles are traditionally those created by string
+   * fragmentation, such that their density should contribute to
+   * thermodynamics. However, we use the formation time also to ignore
+   * particles that are not really present yet in the simulation, for example
+   * in afterburner/ListModus calculations. In these cases, one might want to
+   * ignore unformed particles when evaluating thermodynamic properties.
    */
   /**
    * \see_key{key_output_thermo_ignore_unformed_}
    */
   inline static const Key<bool> output_thermodynamics_ignoreUnformed{
-      InputSections::o_thermodynamics + "Ignore_Unformed", false, {"3.4"}};
+      InputSections::o_thermodynamics + "Ignore_Unformed",
+      false,
+      {"3.4"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_position_,Position,
-   * list of 3 doubles,[0.0\, 0.0\, 0.0]}
+   * list of 3 doubles,[0.0\, 0.0\, 0.0],\none}
    *
    * Point at which thermodynamic quantities are computed (\unit{in fm}).
    */
@@ -5792,12 +7056,13 @@ struct InputKeys {
   inline static const Key<std::array<double, 3>> output_thermodynamics_position{
       InputSections::o_thermodynamics + "Position",
       std::array<double, 3>{{0.0, 0.0, 0.0}},
-      {"1.0"}};
+      {"1.0"},
+      detail::get_default_validator<std::array<double, 3>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
    * \optional_key_no_line{key_output_thermo_quantities_,Quantities,
-   * list of strings,[]}
+   * list of strings,[],\any_valid}
    *
    * List of thermodynamic quantities that are printed to the output.
    * Possible quantities are:
@@ -5808,12 +7073,12 @@ struct InputKeys {
    *   local rest frame, where \f$T^{0i}\f$ = 0.
    * - `"landau_velocity"` &rarr; Velocity of the Landau rest frame. The
    *   velocity is obtained from the energy-momentum tensor
-   *   \f$T^{\mu\nu}(t,x,y,z)\f$ by solving the generalized eigenvalue equation
-   *   \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0\f$.
+   *   \f$T^{\mu\nu}(t,x,y,z)\f$ by solving the generalized eigenvalue
+   * equation \f$(T^{\mu\nu} - \lambda g^{\mu\nu})u_{\mu}=0\f$.
    * - `"j_QBS"` &rarr; Electric (Q), baryonic (B) and strange (S) currents
-   *   \f$j^{\mu}_{QBS}(t,x,y,z) \f$; note that all currents are given in units
-   *   of "number of charges"; multiply the electric current by the elementary
-   *   charge \f$\sqrt{4 \pi \alpha_{EM}} \f$ for charge units.
+   *   \f$j^{\mu}_{QBS}(t,x,y,z) \f$; note that all currents are given in
+   * units of "number of charges"; multiply the electric current by the
+   * elementary charge \f$\sqrt{4 \pi \alpha_{EM}} \f$ for charge units.
    */
   /**
    * \see_key{key_output_thermo_type_}
@@ -5822,48 +7087,53 @@ struct InputKeys {
       output_thermodynamics_quantites{
           InputSections::o_thermodynamics + "Quantities",
           std::set<ThermodynamicQuantity>{},
-          {"1.0"}};
+          {"1.0"},
+          detail::get_default_validator<std::set<ThermodynamicQuantity>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_thermo_smearing_,Smearing,bool,true}
+   * \optional_key_no_line{key_output_thermo_smearing_,Smearing,bool,true,\none}
    *
-   * Using Gaussian smearing for computing thermodynamic quantities or not. This
-   * triggers whether thermodynamic quantities are evaluated at a fixed point
+   * Using Gaussian smearing for computing thermodynamic quantities or not.
+   * This triggers whether thermodynamic quantities are evaluated at a fixed
+   * point
    * (`true`) or summed over all particles (`false`).
    * - `true` &rarr; smearing applied
    * - `false` &rarr; smearing not applied
    *
-   * The contribution to the energy-momentum tensor and current (be it electric,
-   * baryonic or strange) from a single particle in its rest frame is:
-   * \f[\begin{eqnarray}
+   * The contribution to the energy-momentum tensor and current (be it
+   * electric, baryonic or strange) from a single particle in its rest frame
+   * is: \f[\begin{eqnarray}
    * j^{\mu} = B \frac{p_0^{\mu}}{p_0^0} W \\
    * T^{\mu \nu} = \frac{p_0^{\mu}p_0^{\nu}}{p_0^0} W
    * \end{eqnarray}
    * \f]
    * with B being the charge of interest and W being the weight given to this
    * particle. Normally, if one computes thermodynamic quantities at a point,
-   * smearing should be applied, and then \f$W\f$ takes on the following shape:
-   * \f[
-   * W = (2 \pi \sigma^2)^{-3/2} \exp\left(
+   * smearing should be applied, and then \f$W\f$ takes on the following
+   * shape: \f[ W = (2 \pi \sigma^2)^{-3/2} \exp\left(
    * - \frac{(\mathbf{r}-\mathbf{r}_0(t))^2}{2\sigma^2}
    * \right)\f]
    * It can however be useful to compute the thermodynamic quantities of all
-   * particles in a box with \f$W=1\f$, which would correspond to <tt>"Smearing:
-   * false"</tt>. Note that using this option changes the units of the
-   * thermodynamic quantities, as they are no longer spatially normalized. One
-   * should divide this quantity by the volume of the box to restore units to
-   * the correct ones.
+   * particles in a box with \f$W=1\f$, which would correspond to
+   * <tt>"Smearing: false"</tt>. Note that using this option changes the units
+   * of the thermodynamic quantities, as they are no longer spatially
+   * normalized. One should divide this quantity by the volume of the box to
+   * restore units to the correct ones.
    */
   /**
    * \see_key{key_output_thermo_smearing_}
    */
   inline static const Key<bool> output_thermodynamics_smearing{
-      InputSections::o_thermodynamics + "Smearing", true, {"1.0"}};
+      InputSections::o_thermodynamics + "Smearing",
+      true,
+      {"1.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_output
-   * \optional_key_no_line{key_output_thermo_type_,Type,string,"baryon"}
+   * \optional_key_no_line{key_output_thermo_type_,Type,string,
+   * "baryon",\any_valid}
    *
    * Particle type taken into consideration, one among
    * - `"hadron"`
@@ -5877,59 +7147,98 @@ struct InputKeys {
    * \see_key{key_output_thermo_type_}
    */
   inline static const Key<DensityType> output_thermodynamics_type{
-      InputSections::o_thermodynamics + "Type", DensityType::Baryon, {"1.0"}};
+      InputSections::o_thermodynamics + "Type",
+      DensityType::Baryon,
+      {"1.0"},
+      detail::get_default_validator<DensityType>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
-   * \required_key{key_lattice_automatic_,Automatic,bool}
+   * \required_key{key_lattice_automatic_,Automatic,bool,\none}
    *
    * Whether to automatically determine the geometry of the lattice. If set to
    * `False`, both <tt>\ref key_lattice_cell_number_ "Cell_Number"</tt> and
-   * <tt>\ref key_lattice_origin_ "Origin"</tt> and <tt>\ref key_lattice_sizes_
-   * "Sizes"</tt> keys must be specified. If set to `True` at least one of the
-   * geometrical properties must be omitted. SMASH will determine the missing
-   * properties as described in \ref doxypage_input_lattice_default_parameters.
+   * <tt>\ref key_lattice_origin_ "Origin"</tt> and <tt>\ref
+   * key_lattice_sizes_ "Sizes"</tt> keys must be specified. If set to `True`
+   * at least one of the geometrical properties must be omitted. SMASH will
+   * determine the missing properties as described in \ref
+   * doxypage_input_lattice_default_parameters.
    *
    * \attention
    * Specifying only \b some geometrical parameters (among `Cell_Number`,
-   * `Origin` and `Sizes`) and letting SMASH determine the remaining ones should
-   * be carefully done as it might give an undesired result. This is due to the
-   * fact that SMASH determines the full geometry of the lattice as described in
-   * \ref doxypage_input_lattice_default_parameters and **only afterwards** the
-   * provided keys are overwriting the calculated ones. Therefore, for example,
-   * specifing only the `Origin` will shift the automatically determined lattice
-   * and this might not be the desired effect.
+   * `Origin` and `Sizes`) and letting SMASH determine the remaining ones
+   * should be carefully done as it might give an undesired result. This is
+   * due to the fact that SMASH determines the full geometry of the lattice as
+   * described in \ref doxypage_input_lattice_default_parameters and **only
+   * afterwards** the provided keys are overwriting the calculated ones.
+   * Therefore, for example, specifing only the `Origin` will shift the
+   * automatically determined lattice and this might not be the desired
+   * effect.
    */
   /**
    * \see_key{key_lattice_automatic_}
    */
   inline static const Key<bool> lattice_automatic{
-      InputSections::lattice + "Automatic", {"3.0"}};
+      InputSections::lattice + "Automatic",
+      {"3.0"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_cell_number_,Cell_Number,list of 3 ints,
-   * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * </tt>depends on <tt>\ref key_gen_modus_ "Modus", \f$x_i>0\f$}
    * (see \ref doxypage_input_lattice_default_parameters)
    *
    * Number of cells in x, y, z directions.
+   *
+   * \attention Lattice is used to calculate bulk quantities such as baryon
+   * density or energy density. The choice of the number of cells, together
+   * with the chosen lattice size, affects the results: too coarse of a
+   * lattice will average over large volumes of space (which may yield dubious
+   * results), while too fine of a lattice may lead the calculation toward
+   * Poisson-like noise (because there is not enough particles to provide the
+   * necessary statistics). As guidance, one can argue that microscopic
+   * hadronic transport should resolve structures on the order of about 1 fm,
+   * so that one should choose lattice cell number and lattice size that
+   * result in cell size of about 1 fm. Using lattices corresponding to larger
+   * cell sizes can be fine if this is what is intended. Using lattices with
+   * cell sizes of about 0.5 fm may be risky, and smaller lattice sizes are
+   * not not advised.
+   *
+   * \note A too large number of cells can lead to long runtime and/or large
+   * memory usage. This aspect is clearly related to the choice of the
+   * <tt>\ref key_lattice_sizes_ "Sizes"</tt> key and these two keys should be
+   * chosen together. Make sure to choose the lattice geometry carefully and
+   * check the results for convergence with respect to it.
    */
   /**
    * \see_key{key_lattice_cell_number_}
    */
   inline static const Key<std::array<int, 3>> lattice_cellNumber{
-      InputSections::lattice + "Cell_Number", DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Cell_Number",
+      DefaultType::Dependent,
+      {"0.80"},
+      [](const std::array<int, 3> &value) noexcept {
+        if (std::abs(value[0] * value[1] * value[2]) > 15'000'000) {
+          logg[LogArea::Configuration::id].warn(
+              "Number of total cells for lattice is very large, which may "
+              "lead "
+              "to long runtime and/or large memory usage.\nMake sure this is "
+              "intended (refer to the documentation for more information).");
+        }
+        return value[0] > 0 && value[1] > 0 && value[2] > 0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_origin_,Origin,list of 3 doubles,
-   * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * </tt>depends on <tt>\ref key_gen_modus_ "Modus",\none}
    * (see \ref doxypage_input_lattice_default_parameters)
    *
    * The lattice covers a cuboid region whose vertices \f$V_n\f$ are uniquely
-   * identified by the origin coordinates \f$(O_x, O_y, O_z)\f$ and the lattice
-   * sizes \f$(L_x, L_y, L_z)\f$ as follows:
-   * \f[ V_n = (O_x+i\cdot L_x, O_y+j\cdot L_y, O_z+k\cdot L_z) \f] where
+   * identified by the origin coordinates \f$(O_x, O_y, O_z)\f$ and the
+   * lattice sizes \f$(L_x, L_y, L_z)\f$ as follows: \f[ V_n = (O_x+i\cdot
+   * L_x, O_y+j\cdot L_y, O_z+k\cdot L_z) \f] where
    * \f$(i,j,k)\in\{0,1\}\times\{0,1\}\times\{0,1\}\f$. Coordinates of the
    * lattice are given \unit{in fm}.
    */
@@ -5937,13 +7246,16 @@ struct InputKeys {
    * \see_key{key_lattice_origin_}
    */
   inline static const Key<std::array<double, 3>> lattice_origin{
-      InputSections::lattice + "Origin", DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Origin",
+      DefaultType::Dependent,
+      {"0.80"},
+      detail::get_default_validator<std::array<double, 3>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_periodic_,Periodic,bool,
    * (\ref key_gen_modus_ "Modus" == "Box"
-   * || \ref key_gen_modus_ "Modus" == "ListBox")}
+   * || \ref key_gen_modus_ "Modus" == "ListBox"),\none}
    *
    * Use periodic continuation or not. With periodic continuation
    * \f$(x,y,z) + (i\cdot L_x,\,j\cdot L_y,\,k\cdot L_z) \equiv (x,y,z)\f$
@@ -5954,41 +7266,73 @@ struct InputKeys {
    * \see_key{key_lattice_periodic_}
    */
   inline static const Key<bool> lattice_periodic{
-      InputSections::lattice + "Periodic", DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Periodic",
+      DefaultType::Dependent,
+      {"0.80"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
-   * \optional_key{key_lattice_pot_affect_threshold_,Potentials_Affect_Thresholds,bool,false}
+   * \optional_key{key_lattice_pot_affect_threshold_,
+   * Potentials_Affect_Thresholds,bool,false,\none}
    *
-   * Include potential effects, since mean field potentials change the threshold
-   * energies of the actions.
+   * Include potential effects, since mean field potentials change the
+   * threshold energies of the actions.
    */
   /**
    * \see_key{key_lattice_pot_affect_threshold_}
    */
   inline static const Key<bool> lattice_potentialsAffectThreshold{
-      InputSections::lattice + "Potentials_Affect_Thresholds", false, {"1.3"}};
+      InputSections::lattice + "Potentials_Affect_Thresholds",
+      false,
+      {"1.3"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_lattice
    * \optional_key{key_lattice_sizes_,Sizes,list of 3 doubles,
-   * </tt>depends on <tt>\ref key_gen_modus_ "Modus"}
+   * </tt>depends on <tt>\ref key_gen_modus_ "Modus", \f$x_i>0\f$}
    * (see \ref doxypage_input_lattice_default_parameters)
    *
    * Sizes of lattice in x, y, z directions \unit{in fm}.
+   *
+   * \note Lattice is used to calculate bulk quantities such as baryon
+   * density or energy density and the choice of its size can have a
+   * significant impact on the results. A too small lattice size may lead to
+   * inaccurate results, becuase part of the system might not be covered,
+   * while a too large lattice size may lead to long runtime and large memory
+   * usage, depending on the value of the <tt>\ref key_lattice_cell_number_
+   * "Cell_Number"</tt> key. These two keys should be chosen together. Make
+   * sure to choose the lattice geometry carefully and check the results for
+   * convergence with respect to it.
    */
   /**
    * \see_key{key_lattice_sizes_}
    */
   inline static const Key<std::array<double, 3>> lattice_sizes{
-      InputSections::lattice + "Sizes", DefaultType::Dependent, {"0.80"}};
+      InputSections::lattice + "Sizes",
+      DefaultType::Dependent,
+      {"0.80"},
+      [](const std::array<double, 3> &value) noexcept {
+        const int max = 200;  // as int to print it nicer in warning
+        if (value[0] > max || value[1] > max || value[2] > max) {
+          logg[LogArea::Configuration::id].warn(
+              "Lattice size(s) larger than " + std::to_string(max) +
+              " fm may lead to long runtime or large memory usage\nor even "
+              "inaccurate results depending on the number of cells chosen.\n"
+              "Make sure this is intended (refer to the documentation for "
+              "more "
+              "information).");
+        }
+        return value[0] > 0 && value[1] > 0 && value[2] > 0;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_potentials
    * \optional_key{key_potentials_use_potentials_outside_lattice_,
-   * Use_Potentials_Outside_Lattice, bool, true}
+   * Use_Potentials_Outside_Lattice,bool,true,\none}
    *
-   * Wether to include the potentials also for particles that have left the
+   * Whether to include the potentials also for particles that have left the
    * lattice. If set to false, the particles will propagate on straight lines
    * once they leave the volume that is covered by the lattice.
    */
@@ -5998,11 +7342,12 @@ struct InputKeys {
   inline static const Key<bool> potentials_use_potentials_outside_lattice{
       InputSections::potentials + "Use_Potentials_Outside_Lattice",
       true,
-      {"3.1"}};
+      {"3.1"},
+      detail::get_default_validator<bool>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
-   * \required_key{key_potentials_skyrme_a_,Skyrme_A,double}
+   * \required_key{key_potentials_skyrme_a_,Skyrme_A,double,\f$x<0\f$}
    *
    * Parameter \f$A\f$ of Skyrme potential \unit{in MeV}.
    */
@@ -6010,11 +7355,13 @@ struct InputKeys {
    * \see_key{key_potentials_skyrme_a_}
    */
   inline static const Key<double> potentials_skyrme_skyrmeA{
-      InputSections::p_skyrme + "Skyrme_A", {"0.60"}};
+      InputSections::p_skyrme + "Skyrme_A",
+      {"0.60"},
+      [](const double &value) noexcept { return value < 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
-   * \required_key{key_potentials_skyrme_b_,Skyrme_B,double}
+   * \required_key{key_potentials_skyrme_b_,Skyrme_B,double,\f$x>0\f$}
    *
    * Parameter \f$B\f$ of Skyrme potential \unit{in MeV}.
    */
@@ -6022,51 +7369,62 @@ struct InputKeys {
    * \see_key{key_potentials_skyrme_b_}
    */
   inline static const Key<double> potentials_skyrme_skyrmeB{
-      InputSections::p_skyrme + "Skyrme_B", {"0.60"}};
+      InputSections::p_skyrme + "Skyrme_B",
+      {"0.60"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_skyrme
-   * \required_key{key_potentials_skyrme_tau_,Skyrme_Tau,double}
+   * \required_key{key_potentials_skyrme_tau_,Skyrme_Tau,double,
+   * \f$x>\frac{2}{3}\f$}
    *
    * Parameter \f$\tau\f$ of Skyrme potential.
-   *
    */
   /**
    * \see_key{key_potentials_skyrme_tau_}
    */
   inline static const Key<double> potentials_skyrme_skyrmeTau{
-      InputSections::p_skyrme + "Skyrme_Tau", {"0.60"}};
+      InputSections::p_skyrme + "Skyrme_Tau",
+      {"0.60"},
+      [](const double &value) noexcept { return value > 2.0 / 3.0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_symmetry
    * \optional_key{key_potentials_symmetry_gamma_,gamma,double,
-   * </tt>do not consider last term in \f$S(\rho_B)\f$<tt>}
+   * </tt>do not consider last term in \f$S(\rho_B)\f$<tt>,\f$x>0\f$}
    *
    * Exponent \f$\gamma\f$ in formula for \f$S(\rho_B)\f$. If `gamma` is
    * specified, the baryon density dependence is included in the potential.
-   * Otherwise only the first term of the potential will be taken into account.
+   * Otherwise only the first term of the potential will be taken into
+   * account.
    */
   /**
    * \see_key{key_potentials_symmetry_gamma_}
    */
   inline static const Key<double> potentials_symmetry_gamma{
-      InputSections::p_symmetry + "gamma", DefaultType::Dependent, {"1.7"}};
+      InputSections::p_symmetry + "gamma",
+      DefaultType::Dependent,
+      {"1.7"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_symmetry
-   * \required_key{key_potentials_symmetry_s_pot_,S_Pot,double}
+   * \required_key{key_potentials_symmetry_s_pot_,S_Pot,double,\none}
    *
-   * Parameter \f$S_{pot}\f$ of symmetry potential \unit{in MeV}.
+   * Parameter \f$S_{pot}\f$ of symmetry potential \unit{in MeV}. Note that
+   * \iref{Mohs:2024gyc} Bayesian analysis suggests \f$0<S_{pot}<30\f$.
    */
   /**
    * \see_key{key_potentials_symmetry_s_pot_}
    */
   inline static const Key<double> potentials_symmetry_sPot{
-      InputSections::p_symmetry + "S_Pot", {"0.60"}};
+      InputSections::p_symmetry + "S_Pot",
+      {"0.60"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_VDF
-   * \required_key{key_potentials_vdf_coeffs_,Coeffs,list of doubles}
+   * \required_key{key_potentials_vdf_coeffs_,Coeffs,list of doubles,\none}
    *
    * Parameters \f$C_i\f$ of the VDF potential \unit{in MeV}.
    */
@@ -6074,38 +7432,52 @@ struct InputKeys {
    * \see_key{key_potentials_vdf_coeffs_}
    */
   inline static const Key<std::vector<double>> potentials_vdf_coeffs{
-      InputSections::p_vdf + "Coeffs", {"2.1"}};
+      InputSections::p_vdf + "Coeffs",
+      {"2.1"},
+      detail::get_default_validator<std::vector<double>>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_VDF
-   * \required_key{key_potentials_vdf_powers_,Powers,double}
+   * \required_key{key_potentials_vdf_powers_,Powers,list of doubles,
+   * \f$x_i > 0\f$}
    *
    * Parameters \f$b_i\f$ of the VDF potential.
    *
    * \warning
-   * You need to provide as many entries for `Powers` as provided for `Coeffs`.
+   * You need to provide as many entries for `Powers` as provided for
+   * `Coeffs`.
    */
   /**
    * \see_key{key_potentials_vdf_powers_}
    */
   inline static const Key<std::vector<double>> potentials_vdf_powers{
-      InputSections::p_vdf + "Powers", {"2.1"}};
+      InputSections::p_vdf + "Powers",
+      {"2.1"},
+      [](const std::vector<double> &value) noexcept {
+        return std::all_of(value.begin(), value.end(),
+                           [](double x) { return x > 0; });
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_VDF
-   * \required_key{key_potentials_vdf_sat_rhoB_,Sat_rhoB,double}
+   * \required_key{key_potentials_vdf_sat_rhoB_,Sat_rhoB,double,
+   * \f$0.13 \le x \le 0.19\f$}
    *
    * The saturation density of nuclear matter \unit{in 1/fm³}.
    */
   /**
-   * \see_key{key_potentials_symmetry_gamma_}
+   * \see_key{key_potentials_vdf_sat_rhoB_}
    */
   inline static const Key<double> potentials_vdf_satRhoB{
-      InputSections::p_vdf + "Sat_rhoB", {"2.1"}};
+      InputSections::p_vdf + "Sat_rhoB",
+      {"2.1"},
+      [](const double &value) noexcept {
+        return value >= 0.13 && value <= 0.19;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_coulomb
-   * \required_key{key_potentials_coulomb_r_cut_,R_Cut,double}
+   * \required_key{key_potentials_coulomb_r_cut_,R_Cut,double,\f$x>0\f$}
    *
    * The radius value \unit{in fm} at which the integration volume is cut.
    */
@@ -6113,24 +7485,29 @@ struct InputKeys {
    * \see_key{key_potentials_coulomb_r_cut_}
    */
   inline static const Key<double> potentials_coulomb_rCut{
-      InputSections::p_coulomb + "R_Cut", {"2.1"}};
+      InputSections::p_coulomb + "R_Cut",
+      {"2.1"},
+      [](const double &value) noexcept { return value > 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_momentum_dependence
-   * \required_key{key_potentials_momentum_dependence_C,C,double}
+   * \required_key{key_potentials_momentum_dependence_C,C,double,\none}
    *
-   * Parameter \f$ C \f$ of the momentum-dependent term of the
-   * potential \unit{in MeV}.
+   * Parameter \f$ C \f$ of the momentum-dependent term of the potential
+   * \unit{in MeV}.
    */
   /**
    * \see_key{key_potentials_momentum_dependence_C}
    */
   inline static const Key<double> potentials_momentum_dependence_C{
-      InputSections::p_momentumDependence + "C", {"3.1"}};
+      InputSections::p_momentumDependence + "C",
+      {"3.1"},
+      detail::get_default_validator<double>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_pot_momentum_dependence
-   * \required_key{key_potentials_momentum_dependence_Lambda,Lambda,double}
+   * \required_key{key_potentials_momentum_dependence_Lambda,Lambda,
+   * double,\f$x \ne 0\f$}
    *
    * Parameter \f$ \Lambda \f$ of the momentum-dependent term in the
    * potential \unit{in 1/fm}.
@@ -6139,7 +7516,9 @@ struct InputKeys {
    * \see_key{key_potentials_momentum_dependence_Lambda}
    */
   inline static const Key<double> potentials_momentum_dependence_Lambda{
-      InputSections::p_momentumDependence + "Lambda", {"3.1"}};
+      InputSections::p_momentumDependence + "Lambda",
+      {"3.1"},
+      [](const double &value) noexcept { return value != 0; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -6150,7 +7529,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
    * \required_key_no_line{key_forced_therm_cell_number_,Cell_Number,list of 3
-   * ints}
+   * ints,\f$x_i > 0\f$}
    *
    * Number of cells in each direction (x,y,z).
    */
@@ -6158,24 +7537,39 @@ struct InputKeys {
    * \see_key{key_forced_therm_cell_number_}
    */
   inline static const Key<std::array<int, 3>> forcedThermalization_cellNumber{
-      InputSections::forcedThermalization + "Cell_Number", {"1.1"}};
+      InputSections::forcedThermalization + "Cell_Number",
+      {"1.1"},
+      [](const std::array<int, 3> &value) noexcept {
+        const bool valid = value[0] > 0 && value[1] > 0 && value[2] > 0;
+        if (valid && value[0] * value[1] * value[2] > 2'000'000) {
+          logg[LogArea::Configuration::id].warn(
+              "Number of total cells for forced thermalization is very "
+              "large, "
+              "which may lead to long runtime. Make sure this is intended.");
+        }
+        return valid;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \required_key{key_forced_therm_critical_edens_,Critical_Edens,double}
+   * \required_key_no_line{key_forced_therm_critical_edens_,Critical_Edens,
+   * double,\f$x \in (0\, 2]\f$}
    *
-   * Critical energy density \unit{in GeV/fm³} above which forced thermalization
-   * is applied.
+   * Critical energy density \unit{in GeV/fm³} above which forced
+   * thermalization is applied (see \iref{Oliinychenko:2016vkg} for more
+   * information on the constraint).
    */
   /**
    * \see_key{key_forced_therm_critical_edens_}
    */
   inline static const Key<double> forcedThermalization_criticalEDensity{
-      InputSections::forcedThermalization + "Critical_Edens", {"1.1"}};
+      InputSections::forcedThermalization + "Critical_Edens",
+      {"1.1"},
+      [](const double &value) noexcept { return value > 0 && value <= 2; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \required_key{key_forced_therm_start_time_,Start_Time,double}
+   * \required_key_no_line{key_forced_therm_start_time_,Start_Time,double,\none}
    *
    * Time \unit{in fm} after which forced thermalization may be applied, if
    * the energy density is sufficiently high.
@@ -6184,19 +7578,32 @@ struct InputKeys {
    * \see_key{key_forced_therm_start_time_}
    */
   inline static const Key<double> forcedThermalization_startTime{
-      InputSections::forcedThermalization + "Start_Time", {"1.1"}};
+      InputSections::forcedThermalization + "Start_Time",
+      {"1.1"},
+      [](const double &value) noexcept {
+        if (value < 0 || value > 50) {
+          logg[LogArea::Configuration::id].warn(
+              "Start time for forced thermalization outside [0,50] is "
+              "suspicious. Make sure this is intended.");
+        }
+        return true;
+      }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \required_key{key_forced_therm_timestep_,Timestep,double}
+   * \required_key_no_line{key_forced_therm_timestep_,Timestep,
+   * double,\f$x \in (0\,4]\f$}
    *
-   * Timestep of thermalization \unit{in fm}.
+   * Timestep of thermalization \unit{in fm} (see \iref{Oliinychenko:2016vkg}
+   * for more information on the constraint).
    */
   /**
    * \see_key{key_forced_therm_timestep_}
    */
   inline static const Key<double> forcedThermalization_timestep{
-      InputSections::forcedThermalization + "Timestep", {"1.1"}};
+      InputSections::forcedThermalization + "Timestep",
+      {"1.1"},
+      [](const double &value) noexcept { return value > 0 && value <= 4; }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
@@ -6207,7 +7614,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
    * \optional_key_no_line{key_forced_therm_algorithm_,Algorithm,string,"biased
-   * BF"}
+   * BF",\any_valid}
    *
    * Algorithm applied to enforce thermalization, see
    * \iref{Oliinychenko:2016vkg} for more details.
@@ -6222,41 +7629,54 @@ struct InputKeys {
       forcedThermalization_algorithm{
           InputSections::forcedThermalization + "Algorithm",
           ThermalizationAlgorithm::BiasedBF,
-          {"1.1"}};
+          {"1.1"},
+          detail::get_default_validator<ThermalizationAlgorithm>()};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \required_key{key_forced_therm_lattice_sizes_,Lattice_Sizes,list of 3
-   * doubles}
+   * \required_key_no_line{key_forced_therm_lattice_sizes_,Lattice_Sizes,list
+   * of 3 doubles,\f$x_i > 0\f$}
    *
    * The lattice is placed such that the center is [0.0,0.0,0.0].
    * If one wants to have a central cell with center at [0.0,0.0,0.0] then
    * number of cells should be odd (2k+1) in every direction.
    *
    * `Lattice_Sizes` is required for all modi, except the `"Box"` modus. In
-   * case of `"Box"` modus, the lattice is set up automatically to match the box
-   * size, and the user should not (and is not allowed to) specify it. Sizes are
-   * to be specified \unit{in fm}.
+   * case of `"Box"` modus, the lattice is set up automatically to match the
+   * box size, and the user should not (and is not allowed to) specify it.
+   * Sizes are to be specified \unit{in fm}.
    */
   /**
    * \see_key{key_forced_therm_lattice_sizes_}
    */
   inline static const Key<std::array<double, 3>>
       forcedThermalization_latticeSizes{
-          InputSections::forcedThermalization + "Lattice_Sizes", {"1.1"}};
+          InputSections::forcedThermalization + "Lattice_Sizes",
+          {"1.1"},
+          [](const std::array<double, 3> &value) noexcept {
+            const int max = 200;  // as int to print it nicer in warning
+            if (value[0] > max || value[1] > max || value[2] > max) {
+              logg[LogArea::Configuration::id].warn(
+                  "Lattice size(s) for forced thermalization larger than " +
+                  std::to_string(max) +
+                  " fm may lead to long runtime. Make sure this is "
+                  "intended.");
+            }
+            return (value[0] > 0 && value[1] > 0 && value[2] > 0);
+          }};
 
   /*!\Userguide
    * \page doxypage_input_conf_forced_therm
-   * \optional_key{key_forced_therm_microcanonical_,Microcanonical,bool,false}
+   * \optional_key{key_forced_therm_microcanonical_,Microcanonical,bool,false,\none}
    *
-   * Enforce energy conservation or not as part of sampling algorithm. Relevant
-   * for biased and unbiased Becattini-Ferroni (BF) algorithms. If this option
-   * is on, samples with energies deviating too far from the initial one will be
-   * rejected. This is different from simple energy and momentum
-   * renormalization, which is done in the end anyway. If energy conservation
-   * is enforced at sampling, the distributions become microcanonical instead
-   * of canonical. One particular effect is that multiplicity distributions
-   * become narrower.
+   * Enforce energy conservation or not as part of sampling algorithm.
+   * Relevant for biased and unbiased Becattini-Ferroni (BF) algorithms. If
+   * this option is on, samples with energies deviating too far from the
+   * initial one will be rejected. This is different from simple energy and
+   * momentum renormalization, which is done in the end anyway. If energy
+   * conservation is enforced at sampling, the distributions become
+   * microcanonical instead of canonical. One particular effect is that
+   * multiplicity distributions become narrower.
    *
    * The downside of having this option on is that the sampling takes
    * significantly longer time.
@@ -6265,7 +7685,10 @@ struct InputKeys {
    * \see_key{key_forced_therm_microcanonical_}
    */
   inline static const Key<bool> forcedThermalization_microcanonical{
-      InputSections::forcedThermalization + "Microcanonical", false, {"1.7"}};
+      InputSections::forcedThermalization + "Microcanonical",
+      false,
+      {"1.7"},
+      detail::get_default_validator<bool>()};
 
   /// Alias for the type to be used in the list of keys.
   using key_references_variant = std::variant<
@@ -6286,11 +7709,13 @@ struct InputKeys {
       std::reference_wrapper<const Key<einhard::LogLevel>>,
       std::reference_wrapper<const Key<BoxInitialCondition>>,
       std::reference_wrapper<const Key<CalculationFrame>>,
+      std::reference_wrapper<const Key<CharmRescattering>>,
       std::reference_wrapper<const Key<CollisionCriterion>>,
       std::reference_wrapper<const Key<DensityType>>,
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<FermiMotion>>,
+      std::reference_wrapper<const Key<DileptonBremsPionFormFactor>>,
       std::reference_wrapper<const Key<FieldDerivativesMode>>,
       std::reference_wrapper<const Key<FluidizableProcessesBitSet>>,
       std::reference_wrapper<const Key<FluidizationType>>,
@@ -6314,10 +7739,10 @@ struct InputKeys {
    * Get list of references to all existing SMASH keys.
    *
    * \attention Here the Construct-On-First-Use idiom is used to avoid the
-   *            static initialization order fiasco. This means that the list of
-   *            keys is only initialized when this method is called for the
-   *            first time. Therefore, it is guaranteed that all keys are
-   *            already initialized when the list is created.
+   *            static initialization order fiasco. This means that the list
+   * of keys is only initialized when this method is called for the first
+   * time. Therefore, it is guaranteed that all keys are already initialized
+   * when the list is created.
    */
   static const std::vector<key_references_variant> &all_keys();
 
@@ -6353,9 +7778,9 @@ struct InputKeys {
    *
    * @throw std::invalid_argument if no Key was found.
    *
-   * @note This function internally use another method into which it might have
-   *       been merged. This has not been done to separate the finding operation
-   *       with the reference extraction out from the variant.
+   * @note This function internally use another method into which it might
+   * have been merged. This has not been done to separate the finding
+   * operation with the reference extraction out from the variant.
    */
   template <typename T>
   static const Key<T> &get_key_reference(const KeyLabels &labels) {
@@ -6400,10 +7825,12 @@ General:
 \endverbatim
 *
 * In contrast to the first example, in the next example we use 20 parallel
-* ensembles. Here, the maximum number of ensembles run is 2000. The calculation
+* ensembles. Here, the maximum number of ensembles run is 2000. The
+calculation
 * will continue until either this number of ensembles is reached or 1000
 * ensembles contain interactions. Note that an event consists of 20 ensembles.
-* The 20 ensembles run in parallel, so the number of non-empty ensembles in the
+* The 20 ensembles run in parallel, so the number of non-empty ensembles in
+the
 * ouput is between 1000 and 1019.
 * \verbatim
 General:
@@ -6472,8 +7899,8 @@ General:
  * <h3> Example of dileptons configuration </h3>
  *
  * The following example configures the dilepton production for dileptons
- * originating from resonance decays. In addition, the extended OSCAR2013
- * dilepton output is enabled.
+ * originating from resonance decays and bremsstrahlung. In addition, the
+ * extended OSCAR2013 dilepton output is enabled.
  *
  *\verbatim
  Output:
@@ -6483,6 +7910,8 @@ General:
  Collision_Term:
      Dileptons:
          Decays: True
+         Bremsstrahlung: True
+         Pion_Form_Factor: "FF1"
  \endverbatim
  *
  * <hr>
@@ -6506,17 +7935,17 @@ General:
  * of your choice, which you then specify as the input with the `-d` command
  * line option. <b>Without this decay modes modification the dilepton output
  * will be empty</b>. Dilepton decays are commented out by default. Therefore,
- * you need to uncomment them. For the N(1520) Dalitz decay, two treatments
- are
- * available: Either by proxy of the \f$\rho N\f$ decay, which is enabled by
- * default (and leads to a dilepton Dalitz decay, if \f$\rho \rightarrow
- * e^+e^-\f$ is also enabled) or as a direct Dalitz decay to \f$e^+e^- N\f$.
- * If using the latter comment-out the \f$\rho N\f$ decay to avoid double
- * counting. The form factor in the direct case, is constant and fixed at the
- * real photon point. Furthermore note, that for dilepton decays, new decay
- * channels can \b not simply be added to the *decaymodes.txt* file. You also
- * have to modify the decay width formulas \c TwoBodyDecayDilepton::width and
- * \c ThreeBodyDecayDilepton::diff_width in *decaytype.cc* file.
+ * you need to uncomment them. For the N(1520) Dalitz decay, two
+ * treatments are available: Either by proxy of the \f$\rho N\f$ decay, which
+ * is enabled by default (and leads to a dilepton Dalitz decay, if
+ * \f$\rho \rightarrow e^+e^-\f$ is also enabled) or as a direct Dalitz decay
+ * to \f$e^+e^- N\f$. If using the latter, comment-out the \f$\rho N\f$ decay
+ * to avoid double counting. The form factor in the direct case, is constant
+ * and fixed at the real photon point. Furthermore note, that for dilepton
+ * decays, new decay channels can \b not simply be added to the
+ * *decaymodes.txt* file. You also have to modify the decay width formulas
+ * \c TwoBodyDecayDilepton::width and \c ThreeBodyDecayDilepton::diff_width
+ * in *decaytype.cc* file.
  *
  */
 
@@ -6561,8 +7990,7 @@ General:
  *    photon processes are significantly less likely than hadronic processes,
  *    the produced photons are weighted according to the ratio of the photon
  *    cross section to the hadronic cross section used to find the
- interaction,
- *    \f[W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\;.\f]
+ *    interaction, \f[W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\;.\f]
  *    This weight can be found in the weight element of the photon output,
  *    denoted as `photon_weight` there.
  * -# Perform the original hadronic action based on which the photon action
@@ -6591,8 +8019,7 @@ General:
  * \f$ \theta \f$ range, \f$ \frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}k}\f$
  * and \f$ \frac{\mathrm{d}\sigma_\gamma}{\mathrm{d} \theta}\f$ are considered
  * separately. Consequently, the weighting factor in the case of
- bremsstrahlung
- * photons is redefined as:
+ * bremsstrahlung photons is redefined as:
  * \f[
  * W = \frac{
  *       \sqrt{\frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}k} \ \Delta k \
@@ -6615,10 +8042,9 @@ General:
  * The following example configures a Cu63-Cu63 collision at
  * \f$\sqrt{s_{NN}}=3.0\,\mathrm{GeV}\f$ with zero impact parameter and Fermi
  * motion taken into consideration. The calculation frame is the default,
- center
- * of velocity, and the nuclei are not deformed. Refer to \ref
- * doxypage_input_conf_modi_C_proj_targ for information about the
- * `%Particles` and `Target` sections.
+ * center of velocity, and the nuclei are not deformed. Refer to
+ * \ref doxypage_input_conf_modi_C_proj_targ for information about the
+ * `Particles` and `Target` sections.
  *
  *\verbatim
  Modi:
@@ -6632,8 +8058,7 @@ General:
  *
  * To further use Fermi motion and allow the first collisions within the
  * projectile or target nucleus, the corresponding options need to be
- activated
- * by means of:
+ * activated by means of:
  *\verbatim
          Fermi_Motion: "on"
          Collisions_Within_Nucleus: True
@@ -6647,17 +8072,14 @@ General:
  * By default, executing SMASH from the codebase build folder without further
  * specifying the configuration, particles and decay modes files, a collider
  * simulation is set up according to the default _config.yaml_,
- _particles.txt_
- * and _decaymodes.txt_ files located in the _**input**_ directory at the
- * top-level of the codebase. However, changing the _**input**_ directory
- * content will not affect the default SMASH run, unless a clean build folder
- is
- * created over again. This is because the triplet of input files are
- * transformed into another triplet of files into the build directory when
- * `cmake` is run. Hence prefer to use `smash` command line options in case
- you
- * want to refer to possibly modified configuration, particles and decay modes
- * files.\n
+ * _particles.txt_ and _decaymodes.txt_ files located in the _**input**_
+ * directory at the top-level of the codebase. However, changing the
+ * _**input**_ directory content will not affect the default SMASH run,
+ * unless a clean build folder is created over again. This is because the
+ * triplet of input files are transformed into another triplet of files into
+ * the build directory when `cmake` is run. Hence prefer to use `smash`
+ * command line options in case you want to refer to possibly modified
+ * configuration, particles and decay modes files.\n
  * To run SMASH in the (default) collider setup, execute
  * \verbatim
     ./smash
@@ -6882,7 +8304,8 @@ General:
 * <h3> Extracting initial conditions for hydrodynamic evolution </h3>
 *
 * The following example configures the initial conditions for hydrodynamics
-* for a Au+Au collision at \f$\sqrt{s_{NN}}=200\ \mathrm{GeV}\f$ at midrapidity
+* for a Au+Au collision at \f$\sqrt{s_{NN}}=200\ \mathrm{GeV}\f$ at
+midrapidity
 * (\f$-1<y<1\f$). In addition, the extended OSCAR2013 and "For_vHLLE" outputs
 * are enabled.
 *
@@ -6972,8 +8395,10 @@ Modi:
  * <hr>
  * <h3> Configuring a Box Simulation </h3>
  *
- * The following example configures an infinite matter simulation in a Box with
- * 10 fm cube length at a temperature of 200 MeV. The particles are initialized
+ * The following example configures an infinite matter simulation in a Box
+with
+ * 10 fm cube length at a temperature of 200 MeV. The particles are
+initialized
  * with thermal momenta at a start time of 10 fm. The particle numbers at
  * initialization are 100 \f$ \pi^+ \f$, 100 \f$ \pi^0 \f$, 100 \f$ \pi^- \f$,
  * 50 protons and 50 neutrons.
@@ -7024,10 +8449,13 @@ Modi:
 \endverbatim
  *
  * \note\anchor modi_box_usage_remark
- * The box modus is most useful for infinite matter simulations with thermal and
- * chemical equilibration and detailed balance. Detailed balance can however not
+ * The box modus is most useful for infinite matter simulations with thermal
+and
+ * chemical equilibration and detailed balance. Detailed balance can however
+not
  * be conserved if 3-body decays (or higher) are performed. To yield useful
- * results applying a SMASH box simulation, it is therefore necessary to modify
+ * results applying a SMASH box simulation, it is therefore necessary to
+modify
  * the provided default _particles.txt_ and _decaymodes.txt_ files by removing
  * 3-body and higher order decays from the decay modes file and all
  * corresponding particles that can no longer be produced from the particles
@@ -7054,9 +8482,11 @@ Modi:
  * <hr>
  * <h3> Configuring an afterburner simulation </h3>
  *
- * The following example sets up an afterburner simulation for a set of particle
+ * The following example sets up an afterburner simulation for a set of
+ particle
  * files located in _**particle_lists_in**_ folder. The files are named as
- * _event10_, _event11_, etc. (the first being number 10 is specified by the key
+ * _event10_, _event11_, etc. (the first being number 10 is specified by the
+ key
  * `Shift_Id`). SMASH is run once for each event in the folder.
  * \verbatim
  Modi:
@@ -7099,12 +8529,15 @@ Modi:
  * \f[(t, x, y, z) = (0.1, 6.42036, 1.66473, 9.38499)\,\mathrm{fm}\f]
  * and 4-momentum
  * \f[(p_0,p_x,p_y,p_z)=(0.232871,0.116953,-0.115553,0.090303)\,\mathrm{GeV}\f]
- * with mass = 0.138 GeV, pdg = 111, ID = 0 and charge 0 will be initialized for
+ * with mass = 0.138 GeV, pdg = 111, ID = 0 and charge 0 will be initialized
+ for
  * the first event (and also for the second event).
  *
  * \note
- * SMASH is shipped with an example configuration file to set up an afterburner
- * simulation by means of the list modus. This also requires a particle list to
+ * SMASH is shipped with an example configuration file to set up an
+ afterburner
+ * simulation by means of the list modus. This also requires a particle list
+ to
  * be read in. Both, the configuration file and the particle list, are located
  * in the _**input/list**_ folder at the top-level of SMASH codebase. To run
  * SMASH with the provided example configuration and particle list, execute
@@ -7121,7 +8554,8 @@ Modi:
  * <h3> Configuring the Lattice </h3>
  *
  * The following example configures the lattice with the origin in (0,0,0), 20
- * cells of 10 fm size in each direction and with periodic boundary conditions.
+ * cells of 10 fm size in each direction and with periodic boundary
+ conditions.
  * The potential effects on the thresholds are taken into consideration. Note
  * that, as the origin is by definition the left down near corner of the cell,
  * center is located at (5, 5, 5).
@@ -7164,7 +8598,8 @@ Modi:
  *
  * The following example activates forced thermalization in cells in which the
  * energy density is above 0.3 GeV/fm³. The lattice is initialized with 21
- * cells in x and y direction and 101 cells in z-direction. The lattice size is
+ * cells in x and y direction and 101 cells in z-direction. The lattice size
+ is
  * 20 fm in x and y direction and 50 fm in z-direction. The thermalization is
  * applied only for times later than 10 fm with a timestep of 1 fm. The
  * sampling is done according to the "biased BF" algorithm.

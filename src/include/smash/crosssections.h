@@ -11,6 +11,7 @@
 #define SRC_INCLUDE_SMASH_CROSSSECTIONS_H_
 
 #include <memory>
+#include <optional>
 #include <utility>
 
 #include "smash/forwarddeclarations.h"
@@ -108,11 +109,17 @@ class CrossSections {
    * create a list of possible resonance production processes
    * and their cross sections.
    *
+   * If <tt>\ref key_CT_charm_rescattering_ "Charm_Rescattering_Method"</tt> is
+   * not set to `"Resonances"` then interactions of charmed hadrons will not be
+   * considered in two to one processes.
+   *
+   * \param[in] charm_rescattering Type of charm rescattering
+   *
    * \return A list of processes with resonance in the final state.
    * Each element in the list contains the type of the final-state particle
    * and the cross section for that particular process.
    */
-  CollisionBranchList two_to_one() const;
+  CollisionBranchList two_to_one(CharmRescattering charm_rescattering) const;
 
   /**
    * Calculates the 2-to-1 resonance production cross section for a given
@@ -152,11 +159,13 @@ class CrossSections {
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \param[in] KN_offset Offset to the minimum energy for string production in
    * KN scatterings
+   * \param[in] charm_rescattering Type of charm rescattering
    *
    * \return List of all possible inelastic 2->2 processes.
    */
   CollisionBranchList two_to_two(const ReactionsBitSet& included_2to2,
-                                 double KN_offset) const;
+                                 double KN_offset,
+                                 CharmRescattering charm_rescattering) const;
 
   /**
    * Find all 2->3 processes for the given scattering.
@@ -325,26 +334,27 @@ class CrossSections {
    */
   double string_probability(
       const ScatterActionsFinderParameters& finder_parameters) const;
-
   /**
-   * Computes a smooth transition weight w ∈ [0,1] based on sqrt(s).
+   * Computes a smooth transition probability as a function of sqrt(s).
    *
-   * The weight is:
-   *   - w = 0 for sqrt(s) < region_lower
-   *   - w = 1 for sqrt(s) > region_upper
-   *   - smoothly interpolated in between using a sinusoidal profile
+   * The probability is:
+   *   - 0 for sqrt(s) < region_lower
+   *   - 1 for sqrt(s) > region_upper
+   *   - smoothly varying between 0 and 1 inside the transition region
+   *     according to a sinusoidal profile
    *
-   * This weight can be used to interpolate between two models,
-   * parameters, or process choices (e.g. soft ↔ hard interactions).
+   * This probability can be used to determine the relative contribution of
+   * two processes or regimes (e.g. soft ↔ hard string excitation).
    *
    * \param[in] region_lower Lower bound of the transition region in sqrt(s)
-   * [GeV]
-   * \param[in] region_upper Upper bound of the transition region in
-   * sqrt(s) [GeV]
+   *                         [GeV]
+   * \param[in] region_upper Upper bound of the transition region in sqrt(s)
+   *                         [GeV]
    *
-   * \return Transition weight w ∈ [0,1]
+   * \return Transition probability in the interval [0,1]
    */
-  double interpolation_at_sqrts(double region_lower, double region_upper) const;
+  double transition_probability_at_sqrts(double region_lower,
+                                         double region_upper) const;
 
  private:
   /**
@@ -391,6 +401,70 @@ class CrossSections {
    * \throw std::runtime_error if positive cross section cannot be specified.
    */
   double nk_el() const;
+
+  /**
+   * Determine the elastic cross section for a D meson-pion (Dpi) or a D*-pion
+   * (D*pi) collision. If the center-of-mass energy for the collision is below
+   * the lower bound of the energy range of the underlying cross section data,
+   * the return value is the lower bound value. If it is above the upper bound,
+   * the return value will be `std::nullopt`.
+   *
+   * \return Elastic cross section for Dpi or D*pi.
+   *
+   * \throw std::runtime_error if incoming particles are not Dpi or D*pi.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  std::optional<double> Dpi_and_Dstarpi_elastic() const;
+
+  /**
+   * Determine the inelastic cross section for a D meson-pion (Dpi) or a D*-pion
+   * (D*pi) collision.
+   *
+   * \return Inlastic cross section for Dpi or D*pi.
+   *
+   * \throw std::runtime_error if incoming particles are not Dpi or D*pi.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  double Dpi_and_Dstarpi_inelastic() const;
+
+  /**
+   * Determine the elastic cross section for a D meson-eta (Deta) or a D*-eta
+   * (D*eta) collision. If the center-of-mass energy for the collision is below
+   * the lower bound of the energy range of the underlying cross section data,
+   * the return value is the lower bound value. If it is above the upper bound,
+   * the return value will be `std::nullopt`.
+   *
+   * \return Elastic cross section for Deta or D*eta.
+   *
+   * \throw std::runtime_error if incoming particles are not Deta or D*eta.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  std::optional<double> Deta_and_Dstareta_elastic() const;
+
+  /**
+   * Determine the elastic cross section for a D meson-kaon (DK) or a D*-kaon
+   * (D*K) collision. If the center-of-mass energy for the collision is below
+   * the lower bound of the energy range of the underlying cross section data,
+   * the return value is the lower bound value. If it is above the upper bound,
+   * the return value will be `std::nullopt`.
+   *
+   * \return Elastic cross section for DK or D*K.
+   *
+   * \throw std::runtime_error if incoming particles are not DK or D*K.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  std::optional<double> DK_and_DstarK_elastic() const;
+
+  /**
+   * Determine the inelastic cross section for a D meson-kaon (DK) or a D*-kaon
+   * (D*K) collision.
+   *
+   * \return Inlastic cross section for DK or D*K.
+   *
+   * \throw std::runtime_error if incoming particles are not DK or D*K.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  double DK_and_DstarK_inelastic() const;
 
   /**
    * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.
@@ -442,10 +516,37 @@ class CrossSections {
                             double KN_offset) const;
 
   /**
+   * Find all inelastic 2->2 processes for D meson-pion (Dpi) and D*-pion (D*pi)
+   * scattering.
+   *
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \param[in] charm_rescattering Type of charm rescattering
+   *
+   * \return List of all possible Dpi or D*pi reactions with their cross
+   * sections
+   */
+  CollisionBranchList Dpi_and_Dstarpi_xx(
+      const ReactionsBitSet& included_2to2,
+      CharmRescattering charm_rescattering) const;
+
+  /**
+   * Find all inelastic 2->2 processes for D meson-kaon (DK) and D*-kaon (D*K)
+   * scattering.
+   *
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \param[in] charm_rescattering Type of charm rescattering
+   *
+   * \return List of all possible DK or D*K reactions with their cross sections
+   */
+  CollisionBranchList DK_and_DstarK_xx(
+      const ReactionsBitSet& included_2to2,
+      CharmRescattering charm_rescattering) const;
+
+  /**
    * Find all inelastic 2->2 processes for Delta-Kaon (DeltaK) Scattering.
    * \param[in] included_2to2 Which 2->2 reactions are enabled?
    * \return List of all possible DeltaK reactions with their cross sections
-   * */
+   */
   CollisionBranchList deltak_xx(const ReactionsBitSet& included_2to2) const;
 
   /**
@@ -520,7 +621,7 @@ class CrossSections {
    * the list contains the types of the final-state particles and the cross
    * section for that particular process.
    */
-  CollisionBranchList bar_bar_to_nuc_nuc(const bool is_anti_particles) const;
+  CollisionBranchList bar_bar_to_nuc_nuc(bool is_anti_particles) const;
 
   /**
    * Scattering matrix amplitude squared (divided by 16π) for resonance
@@ -537,7 +638,7 @@ class CrossSections {
   static double nn_to_resonance_matrix_element(double sqrts,
                                                const ParticleType& type_a,
                                                const ParticleType& type_b,
-                                               const int twoI);
+                                               int twoI);
 
   /**
    * Utility function to avoid code replication in nn_xx().
