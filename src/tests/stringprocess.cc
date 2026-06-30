@@ -9,6 +9,8 @@
 
 #include "vir/test.h"  // This include has to be first
 
+#include "smash/stringprocess.h"
+
 #include <iostream>
 
 #include "Pythia8/Pythia.h"
@@ -16,6 +18,7 @@
 #include "histogram.h"
 #include "setup.h"
 #include "smash/angles.h"
+#include "smash/quantumnumbers.h"
 #include "smash/random.h"
 #include "smash/scatteraction.h"
 
@@ -42,25 +45,16 @@ void test_distribution(int n_test, double dx, Chi get_chi,
 
 using namespace smash;
 
-static std::unique_ptr<StringProcess> dummy_string_process() {
-  auto sp = std::make_unique<StringProcess>(1., 1., .0, .001, .0, .0, 1., 1.,
-                                            .0, .0, .5, .0, .21, .0, .0, true,
-                                            1. / 3., true, 0., false, 0.7);
-
-  return sp;
-}
-
 TEST(common_setup) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   // Pythia object to work with
   Pythia8::Pythia pythia_interface{PYTHIA_XML_DIR, false};
   sp->common_setup_pythia(&pythia_interface, 1.0, 1.0, .3, .5, .7, .9);
 
   // Verify that all parameters were set accordingly
   VERIFY(pythia_interface.settings.mode("ParticleData:modeBreitWigner") == 4);
-  FUZZY_COMPARE(pythia_interface.settings.parm("MultipartonInteractions:pTmin"),
-                1.5);
   VERIFY(pythia_interface.settings.mode("MultipartonInteractions:nSample") ==
          100000);
   FUZZY_COMPARE(pythia_interface.settings.parm("StringPT:sigma"), .9);
@@ -83,9 +77,10 @@ TEST(common_setup) {
   VERIFY(pythia_interface.settings.parm("Check:epTolWarn") == 1e-8);
 }
 
-TEST(append_final) {
+TEST(form_intermediate_particles) {
   // Create StringProcess to work with
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
 
   // ParticleData object to calculate final state for
   ParticleData a{ParticleType::find(0x211)};
@@ -99,27 +94,44 @@ TEST(append_final) {
   // Values make for easily calucated test values
   FourVector uString = {1., .0, .0, .0};
   ThreeVector evecLong = {.0, .0, .0};
+  const double time_formation_const = 1.0;
+  const ThreeVector vstring = uString.velocity();
 
+  const ThreeVector vcomAB = sp->get_vcom();
+  const FourVector momentum_a = a.momentum().lorentz_boost(-vstring);
+  const FourVector momentum_b = b.momentum().lorentz_boost(-vstring);
+
+  const ThreeVector v_calc_a = momentum_a.lorentz_boost(-vcomAB).velocity();
+  const ThreeVector v_calc_b = momentum_b.lorentz_boost(-vcomAB).velocity();
+
+  const double gamma_a = 1.0 / std::sqrt(1.0 - v_calc_a.sqr());
+  const double gamma_b = 1.0 / std::sqrt(1.0 - v_calc_b.sqr());
+
+  const double expected_formation_a =
+      time_formation_const * gamma_a + sp->get_tcoll();
+
+  const double expected_formation_b =
+      time_formation_const * gamma_b + sp->get_tcoll();
   // Call tested function
-  sp->append_final_state(intermediate, uString, evecLong);
+  sp->form_intermediate_particles(intermediate, uString, evecLong,
+                                  /*additional_xsec_supression*/ 1.0);
 
-  // Formation time is 0 due to the soft_t_form_ in the StringProcess
   // vx and vy remain 0 even with boosting
   // As vz starts at 1 it simply gets boosted to inverse_gamma
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].formation_time(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[1].formation_time(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].velocity().x1(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[1].velocity().x1(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[0].velocity().x2(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.0, sp->get_final_state()[1].velocity().x2(), 1e-7);
-  COMPARE_ABSOLUTE_ERROR(.7071067812, sp->get_final_state()[0].velocity().x3(),
+  COMPARE_ABSOLUTE_ERROR(expected_formation_a, intermediate[0].formation_time(),
                          1e-7);
-  COMPARE_ABSOLUTE_ERROR(-0.7071067812,
-                         sp->get_final_state()[1].velocity().x3(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(expected_formation_b, intermediate[1].formation_time(),
+                         1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, intermediate[0].velocity().x1(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, intermediate[1].velocity().x1(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, intermediate[0].velocity().x2(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.0, intermediate[1].velocity().x2(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(.7071067812, intermediate[0].velocity().x3(), 1e-7);
+  COMPARE_ABSOLUTE_ERROR(-0.7071067812, intermediate[1].velocity().x3(), 1e-7);
 }
-
 TEST(initialization) {
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   ParticleData a{ParticleType::find(0x2212)};
   a.set_4momentum(1., 0., 0., 1.);
 
@@ -159,7 +171,8 @@ TEST(initialization) {
 
 TEST(rearrange_ex) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   // Array for total quark numbers
   std::array<int, 5> tot_quark = {0, 0, 0, 0, 0};
   // Arrays with the excess constituents
@@ -191,7 +204,8 @@ TEST(rearrange_ex) {
 
 TEST(find_excess) {
   // StringProcess to use member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   // PDG codes for proton and neutron
   PdgCode actual = pdg::p;
   PdgCode mapped = pdg::n;
@@ -221,7 +235,8 @@ TEST(find_excess) {
 
 TEST(restore_constituents) {
   // Create StringProcess to work with member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   // create Pythia class object to simulate p-p collision
   Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
   pythia.readString("Print:quiet = on");
@@ -275,7 +290,8 @@ TEST(restore_constituents) {
 
 TEST(replace_const) {
   // Create StringProcess to work with member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
   // Create particle entry for an electron
   Pythia8::ParticleDataEntry entry1(11, "e", "e+");
   // Create Pythia Particle, an electron in this case
@@ -346,7 +362,8 @@ TEST(find_total_number_constituent) {
   intermediate.init("intermediate partons", &pythia_hadron->particleData);
 
   // String process to be able to call the member functions
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
 
   // Arrays for quark and antiquark content
   std::array<int, 5> nquark;
@@ -359,60 +376,6 @@ TEST(find_total_number_constituent) {
   for (int i = 0; i < 5; ++i) {
     VERIFY((nquark[i] == 0) && (nantiq[i] == 0));
   }
-}
-
-/**
- * Compare sampled values of the LUND function to analytical ones via:
- * \f$ f(z) = \frac{1}{z} (1 - z)^a \exp{ \left(- \frac{b m_T^2}{z} \right) }
- * Using the same framework as the tests in random.cc do.
- */
-TEST(string_zlund) {
-  test_distribution(
-      1e7, 0.0001, []() { return StringProcess::sample_zLund(1, 1, 1); },
-      [](double x) { return 1 / x * (1. - x) * exp(-1. / x); });
-}
-
-TEST(string_incoming_lightcone_momenta) {
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
-
-  ParticleData a{ParticleType::find(0x2212)};
-  a.set_4momentum(0.938, 0., 0., 1.);
-  FourVector p_a = a.momentum();
-
-  ParticleData b{ParticleType::find(0x2212)};
-  b.set_4momentum(0.938, 0., 0., -1.);
-  FourVector p_b = b.momentum();
-
-  sp->init({a, b}, 0.);
-
-  double Ap = sp->getPPosA();
-  double An = sp->getPNegA();
-  double Bp = sp->getPPosB();
-  double Bn = sp->getPnegB();
-
-  // longitudinal direction is +z so p± is (E±pz) / sqrt(2)
-  FUZZY_COMPARE(Ap, (p_a.x0() + p_a.x3()) * M_SQRT1_2);
-  FUZZY_COMPARE(An, (p_a.x0() - p_a.x3()) * M_SQRT1_2);
-  FUZZY_COMPARE(Bp, (p_b.x0() + p_b.x3()) * M_SQRT1_2);
-  FUZZY_COMPARE(Bn, (p_b.x0() - p_b.x3()) * M_SQRT1_2);
-}
-
-TEST(string_lightcone_final_two) {
-  double a = .0;
-  double b = .0;
-  double c = .0;
-  double d = .0;
-  std::unique_ptr<StringProcess> sp = dummy_string_process();
-
-  // returns false because mTsqr_string < 0.
-  VERIFY(sp->make_lightcone_final_two(false, -1., 1., .0, .0, a, b, c, d) ==
-         false);
-  // returns false because mTrn_string < mTrn_had_forward + mTrn_had_backward
-  VERIFY(sp->make_lightcone_final_two(false, .0, .0, 1., 1., a, b, c, d) ==
-         false);
-  // returns false because lambda_sqr == 0.
-  VERIFY(sp->make_lightcone_final_two(false, 1., 1. / 2., -0.337106, 0.837106,
-                                      a, b, c, d) == false);
 }
 
 TEST(string_find_leading) {
@@ -614,23 +577,37 @@ TEST(string_make_string_ends) {
   VERIFY((id2 == -1 && id1 == -2203) || (id2 == -2 && (id1 == -2101 || -2103)));
 }
 
-TEST(string_set_Vec4) {
-  // make arbitrary lightlike 4-vector with random direction
-  Angles angle_random = Angles(0., 0.);
-  angle_random.distribute_isotropically();
-  const double energy = 10.;
-  const ThreeVector mom = energy * angle_random.threevec();
-  Pythia8::Vec4 vector = Pythia8::Vec4(0., 0., 0., 0.);
-  // set Pythia8::Vec4
-  vector = StringProcess::set_Vec4(energy, mom);
-  // check if Pythia8::Vec4 is same with 4-vector from energy and mom
-  const double energy_scale = 0.5 * (vector.e() + energy);
-  VERIFY(std::abs(vector.e() - energy) < really_small * energy_scale);
-  VERIFY(std::abs(vector.px() - mom.x1()) < really_small * energy_scale);
-  VERIFY(std::abs(vector.py() - mom.x2()) < really_small * energy_scale);
-  VERIFY(std::abs(vector.pz() - mom.x3()) < really_small * energy_scale);
+TEST(string_make_smash_4vec) {
+  const Pythia8::Vec4 pythia_vec(1.2, -3.4, 5.6, 7.8);
+
+  const FourVector smash_vec = StringProcess::make_smash_4vec(pythia_vec);
+
+  const double energy_scale = 0.5 * (smash_vec.x0() + pythia_vec.e());
+  VERIFY(std::abs(smash_vec.x0() - pythia_vec.e()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(smash_vec.x1() - pythia_vec.px()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(smash_vec.x2() - pythia_vec.py()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(smash_vec.x3() - pythia_vec.pz()) <
+         really_small * energy_scale);
 }
 
+TEST(string_make_pythia_4vec) {
+  const FourVector smash_vec(7.8, 1.2, -3.4, 5.6);
+
+  const Pythia8::Vec4 pythia_vec = StringProcess::make_pythia_4vec(smash_vec);
+
+  const double energy_scale = 0.5 * (pythia_vec.e() + smash_vec.x0());
+  VERIFY(std::abs(pythia_vec.e() - smash_vec.x0()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(pythia_vec.px() - smash_vec.x1()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(pythia_vec.py() - smash_vec.x2()) <
+         really_small * energy_scale);
+  VERIFY(std::abs(pythia_vec.pz() - smash_vec.x3()) <
+         really_small * energy_scale);
+}
 TEST(pdg_map_for_pythia) {
   int pdgid_mapped = 0;
 
@@ -756,4 +733,341 @@ TEST(string_scaling_factors) {
   COMPARE(outgoing[2].initial_xsec_scaling_factor(), 0.);
   COMPARE(outgoing[3].initial_xsec_scaling_factor(), coherence_factor / 3.);
   VERIFY(outgoing[3] == c);
+}
+
+TEST(string_tag_leading_hadrons) {
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
+
+  Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
+  pythia.readString("Print:quiet = on");
+  pythia.readString("ProcessLevel:all = off");
+  pythia.init();
+
+  Pythia8::Event event;
+  event.init("test event", &pythia.particleData);
+
+  const int leading_quark =
+      static_cast<int>(StringProcess::LeadingStatus::LeadingQuark);
+  const int leading_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::LeadingDiquark);
+  const int from_quark =
+      static_cast<int>(StringProcess::LeadingStatus::FromLeadingQuark);
+  const int from_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::FromLeadingDiquark);
+
+  event.append(90, -11, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 3.0, 3.0);
+
+  const int diquark = event.append(2203, -leading_diquark, 0, 0, 0, 0, 0, 101,
+                                   0.0, 0.0, 1.0, 1.3, 0.771);
+
+  const int quark = event.append(1, -leading_quark, 0, 0, 0, 0, 101, 0, 0.0,
+                                 0.0, -1.0, 1.1, 0.330);
+
+  const int forward_meson = event.append(113, 83, diquark, quark, 0, 0, 0, 0,
+                                         0.0, 0.0, 0.80, 0.90, 0.775);
+
+  const int forward_baryon = event.append(2214, 83, diquark, quark, 0, 0, 0, 0,
+                                          0.0, 0.0, 0.40, 1.30, 1.232);
+
+  const int backward_baryon = event.append(2112, 83, diquark, quark, 0, 0, 0, 0,
+                                           0.0, 0.0, -0.50, 1.10, 0.938);
+
+  sp->tag_leading_hadrons(event);
+
+  VERIFY(event[forward_meson].statusAbs() != from_diquark);
+  VERIFY(event[forward_baryon].statusAbs() == from_diquark);
+  VERIFY(event[backward_baryon].statusAbs() == from_quark);
+}
+
+TEST(string_tag_leading_hadrons_antidiquark) {
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
+
+  Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
+  pythia.readString("Print:quiet = on");
+  pythia.readString("ProcessLevel:all = off");
+  pythia.init();
+
+  Pythia8::Event event;
+  event.init("test event", &pythia.particleData);
+
+  const int leading_quark =
+      static_cast<int>(StringProcess::LeadingStatus::LeadingQuark);
+  const int leading_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::LeadingDiquark);
+  const int from_quark =
+      static_cast<int>(StringProcess::LeadingStatus::FromLeadingQuark);
+  const int from_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::FromLeadingDiquark);
+
+  event.append(90, -11, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 3.0, 3.0);
+
+  const int quark = event.append(-1, -leading_quark, 0, 0, 0, 0, 0, 101, 0.0,
+                                 0.0, -1.0, 1.1, 0.330);
+
+  const int antidiquark = event.append(-2103, -leading_diquark, 0, 0, 0, 0, 101,
+                                       0, 0.0, 0.0, 1.0, 1.3, 0.771);
+
+  const int forward_baryon_wrong_sign = event.append(
+      2214, 83, quark, antidiquark, 0, 0, 0, 0, 0.0, 0.0, 0.80, 1.30, 1.232);
+
+  const int forward_antibaryon = event.append(
+      -2112, 83, quark, antidiquark, 0, 0, 0, 0, 0.0, 0.0, 0.40, 1.10, 0.938);
+
+  const int backward_meson = event.append(111, 83, quark, antidiquark, 0, 0, 0,
+                                          0, 0.0, 0.0, -0.50, 0.20, 0.138);
+
+  sp->tag_leading_hadrons(event);
+
+  VERIFY(event[forward_baryon_wrong_sign].statusAbs() != from_diquark);
+  VERIFY(event[forward_antibaryon].statusAbs() == from_diquark);
+  VERIFY(event[backward_meson].statusAbs() == from_quark);
+}
+
+TEST(string_tag_leading_hadrons_no_overwrite) {
+  std::unique_ptr<StringProcess> sp =
+      smash::Test::default_string_process_interface();
+
+  Pythia8::Pythia pythia(PYTHIA_XML_DIR, false);
+  pythia.readString("Print:quiet = on");
+  pythia.readString("ProcessLevel:all = off");
+  pythia.init();
+
+  Pythia8::Event event;
+  event.init("test event", &pythia.particleData);
+
+  const int leading_quark =
+      static_cast<int>(StringProcess::LeadingStatus::LeadingQuark);
+  const int leading_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::LeadingDiquark);
+  const int from_diquark =
+      static_cast<int>(StringProcess::LeadingStatus::FromLeadingDiquark);
+
+  event.append(90, -11, 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0, 2.0, 2.0);
+
+  const int diquark = event.append(2103, -leading_diquark, 0, 0, 0, 0, 0, 101,
+                                   0.0, 0.0, 1.0, 1.2, 0.771);
+
+  const int quark = event.append(1, -leading_quark, 0, 0, 0, 0, 101, 0, 0.0,
+                                 0.0, -1.0, 1.0, 0.330);
+
+  const int only_baryon = event.append(2112, 83, diquark, quark, 0, 0, 0, 0,
+                                       0.0, 0.0, 0.20, 1.10, 0.938);
+
+  sp->tag_leading_hadrons(event);
+
+  VERIFY(event[only_baryon].statusAbs() == from_diquark);
+}
+TEST(string_soft_nondiff_runs) {
+  auto sp = smash::Test::default_string_process_interface();
+
+  ParticleList incoming;
+  incoming.emplace_back(ParticleType::find(0x2212));  // proton
+  incoming.emplace_back(ParticleType::find(0x2212));  // proton
+
+  incoming[0].set_4momentum(FourVector(5.0, 0.0, 0.0, 4.8));
+  incoming[1].set_4momentum(FourVector(5.0, 0.0, 0.0, -4.8));
+
+  sp->init(incoming, 0.0);
+
+  bool success = false;
+  for (int i = 0; i < 1000 && !success; ++i) {
+    success = sp->next(ProcessType::StringSoftNonDiffractive);
+  }
+
+  VERIFY(success);
+  VERIFY(!sp->get_final_state().empty());
+}
+
+TEST(string_hard_nondiff_runs) {
+  auto sp = smash::Test::default_string_process_interface();
+
+  ParticleList incoming;
+  incoming.emplace_back(ParticleType::find(0x2212));  // proton
+  incoming.emplace_back(ParticleType::find(0x2212));  // proton
+
+  incoming[0].set_4momentum(FourVector(5.0, 0.0, 0.0, 4.8));
+  incoming[1].set_4momentum(FourVector(5.0, 0.0, 0.0, -4.8));
+
+  sp->init(incoming, 0.0);
+
+  bool success = false;
+  for (int i = 0; i < 1000 && !success; ++i) {
+    success = sp->next(ProcessType::StringHardNonDiffractive);
+  }
+
+  VERIFY(success);
+  VERIFY(!sp->get_final_state().empty());
+}
+
+static bool check_single_diff_replaces_elastic_hadron_flavour(
+    ProcessType process_type, int mapped_side) {
+  auto sp = smash::Test::default_string_process_interface();
+
+  ParticleList incoming;
+  incoming.emplace_back(ParticleType::find(mapped_side == 0 ? 0x3122 : 0x2212));
+  incoming.emplace_back(ParticleType::find(mapped_side == 1 ? 0x3122 : 0x2212));
+
+  incoming[0].set_4momentum(FourVector(5020.0, 0.0, 0.0, 5000.0));
+  incoming[1].set_4momentum(FourVector(5020.0, 0.0, 0.0, -5000.0));
+
+  sp->init(incoming, 0.0);
+
+  for (int i = 0; i < 1000; ++i) {
+    if (!sp->next(process_type)) {
+      continue;
+    }
+
+    const ParticleList& final_state = sp->get_final_state();
+
+    const bool found_lambda = std::any_of(
+        final_state.begin(), final_state.end(),
+        [](const ParticleData& p) { return p.pdgcode() == PdgCode(0x3122); });
+
+    return found_lambda &&
+           QuantumNumbers{incoming} == QuantumNumbers{final_state};
+  }
+
+  return false;
+}
+TEST(string_hard_single_diff_AX_replaces_elastic_hadron_flavour) {
+  VERIFY(check_single_diff_replaces_elastic_hadron_flavour(
+      ProcessType::StringHardSingleDiffractiveAX, 0));
+}
+
+TEST(string_hard_single_diff_XB_replaces_elastic_hadron_flavour) {
+  VERIFY(check_single_diff_replaces_elastic_hadron_flavour(
+      ProcessType::StringHardSingleDiffractiveXB, 1));
+}
+static std::unique_ptr<StringProcess> initialized_pp_string_process() {
+  /**
+   * Junctions are disabled here so that leading hadrons come only from ordinary
+   * open-string endpoints. With junctions enabled, valence content can be
+   * spread over topology-dependent baryonic strings, so the number of leading
+   * hadrons is not fixed.
+   */
+  Configuration config{R"(
+    Collision_Term:
+      String_Parameters:
+        Pythia_Settings:
+          - "BeamRemnants:allowJunction = off"
+    )"};
+
+  auto sp = std::make_unique<StringProcess>(config);
+
+  ParticleList incoming;
+  incoming.emplace_back(ParticleType::find(0x2212));
+  incoming.emplace_back(ParticleType::find(0x2212));
+
+  incoming[0].set_4momentum(FourVector(5020.0, 0.0, 0.0, 5000.0));
+  incoming[1].set_4momentum(FourVector(5020.0, 0.0, 0.0, -5000.0));
+
+  sp->init(incoming, 0.0);
+  return sp;
+}
+static int count_leading_hadrons(const ParticleList& final_state) {
+  int n_leading = 0;
+
+  for (const ParticleData& p : final_state) {
+    if (p.initial_xsec_scaling_factor() <= 0.0 || !p.is_hadron()) {
+      continue;
+    }
+
+    if (p.pdgcode().is_charmonia()) {
+      continue;
+    }
+
+    ++n_leading;
+  }
+
+  return n_leading;
+}
+static int check_process_produces_leading_hadrons(StringProcess& sp,
+                                                  ProcessType process_type,
+                                                  int n_leading_expected,
+                                                  int n_events_to_check) {
+  int n_matches = 0;
+  int n_checked = 0;
+
+  for (int i = 0; i < 10000 && n_checked < n_events_to_check; ++i) {
+    if (!sp.next(process_type)) {
+      continue;
+    }
+
+    const int n_leading = count_leading_hadrons(sp.get_final_state());
+
+    if (n_leading == n_leading_expected) {
+      ++n_matches;
+    }
+    ++n_checked;
+  }
+
+  return n_matches;
+}
+
+static double average_number_of_leading_hadrons(StringProcess& sp,
+                                                ProcessType process_type,
+                                                int n_events_to_check) {
+  int n_checked = 0;
+  int total_leading = 0;
+
+  for (int i = 0; i < 10000 && n_checked < n_events_to_check; ++i) {
+    if (!sp.next(process_type)) {
+      continue;
+    }
+    total_leading += count_leading_hadrons(sp.get_final_state());
+
+    ++n_checked;
+  }
+
+  return static_cast<double>(total_leading) / n_checked;
+}
+
+TEST(string_processes_produce_expected_leading_hadrons) {
+  constexpr int n_events_to_check = 2000;
+  auto sp = initialized_pp_string_process();
+
+  VERIFY(check_process_produces_leading_hadrons(
+             *sp, ProcessType::StringSoftNonDiffractive, 4,
+             n_events_to_check) == n_events_to_check);
+
+  VERIFY(check_process_produces_leading_hadrons(
+             *sp, ProcessType::StringSoftSingleDiffractiveAX, 3,
+             n_events_to_check) == n_events_to_check);
+
+  VERIFY(check_process_produces_leading_hadrons(
+             *sp, ProcessType::StringSoftSingleDiffractiveXB, 3,
+             n_events_to_check) == n_events_to_check);
+
+  VERIFY(check_process_produces_leading_hadrons(
+             *sp, ProcessType::StringSoftDoubleDiffractive, 4,
+             n_events_to_check) == n_events_to_check);
+
+  /**
+   * In hard events, a beam valence quark can participate in the hard/MPI system
+   * instead of surviving as a final quark endpoint. Since leading tags are
+   * assigned to final quark/diquark string endpoints, such events can contain
+   * fewer leading hadrons. We therefore test the average number of leading
+   * hadrons rather than requiring the exact number in every hard event.
+   */
+  COMPARE_ABSOLUTE_ERROR(
+      average_number_of_leading_hadrons(
+          *sp, ProcessType::StringHardSingleDiffractiveAX, n_events_to_check),
+      3.0, 0.05);
+
+  COMPARE_ABSOLUTE_ERROR(
+      average_number_of_leading_hadrons(
+          *sp, ProcessType::StringHardSingleDiffractiveXB, n_events_to_check),
+      3.0, 0.05);
+
+  COMPARE_ABSOLUTE_ERROR(
+      average_number_of_leading_hadrons(
+          *sp, ProcessType::StringHardDoubleDiffractive, n_events_to_check),
+      4.0, 0.05);
+
+  COMPARE_ABSOLUTE_ERROR(
+      average_number_of_leading_hadrons(
+          *sp, ProcessType::StringHardNonDiffractive, n_events_to_check),
+      4.0, 0.05);
 }

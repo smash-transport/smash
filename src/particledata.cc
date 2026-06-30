@@ -63,9 +63,12 @@ void ParticleData::set_history(int ncoll, uint32_t pid, ProcessType pt,
     case ProcessType::StringSoftSingleDiffractiveAX:
     case ProcessType::StringSoftSingleDiffractiveXB:
     case ProcessType::StringSoftDoubleDiffractive:
-    case ProcessType::StringSoftAnnihilation:
     case ProcessType::StringSoftNonDiffractive:
-    case ProcessType::StringHard:
+    case ProcessType::StringSoftAnnihilation:
+    case ProcessType::StringHardNonDiffractive:
+    case ProcessType::StringHardSingleDiffractiveAX:
+    case ProcessType::StringHardSingleDiffractiveXB:
+    case ProcessType::StringHardDoubleDiffractive:
     case ProcessType::Bremsstrahlung:
       // store two parent particles
       history_.p1 = plist[0].pdgcode();

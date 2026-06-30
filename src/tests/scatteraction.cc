@@ -403,17 +403,24 @@ TEST(update_incoming) {
   act.update_incoming(particles);
   COMPARE(act.incoming_particles()[0].position(), new_position);
 }
-
 static bool collisionbranches_equal(const CollisionBranchPtr& b1,
                                     const CollisionBranchPtr& b2) {
-  bool same_particle_number = b1->particle_number() == b2->particle_number();
-  bool same_weight = (std::abs(b1->weight() - b2->weight()) < really_small);
+  const bool same_particle_number =
+      b1->particle_number() == b2->particle_number();
+  const bool same_weight = std::abs(b1->weight() - b2->weight()) < really_small;
+
   if (b1->get_type() == ProcessType::StringSoftSingleDiffractiveAX) {
     return same_weight && same_particle_number &&
            b2->get_type() == ProcessType::StringSoftSingleDiffractiveXB;
   } else if (b1->get_type() == ProcessType::StringSoftSingleDiffractiveXB) {
     return same_weight && same_particle_number &&
            b2->get_type() == ProcessType::StringSoftSingleDiffractiveAX;
+  } else if (b1->get_type() == ProcessType::StringHardSingleDiffractiveAX) {
+    return same_weight && same_particle_number &&
+           b2->get_type() == ProcessType::StringHardSingleDiffractiveXB;
+  } else if (b1->get_type() == ProcessType::StringHardSingleDiffractiveXB) {
+    return same_weight && same_particle_number &&
+           b2->get_type() == ProcessType::StringHardSingleDiffractiveAX;
   } else {
     return same_weight && same_particle_number &&
            b1->get_type() == b2->get_type();

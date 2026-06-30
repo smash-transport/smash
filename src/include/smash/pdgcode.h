@@ -473,16 +473,31 @@ class PdgCode {
     return (c == pdg::pi_z) || (c == pdg::pi_p) || (c == pdg::pi_m);
   }
 
+  /// \return whether this is an eta meson
+  inline bool is_eta() const { return code() == pdg::eta; }
+
   /// \return whether this is an omega meson
-  inline bool is_omega() const {
-    const auto c = code();
-    return c == pdg::omega;
-  }
+  inline bool is_omega() const { return code() == pdg::omega; }
 
   /// \return whether this is a rho meson (rho+/rho0/rho-)
   inline bool is_rho() const {
     const auto c = code();
     return (c == pdg::rho_z) || (c == pdg::rho_p) || (c == pdg::rho_m);
+  }
+
+  /// \return whether this is a D meson (D+, D-, D0, Dbar0)
+  inline bool is_Dmeson() const {
+    const auto abs_code = std::abs(code());
+    return (abs_code == pdg::D_p) || (abs_code == pdg::D_z);
+  }
+
+  /**
+   * \return whether this is a D* meson
+   * (D*(2010)⁺, D*(2010)⁻, D*(2007)⁰, D̄*(2007)⁰)
+   */
+  inline bool is_Dstar2007() const {
+    const auto abs_code = std::abs(code());
+    return (abs_code == pdg::Dstar_p) || (abs_code == pdg::Dstar_z);
   }
 
   /// \return whether this is (anti-)deuteron

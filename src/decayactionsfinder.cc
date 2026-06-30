@@ -33,6 +33,16 @@ ActionList DecayActionsFinder::find_actions_in_cell(
         p.get_history().collisions_per_particle == 0) {
       continue;
     }
+    /* Prevent decays of charmed particles if 'Charm_Rescattering_Method' is set
+     * to 'none' and D* meson decays if set to 'T-matrix'. Adding it in this
+     * function ensures that find_final_actions will still lead to forced decays
+     * for all charmed hardons if 'Force_Decays_At_End' is set to true. */
+    if ((charm_rescattering_method_ == CharmRescattering::None &&
+         p.type().pdgcode().frac_charm() != 0) ||
+        (charm_rescattering_method_ == CharmRescattering::T_Matrix &&
+         p.type().pdgcode().is_Dstar2007())) {
+      continue;
+    }
 
     DecayBranchList processes = p.type().get_partial_widths(
         p.momentum(), p.position().threevec(), WhichDecaymodes::Hadronic);
@@ -49,8 +59,7 @@ ActionList DecayActionsFinder::find_actions_in_cell(
     /* The decay_time is sampled from an exponential distribution.
      * Even though it may seem suspicious that it is sampled every
      * timestep, it can be proven that this still overall obeys
-     * the exponential decay law.
-     */
+     * the exponential decay law. */
     double decay_time =
         res_lifetime_factor_ * random::exponential<double>(
                                    /* The clock goes slower in the rest

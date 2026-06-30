@@ -295,6 +295,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
           criterion,
           config.take(InputKeys::collTerm_twoToOne),
           config.take(InputKeys::collTerm_includedTwoToTwo),
+          config.take(InputKeys::collTerm_charmRescatteringMethod),
           config.take(InputKeys::collTerm_multiParticleReactions),
           config.take(InputKeys::collTerm_strings, modus_chooser != "Box"),
           config.take(InputKeys::collTerm_resonanceLifetimeModifier),

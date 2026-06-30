@@ -981,14 +981,16 @@ class Configuration {
           s.set(IncludedReactions::PiDeuteron_to_pidprime);
         } else if (x == "NDeuteron_to_Ndprime") {
           s.set(IncludedReactions::NDeuteron_to_Ndprime);
+        } else if (x == "Charm_T-matrix") {
+          s.set(IncludedReactions::Charm_T_matrix);
         } else {
           throw IncorrectTypeInAssignment(
               "The value for key \"" + std::string(key_) +
               "\" should be \"All\", \"Elastic\", \"NN_to_NR\", \"NN_to_DR\","
               "\"KN_to_KN\", \"KN_to_KDelta\", \"PiDeuteron_to_NN\", "
               "\"PiDeuteron_to_pidprime\", \"NDeuteron_to_Ndprime\", "
-              "\"Strangeness_exchange\" or "
-              "\"NNbar\", or any combination of these.");
+              "\"Strangeness_exchange\", \"NNbar\", or \"Charm_T-matrix\" "
+              "or any combination of these.");
         }
       }
       return s;
@@ -1377,7 +1379,7 @@ class Configuration {
      * Set collision criterion from configuration values.
      *
      * \return CollisionCriterion.
-     * \throw IncorrectTypeInAssignment in case an collision criterion that is
+     * \throw IncorrectTypeInAssignment in case a collision criterion that is
      * not available is provided as a configuration value.
      */
     operator CollisionCriterion() const {
@@ -1394,6 +1396,29 @@ class Configuration {
       throw IncorrectTypeInAssignment(
           "The value for key \"" + std::string(key_) + "\" should be " +
           "\"Geometric\", \"Stochastic\" " + "or \"Covariant\".");
+    }
+
+    /**
+     * Set charm rescattering method from configuration values.
+     *
+     * \return CharmRescattering.
+     * \throw IncorrectTypeInAssignment in case a charm rescattering method that
+     * is not available is provided as a configuration value.
+     */
+    operator CharmRescattering() const {
+      const std::string c = operator std::string();
+      if (c == "T-matrix") {
+        return CharmRescattering::T_Matrix;
+      }
+      if (c == "resonances") {
+        return CharmRescattering::Resonances;
+      }
+      if (c == "none") {
+        return CharmRescattering::None;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) + "\" should be " +
+          "\"T-matrix\", \"resonances\", " + "or \"none\".");
     }
 
     /**

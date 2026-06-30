@@ -10,6 +10,7 @@
 #include "smash/dynamicfluidfinder.h"
 
 #include "smash/fluidizationaction.h"
+#include "smash/forwarddeclarations.h"
 #include "smash/freeforallaction.h"
 #include "smash/logging.h"
 
@@ -83,6 +84,10 @@ bool DynamicFluidizationFinder::is_process_fluidizable(
     return fluidizable_processes_
         [IncludedFluidizableProcesses::From_SoftString];
   }
+  if (is_string_hard_process(type)) {
+    return fluidizable_processes_
+        [IncludedFluidizableProcesses::From_HardString];
+  }
   switch (type) {
     case ProcessType::Elastic:
       if (history.collisions_per_particle == 1 && delay_initial_elastic_) {
@@ -102,9 +107,6 @@ bool DynamicFluidizationFinder::is_process_fluidizable(
     case ProcessType::MultiParticleFiveToTwo:
       return fluidizable_processes_
           [IncludedFluidizableProcesses::From_Inelastic];
-    case ProcessType::StringHard:
-      return fluidizable_processes_
-          [IncludedFluidizableProcesses::From_HardString];
     default:
       return false;
   }

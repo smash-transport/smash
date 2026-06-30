@@ -239,6 +239,7 @@ enum IncludedReactions {
   PiDeuteron_to_NN = 7,
   PiDeuteron_to_pidprime = 8,
   NDeuteron_to_Ndprime = 9,
+  Charm_T_matrix = 10,
 };
 
 /**
@@ -250,7 +251,7 @@ enum IncludedReactions {
  * overloads; therefore, developers should ensure that multiple bitsets are not
  * set to the same length.
  */
-typedef std::bitset<10> ReactionsBitSet;
+typedef std::bitset<11> ReactionsBitSet;
 
 /// The different groups of multi-particle reactions that one can include
 // Because std::bitset does not handle enum classes, this is a simple enum.
@@ -267,6 +268,16 @@ enum IncludedMultiParticleReactions {
  * @attention See remark in \ref ReactionsBitSet
  */
 typedef std::bitset<4> MultiParticleReactionsBitSet;
+
+/// Possible charm scattering options
+enum class CharmRescattering {
+  /// Disable charm interactions
+  None,
+  /// Charm interactions via resonances
+  Resonances,
+  /// Charm interactions via T-matrix approach
+  T_Matrix,
+};
 
 /// Possible spin interaction types
 enum class SpinInteractionType {

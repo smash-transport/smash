@@ -101,6 +101,8 @@ class ScatterActionsFinderParameters {
   const NNbarTreatment nnbar_treatment;
   /// List of included 2<->2 reactions
   const ReactionsBitSet included_2to2;
+  /// Specifies kind of charm rescattering
+  const CharmRescattering charm_rescattering;
   /// List of included multi-particle reactions
   const MultiParticleReactionsBitSet included_multi;
   /// Number of test particles.
