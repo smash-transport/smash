@@ -3921,6 +3921,9 @@ struct InputKeys {
    * of pion and 60% indirectly via \f$\rho_0\f$ meson.
    *
    * This key is only relevant if \key Bremsstrahlung is `true`.
+   * Note that selecting option "FF2" leads to unphysical peaks at \f$\lambda\f$
+   * cutoff. Usage is therefore not recommended above the energy scales
+   * investigated by \iref{Shyam:2010vr}.
    */
   /**
    * \see_key{key_CT_dileptons_pion_form_factor_}
