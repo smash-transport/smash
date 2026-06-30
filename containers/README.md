@@ -30,6 +30,34 @@ Of course, `x86-64` can be changed using any general cpu family architecture fla
 
 The option `-t <tag_name>` can be added to assign the `<tag_name>` tag to the built image.
 
+#### Selecting the SMASH source
+
+The Dockerfile provides the following build arguments:
+
+- `SOURCE_STAGE=public-source` (default): clone the public SMASH repository from GitHub.
+- `SOURCE_STAGE=local-source`: use a local SMASH checkout supplied through the `local_smash` Docker BuildKit build context.
+- `SMASH_TAG=latest` (default): when building from `public-source`, use the latest released SMASH Git tag. Any other Git tag, such as `SMASH-3.2`, can be specified instead.
+
+To build from the public repository:
+
+```console
+docker buildx build \
+  --build-arg SOURCE_STAGE=public-source \
+  --build-arg SMASH_TAG=SMASH-3.2 \
+  -f Dockerfile .
+```
+
+To build from local development sources:
+
+```console
+docker buildx build \
+  --build-context local_smash=/path/to/smash-devel \
+  --build-arg SOURCE_STAGE=local-source \
+  -f Dockerfile .
+```
+
+The `local_smash` build context is copied into the image as the SMASH source tree, allowing local modifications to be tested without committing them to a remote repository.
+
 #### Note for users with ARM CPUs (e.g. Apple M1/M2 chips)
 
 Our Docker images are by default prepared for the x86-64 CPU architecture.
