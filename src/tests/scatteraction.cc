@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2015-2025
+ *    Copyright (c) 2015-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
