@@ -209,27 +209,54 @@ int sgn(T val) {
 }
 
 /**
- * Draws a random number according to a power-law distribution ~ x^n.
- *
- * \param n Exponent in power law (arbitrary real number).
- * \param xMin Minimum value.
- * \param xMax Maximum value.
- * \return random number between xMin and xMax.
- */
+
+* Sample from a power-law probability density proportional to |x|^n.
+* The sample is drawn on the interval [xMin, xMax]. The interval must lie
+* entirely on one side of zero; intervals crossing zero are not supported.
+* Negative intervals are handled by sampling the absolute values and restoring
+* the negative sign.
+* For n ≈ -1, the distribution is sampled using the logarithmic limit.
+* \tparam T Floating-point type.
+* \param n Power-law exponent.
+* \param xMin Lower interval bound.
+* \param xMax Upper interval bound.
+* \return Random value distributed as p(x) ∝ |x|^n on the given interval.
+* \throws std::invalid_argument if the interval crosses zero.
+* \throws std::invalid_argument if the interval touches zero and n <= -1,
+*  where the distribution is not normalizable.
+*/
 template <typename T = double>
 T power(T n, T xMin, T xMax) {
-  const T n1 = n + 1;
-  if (std::abs(n1) < 1E-3) {
-    return xMin * std::pow(xMax / xMin, canonical());
-  } else if (xMin >= 0. && xMax > 0.) {
-    return std::pow(uniform(std::pow(xMin, n1), std::pow(xMax, n1)), 1. / n1);
-  } else {
-    return sgn(xMin) * std::pow(uniform(std::pow(std::abs(xMin), n1),
-                                        std::pow(std::abs(xMax), n1)),
-                                1. / n1);
-  }
-}
+  const T n1 = n + T(1);
 
+  if ((xMin < 0 && xMax > 0) || (xMax < 0 && xMin > 0)) {
+    throw std::invalid_argument(
+        "power: interval crossing zero is not supported");
+  } else if ((xMin == 0 || xMax == 0) && n <= -1) {
+    throw std::invalid_argument("power: distribution not normalizable at x=0");
+  }
+
+  if (xMin > xMax) {
+    std::swap(xMin, xMax);
+  }
+  const T sign = xMax < T(0) ? T(-1) : T(1);
+
+  const T lo = std::abs(xMin);
+  const T hi = std::abs(xMax);
+
+  if (std::abs(n1) < T(1e-3)) {
+    return sign * lo * std::pow(hi / lo, canonical());
+  }
+
+  T a = std::pow(lo, n1);
+  T b = std::pow(hi, n1);
+
+  if (a > b) {
+    std::swap(a, b);
+  }
+
+  return sign * std::pow(uniform(a, b), T(1) / n1);
+}
 /**
  * Returns a Poisson distributed random number.
  *
