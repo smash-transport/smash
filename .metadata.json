@@ -135,6 +135,13 @@
       "years": "2015-2017"
     },
     {
+      "last name": "Ostrowski",
+      "first name": "Sebastian",
+      "email": "ostrowski@itp.uni-frankfurt.de",
+      "years": "2026-",
+      "affiliation": "Institute for Theoretical Physics, Goethe University Frankfurt, Max-von-Laue-Straße 1, 60438 Frankfurt am Main, Germany"
+    },
+    {
       "last name": "Oliinychenko",
       "first name": "Dmytro",
       "email": "oliiny@fias.uni-frankfurt.de",
@@ -159,12 +166,6 @@
       "years": "2017"
     },
     {
-      "last name": "Kretz",
-      "first name": "Matthias",
-      "email": "kretz@compeng.uni-frankfurt.de",
-      "years": "2014-2015,2020"
-    },
-    {
       "last name": "Li",
       "first name": "Feng",
       "email": "fengli@fias.uni-frankfurt.de",
@@ -177,6 +178,12 @@
       "years": "2020-2021"
     },
     {
+      "last name": "Kretz",
+      "first name": "Matthias",
+      "email": "kretz@compeng.uni-frankfurt.de",
+      "years": "2014-2015,2020"
+    },
+    {
       "last name": "Kehrenberg",
       "first name": "Thomas",
       "email": "kehrenberg@fias.uni-frankfurt.de",
@@ -187,14 +194,6 @@
       "first name": "Gabriele",
       "email": "inghirami@fias.uni-frankfurt.de",
       "years": "2021-2025"
-    },
-    {
-      "last name": "Góes-Hirayama",
-      "first name": "Renan",
-      "email": "hirayama@itp.uni-frankfurt.de",
-      "years": "2021-",
-      "affiliation": "Frankfurt Institute for Advanced Studies, Ruth-Moufang-Straße 1, 60438 Frankfurt am Main, Germany",
-      "orcid": "0000-0003-2403-8073"
     },
     {
       "last name": "Hammelmann",
@@ -221,6 +220,14 @@
       "years": "2021-2025"
     },
     {
+      "last name": "Góes-Hirayama",
+      "first name": "Renan",
+      "email": "hirayama@itp.uni-frankfurt.de",
+      "years": "2021-",
+      "affiliation": "Frankfurt Institute for Advanced Studies, Ruth-Moufang-Straße 1, 60438 Frankfurt am Main, Germany",
+      "orcid": "0000-0003-2403-8073"
+    },
+    {
       "last name": "Geiger",
       "first name": "Leon",
       "email": "geiger@fias.uni-frankfurt.de",
@@ -236,8 +243,7 @@
       "last name": "Engel",
       "first name": "Manou",
       "email": "mengel@itp.uni-frankfurt.de",
-      "years": "2025-",
-      "affiliation": "Institute for Theoretical Physics, Goethe University Frankfurt, Max-von-Laue-Straße 1, 60438 Frankfurt am Main, Germany"
+      "years": "2025"
     },
     {
       "last name": "Elfner",

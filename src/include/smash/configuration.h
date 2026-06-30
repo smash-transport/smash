@@ -1086,6 +1086,29 @@ class Configuration {
     }
 
     /**
+     * Set form factor from configuration values.
+     *
+     * \return Dilepton pion form factor type.
+     * \throw IncorrectTypeInAssignment in case a form factor value that is
+     * not available is provided as a configuration value.
+     */
+    operator DileptonBremsPionFormFactor() const {
+      const std::string s = operator std::string();
+      if (s == "FF1") {
+        return DileptonBremsPionFormFactor::FF1;
+      }
+      if (s == "FF2") {
+        return DileptonBremsPionFormFactor::FF2;
+      }
+      if (s == "Off") {
+        return DileptonBremsPionFormFactor::Off;
+      }
+      throw IncorrectTypeInAssignment(
+          "The value for key \"" + std::string(key_) +
+          "\" should be \"FF1\" or \"FF2\" or \"Off\".");
+    }
+
+    /**
      * (De-)Activate Fermi motion from configuration values.
      *
      * \return Fermi motion setup.

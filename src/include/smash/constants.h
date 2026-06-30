@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2013-2021,2023,2025
+ *    Copyright (c) 2013-2021,2023,2025-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -53,6 +53,13 @@ constexpr double nuclear_density = 0.168;
 
 /// Physical error tolerance.
 constexpr double small_number = 1.0e-4;
+
+/**
+ * Electron mass in GeV.
+ *
+ * Note that this should be the same as in particles.txt.
+ */
+constexpr double electron_mass = 0.000511;
 
 /**
  * Nucleon mass in GeV.

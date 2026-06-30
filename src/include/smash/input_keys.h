@@ -3893,8 +3893,52 @@ struct InputKeys {
       detail::get_default_validator<bool>()};
 
   /*!\Userguide
+   * \page doxypage_input_conf_ct_dileptons
+   * \optional_key{key_CT_dileptons_bremsstrahlung_,Bremsstrahlung,bool,false,
+   * \none}
+   *
+   * Whether or not to enable dilepton production via bremsstrahlung in
+   * neutron-proton interactions. The approach follows the meson-exchange
+   * approximation depicted in \iref{Shyam:2010vr}.
+   */
+  /**
+   * \see_key{key_CT_dileptons_bremsstrahlung_}
+   */
+  inline static const Key<bool> collTerm_dileptons_bremsstrahlung{
+      InputSections::c_dileptons + "Bremsstrahlung",
+      false,
+      {"3.4"},
+      detail::get_default_validator<bool>()};
+
+  /*!\Userguide
+   * \page doxypage_input_conf_ct_dileptons
+   * \optional_key{key_CT_dileptons_pion_form_factor_,Pion_Form_Factor,string,
+   * "Off",\any_valid}
+   *
+   * - `"Off"` &rarr; Implicitly using a factor of 1.
+   * - `"FF1"` &rarr; Photon couples to pion direclty via \f$\rho_0\f$ meson.
+   * - `"FF2"` &rarr; Photon couples 40% directly to intrinsic quark structure
+   * of pion and 60% indirectly via \f$\rho_0\f$ meson.
+   *
+   * This key is only relevant if \key Bremsstrahlung is `true`.
+   * Note that selecting option "FF2" leads to unphysical peaks at \f$\lambda\f$
+   * cutoff. Usage is therefore not recommended above the energy scales
+   * investigated by \iref{Shyam:2010vr}.
+   */
+  /**
+   * \see_key{key_CT_dileptons_pion_form_factor_}
+   */
+  inline static const Key<DileptonBremsPionFormFactor>
+      collTerm_dileptons_pion_form_factor{
+          InputSections::c_dileptons + "Pion_Form_Factor",
+          DileptonBremsPionFormFactor::Off,
+          {"3.4"},
+          detail::get_default_validator<DileptonBremsPionFormFactor>()};
+
+  /*!\Userguide
    * \page doxypage_input_conf_ct_photons
-   * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false,\none}
+   * \optional_key{key_CT_photons_2to2_scatterings_,2to2_Scatterings,bool,false,
+   * \none}
    *
    * Whether or not to enable photon production in mesonic scattering
    * processes.
@@ -3910,7 +3954,8 @@ struct InputKeys {
 
   /*!\Userguide
    * \page doxypage_input_conf_ct_photons
-   * \optional_key{key_CT_photons_bremsstrahlung_,Bremsstrahlung,bool,false,\none}
+   * \optional_key{key_CT_photons_bremsstrahlung_,Bremsstrahlung,bool,false,
+   * \none}
    *
    * Whether or not to enable photon production in bremsstrahlung processes.
    */
@@ -7670,6 +7715,7 @@ struct InputKeys {
       std::reference_wrapper<const Key<DerivativesMode>>,
       std::reference_wrapper<const Key<ExpansionMode>>,
       std::reference_wrapper<const Key<FermiMotion>>,
+      std::reference_wrapper<const Key<DileptonBremsPionFormFactor>>,
       std::reference_wrapper<const Key<FieldDerivativesMode>>,
       std::reference_wrapper<const Key<FluidizableProcessesBitSet>>,
       std::reference_wrapper<const Key<FluidizationType>>,
@@ -7853,8 +7899,8 @@ General:
  * <h3> Example of dileptons configuration </h3>
  *
  * The following example configures the dilepton production for dileptons
- * originating from resonance decays. In addition, the extended OSCAR2013
- * dilepton output is enabled.
+ * originating from resonance decays and bremsstrahlung. In addition, the
+ * extended OSCAR2013 dilepton output is enabled.
  *
  *\verbatim
  Output:
@@ -7864,6 +7910,8 @@ General:
  Collision_Term:
      Dileptons:
          Decays: True
+         Bremsstrahlung: True
+         Pion_Form_Factor: "FF1"
  \endverbatim
  *
  * <hr>
@@ -7887,17 +7935,17 @@ General:
  * of your choice, which you then specify as the input with the `-d` command
  * line option. <b>Without this decay modes modification the dilepton output
  * will be empty</b>. Dilepton decays are commented out by default. Therefore,
- * you need to uncomment them. For the N(1520) Dalitz decay, two treatments
- are
- * available: Either by proxy of the \f$\rho N\f$ decay, which is enabled by
- * default (and leads to a dilepton Dalitz decay, if \f$\rho \rightarrow
- * e^+e^-\f$ is also enabled) or as a direct Dalitz decay to \f$e^+e^- N\f$.
- * If using the latter comment-out the \f$\rho N\f$ decay to avoid double
- * counting. The form factor in the direct case, is constant and fixed at the
- * real photon point. Furthermore note, that for dilepton decays, new decay
- * channels can \b not simply be added to the *decaymodes.txt* file. You also
- * have to modify the decay width formulas \c TwoBodyDecayDilepton::width and
- * \c ThreeBodyDecayDilepton::diff_width in *decaytype.cc* file.
+ * you need to uncomment them. For the N(1520) Dalitz decay, two
+ * treatments are available: Either by proxy of the \f$\rho N\f$ decay, which
+ * is enabled by default (and leads to a dilepton Dalitz decay, if
+ * \f$\rho \rightarrow e^+e^-\f$ is also enabled) or as a direct Dalitz decay
+ * to \f$e^+e^- N\f$. If using the latter, comment-out the \f$\rho N\f$ decay
+ * to avoid double counting. The form factor in the direct case, is constant
+ * and fixed at the real photon point. Furthermore note, that for dilepton
+ * decays, new decay channels can \b not simply be added to the
+ * *decaymodes.txt* file. You also have to modify the decay width formulas
+ * \c TwoBodyDecayDilepton::width and \c ThreeBodyDecayDilepton::diff_width
+ * in *decaytype.cc* file.
  *
  */
 
@@ -7942,8 +7990,7 @@ General:
  *    photon processes are significantly less likely than hadronic processes,
  *    the produced photons are weighted according to the ratio of the photon
  *    cross section to the hadronic cross section used to find the
- interaction,
- *    \f[W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\;.\f]
+ *    interaction, \f[W = \frac{\sigma_\gamma}{\sigma_\mathrm{hadronic}}\;.\f]
  *    This weight can be found in the weight element of the photon output,
  *    denoted as `photon_weight` there.
  * -# Perform the original hadronic action based on which the photon action
@@ -7972,8 +8019,7 @@ General:
  * \f$ \theta \f$ range, \f$ \frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}k}\f$
  * and \f$ \frac{\mathrm{d}\sigma_\gamma}{\mathrm{d} \theta}\f$ are considered
  * separately. Consequently, the weighting factor in the case of
- bremsstrahlung
- * photons is redefined as:
+ * bremsstrahlung photons is redefined as:
  * \f[
  * W = \frac{
  *       \sqrt{\frac{\mathrm{d}\sigma_\gamma}{\mathrm{d}k} \ \Delta k \
@@ -7996,10 +8042,9 @@ General:
  * The following example configures a Cu63-Cu63 collision at
  * \f$\sqrt{s_{NN}}=3.0\,\mathrm{GeV}\f$ with zero impact parameter and Fermi
  * motion taken into consideration. The calculation frame is the default,
- center
- * of velocity, and the nuclei are not deformed. Refer to \ref
- * doxypage_input_conf_modi_C_proj_targ for information about the
- * `%Particles` and `Target` sections.
+ * center of velocity, and the nuclei are not deformed. Refer to
+ * \ref doxypage_input_conf_modi_C_proj_targ for information about the
+ * `Particles` and `Target` sections.
  *
  *\verbatim
  Modi:
@@ -8013,8 +8058,7 @@ General:
  *
  * To further use Fermi motion and allow the first collisions within the
  * projectile or target nucleus, the corresponding options need to be
- activated
- * by means of:
+ * activated by means of:
  *\verbatim
          Fermi_Motion: "on"
          Collisions_Within_Nucleus: True
@@ -8028,17 +8072,14 @@ General:
  * By default, executing SMASH from the codebase build folder without further
  * specifying the configuration, particles and decay modes files, a collider
  * simulation is set up according to the default _config.yaml_,
- _particles.txt_
- * and _decaymodes.txt_ files located in the _**input**_ directory at the
- * top-level of the codebase. However, changing the _**input**_ directory
- * content will not affect the default SMASH run, unless a clean build folder
- is
- * created over again. This is because the triplet of input files are
- * transformed into another triplet of files into the build directory when
- * `cmake` is run. Hence prefer to use `smash` command line options in case
- you
- * want to refer to possibly modified configuration, particles and decay modes
- * files.\n
+ * _particles.txt_ and _decaymodes.txt_ files located in the _**input**_
+ * directory at the top-level of the codebase. However, changing the
+ * _**input**_ directory content will not affect the default SMASH run,
+ * unless a clean build folder is created over again. This is because the
+ * triplet of input files are transformed into another triplet of files into
+ * the build directory when `cmake` is run. Hence prefer to use `smash`
+ * command line options in case you want to refer to possibly modified
+ * configuration, particles and decay modes files.\n
  * To run SMASH in the (default) collider setup, execute
  * \verbatim
     ./smash

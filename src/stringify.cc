@@ -51,6 +51,18 @@ std::string to_string(CalculationFrame frame) {
   throw_unhandled_enum("CalculationFrame", static_cast<int>(frame));
 }
 
+std::string to_string(DileptonBremsPionFormFactor factor) {
+  switch (factor) {
+    case DileptonBremsPionFormFactor::FF1:
+      return "FF1";
+    case DileptonBremsPionFormFactor::FF2:
+      return "FF2";
+    case DileptonBremsPionFormFactor::Off:
+      return "Off";
+  }
+  throw_unhandled_enum("DileptonBremsPionFormFactor", static_cast<int>(factor));
+}
+
 std::string to_string(FermiMotion motion) {
   switch (motion) {
     case FermiMotion::Off:

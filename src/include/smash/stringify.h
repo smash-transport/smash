@@ -40,6 +40,16 @@ std::string to_string(ThermodynamicQuantity quantity);
 std::string to_string(CalculationFrame frame);
 
 /**
+ * Convert a DileptonBremsPionFormFactor enum value to its corresponding string.
+ *
+ * \param[in] factor The DileptonBremsPionFormFactor enum value to convert.
+ *
+ * \return std::string Corresponding string representation.
+ * \throws std::invalid_argument If the enum value is unhandled.
+ */
+std::string to_string(DileptonBremsPionFormFactor factor);
+
+/**
  * Convert a FermiMotion enum value to its corresponding string.
  *
  * \param[in] motion The FermiMotion enum value to convert.
