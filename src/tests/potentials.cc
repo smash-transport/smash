@@ -463,8 +463,9 @@ static ExperimentParameters default_parameters_vdf(
       true,   // force decays at the end
       false,  // do non-strong decays
       true,   // can decay initial particles
-      SpinInteractionType::Off,  // no spin interactions
-      std::nullopt               // use monash tune, not known
+      DileptonBremsPionFormFactor::Off,  // no form factor
+      SpinInteractionType::Off,          // no spin interactions
+      std::nullopt                       // use monash tune, not known
   };
 }
 

@@ -17,7 +17,8 @@
 
 #include "actionfinderfactory.h"
 #include "actions.h"
-#include "bremsstrahlungaction.h"
+#include "bremsstrahlungactiondilepton.h"
+#include "bremsstrahlungactionphoton.h"
 #include "chrono.h"
 #include "decayactionsfinder.h"
 #include "decayactionsfinderdilepton.h"
@@ -604,11 +605,17 @@ class Experiment : public ExperimentBase {
   /// This indicates whether dileptons are switched on.
   const bool dileptons_switch_;
 
+  /**
+   * This indicates whether dilepton production via bremsstrahlung is
+   * switched on.
+   */
+  const bool dileptons_bremsstrahlung_switch_;
+
   /// This indicates whether photons are switched on.
   const bool photons_switch_;
 
   /// This indicates whether bremsstrahlung is switched on.
-  const bool bremsstrahlung_switch_;
+  const bool photons_bremsstrahlung_switch_;
 
   /**
    * This indicates whether the experiment will be used as initial condition for
@@ -927,9 +934,11 @@ Experiment<Modus>::Experiment(Configuration &config,
       metric_(config.take(InputKeys::gen_metricType),
               config.take(InputKeys::gen_expansionRate)),
       dileptons_switch_(config.take(InputKeys::collTerm_dileptons_decays)),
+      dileptons_bremsstrahlung_switch_(
+          config.take(InputKeys::collTerm_dileptons_bremsstrahlung)),
       photons_switch_(
           config.take(InputKeys::collTerm_photons_twoToTwoScatterings)),
-      bremsstrahlung_switch_(
+      photons_bremsstrahlung_switch_(
           config.take(InputKeys::collTerm_photons_bremsstrahlung)),
       IC_switch_(config.has_section(InputSections::o_initialConditions) &&
                  modus_.is_IC_for_hybrid()),
@@ -1026,7 +1035,7 @@ Experiment<Modus>::Experiment(Configuration &config,
   if (dileptons_switch_) {
     dilepton_finder_ = std::make_unique<DecayActionsFinderDilepton>();
   }
-  if (photons_switch_ || bremsstrahlung_switch_) {
+  if (photons_switch_ || photons_bremsstrahlung_switch_) {
     n_fractional_photons_ =
         config.take(InputKeys::collTerm_photons_fractionalPhotons);
   }
@@ -2430,14 +2439,14 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
     photon_act.perform_photons(outputs_);
   }
 
-  if (bremsstrahlung_switch_ &&
-      BremsstrahlungAction::is_bremsstrahlung_reaction(
+  if (photons_bremsstrahlung_switch_ &&
+      BremsstrahlungActionPhoton::is_photon_brems_reaction(
           action.incoming_particles())) {
     /* Time in the action constructor is relative to
      * current time of incoming */
     constexpr double action_time = 0.;
 
-    BremsstrahlungAction brems_act(
+    BremsstrahlungActionPhoton photon_brems_act(
         action.incoming_particles(), action_time, n_fractional_photons_,
         action.get_total_weight(), parameters_.spin_interaction_type);
 
@@ -2452,12 +2461,39 @@ bool Experiment<Modus>::perform_action(Action &action, int i_ensemble,
      * is taken.
      */
 
-    brems_act.add_dummy_hadronic_process(action.get_total_weight());
+    photon_brems_act.add_dummy_hadronic_process(action.get_total_weight());
 
     // Now add the actual bremsstrahlung reaction channel.
-    brems_act.add_single_process();
+    photon_brems_act.add_single_process();
 
-    brems_act.perform_bremsstrahlung(outputs_);
+    photon_brems_act.perform_bremsstrahlung(outputs_);
+  }
+
+  if (dileptons_bremsstrahlung_switch_ &&
+      BremsstrahlungActionDilepton::is_dilepton_brems_reaction(
+          action.incoming_particles())) {
+    // Time in the action constructor is relative to current time of incoming
+    constexpr double action_time = 0.;
+
+    // Create the dilepton bremsstrahlung action with the respective form
+    // factor.
+    BremsstrahlungActionDilepton dilepton_brems_act(
+        action.incoming_particles(), action_time, action.get_total_weight(),
+        parameters_.dilepton_brems_pion_form_factor_type);
+
+    // Add a dummy process to the dilepton bremsstrahlung action. The
+    // only important thing is that its cross section is equal to the cross
+    // section of the hadronic action. The dilepton bremsstrahlung action is
+    // never performed, only the final state is generated and printed to the
+    // dilepton output (similar to the photon output).
+    //
+    // The add_single_process() logic used in the photon bremsstrahlung
+    // becomes obsolet since there are no sub-branches leading to the output at
+    // the moment. Therefore, the very reduced logic from this function is
+    // incorporated into add_dummy_hadronic_process.
+    dilepton_brems_act.add_dummy_hadronic_process(action.get_total_weight());
+
+    dilepton_brems_act.perform_dilepton_bremsstrahlung(outputs_);
   }
 
   logg[LExperiment].debug(~einhard::Green(), "✔ ", action);

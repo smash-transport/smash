@@ -24,6 +24,12 @@ constexpr int invalid = 0x0;
 /// Photon.
 constexpr int photon = 0x22;
 
+/// Electron
+constexpr int e_m = 0x11;
+
+/// Positron
+constexpr int e_p = -0x11;
+
 /// Proton.
 constexpr int p = 0x2212;
 /// Neutron.

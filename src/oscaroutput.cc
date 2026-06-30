@@ -520,6 +520,7 @@ void OscarOutput<Format, Contents>::at_intermediate_time(
  * \process_type{21} Fluidization as above, but particles are not removed from
  *                   the evolution. They are instead tagged as core.
  * \process_type{9}  Bremsstrahlung process: a + b &rarr; a + b + photon
+ * \process_type{16} Bremsstrahlung process: a + b &rarr; a + b + dilepton
  * \process_type{10} Inelastic multi-particle meson scattering (3 &rarr; 1)
  * \process_type{11} Inelastic multi-particle scattering (3 &rarr; 2)
  * \process_type{12} Inelastic multi-particle scattering (5 &rarr; 2)
