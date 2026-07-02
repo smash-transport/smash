@@ -935,7 +935,7 @@ TEST(validators_output) {
   VERIFY(thermodynamics_format.validate({"Lattice_ASCII"}));
   VERIFY(thermodynamics_format.validate({"Lattice_Binary"}));
   VERIFY(thermodynamics_format.validate({"VTK"}));
-  VERIFY(!thermodynamics_format.validate({"ASCII"}));
+  VERIFY(thermodynamics_format.validate({"ASCII"}));
   VERIFY(!thermodynamics_format.validate({"Binary"}));
   VERIFY(!thermodynamics_format.validate({"HepMC"}));
   VERIFY(!thermodynamics_format.validate({"Root"}));
