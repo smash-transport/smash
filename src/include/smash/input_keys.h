@@ -6377,7 +6377,7 @@ struct InputKeys {
                             [](const std::string &s) { return s == "None"; });
             if (has_none)
               return values.size() == 1;
-            std::set<std::string> allowed_set = {"Lattice_ASCII",
+            std::set<std::string> allowed_set = {"Lattice_ASCII", "ASCII",
                                                  "Lattice_Binary", "VTK"};
             return std::none_of(values.begin(), values.end(),
                                 [&allowed_set](const std::string &s) {
