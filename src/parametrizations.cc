@@ -1564,4 +1564,80 @@ std::optional<double> DstarzeroKminus_elastic(double sqrts) {
   }
 }
 
+std::optional<double> Dplusn_elastic(double sqrts) {
+  if (sqrts > *(DN_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dplusn_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] = dedup_avg<double>(DN_SQRTS, DPLUSN_ELASTIC_SIG);
+      Dplusn_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Zero);
+    }
+    return (*Dplusn_elastic_interpolation)(sqrts);
+  }
+}
+
+double Dplusn_Dzerop(double sqrts) {
+  if (Dplusn_Dzerop_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] = dedup_avg<double>(DN_SQRTS, DPLUSN_DZEROP_SIG);
+    Dplusn_Dzerop_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dplusn_Dzerop_interpolation)(sqrts);
+}
+
+std::optional<double> Dplusp_elastic(double sqrts) {
+  if (sqrts > *(DN_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dplusp_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] = dedup_avg<double>(DN_SQRTS, DPLUSP_ELASTIC_SIG);
+      Dplusp_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Zero);
+    }
+    return (*Dplusp_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> Dzeron_elastic(double sqrts) {
+  if (sqrts > *(DN_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dzeron_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] = dedup_avg<double>(DN_SQRTS, DZERON_ELASTIC_SIG);
+      Dzeron_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Zero);
+    }
+    return (*Dzeron_elastic_interpolation)(sqrts);
+  }
+}
+
+double Dzerop_Dplusn(double sqrts) {
+  if (Dzerop_Dplusn_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] = dedup_avg<double>(DN_SQRTS, DZEROP_DPLUSN_SIG);
+    Dzerop_Dplusn_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dzerop_Dplusn_interpolation)(sqrts);
+}
+
+std::optional<double> Dzerop_elastic(double sqrts) {
+  if (sqrts > *(DN_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dzerop_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] = dedup_avg<double>(DN_SQRTS, DZEROP_ELASTIC_SIG);
+      Dzerop_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Zero);
+    }
+    return (*Dzerop_elastic_interpolation)(sqrts);
+  }
+}
+
 }  // namespace smash
