@@ -491,6 +491,20 @@ class CrossSections {
   double DN_inelastic() const;
 
   /**
+   * Determine the elastic cross section for a D meson-Delta (DΔ) collision,
+   * If the center-of-mass energy for the collision is below the lower bound of
+   * the energy range of the underlying cross section data, the return value is
+   * zero. If it is above the upper bound, the return value will be
+   * `std::nullopt`.
+   *
+   * \return Elastic cross section for DΔ.
+   *
+   * \throw std::runtime_error if incoming particles are not DΔ.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  std::optional<double> DDelta_elastic() const;
+
+  /**
    * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.
    * These scatterings are suppressed at high energies when strings are
    * turned on with probabilities, so they need to be added back manually.

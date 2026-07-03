@@ -522,11 +522,15 @@ double CrossSections::elastic_parametrization(
              (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
     // Elastic Nucleon Kaon Scattering
     elastic_xs = nk_el();
-  } else if ((pdg_a.is_nucleon() && pdg_b.is_Dmeson()) ||
-             (pdg_b.is_nucleon() && pdg_a.is_Dmeson())) {
+  } else if (pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) {
     const CharmRescattering& charm_rescattering =
         finder_parameters.charm_rescattering;
-    std::optional<double> tmp_elastic_xs = DN_elastic();
+    std::optional<double> tmp_elastic_xs = std::nullopt;
+    if (pdg_a.is_nucleon() || pdg_b.is_nucleon()) {
+      tmp_elastic_xs = DN_elastic();
+    } else if (pdg_a.is_Delta() || pdg_b.is_Delta()) {
+      tmp_elastic_xs = DDelta_elastic();
+    }
     if ((charm_rescattering == CharmRescattering::T_Matrix) &&
         tmp_elastic_xs.has_value()) {
       elastic_xs = tmp_elastic_xs.value();
@@ -1346,6 +1350,107 @@ std::optional<double> CrossSections::DN_elastic() const {
     case pack(pdg::Dbar_z, pdg::p):
     case pack(pdg::D_z, -pdg::p): {  // Same xsec for charge conjugation.
       sig_el = Dbarzerop_elastic(sqrt_s_);
+      break;
+    }
+    default:
+      throw_xsec_is_not_implemented(incoming_particles_[0],
+                                    incoming_particles_[1], __func__);
+  }
+
+  if (sig_el.has_value() && sig_el.value() < 0.) {
+    throw_xsec_is_negative(sqrt_s_, sig_el.value(), incoming_particles_[0],
+                           incoming_particles_[1], __func__);
+  } else {
+    return sig_el;
+  }
+}
+
+std::optional<double> CrossSections::DDelta_elastic() const {
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+  const auto pdg_D = pdg_a.is_Dmeson() ? pdg_a.code() : pdg_b.code();
+  const auto pdg_Delta = pdg_a.is_Dmeson() ? pdg_b.code() : pdg_a.code();
+
+  std::optional<double> sig_el = std::nullopt;
+  switch (pack(pdg_D, pdg_Delta)) {
+    case pack(pdg::D_p, pdg::Delta_p):
+    case pack(pdg::D_m, -pdg::Delta_p): {  // Same xsec for charge conjugation.
+      sig_el = DplusDeltaplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, pdg::Delta_pp):
+    case pack(pdg::D_m, -pdg::Delta_pp): {  // Same xsec for charge conjugation.
+      sig_el = DplusDeltaplusplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, pdg::Delta_m):
+    case pack(pdg::D_m, -pdg::Delta_m): {  // Same xsec for charge conjugation.
+      sig_el = DplusDeltaminus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, pdg::Delta_z):
+    case pack(pdg::D_m, -pdg::Delta_z): {  // Same xsec for charge conjugation.
+      sig_el = DplusDeltazero_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::Delta_p):
+    case pack(pdg::Dbar_z, -pdg::Delta_p): {  // Same xs for charge conjugation.
+      sig_el = DzeroDeltaplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::Delta_pp):
+    case pack(pdg::Dbar_z, -pdg::Delta_pp): {  // Same xs for charge conjugate.
+      sig_el = DzeroDeltaplusplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::Delta_m):
+    case pack(pdg::Dbar_z, -pdg::Delta_m): {  // Same xs for charge conjugation.
+      sig_el = DzeroDeltaminus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::Delta_z):
+    case pack(pdg::Dbar_z, -pdg::Delta_z): {  // Same xs for charge conjugation.
+      sig_el = DzeroDeltazero_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_m, pdg::Delta_p):
+    case pack(pdg::D_p, -pdg::Delta_p): {  // Same xsec for charge conjugation.
+      sig_el = DminusDeltaplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_m, pdg::Delta_pp):
+    case pack(pdg::D_p, -pdg::Delta_pp): {  // Same xsec for charge conjugation.
+      sig_el = DminusDeltaplusplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_m, pdg::Delta_m):
+    case pack(pdg::D_p, -pdg::Delta_m): {  // Same xsec for charge conjugation.
+      sig_el = DminusDeltaminus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_m, pdg::Delta_z):
+    case pack(pdg::D_p, -pdg::Delta_z): {  // Same xsec for charge conjugation.
+      sig_el = DminusDeltazero_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dbar_z, pdg::Delta_p):
+    case pack(pdg::D_z, -pdg::Delta_p): {  // Same xsec for charge conjugation.
+      sig_el = DbarzeroDeltaplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dbar_z, pdg::Delta_pp):
+    case pack(pdg::D_z, -pdg::Delta_pp): {  // Same xsec for charge conjugate.
+      sig_el = DbarzeroDeltaplusplus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dbar_z, pdg::Delta_m):
+    case pack(pdg::D_z, -pdg::Delta_m): {  // Same xsec for charge conjugation.
+      sig_el = DbarzeroDeltaminus_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dbar_z, pdg::Delta_z):
+    case pack(pdg::D_z, -pdg::Delta_z): {  // Same xsec for charge conjugation.
+      sig_el = DbarzeroDeltazero_elastic(sqrt_s_);
       break;
     }
     default:
