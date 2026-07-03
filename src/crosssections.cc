@@ -1478,15 +1478,20 @@ CollisionBranchList CrossSections::two_to_one(
   CollisionBranchList resonance_process_list;
   const ParticleType& type_particle_a = incoming_particles_[0].type();
   const ParticleType& type_particle_b = incoming_particles_[1].type();
-  const PdgCode& pdg_a = type_particle_a.pdgcode();
-  const PdgCode& pdg_b = type_particle_b.pdgcode();
 
-  if (charm_rescattering == CharmRescattering::T_Matrix &&
-      ((pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) ||
-       (pdg_a.is_Dstar2007() || pdg_b.is_Dstar2007()))) {
-    if ((pdg_a.is_pion() || pdg_b.is_pion()) ||
-        (pdg_a.is_eta() || pdg_b.is_eta()) ||
-        (pdg_a.is_kaon() || pdg_b.is_kaon())) {
+  if (charm_rescattering == CharmRescattering::T_Matrix) {
+    const PdgCode& pdg_a = type_particle_a.pdgcode();
+    const PdgCode& pdg_b = type_particle_b.pdgcode();
+    const bool Dmeson_present = pdg_a.is_Dmeson() || pdg_b.is_Dmeson();
+    const bool Dstar_present = pdg_a.is_Dstar2007() || pdg_b.is_Dstar2007();
+    const bool light_meson_present = pdg_a.is_pion() || pdg_b.is_pion() ||
+                                     pdg_a.is_eta() || pdg_b.is_eta() ||
+                                     pdg_a.is_kaon() || pdg_b.is_kaon();
+    const bool nucleon_or_Delta_present = pdg_a.is_nucleon() ||
+                                          pdg_b.is_nucleon() ||
+                                          pdg_a.is_Delta() || pdg_b.is_Delta();
+    if ((Dmeson_present && (light_meson_present || nucleon_or_Delta_present)) ||
+        (Dstar_present && light_meson_present)) {
       return resonance_process_list;
     }
   }
