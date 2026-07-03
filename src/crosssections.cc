@@ -385,6 +385,24 @@ double CrossSections::parametrized_total(
         // π⁻(p,nbar), π⁺(n,pbar)
         total_xs = piminusp_total(sqrt_s_);
       }
+    } else if (meson.is_Dmeson() && baryon.is_nucleon()) {
+      const CharmRescattering& charm_rescattering =
+          finder_parameters.charm_rescattering;
+      std::optional<double> elastic_xs = DN_elastic();
+      double inelastic_xs = DN_inelastic();
+      if ((charm_rescattering == CharmRescattering::T_Matrix) &&
+          elastic_xs.has_value()) {
+        total_xs = elastic_xs.value() + inelastic_xs;
+      } else {
+        /* use AQM if charm_rescattering == CharmRescattering::Resonances or if
+         * tmp_elastic_xs has no value, which happens either when sqrts is above
+         * the upper bound of the energy range of the underlying cross section
+         * data or there is no underlying data for the two colliding particles
+         */
+        total_xs = AQM_based_on_piminusp_high_energy(
+            sqrt_s_, pdg_a, pdg_b, finder_parameters.AQM_scaling_factor(pdg_a),
+            finder_parameters.AQM_scaling_factor(pdg_b));
+      }
     } else {
       // M*+B* goes to AQM high energy π⁻p
       total_xs = AQM_based_on_piminusp_high_energy(
@@ -3118,6 +3136,59 @@ double CrossSections::DK_and_DstarK_inelastic() const {
     case pack(pdg::Dstar_m, pdg::K_m):
     case pack(pdg::Dstarbar_z, pdg::K_p):
     case pack(pdg::Dstarbar_z, pdg::Kbar_z): {
+      // These combinations can only scatter elastically.
+      return 0.;
+      break;
+    }
+    default:
+      throw_xsec_is_not_implemented(incoming_particles_[0],
+                                    incoming_particles_[1], __func__);
+  }
+
+  if (sig_inel < 0.) {
+    throw_xsec_is_negative(sqrt_s_, sig_inel, incoming_particles_[0],
+                           incoming_particles_[1], __func__);
+  } else {
+    return sig_inel;
+  }
+}
+
+double CrossSections::DN_inelastic() const {
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+  const auto pdg_D = pdg_a.is_Dmeson() ? pdg_a.code() : pdg_b.code();
+  const auto pdg_nucleon = pdg_a.is_Dmeson() ? pdg_b.code() : pdg_a.code();
+
+  double sig_inel = -1.;
+  switch (pack(pdg_D, pdg_nucleon)) {
+    case pack(pdg::D_p, pdg::n):
+    case pack(pdg::D_m, -pdg::n): {  // Same xsec for charge conjugation.
+      sig_inel = Dplusn_Dzerop(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::p):
+    case pack(pdg::Dbar_z, -pdg::p): {  // Same xsec for charge conjugation.
+      sig_inel = Dzerop_Dplusn(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_m, pdg::p):
+    case pack(pdg::D_p, -pdg::p): {  // Same xsec for charge conjugation.
+      sig_inel = Dminusp_Dbarzeron(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dbar_z, pdg::n):
+    case pack(pdg::D_z, -pdg::n): {  // Same xsec for charge conjugation.
+      sig_inel = Dbarzeron_Dminusp(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, -pdg::n):
+    case pack(pdg::D_p, pdg::p):
+    case pack(pdg::D_z, -pdg::p):
+    case pack(pdg::D_z, pdg::n):
+    case pack(pdg::D_m, pdg::n):
+    case pack(pdg::D_m, -pdg::p):
+    case pack(pdg::Dbar_z, pdg::p):
+    case pack(pdg::Dbar_z, -pdg::n): {
       // These combinations can only scatter elastically.
       return 0.;
       break;

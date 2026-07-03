@@ -481,6 +481,16 @@ class CrossSections {
   std::optional<double> DN_elastic() const;
 
   /**
+   * Determine the inelastic cross section for a D meson-nucleon (DN) collision.
+   *
+   * \return Inlastic cross section for DN.
+   *
+   * \throw std::runtime_error if incoming particles are not DN.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  double DN_inelastic() const;
+
+  /**
    * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.
    * These scatterings are suppressed at high energies when strings are
    * turned on with probabilities, so they need to be added back manually.
