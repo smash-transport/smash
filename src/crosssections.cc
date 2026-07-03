@@ -187,6 +187,35 @@ static double AQM_based_on_piminusp_high_energy(
          AQM_scaling_factor_a * AQM_scaling_factor_b;
 }
 
+/**
+ * Helper function:
+ * Print a warning message if `Charm_Rescattering_Method` is not set to `none`
+ * and AQM is disabled but should be used.
+ *
+ * \param[in] sqrts center of mass energy of incoming particles
+ * \param[in] type_a type of incoming particle a
+ * \param[in] type_b type of incoming particle b
+ * \param[in] charm_rescattering type of charm rescattering
+ */
+static void warn_if_charm_rescattering_enabled_and_AQM_disabled(
+    const double sqrts, const ParticleType& type_a, const ParticleType& type_b,
+    const CharmRescattering charm_rescattering) {
+  std::ostringstream warn_msg{
+      "AQM is disabled and 'Charm_Rescattering_Method' is set to ",
+      std::ios::ate};
+  if (charm_rescattering == CharmRescattering::T_Matrix) {
+    warn_msg << "'T-matrix' with sqrt(s) = " << sqrts
+             << " GeV out of bounds of the underlying data";
+  } else if (charm_rescattering == CharmRescattering::Resonances) {
+    warn_msg << "'resonances'";
+  }
+  warn_msg << ".\nElastic interactions of " << type_a.name() << " and "
+           << type_b.name()
+           << " are disabled under these circumstances.\nPlease enable AQM "
+              "if these interactions should occur.";
+  logg[LCrossSections].warn(warn_msg.str());
+}
+
 CrossSections::CrossSections(const ParticleList& incoming_particles,
                              const double sqrt_s,
                              const std::pair<FourVector, FourVector> potentials)
@@ -475,6 +504,32 @@ double CrossSections::elastic_parametrization(
              (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
     // Elastic Nucleon Kaon Scattering
     elastic_xs = nk_el();
+  } else if ((pdg_a.is_nucleon() && pdg_b.is_Dmeson()) ||
+             (pdg_b.is_nucleon() && pdg_a.is_Dmeson())) {
+    const CharmRescattering& charm_rescattering =
+        finder_parameters.charm_rescattering;
+    std::optional<double> tmp_elastic_xs = DN_elastic();
+    if ((charm_rescattering == CharmRescattering::T_Matrix) &&
+        tmp_elastic_xs.has_value()) {
+      elastic_xs = tmp_elastic_xs.value();
+    } else if (use_AQM) {
+      /* use AQM if charm_rescattering == CharmRescattering::Resonances or if
+       * tmp_elastic_xs has no value, which happens either when sqrts is above
+       * the upper bound of the energy range of the underlying cross section
+       * data or there is no underlying data for the two colliding particles */
+      const double m1 = incoming_particles_[0].effective_mass();
+      const double m2 = incoming_particles_[1].effective_mass();
+      const double s = sqrt_s_ * sqrt_s_;
+      elastic_xs = 2. / 3. * piplusp_elastic_AQM(s, m1, m2) *
+                   finder_parameters.AQM_scaling_factor(pdg_a) *
+                   finder_parameters.AQM_scaling_factor(pdg_b);
+    } else {
+      const ParticleType& a = incoming_particles_[0].type();
+      const ParticleType& b = incoming_particles_[1].type();
+      warn_if_charm_rescattering_enabled_and_AQM_disabled(sqrt_s_, a, b,
+                                                          charm_rescattering);
+      return 0.;
+    }
   } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon() &&
              pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign()) {
     // Elastic Nucleon Nucleon Scattering
@@ -523,20 +578,8 @@ double CrossSections::elastic_parametrization(
     } else {
       const ParticleType& a = incoming_particles_[0].type();
       const ParticleType& b = incoming_particles_[1].type();
-      std::ostringstream warn_msg{
-          "AQM is not enabled and 'Charm_Rescattering_Method' is set to ",
-          std::ios::ate};
-      if (charm_rescattering == CharmRescattering::T_Matrix) {
-        warn_msg << "'T-matrix' and sqrt(s) = " << sqrt_s_
-                 << " GeV is out of bounds of the underlying data";
-      } else if (charm_rescattering == CharmRescattering::Resonances) {
-        warn_msg << "'resonances'";
-      }
-      warn_msg << ".\nElastic interactions of " << a.name() << " and "
-               << b.name()
-               << " are disabled under these circumstances.\nPlease enable AQM "
-                  "if these interactions should occur.";
-      logg[LCrossSections].warn(warn_msg.str());
+      warn_if_charm_rescattering_enabled_and_AQM_disabled(sqrt_s_, a, b,
+                                                          charm_rescattering);
       return 0.;
     }
   } else if (use_AQM) {
@@ -1224,6 +1267,67 @@ std::optional<double> CrossSections::DK_and_DstarK_elastic() const {
     case pack(pdg::Dstar_z, pdg::K_m):
     case pack(pdg::Dstarbar_z, pdg::K_p): {  // Same xs for charge conjugation.
       sig_el = DstarzeroKminus_elastic(sqrt_s_);
+      break;
+    }
+    default:
+      throw_xsec_is_not_implemented(incoming_particles_[0],
+                                    incoming_particles_[1], __func__);
+  }
+
+  if (sig_el.has_value() && sig_el.value() < 0.) {
+    throw_xsec_is_negative(sqrt_s_, sig_el.value(), incoming_particles_[0],
+                           incoming_particles_[1], __func__);
+  } else {
+    return sig_el;
+  }
+}
+
+std::optional<double> CrossSections::DN_elastic() const {
+  const PdgCode& pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode& pdg_b = incoming_particles_[1].type().pdgcode();
+  const auto pdg_D = pdg_a.is_Dmeson() ? pdg_a.code() : pdg_b.code();
+  const auto pdg_nucleon = pdg_a.is_Dmeson() ? pdg_b.code() : pdg_a.code();
+
+  std::optional<double> sig_el = std::nullopt;
+  switch (pack(pdg_D, pdg_nucleon)) {
+    case pack(pdg::D_p, pdg::n):
+    case pack(pdg::D_m, -pdg::n): {  // Same xsec for charge conjugation.
+      sig_el = Dplusn_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_p, pdg::p):
+    case pack(pdg::D_m, -pdg::p): {  // Same xsec for charge conjugation.
+      sig_el = Dplusp_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::n):
+    case pack(pdg::Dbar_z, -pdg::n): {  // Same xsec for charge conjugation.
+      sig_el = Dzeron_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_z, pdg::p):
+    case pack(pdg::Dbar_z, -pdg::p): {  // Same xsec for charge conjugation.
+      sig_el = Dzerop_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_m, pdg::n):
+    case pack(pdg::D_p, -pdg::n): {  // Same xsec for charge conjugation.
+      sig_el = Dminusn_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::D_m, pdg::p):
+    case pack(pdg::D_p, -pdg::p): {  // Same xsec for charge conjugation.
+      sig_el = Dminusp_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dbar_z, pdg::n):
+    case pack(pdg::D_z, -pdg::n): {  // Same xsec for charge conjugation.
+      sig_el = Dbarzeron_elastic(sqrt_s_);
+      break;
+    }
+    case pack(pdg::Dbar_z, pdg::p):
+    case pack(pdg::D_z, -pdg::p): {  // Same xsec for charge conjugation.
+      sig_el = Dbarzerop_elastic(sqrt_s_);
       break;
     }
     default:

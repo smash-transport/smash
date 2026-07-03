@@ -467,6 +467,20 @@ class CrossSections {
   double DK_and_DstarK_inelastic() const;
 
   /**
+   * Determine the elastic cross section for a D meson-nucleon (DN) collision,
+   * If the center-of-mass energy for the collision is below the lower bound of
+   * the energy range of the underlying cross section data, the return value is
+   * zero. If it is above the upper bound, the return value will be
+   * `std::nullopt`.
+   *
+   * \return Elastic cross section for DN.
+   *
+   * \throw std::runtime_error if incoming particles are not DN.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  std::optional<double> DN_elastic() const;
+
+  /**
    * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.
    * These scatterings are suppressed at high energies when strings are
    * turned on with probabilities, so they need to be added back manually.
