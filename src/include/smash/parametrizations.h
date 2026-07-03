@@ -1341,6 +1341,66 @@ double Dzerop_Dplusn(double sqrts);
  */
 std::optional<double> Dzerop_elastic(double sqrts);
 
+/**
+ * D⁻n elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺n̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dminusn_elastic(double sqrts);
+
+/**
+ * D⁻p elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺p̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dminusp_elastic(double sqrts);
+
+/**
+ * D⁻p -> D̄⁰n cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺p̄ -> D⁰n̄ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double Dminusp_Dbarzeron(double sqrts);
+
+/**
+ * D̄⁰n -> D⁻p cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰n̄ -> D⁺p̄ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double Dbarzeron_Dminusp(double sqrts);
+
+/**
+ * D̄⁰n elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰n̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dbarzeron_elastic(double sqrts);
+
+/**
+ * D̄⁰p elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰p̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dbarzerop_elastic(double sqrts);
+
 }  // namespace smash
 
 #endif  // SRC_INCLUDE_SMASH_PARAMETRIZATIONS_H_

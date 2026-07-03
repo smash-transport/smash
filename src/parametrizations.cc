@@ -1640,4 +1640,86 @@ std::optional<double> Dzerop_elastic(double sqrts) {
   }
 }
 
+std::optional<double> Dminusn_elastic(double sqrts) {
+  if (sqrts > *(DBARN_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dminusn_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DBARN_SQRTS, DMINUSN_ELASTIC_SIG);
+      Dminusn_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Zero);
+    }
+    return (*Dminusn_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> Dminusp_elastic(double sqrts) {
+  if (sqrts > *(DBARN_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dminusp_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DBARN_SQRTS, DMINUSP_ELASTIC_SIG);
+      Dminusp_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Zero);
+    }
+    return (*Dminusp_elastic_interpolation)(sqrts);
+  }
+}
+
+double Dminusp_Dbarzeron(double sqrts) {
+  if (Dminusp_Dbarzeron_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DBARN_SQRTS, DMINUSP_DBARZERON_SIG);
+    Dminusp_Dbarzeron_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dminusp_Dbarzeron_interpolation)(sqrts);
+}
+
+double Dbarzeron_Dminusp(double sqrts) {
+  if (Dbarzeron_Dminusp_interpolation == nullptr) {
+    auto [dedup_x, dedup_y] =
+        dedup_avg<double>(DBARN_SQRTS, DBARZERON_DMINUSP_SIG);
+    Dbarzeron_Dminusp_interpolation =
+        std::make_unique<InterpolateDataLinear<double>>(
+            dedup_x, dedup_y, ExtrapolationType::Constant);
+  }
+  return (*Dbarzeron_Dminusp_interpolation)(sqrts);
+}
+
+std::optional<double> Dbarzeron_elastic(double sqrts) {
+  if (sqrts > *(DBARN_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dbarzeron_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DBARN_SQRTS, DBARZERON_ELASTIC_SIG);
+      Dbarzeron_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Zero);
+    }
+    return (*Dbarzeron_elastic_interpolation)(sqrts);
+  }
+}
+
+std::optional<double> Dbarzerop_elastic(double sqrts) {
+  if (sqrts > *(DBARN_SQRTS.end() - 1)) {
+    return std::nullopt;
+  } else {
+    if (Dbarzerop_elastic_interpolation == nullptr) {
+      auto [dedup_x, dedup_y] =
+          dedup_avg<double>(DBARN_SQRTS, DBARZEROP_ELASTIC_SIG);
+      Dbarzerop_elastic_interpolation =
+          std::make_unique<InterpolateDataLinear<double>>(
+              dedup_x, dedup_y, ExtrapolationType::Zero);
+    }
+    return (*Dbarzerop_elastic_interpolation)(sqrts);
+  }
+}
+
 }  // namespace smash
