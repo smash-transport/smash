@@ -365,7 +365,7 @@ void BremsstrahlungActionPhoton::create_interpolations() {
   // Create interpolation objects containing linear interpolations for
   // total cross sections
   pipi_pipi_opp_interpolation = std::make_unique<InterpolateDataLinear<double>>(
-      sqrts, sigma_pipi_pipi_opp);
+      sqrts, sigma_pipi_pipi_opp, ExtrapolationType::Constant);
   pipi_pipi_same_interpolation =
       std::make_unique<InterpolateDataLinear<double>>(
           sqrts, sigma_pipi_pipi_same, ExtrapolationType::Constant);
