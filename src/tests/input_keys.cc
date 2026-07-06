@@ -304,8 +304,7 @@ TEST(validators_collision_term) {
   VERIFY(!xs_scaling.validate(-1.0));
   const auto& elastic_xs = InputKeys::collTerm_elasticCrossSection;
   VERIFY(elastic_xs.validate(-1.0));
-  VERIFY(elastic_xs.validate(0.1));
-  VERIFY(!elastic_xs.validate(0.0));
+  VERIFY(elastic_xs.validate(0.0));
   VERIFY(!elastic_xs.validate(-2.0));
   const auto& elastic_NN_cutoff = InputKeys::collTerm_elasticNNCutoffSqrts;
   VERIFY(elastic_NN_cutoff.validate(1.876));

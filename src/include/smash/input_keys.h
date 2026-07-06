@@ -2579,7 +2579,7 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_collision_term
    * \optional_key{key_CT_elastic_cross_section_,Elastic_Cross_Section,
-   * double,-1.0,\f$x>0 \lor x=-1\f$}
+   * double,-1.0,\f$x \geq 0 \lor x=-1\f$}
    *
    * If a non-negative value is given, it will override the parametrized
    * elastic cross sections (which are energy-dependent) with a constant value
@@ -2594,7 +2594,7 @@ struct InputKeys {
       -1.0,
       {"1.2"},
       [](const double &value) noexcept {
-        return value > 0.0 || value == -1.0;
+        return value >= 0.0 || value == -1.0;
       }};
 
   /*!\Userguide
