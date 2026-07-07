@@ -956,13 +956,7 @@ void ScatterActionsFinder::dump_cross_sections(
           m_tot += ptype->mass();
         }
         outgoing_total_mass[description] = m_tot;
-        if (!xs_dump[description].empty() &&
-            std::abs(xs_dump[description].back().first - sqrts) <
-                really_small) {
-          xs_dump[description].back().second += xs;
-        } else {
-          xs_dump[description].push_back(std::make_pair(sqrts, xs));
-        }
+        xs_dump[description].push_back(std::make_pair(sqrts, xs));
       } else {
         std::stringstream process_description_stream;
         process_description_stream << *process;
