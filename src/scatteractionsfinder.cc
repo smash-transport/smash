@@ -923,6 +923,16 @@ void ScatterActionsFinder::dump_cross_sections(
     n_momentum_points = plab.size();
   }
   sqrts_values.reserve(n_momentum_points);
+  const auto store_cross_section_into_map = [&](const std::string& channel, double xs,
+                                       int i) {
+    /* Store one cross-section value per energy point. Missing channels remain
+     * zero, so all channel vectors have the same indexing as sqrts_values. */
+    auto& xs_values = xs_dump[channel];
+    if (xs_values.empty()) {
+      xs_values.resize(n_momentum_points, 0.0);
+    }
+    xs_values[i] = xs;
+  };
   for (int i = 0; i < n_momentum_points; i++) {
     double momentum;
     if (plab.size() > 0) {
@@ -959,13 +969,7 @@ void ScatterActionsFinder::dump_cross_sections(
           m_tot += ptype->mass();
         }
         outgoing_total_mass[description] = m_tot;
-        /* Store the cross-section values for each energy point. The first time
-         * the channel appears, resize the vector to the known final size.*/
-        auto& xs_values = xs_dump[description];
-        if (xs_values.empty()) {
-          xs_values.resize(n_momentum_points, 0.0);
-        }
-        xs_values[i] = xs;
+        store_cross_section_into_map(description, xs, i);
       } else {
         std::stringstream process_description_stream;
         process_description_stream << *process;
@@ -978,11 +982,7 @@ void ScatterActionsFinder::dump_cross_sections(
         decaytree::add_decays(process_node, sqrts);
       }
     }
-    auto& xs_values = xs_dump["total"];
-    if (xs_values.empty()) {
-      xs_values.resize(n_momentum_points, 0.0);
-    }
-    xs_values[i] = act->cross_section();
+    store_cross_section_into_map("total", act->cross_section(), i);
     // Total cross-section should be the first in the list -> negative mass
     outgoing_total_mass["total"] = -1.0;
     if (final_state) {
@@ -998,11 +998,7 @@ void ScatterActionsFinder::dump_cross_sections(
           continue;
         }
         outgoing_total_mass[p.name_] = p.mass_;
-        auto& xs_values = xs_dump[p.name_];
-        if (xs_values.empty()) {
-          xs_values.resize(n_momentum_points, 0.0);
-        }
-        xs_values[i] = p.cross_section_;
+        store_cross_section_into_map(p.name_, p.cross_section_, i);
       }
     }
   }
