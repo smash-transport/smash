@@ -916,10 +916,11 @@ void ScatterActionsFinder::dump_cross_sections(
   int n_momentum_points = 200;
   constexpr double momentum_step = 0.02;
   if (plab.size() > 0) {
-    n_momentum_points = plab.size();
     // Remove duplicates.
     std::sort(plab.begin(), plab.end());
     plab.erase(std::unique(plab.begin(), plab.end()), plab.end());
+    // Reset size of momentum points to the number of unique values.
+    n_momentum_points = plab.size();
   }
   sqrts_values.reserve(n_momentum_points);
   for (int i = 0; i < n_momentum_points; i++) {
