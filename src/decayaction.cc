@@ -44,6 +44,11 @@ bool DecayAction::sample_outgoing_particles() {
       choose_channel<DecayBranch>(decay_channels_, total_width_);
   outgoing_particles_ = proc->particle_list();
   logg[LDecayModes].debug("Channel: ", outgoing_particles_);
+  assert(std::accumulate(outgoing_particles_.begin(), outgoing_particles_.end(),
+                         0., [](double sum, const ParticleData &p) {
+                           return sum + p.type().min_mass_spectral();
+                         }) <= incoming_particles_[0].effective_mass());
+
   // set positions of the outgoing particles
   for (auto &p : outgoing_particles_) {
     p.set_4position(incoming_particles_[0].position());
