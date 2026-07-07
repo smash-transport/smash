@@ -279,11 +279,11 @@ static double piminusp_elastic_pdg(double mandelstam_s) {
 
 double piminusp_elastic(double mandelstam_s) {
   double sigma;
-  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-  const auto logp = std::log(p_lab);
   if (mandelstam_s < 1.69) {
     sigma = really_small;
   } else if (mandelstam_s > 4.84) {
+    const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+    const auto logp = std::log(p_lab);
     sigma = 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
   } else {
     sigma = piminusp_elastic_pdg(mandelstam_s);
