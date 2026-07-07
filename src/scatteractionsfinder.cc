@@ -923,8 +923,8 @@ void ScatterActionsFinder::dump_cross_sections(
     n_momentum_points = plab.size();
   }
   sqrts_values.reserve(n_momentum_points);
-  const auto store_cross_section_into_map = [&](const std::string& channel, double xs,
-                                       int i) {
+  const auto store_cross_section_into_map = [&](const std::string& channel,
+                                                double xs, int i) {
     /* Store one cross-section value per energy point. Missing channels remain
      * zero, so all channel vectors have the same indexing as sqrts_values. */
     auto& xs_values = xs_dump[channel];
@@ -944,7 +944,6 @@ void ScatterActionsFinder::dump_cross_sections(
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
     sqrts_values.push_back(sqrts);
-    const ParticleList incoming = {a_data, b_data};
     ScatterActionPtr act = std::make_unique<ScatterAction>(
         a_data, b_data, 0., isotropic_, string_formation_time_, -1, false,
         finder_parameters_.spin_interaction_type);
@@ -1042,7 +1041,7 @@ void ScatterActionsFinder::dump_cross_sections(
   for (int i = 0; i < n_momentum_points; i++) {
     std::printf("%9.6f", sqrts_values[i]);
     for (const auto& channel : all_channels) {
-      std::printf("%24.6f", xs_dump[channel][i]);
+      std::printf("%24.6f", xs_dump.at(channel)[i]);
     }
     std::printf("\n");
   }
