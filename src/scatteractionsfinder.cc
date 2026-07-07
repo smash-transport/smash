@@ -908,8 +908,8 @@ static void deduplicate(std::vector<FinalStateCrossSection>& final_state_xs) {
 void ScatterActionsFinder::dump_cross_sections(
     const ParticleType& a, const ParticleType& b, double m_a, double m_b,
     bool final_state, std::vector<double>& plab) const {
-  typedef std::vector<std::pair<double, double>> xs_saver;
-  std::map<std::string, xs_saver> xs_dump;
+  std::vector<double> sqrts_values;
+  std::map<std::string, std::vector<double>> xs_dump;
   std::map<std::string, double> outgoing_total_mass;
 
   ParticleData a_data(a), b_data(b);
@@ -921,6 +921,7 @@ void ScatterActionsFinder::dump_cross_sections(
     std::sort(plab.begin(), plab.end());
     plab.erase(std::unique(plab.begin(), plab.end()), plab.end());
   }
+  sqrts_values.reserve(n_momentum_points);
   for (int i = 0; i < n_momentum_points; i++) {
     double momentum;
     if (plab.size() > 0) {
@@ -931,6 +932,7 @@ void ScatterActionsFinder::dump_cross_sections(
     a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
     b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
     const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
+    sqrts_values.push_back(sqrts);
     const ParticleList incoming = {a_data, b_data};
     ScatterActionPtr act = std::make_unique<ScatterAction>(
         a_data, b_data, 0., isotropic_, string_formation_time_, -1, false,
@@ -956,7 +958,13 @@ void ScatterActionsFinder::dump_cross_sections(
           m_tot += ptype->mass();
         }
         outgoing_total_mass[description] = m_tot;
-        xs_dump[description].push_back(std::make_pair(sqrts, xs));
+        /* Store the cross-section values for each energy point. The first time
+         * the channel appears, resize the vector to the known final size.*/
+        auto& xs_values = xs_dump[description];
+        if (xs_values.empty()) {
+          xs_values.resize(n_momentum_points, 0.0);
+        }
+        xs_values[i] = xs;
       } else {
         std::stringstream process_description_stream;
         process_description_stream << *process;
@@ -969,7 +977,11 @@ void ScatterActionsFinder::dump_cross_sections(
         decaytree::add_decays(process_node, sqrts);
       }
     }
-    xs_dump["total"].push_back(std::make_pair(sqrts, act->cross_section()));
+    auto& xs_values = xs_dump["total"];
+    if (xs_values.empty()) {
+      xs_values.resize(n_momentum_points, 0.0);
+    }
+    xs_values[i] = act->cross_section();
     // Total cross-section should be the first in the list -> negative mass
     outgoing_total_mass["total"] = -1.0;
     if (final_state) {
@@ -985,7 +997,11 @@ void ScatterActionsFinder::dump_cross_sections(
           continue;
         }
         outgoing_total_mass[p.name_] = p.mass_;
-        xs_dump[p.name_].push_back(std::make_pair(sqrts, p.cross_section_));
+        auto& xs_values = xs_dump[p.name_];
+        if (xs_values.empty()) {
+          xs_values.resize(n_momentum_points, 0.0);
+        }
+        xs_values[i] = p.cross_section_;
       }
     }
   }
@@ -994,11 +1010,8 @@ void ScatterActionsFinder::dump_cross_sections(
   // decay with our simplified assumptions.
   for (auto it = begin(xs_dump); it != end(xs_dump);) {
     // Sum cross section over all energies.
-    const xs_saver& xs = (*it).second;
-    double sum = 0;
-    for (const auto& p : xs) {
-      sum += p.second;
-    }
+    const auto& xs = (*it).second;
+    const double sum = std::accumulate(xs.begin(), xs.end(), 0.0);
     if (sum == 0.) {
       it = xs_dump.erase(it);
     } else {
@@ -1030,26 +1043,9 @@ void ScatterActionsFinder::dump_cross_sections(
 
   // Print out all partial cross-sections in mb
   for (int i = 0; i < n_momentum_points; i++) {
-    double momentum;
-    if (plab.size() > 0) {
-      momentum = pCM_from_s(s_from_plab(plab.at(i), m_a, m_b), m_a, m_b);
-    } else {
-      momentum = momentum_step * (i + 1);
-    }
-    a_data.set_4momentum(m_a, momentum, 0.0, 0.0);
-    b_data.set_4momentum(m_b, -momentum, 0.0, 0.0);
-    const double sqrts = (a_data.momentum() + b_data.momentum()).abs();
-    std::printf("%9.6f", sqrts);
+    std::printf("%9.6f", sqrts_values[i]);
     for (const auto& channel : all_channels) {
-      const xs_saver energy_and_xs = xs_dump[channel];
-      const auto it =
-          std::find_if(energy_and_xs.begin(), energy_and_xs.end(),
-                       [sqrts](const auto& p) { return p.first == sqrts; });
-      double xs = 0.0;
-      if (it != energy_and_xs.end()) {
-        xs = it->second;
-      }
-      std::printf("%24.6f", xs);  // Same alignment as in the header.
+      std::printf("%24.6f", xs_dump[channel][i]);
     }
     std::printf("\n");
   }
