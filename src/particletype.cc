@@ -735,7 +735,7 @@ std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
       std::max(t2.max_ratio_spectral_full_to_breit_wigner(),
                t2.ratio_spectral_full_to_breit_wigner(max_mass_2));
 
-  int max_trials = 10;
+  int max_trials_outer = 10, max_trials_inner = 20;
   double mass_1, mass_2, acceptance, fudge_factor = 1;
   double max_acceptance =
       sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
@@ -752,12 +752,29 @@ std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
                               t2.ratio_spectral_full_to_breit_wigner(mass_2);
       // determine ratios of full to simple spectral function
       acceptance = sf_ratio * pcm * blatt_weisskopf_sqr(pcm, L);
-    } while (acceptance < random::uniform(0., max_acceptance));
+    } while (acceptance < random::uniform(0., max_acceptance) &&
+             --max_trials_inner > 0);
     fudge_factor *= acceptance / max_acceptance;
-    --max_trials;
-  } while (acceptance > max_acceptance && max_trials > 0);
+  } while (acceptance > max_acceptance && --max_trials_outer > 0);
 
-  if (acceptance > max_acceptance && max_trials == 0) {
+  if (max_trials_inner == 0) {
+    /*
+     * This fallback is necessary for when the inner loop fails to find an
+     * acceptable mass combination. This can happen when the cms_energy is much
+     * smaller than the sum of pole masses of the two resonances.
+     *
+     */
+    logg[LResonances].debug(
+        "Could not sample a valid mass combination for the resonances ",
+        t1.name(), " and ", t2.name(), " with energy ", cms_energy,
+        " GeV. Using bisection fallback to find valid masses.");
+    while (mass_1 + mass_2 > cms_energy) {
+      mass_1 = (t1.min_mass_spectral() + mass_1) / 2;
+      mass_2 = (t2.min_mass_spectral() + mass_2) / 2;
+    }
+  }
+
+  if (acceptance > max_acceptance && max_trials_outer == 0) {
     logg[LResonances].fatal(
         "Maximum acceptance should be increased in sample_resonance_masses: ",
         acceptance / max_acceptance, " ", t1.pdgcode(), " ", t2.pdgcode(), " ",
