@@ -33,7 +33,7 @@ void DecayAction::add_decay(DecayBranchPtr p) {
 }
 
 bool DecayAction::sample_outgoing_particles() {
-  logg[LDecayModes].debug("Process: Resonance decay. ");
+  logg[LDecayModes].debug("Process: Resonance decay of", incoming_particles_);
   /* Execute a decay process for the selected particle.
    *
    * randomly select one of the decay modes of the particle
@@ -43,6 +43,12 @@ bool DecayAction::sample_outgoing_particles() {
   const DecayBranch *proc =
       choose_channel<DecayBranch>(decay_channels_, total_width_);
   outgoing_particles_ = proc->particle_list();
+  logg[LDecayModes].debug("Channel: ", outgoing_particles_);
+  assert(std::accumulate(outgoing_particles_.begin(), outgoing_particles_.end(),
+                         0., [](double sum, const ParticleData &p) {
+                           return sum + p.type().min_mass_spectral();
+                         }) <= incoming_particles_[0].effective_mass());
+
   // set positions of the outgoing particles
   for (auto &p : outgoing_particles_) {
     p.set_4position(incoming_particles_[0].position());
