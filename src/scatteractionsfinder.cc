@@ -1042,13 +1042,12 @@ void ScatterActionsFinder::dump_cross_sections(
     std::printf("%9.6f", sqrts);
     for (const auto& channel : all_channels) {
       const xs_saver energy_and_xs = xs_dump[channel];
-      size_t j = 0;
-      for (; j < energy_and_xs.size() && energy_and_xs[j].first < sqrts; j++) {
-      }
+      const auto it =
+          std::find_if(energy_and_xs.begin(), energy_and_xs.end(),
+                       [sqrts](const auto& p) { return p.first == sqrts; });
       double xs = 0.0;
-      if (j < energy_and_xs.size() &&
-          std::abs(energy_and_xs[j].first - sqrts) < really_small) {
-        xs = energy_and_xs[j].second;
+      if (it != energy_and_xs.end()) {
+        xs = it->second;
       }
       std::printf("%24.6f", xs);  // Same alignment as in the header.
     }
