@@ -46,7 +46,7 @@ If the required version is not already installed or if there are issues with the
 
 To download and build the needed version of Pythia, use the following commands:
 ```console
-wget https://pythia.org/download/pythia83/pythia8316.tgz
+wget https://pythia.org/releases/pythia83/pythia8316.tgz
 tar xf pythia8316.tgz && rm pythia8316.tgz
 cd pythia8316
 ./configure --cxx-common='-std=c++17 -march=native -O3 -fPIC -pthread'
@@ -72,7 +72,7 @@ CXX=clang++ ./configure --cxx-common='-std=c++17 -stdlib=libc++ -march=native -O
 
 The commands to build Pythia on a M1 Apple machine become:
 ```console
-curl https://pythia.org/download/pythia83/pythia8316.tgz -o pythia8316.tgz
+curl https://pythia.org/releases/pythia83/pythia8316.tgz -o pythia8316.tgz
 tar xf pythia8316.tgz && rm pythia8316.tgz
 cd pythia8316
 ./configure --cxx-common='-std=c++17 -O3 -fPIC -pthread'

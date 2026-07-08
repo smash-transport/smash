@@ -109,7 +109,7 @@ jobs:
         # we set the TERM environment variable (Pythia installation uses tput)
         export TERM="xterm"
         # we download and install Pythia
-        wget https://pythia.org/download/pythia83/pythia8316.tgz && tar xf pythia8316.tgz && rm pythia8316.tgz && cd pythia8316
+        wget https://pythia.org/releases/pythia83/pythia8316.tgz && tar xf pythia8316.tgz && rm pythia8316.tgz && cd pythia8316
         ./configure --cxx-common="-std=c++17 -march=native -O3 -fPIC -pthread" && make -j$(nproc) && cd ..
         export LD_LIBRARY_PATH=${SMASH_ROOT}/pythia8316/lib:${LD_LIBRARY_PATH} # To make sure it can be found at run time
         # we get cpplint

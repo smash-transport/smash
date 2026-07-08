@@ -148,7 +148,7 @@ RUN <<'EOF'
   PYTHIA_VERSION="${find_pythia_strings[0]//./}"
   echo "Using Pythia tarball version: ${PYTHIA_VERSION}"
   cd /SMASH
-  wget "https://pythia.org/download/pythia83/pythia${PYTHIA_VERSION}.tgz"
+  wget "https://pythia.org/releases/pythia83/pythia${PYTHIA_VERSION}.tgz"
   tar xf "pythia${PYTHIA_VERSION}.tgz"
   rm "pythia${PYTHIA_VERSION}.tgz"
   cd "/SMASH/pythia${PYTHIA_VERSION}"
