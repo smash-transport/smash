@@ -57,8 +57,10 @@ Date:
 * The separate SMASH procedure for manually peeling off leading baryons from string ends has been replaced by PYTHIA’s hard beam-remnant handling. Accordingly, `StringZ_A_Leading` and `StringZ_B_Leading` now map to PYTHIA’s `BeamRemnants:hardRemnantBaryonA` and `BeamRemnants:hardRemnantBaryonB`. Together with `BeamRemnants:dampPopcorn`, these settings control the baryon stopping of leading baryons. This change required some string-fragmentation parameters to be retuned.
 
 ### Fixed
-* Fixed order of arguments of the sampling of an exponential used in NN->NR scatterings for the angular distribution avoiding potentially undefined behavior
-* Fixed random seed initialization for runs of multiple events ensuring reproducibility
+* Fixed order of arguments of the sampling of an exponential used in NN->NR scatterings for the angular distribution avoiding potentially undefined behavior.
+* Fixed random seed initialization for runs of multiple events ensuring reproducibility.
+* Fix bug in dumped cross sections by SMASH `-s` option whenever the specified momenta where resulting in `sqrt_s` less than 1 keV apart.
+* Fix harmless bug taking the `std::log(0)` to set an unused variable.
 
 ### Removed
 * CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally.
