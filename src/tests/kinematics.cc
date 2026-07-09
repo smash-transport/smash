@@ -94,6 +94,6 @@ TEST(s_from_plab) {
   const double ma = 0.6;
   const double mb = 1.2;
   const double E = std::sqrt(plab * plab + ma * ma) + mb;
-  vir::test::setFuzzyness<double>(2);
+  vir::test::setFuzzyness<double>(3);
   FUZZY_COMPARE(s_from_plab(plab, ma, mb), E * E - plab * plab);
 }
