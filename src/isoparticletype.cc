@@ -233,9 +233,13 @@ static bool cache_integral(
   const auto path = generate_tabulation_path(dir, part.name_filtered_prime(),
                                              res.name_filtered_prime());
   bool loaded_from_file = false;
+  /* This is a static variable to keep track of the length of the previous
+   * status message. It is used to overwrite the previous message with spaces if
+   * the new message is shorter, ensuring that the console output remains clean
+   * and readable also across multiple function calls. */
   static std::size_t previous_length = 0;
   const auto print_status = [](std::string_view msg) {
-    std::string output(msg);
+    std::string output{msg};
     if (output.size() < previous_length) {
       output.append(previous_length - output.size(), ' ');
     }
