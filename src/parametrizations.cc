@@ -277,7 +277,16 @@ double piminusp_elastic(double mandelstam_s) {
     sigma = really_small;
   } else if (mandelstam_s > 4.84) {
     const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-    const auto logp = std::log(p_lab);
+    /* The following is a workaround for the fact that log(0) = -inf and
+     * calculating it might perform a division by zero that in turn would
+     * trigger a FPE. */
+    const auto logp = [&p_lab]() {
+      if (p_lab == 0.0) {
+        return -std::numeric_limits<double>::infinity();
+      } else {
+        return std::log(p_lab);
+      }
+    }();
     sigma = 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
   } else {
     sigma = piminusp_elastic_pdg(mandelstam_s);
