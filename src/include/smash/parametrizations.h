@@ -190,21 +190,13 @@ double piplusp_total(double sqrts);
 
 /**
  * pi+p elactic cross section parametrization.
+ *
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  * Elastic contributions from decays are not subtracted, high energy
- * parametrization used at all energies (useful for AQM)
+ * parametrization used at all energies (useful for AQM).
  *
- * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
- * \param[in] m1 the mass of the first particle [GeV]
- * \param[in] m2 the mass of the second particle [GeV]
- * \return the parametrized cross-section [mb]
- */
-double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2);
-
-/**
- * An overload of piplusp_elastic_high_energy in which the very low
- * part is replaced by a flat 5 mb cross section; used for meson-meson
- * interactions.
+ * The very low part is replaced by a flat 7.5 mb cross section; used for
+ * meson-meson interactions.
  *
  * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
  * \param[in] m1 the mass of the first particle [GeV]

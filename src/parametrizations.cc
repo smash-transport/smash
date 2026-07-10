@@ -176,20 +176,14 @@ static double piplusp_elastic_pdg(double mandelstam_s) {
   return (*piplusp_elastic_interpolation)(p_lab);
 }
 
-double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
-  const double p_lab =
-      plab_from_s_heavier_particle_at_rest(mandelstam_s, m1, m2);
-  const auto logp = std::log(p_lab);
-  return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
-}
-
 double piplusp_elastic_AQM(double mandelstam_s, double m1, double m2) {
   const double p_lab =
       plab_from_s_heavier_particle_at_rest(mandelstam_s, m1, m2);
   if (p_lab < 3.05) {  // the plab from which the param starts to explode
     return 7.5;        // this will be scaled down by 2/3 for meson-meson
   } else {
-    return piplusp_elastic_high_energy(mandelstam_s, m1, m2);
+    const auto logp = std::log(p_lab);
+    return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
   }
 }
 
