@@ -959,10 +959,10 @@ void ScatterActionsFinder::dump_cross_sections(
       if (xs <= 0.0) {
         continue;
       }
+      std::stringstream process_description_stream;
+      process_description_stream << *process;
+      const std::string& description = process_description_stream.str();
       if (!final_state) {
-        std::stringstream process_description_stream;
-        process_description_stream << *process;
-        const std::string& description = process_description_stream.str();
         double m_tot = 0.0;
         for (const auto& ptype : process->particle_types()) {
           m_tot += ptype->mass();
@@ -970,9 +970,6 @@ void ScatterActionsFinder::dump_cross_sections(
         outgoing_total_mass[description] = m_tot;
         store_cross_section_into_map(description, xs, i);
       } else {
-        std::stringstream process_description_stream;
-        process_description_stream << *process;
-        const std::string& description = process_description_stream.str();
         ParticleTypePtrList initial_particles = {&a, &b};
         ParticleTypePtrList final_particles = process->particle_types();
         auto& process_node =
