@@ -931,7 +931,10 @@ void ScatterActionsFinder::dump_cross_sections(
     if (xs_values.empty()) {
       xs_values.resize(n_momentum_points, 0.0);
     }
-    xs_values[i] = xs;
+    /* NOTE: We add the value to the existing one (usually 0.0) in order to
+     * correctly accumulate cross-sections in case multiple channels have the
+     * same name. */
+    xs_values[i] += xs;
   };
   for (int i = 0; i < n_momentum_points; i++) {
     double momentum;
