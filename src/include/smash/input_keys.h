@@ -2481,11 +2481,16 @@ struct InputKeys {
    * - `"T-matrix"` &rarr; Tabulated cross sections (\iref{Abreu:2011ic},
    *    \iref{Tolos:2013kva}, \iref{Torres-Rincon:2014ffa}) are used, which
    *    handle elastic and inelastic binary collisions.
-   *    @attention Currently, only \f$ D\pi \leftrightarrow D\pi \f$,
-   *    \f$ D\eta \leftrightarrow D\eta \f$, \f$ DK \leftrightarrow DK \f$, and
-   *    the same channels for D*(2007) and D*(2010) are implemented. All other
-   *    interactions including charmed hadrons are treated via intermediate
-   *    resonances.<br>
+   *    @attention Currently, only the following interactions are included:
+   *    \f$ D\pi \leftrightarrow D\pi \f$, \f$ D\eta \leftrightarrow D\eta \f$,
+   *    \f$ DK \leftrightarrow DK \f$, \f$ DN \leftrightarrow DN \f$,
+   *    \f$ D\Delta \leftrightarrow D\Delta \f$, \f$ D^*\pi \leftrightarrow
+   *    D^*\pi \f$, \f$ D^*\eta \leftrightarrow D^*\eta \f$, and \f$ D^*K
+   *    \leftrightarrow D^*K \f$.<br>
+   *    \f$ N \f$ refers to protons and neutrons and \f$\Delta\f$ to
+   *    \f$\Delta\f$(1232), including all their antiparticles, and D* to
+   *    D*(2007) and D*(2010). All other interactions including charmed hadrons
+   *    are treated via intermediate resonances.<br>
    *    When using this option of charm rescattering,
    *    <tt>\ref key_CT_force_decays_at_end_ "Force_Decays_At_End"</tt> should
    *    be set to true to handle decays properly.
@@ -2696,9 +2701,12 @@ struct InputKeys {
    * - `"NDeuteron_to_Ndprime"` &rarr; deuteron + (anti-)nucleon &harr;
    *   d' + (anti-)nucleon, and their CPT-conjugates
    * - `"Charm_T-matrix"` &rarr; D meson + light meson &harr; D meson + light
-   *   meson and D* + light meson &harr; D* + light meson, where D* refers to
-   *   D*(2007) and D*(2010); currently, included light mesons are pions, etas,
-   *   kaons, and their corresponding antiparticles. Only taken into account if
+   *   meson, D meson + nucleon &harr; D meson + nucleon, D meson + \f$\Delta\f$
+   *   &harr; D meson + \f$\Delta\f$, and D* + light meson &harr; D* + light
+   *   meson, where D* refers to D*(2007) and D*(2010), Currently, included
+   *   light mesons are pions, etas, kaons; nucleons refer to protons and
+   *   neutrons;\f$\Delta\f$ to \f$\Delta\f$(1232); and all their corresponding
+   *   antiparticles are considered as well. Only taken into account if
    *   <tt>\ref key_CT_charm_rescattering_ "Charm_Rescattering_Method"</tt> is
    *   set to `T-matrix`. Otherwise, collisions including charmed hadrons are
    *   treated via intermediate resonances.
