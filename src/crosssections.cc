@@ -547,7 +547,7 @@ double CrossSections::elastic_parametrization(
       elastic_xs = nn_el();  // valid also for annihilation
     } else if ((pdg_a.is_meson() && pdg_b.is_baryon()) ||
                (pdg_b.is_meson() && pdg_a.is_baryon())) {
-      elastic_xs = piplusp_elastic_high_energy(s, m1, m2);
+      elastic_xs = piplusp_elastic_AQM(s, m1, m2);
     } else if (pdg_a.is_meson() && pdg_b.is_meson()) {
       /* Special case: the pi+pi- elastic cross-section goes through resonances
        * at low sqrt_s, so we turn it off for this region so as not to destroy

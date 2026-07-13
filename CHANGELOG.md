@@ -20,22 +20,23 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 ## Unreleased
 
 ## SMASH-3.4rc
-Date: 
+Date:
 
-### Added
-* Implemented 2 -> 2 cross sections for D meson-light meson and D*-light meson scatterings as an additional option beside the treatment via intermediate resonances.
-  D* refers to D*(2007) and D*(2010), and light mesons to pions, etas, kaons, and their corresponding antiparticles.
-* N-p bremsstrahlung of dileptons is now available with the key `CollisionTerm: Dileptons: Bremsstrahlung` as well as the form factors `CollisionTerm: Dileptons: Pion_Form_Factor` 
-* Processes with more than two outgoing particles (e.g. Dalitz decays and multiparticle reactions) can now produce resonances, with masses sampled from the appropriate spectral function.
-* Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams.
-  This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
-* `CrossSections::probability_transit_high` has been replaced by `CrossSections::transition_probability_at_sqrts`.
+### Input
+* N-p bremsstrahlung of dileptons is now available with the key `CollisionTerm: Dileptons: Bremsstrahlung` as well as the form factors `CollisionTerm: Dileptons: Pion_Form_Factor`
 * New key `Ignore_Unformed` in `Output: Thermodynamics` to exclude unformed (and preformed) particles from the density evaluation. This is useful e.g. in afterburner calculations.
-* The path to tabulations can now be passed with the command line argument `-t to/path/tabulations`. However, if the input files for particles/decay modes or SMASH version change, the tabulations will be recalculated in the indicated folder. This is useful to make several runs share the same tabulations folder, even if these are in different output directories, avoiding creating several sets of possibly identical files.
 * New key `Unformed_Xsec_Suppression` to apply an additional suppression factor to the interaction cross sections of unformed hadrons during their formation time. A value of 1.0 corresponds to no additional suppression, while smaller values reduce the interaction probability of unformed hadrons. This parameter can be used as a phenomenological tuning knob for dense environments.
 * New key `Pythia_Settings` to pass additional PYTHIA 8 settings directly to the internal PYTHIA instances used for string fragmentation. These settings are applied after the corresponding SMASH string parameters, so values specified in `Pythia_Settings` take precedence. Invalid PYTHIA settings cause SMASH to terminate during initialization.
 * New key `Damp_Popcorn` in the Pythia string-fragmentation settings to control whether a diquark endpoint can hadronize via the popcorn mechanism into a leading meson before producing the baryon. A value of 1 corresponds to normal popcorn production, while 0 suppresses popcorn completely, such that the diquark fragments directly into a leading baryon. Intermediate values interpolate between these limits. This corresponds to PYTHIA’s `BeamRemnants:dampPopcorn` parameter.
 * Added an optional custom hard-string transition in the `Collision_Term` section via the `Hard_String_Transition` subsection, with `Mode` set to `Custom_Range` and `Energy_Range` defining the start and end energies. The default `Mode` is `Exponential`, which preserves the old SMASH behavior by using the hard cross-section to compute an exponential weight.
+
+### Added
+* Implemented 2 -> 2 cross sections for D meson-light meson and D*-light meson scatterings as an additional option beside the treatment via intermediate resonances.
+  D* refers to D*(2007) and D*(2010), and light mesons to pions, etas, kaons, and their corresponding antiparticles.
+* Processes with more than two outgoing particles (e.g. Dalitz decays and multiparticle reactions) can now produce resonances, with masses sampled from the appropriate spectral function.
+* Leading hadrons are now selected not only based on their proximity in momentum space to the string endpoints, but also on whether the corresponding endpoint originates from a valence quark of the incoming beams.
+  This reduces the number of leading hadrons at higher energies, where previously two leading hadrons were selected per string.
+* The path to tabulations can now be passed with the command line argument `-t to/path/tabulations`. However, if the input files for particles/decay modes or SMASH version change, the tabulations will be recalculated in the indicated folder. This is useful to make several runs share the same tabulations folder, even if these are in different output directories, avoiding creating several sets of possibly identical files.
 * Hard diffractive string processes are now included in the string transition. Single- and double-diffractive string excitations can therefore be split into soft and hard components, in the same way as non-diffractive string excitation.
 
 ### Changed
@@ -55,15 +56,18 @@ Date:
 * A maximum version of 3.1.11 for Rivet is now imposed, as SMASH cannot compile with the 4.x versions.
 * The separate SMASH procedure for manually peeling off leading baryons from string ends has been replaced by PYTHIA’s hard beam-remnant handling. Accordingly, `StringZ_A_Leading` and `StringZ_B_Leading` now map to PYTHIA’s `BeamRemnants:hardRemnantBaryonA` and `BeamRemnants:hardRemnantBaryonB`. Together with `BeamRemnants:dampPopcorn`, these settings control the baryon stopping of leading baryons. This change required some string-fragmentation parameters to be retuned.
 
-### Fixed 
-* Fixed order of arguments of the sampling of an exponential used in NN->NR scatterings for the angular distribution avoiding potentially undefined behaviour
-* Fixed random seed initialisation for runs of multiple events ensuring reproducibility
-  
+### Fixed
+* Fixed order of arguments of the sampling of an exponential used in NN->NR scatterings for the angular distribution avoiding potentially undefined behavior.
+* Fixed random seed initialization for runs of multiple events ensuring reproducibility.
+* Fix bug in dumped cross sections by SMASH's `-s` option whenever the specified momenta where resulting in `sqrt_s` less than 1 keV apart.
+* Fix harmless bug taking the `std::log(0)` to set an unused variable.
+
 ### Removed
 * CMake utility function `add_compiler_flags_if_supported` has been removed as it sets flags globally.
 * ⚠️ CMake module `FindSMASH.cmake` is not any more needed and has been removed.
 
 [Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-3.3...SMASH-3.4)
+
 
 ## SMASH-3.3
 Date: 2025-12-03

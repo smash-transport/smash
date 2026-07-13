@@ -176,20 +176,14 @@ static double piplusp_elastic_pdg(double mandelstam_s) {
   return (*piplusp_elastic_interpolation)(p_lab);
 }
 
-double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
-  const double p_lab =
-      plab_from_s_heavier_particle_at_rest(mandelstam_s, m1, m2);
-  const auto logp = std::log(p_lab);
-  return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
-}
-
 double piplusp_elastic_AQM(double mandelstam_s, double m1, double m2) {
   const double p_lab =
       plab_from_s_heavier_particle_at_rest(mandelstam_s, m1, m2);
   if (p_lab < 3.05) {  // the plab from which the param starts to explode
     return 7.5;        // this will be scaled down by 2/3 for meson-meson
   } else {
-    return piplusp_elastic_high_energy(mandelstam_s, m1, m2);
+    const auto logp = std::log(p_lab);
+    return 11.4 * std::pow(p_lab, -0.4) + 0.079 * logp * logp;
   }
 }
 
@@ -279,12 +273,19 @@ static double piminusp_elastic_pdg(double mandelstam_s) {
 
 double piminusp_elastic(double mandelstam_s) {
   double sigma;
-  const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-  const auto logp = std::log(p_lab);
   if (mandelstam_s < 1.69) {
     sigma = really_small;
   } else if (mandelstam_s > 4.84) {
-    sigma = 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
+    const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
+    /* std::log(0) = -∞ and std::pow(0, negative) = +∞ both raise FE_DIVBYZERO.
+     * Handle this case explicitly to preserve the mathematical result without
+     * raising a floating-point exception. */
+    if (p_lab == 0.0) {
+      sigma = std::numeric_limits<double>::infinity();
+    } else {
+      const auto logp = std::log(p_lab);
+      sigma = 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
+    }
   } else {
     sigma = piminusp_elastic_pdg(mandelstam_s);
   }
@@ -393,9 +394,16 @@ double pp_elastic(double mandelstam_s) {
 double pp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
   const double p_lab =
       plab_from_s_heavier_particle_at_rest(mandelstam_s, m1, m2);
-  const auto logp = std::log(p_lab);
-  return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
-         1.85 * logp;
+  /* std::log(0) = -∞ and std::pow(0, negative) = +∞ both raise FE_DIVBYZERO.
+   * Handle this case explicitly to preserve the mathematical result without
+   * raising a floating-point exception. */
+  if (p_lab == 0.0) {
+    return std::numeric_limits<double>::infinity();
+  } else {
+    const auto logp = std::log(p_lab);
+    return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
+           1.85 * logp;
+  }
 }
 
 double pp_total(double mandelstam_s) {
@@ -615,11 +623,10 @@ double kminusp_elastic_background(double mandelstam_s) {
     constexpr double a1 = 0.22002795;    // Gev
     constexpr double a2 = 0.64907116;
 
-    const double p_i = p_lab;
-    const double p_f = p_lab;
-
-    const double ratio = a1 * a1 / (a1 * a1 + p_f * p_f);
-    sigma = a0 * p_f / (p_i * mandelstam_s) * std::pow(ratio, a2);
+    /* In sigma a ratio p_i/p_f is omitted as both are set to p_lab. Keeping it
+     * is unnecessary and it would trigger a FPE if p_lab were zero. */
+    const double ratio = a1 * a1 / (a1 * a1 + p_lab * p_lab);
+    sigma = a0 / mandelstam_s * std::pow(ratio, a2);
   } else {
     sigma = kminusp_elastic_pdg(mandelstam_s);
   }
@@ -807,11 +814,10 @@ double kminusp_kbar0n(double mandelstam_s) {
   constexpr unsigned a2 = 2;
 
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  const double p_i = p_lab;
-  const double p_f = p_lab;
 
-  return a0 * p_f / (p_i * mandelstam_s) *
-         pow_int(a1 * a1 / (a1 * a1 + p_f * p_f), a2);
+  /* In this expression a ratio p_i/p_f is omitted as both are set to p_lab.
+   * Keeping it is unnecessary and it would trigger a FPE if p_lab were zero. */
+  return a0 / mandelstam_s * pow_int(a1 * a1 / (a1 * a1 + p_lab * p_lab), a2);
 }
 
 double kminusp_piminussigmaplus(double sqrts) {
