@@ -277,17 +277,15 @@ double piminusp_elastic(double mandelstam_s) {
     sigma = really_small;
   } else if (mandelstam_s > 4.84) {
     const double p_lab = plab_from_s(mandelstam_s, pion_mass, nucleon_mass);
-    /* The following is a workaround for the fact that log(0) = -inf and
-     * calculating it might perform a division by zero that in turn would
-     * trigger a FPE. */
-    const auto logp = [&p_lab]() {
-      if (p_lab == 0.0) {
-        return -std::numeric_limits<double>::infinity();
-      } else {
-        return std::log(p_lab);
-      }
-    }();
-    sigma = 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
+    /* std::log(0) = -∞ and std::pow(0, negative) = +∞ both raise FE_DIVBYZERO.
+     * Handle this case explicitly to preserve the mathematical result without
+     * raising a floating-point exception. */
+    if (p_lab == 0.0) {
+      sigma = std::numeric_limits<double>::infinity();
+    } else {
+      const auto logp = std::log(p_lab);
+      sigma = 1.76 + 11.2 * std::pow(p_lab, -0.64) + 0.043 * logp * logp;
+    }
   } else {
     sigma = piminusp_elastic_pdg(mandelstam_s);
   }
@@ -396,9 +394,16 @@ double pp_elastic(double mandelstam_s) {
 double pp_elastic_high_energy(double mandelstam_s, double m1, double m2) {
   const double p_lab =
       plab_from_s_heavier_particle_at_rest(mandelstam_s, m1, m2);
-  const auto logp = std::log(p_lab);
-  return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
-         1.85 * logp;
+  /* std::log(0) = -∞ and std::pow(0, negative) = +∞ both raise FE_DIVBYZERO.
+   * Handle this case explicitly to preserve the mathematical result without
+   * raising a floating-point exception. */
+  if (p_lab == 0.0) {
+    return std::numeric_limits<double>::infinity();
+  } else {
+    const auto logp = std::log(p_lab);
+    return 11.9 + 26.9 * std::pow(p_lab, -1.21) + 0.169 * logp * logp -
+           1.85 * logp;
+  }
 }
 
 double pp_total(double mandelstam_s) {

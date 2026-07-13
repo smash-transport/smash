@@ -59,7 +59,7 @@ Date:
 ### Fixed
 * Fixed order of arguments of the sampling of an exponential used in NN->NR scatterings for the angular distribution avoiding potentially undefined behavior.
 * Fixed random seed initialization for runs of multiple events ensuring reproducibility.
-* Fix bug in dumped cross sections by SMASH `-s` option whenever the specified momenta where resulting in `sqrt_s` less than 1 keV apart.
+* Fix bug in dumped cross sections by SMASH's `-s` option whenever the specified momenta where resulting in `sqrt_s` less than 1 keV apart.
 * Fix harmless bug taking the `std::log(0)` to set an unused variable.
 
 ### Removed
