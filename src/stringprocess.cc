@@ -59,8 +59,6 @@ StringProcess::StringProcess(Configuration& config)
           config.take(InputKeys::collTerm_stringParam_probabilityPToDUU)),
       separate_fragment_baryon_(
           config.take(InputKeys::collTerm_stringParam_separateFragmentBaryon)),
-      use_monash_tune_(
-          config.take(InputKeys::collTerm_stringParam_useMonashTune, false)),
       additional_xsec_supp_(
           config.take(InputKeys::collTerm_stringParam_unformedXsecSuppression)),
       pythia_settings_(
@@ -166,10 +164,7 @@ void StringProcess::common_setup_pythia(Pythia8::Pythia* pythia_in,
   // make energy-momentum conservation in PYTHIA more precise
   pythia_in->readString("Check:epTolErr = 1e-6");
   pythia_in->readString("Check:epTolWarn = 1e-8");
-  if (use_monash_tune_) {
-    pythia_in->readString("Tune:ee = 7");
-    pythia_in->readString("Tune:pp = 14");
-  }
+
   for (const auto& setting : pythia_settings_) {
     if (!pythia_in->readString(setting)) {
       throw std::runtime_error(

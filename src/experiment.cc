@@ -312,8 +312,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
           config.take(InputKeys::collTerm_ignoreDecayWidthAtTheEnd),
           config.take(InputKeys::collTerm_decayInitial),
           config.take(InputKeys::collTerm_dileptons_pion_form_factor),
-          config.take(InputKeys::collTerm_spinInteractions),
-          std::nullopt};
+          config.take(InputKeys::collTerm_spinInteractions)};
 }
 
 std::string format_measurements(const std::vector<Particles> &ensembles,

@@ -162,12 +162,6 @@ class StringProcess {
   bool separate_fragment_baryon_;
 
   /**
-   * Whether to use the monash tune \iref{Skands:2014pea} for all string
-   * processes.
-   */
-  bool use_monash_tune_;
-
-  /**
    * additional cross-section suppression factor
    * to take coherence effect into account.
    */

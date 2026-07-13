@@ -3411,7 +3411,7 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_diquarkSuppression{
       InputSections::c_stringParameters + "Diquark_Supp",
       0.04,
-      {"1.3"},
+      {"1.3", "3.4"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 1.0;
       }};
@@ -3547,7 +3547,7 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_popcornRate{
       InputSections::c_stringParameters + "Popcorn_Rate",
       0.5,
-      {"1.6"},
+      {"1.6", "3.4"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 2.0;
       }};
@@ -3674,7 +3674,7 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_strangeSuppression{
       InputSections::c_stringParameters + "Strange_Supp",
       0.16,
-      {"1.3"},
+      {"1.3", "3.4"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 1.0;
       }};
@@ -3693,7 +3693,7 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_stringSigmaT{
       InputSections::c_stringParameters + "String_Sigma_T",
       0.5,
-      {"1.3"},
+      {"1.3", "3.4"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 1.0;
       }};
@@ -3731,7 +3731,7 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_stringZA{
       InputSections::c_stringParameters + "StringZ_A",
       1.0,
-      {"1.3"},
+      {"1.3", "3.4"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 2.0;
       }};
@@ -3751,7 +3751,7 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_stringZALeading{
       InputSections::c_stringParameters + "StringZ_A_Leading",
       0.0,
-      {"1.6"},
+      {"1.6", "3.4"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 2.0;
       }};
@@ -3770,7 +3770,7 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_stringZB{
       InputSections::c_stringParameters + "StringZ_B",
       0.3,
-      {"1.3"},
+      {"1.3", "3.4"},
       [](const double &value) noexcept {
         return value >= 0.0 && value <= 2.0;
       }};
@@ -3791,7 +3791,7 @@ struct InputKeys {
   inline static const Key<double> collTerm_stringParam_stringZBLeading{
       InputSections::c_stringParameters + "StringZ_B_Leading",
       3.0,
-      {"1.6"},
+      {"1.6", "3.4"},
       [](const double &value) noexcept {
         return value >= 0.2 && value <= 5.0;
       }};
@@ -3813,7 +3813,7 @@ struct InputKeys {
   inline static const Key<bool> collTerm_stringParam_useMonashTune{
       InputSections::c_stringParameters + "Use_Monash_Tune",
       DefaultType::Dependent,
-      {"3.0"},
+      {"3.0", "3.4", "3.4"},
       detail::get_default_validator<bool>()};
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters

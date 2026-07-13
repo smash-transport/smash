@@ -177,13 +177,6 @@ struct ExperimentParameters {
    * Whether to include spin interactions.
    */
   SpinInteractionType spin_interaction_type;
-
-  /** Bool for the default usage of the monash tune in the collider modus.
-   * The used type is std::optional since its value might not be known at
-   * creation time. E.g. in Experiment this flag is set after the instance is
-   * created.
-   */
-  std::optional<bool> use_monash_tune_default;
 };
 
 }  // namespace smash

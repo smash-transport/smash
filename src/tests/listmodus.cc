@@ -599,8 +599,7 @@ TEST(try_create_particle_with_spin_func) {
       false,
       true,
       DileptonBremsPionFormFactor::Off,
-      SpinInteractionType::On,
-      std::nullopt};
+      SpinInteractionType::On};
 
   Configuration config{R"(
     Modi:
