@@ -623,11 +623,12 @@ double kminusp_elastic_background(double mandelstam_s) {
     constexpr double a1 = 0.22002795;    // Gev
     constexpr double a2 = 0.64907116;
 
-    const double p_i = p_lab;
     const double p_f = p_lab;
 
+    /* In sigma a ratio p_i/p_f is omitted as both are set to p_lab. Keeping it
+     * is unnecessary and it would trigger a FPE if p_lab were zero. */
     const double ratio = a1 * a1 / (a1 * a1 + p_f * p_f);
-    sigma = a0 * p_f / (p_i * mandelstam_s) * std::pow(ratio, a2);
+    sigma = a0 / mandelstam_s * std::pow(ratio, a2);
   } else {
     sigma = kminusp_elastic_pdg(mandelstam_s);
   }
@@ -815,11 +816,11 @@ double kminusp_kbar0n(double mandelstam_s) {
   constexpr unsigned a2 = 2;
 
   const double p_lab = plab_from_s(mandelstam_s, kaon_mass, nucleon_mass);
-  const double p_i = p_lab;
   const double p_f = p_lab;
 
-  return a0 * p_f / (p_i * mandelstam_s) *
-         pow_int(a1 * a1 / (a1 * a1 + p_f * p_f), a2);
+  /* In this expression a ratio p_i/p_f is omitted as both are set to p_lab.
+   * Keeping it is unnecessary and it would trigger a FPE if p_lab were zero. */
+  return a0 / mandelstam_s * pow_int(a1 * a1 / (a1 * a1 + p_f * p_f), a2);
 }
 
 double kminusp_piminussigmaplus(double sqrts) {
