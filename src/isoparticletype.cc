@@ -233,6 +233,19 @@ static bool cache_integral(
   const auto path = generate_tabulation_path(dir, part.name_filtered_prime(),
                                              res.name_filtered_prime());
   bool loaded_from_file = false;
+  /* This is a static variable to keep track of the length of the previous
+   * status message. It is used to overwrite the previous message with spaces if
+   * the new message is shorter, ensuring that the console output remains clean
+   * and readable also across multiple function calls. */
+  static std::size_t previous_length = 0;
+  const auto print_status = [](std::string_view msg) {
+    std::string output{msg};
+    if (output.size() < previous_length) {
+      output.append(previous_length - output.size(), ' ');
+    }
+    previous_length = output.size();
+    std::cout << output << '\r' << std::flush;
+  };
   Tabulation integral;
   if (!dir.empty() && std::filesystem::exists(path)) {
     std::ifstream file(path.string());
@@ -241,8 +254,7 @@ static bool cache_integral(
   if (integral.is_empty()) {
     const auto particle_names =
         part.name_filtered_prime() + res.name_filtered_prime();
-    std::cout << "Calculating integral for " << particle_names << '\r'
-              << std::flush;
+    print_status("Calculating integral for " + particle_names);
     if (!unstable) {
       integral = spectral_integral_semistable(integrate, *res.get_states()[0],
                                               *part.get_states()[0], spacing);
@@ -256,20 +268,18 @@ static bool cache_integral(
       // writing the tabulation to file.
       FileLock lock(dir / (particle_names + ".lock"));
       if (lock.acquire()) {
-        std::cout << "Caching tabulation to " << path.filename() << '\r'
-                  << std::flush;
+        print_status("Caching tabulation to " + path.filename().string());
         std::ofstream file(path.string());
         integral.write(file, hash);
       } else {
-        std::cout << "Another instance is caching the tabulation to "
-                  << path.filename() << ", skipping caching for this instance\r"
-                  << std::flush;
+        print_status("Another instance is caching the tabulation to " +
+                     path.filename().string() +
+                     ", skipping caching for this instance");
       }
     }
   } else {
     // Only print message if the found tabulation was valid.
-    std::cout << "Tabulation found at " << path.filename() << '\r'
-              << std::flush;
+    print_status("Tabulation found at " + path.filename().string());
     loaded_from_file = true;
   }
   tabulations.emplace(std::make_pair(res.name(), integral));

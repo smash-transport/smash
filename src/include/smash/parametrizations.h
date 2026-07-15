@@ -190,21 +190,13 @@ double piplusp_total(double sqrts);
 
 /**
  * pi+p elactic cross section parametrization.
+ *
  * Source: GiBUU:parametrizationBarMes_HighEnergy.f90
  * Elastic contributions from decays are not subtracted, high energy
- * parametrization used at all energies (useful for AQM)
+ * parametrization used at all energies (useful for AQM).
  *
- * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
- * \param[in] m1 the mass of the first particle [GeV]
- * \param[in] m2 the mass of the second particle [GeV]
- * \return the parametrized cross-section [mb]
- */
-double piplusp_elastic_high_energy(double mandelstam_s, double m1, double m2);
-
-/**
- * An overload of piplusp_elastic_high_energy in which the very low
- * part is replaced by a flat 5 mb cross section; used for meson-meson
- * interactions.
+ * The very low part is replaced by a flat 7.5 mb cross section; used for
+ * meson-meson interactions.
  *
  * \param[in] mandelstam_s the rest frame total energy squared [GeV^2]
  * \param[in] m1 the mass of the first particle [GeV]
@@ -1288,6 +1280,406 @@ std::optional<double> DstarzeroKbarzero_elastic(double sqrts);
  * \return the parametrized cross-section [mb]
  */
 std::optional<double> DstarzeroKminus_elastic(double sqrts);
+
+/**
+ * D⁺n elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁻n̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dplusn_elastic(double sqrts);
+
+/**
+ * D⁺n -> D⁰p cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁻n̄ -> D̄⁰p̄ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double Dplusn_Dzerop(double sqrts);
+
+/**
+ * D⁺p elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁻p̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dplusp_elastic(double sqrts);
+
+/**
+ * D⁰n elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D̄⁰n̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dzeron_elastic(double sqrts);
+
+/**
+ * D⁰p -> D⁺n cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D̄⁰p̄ -> D⁻n̄ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double Dzerop_Dplusn(double sqrts);
+
+/**
+ * D⁰p elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D̄⁰p̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dzerop_elastic(double sqrts);
+
+/**
+ * D⁻n elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺n̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dminusn_elastic(double sqrts);
+
+/**
+ * D⁻p elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺p̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dminusp_elastic(double sqrts);
+
+/**
+ * D⁻p -> D̄⁰n cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺p̄ -> D⁰n̄ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double Dminusp_Dbarzeron(double sqrts);
+
+/**
+ * D̄⁰n -> D⁻p cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰n̄ -> D⁺p̄ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double Dbarzeron_Dminusp(double sqrts);
+
+/**
+ * D̄⁰n elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰n̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dbarzeron_elastic(double sqrts);
+
+/**
+ * D̄⁰p elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰p̄ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> Dbarzerop_elastic(double sqrts);
+
+/**
+ * D⁺Δ⁺ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁻Δ̅⁻ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DplusDeltaplus_elastic(double sqrts);
+
+/**
+ * D⁺Δ⁺ -> D⁰Δ⁺⁺ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁻Δ̅⁻ -> D̄⁰Δ̅⁻⁻ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DplusDeltaplus_DzeroDeltaplusplus(double sqrts);
+
+/**
+ * D⁺Δ⁺⁺ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁻Δ̅⁻⁻ is also handled with
+ * this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DplusDeltaplusplus_elastic(double sqrts);
+
+/**
+ * D⁺Δ⁻ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁻Δ̅⁺ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DplusDeltaminus_elastic(double sqrts);
+
+/**
+ * D⁺Δ⁻ -> D⁰Δ⁰ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁻Δ̅⁺ -> D̄⁰Δ̅⁰ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DplusDeltaminus_DzeroDeltazero(double sqrts);
+
+/**
+ * D⁺Δ⁰ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁻Δ̅⁰ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DplusDeltazero_elastic(double sqrts);
+
+/**
+ * D⁺Δ⁰ -> D⁰Δ⁺ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁻Δ̅⁰ -> D̄⁰Δ̅⁻ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DplusDeltazero_DzeroDeltaplus(double sqrts);
+
+/**
+ * D⁰Δ⁺ -> D⁺Δ⁰ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D̄⁰Δ̅⁻ -> D⁻Δ̅⁰ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DzeroDeltaplus_DplusDeltazero(double sqrts);
+
+/**
+ * D⁰Δ⁺ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D̄⁰Δ̅⁻ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DzeroDeltaplus_elastic(double sqrts);
+
+/**
+ * D⁰Δ⁺⁺ -> D⁺Δ⁺ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D̄⁰Δ̅⁻⁻ -> D⁻Δ̅⁻ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DzeroDeltaplusplus_DplusDeltaplus(double sqrts);
+
+/**
+ * D⁰Δ⁺⁺ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D̄⁰Δ̅⁻⁻ is also handled with
+ * this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DzeroDeltaplusplus_elastic(double sqrts);
+
+/**
+ * D⁰Δ⁻ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D̄⁰Δ̅⁺ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DzeroDeltaminus_elastic(double sqrts);
+
+/**
+ * D⁰Δ⁰ -> D⁺Δ⁻ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D̄⁰Δ̅⁰ -> D⁻Δ̅⁺ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DzeroDeltazero_DplusDeltaminus(double sqrts);
+
+/**
+ * D⁰Δ⁰ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D̄⁰Δ̅⁰ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DzeroDeltazero_elastic(double sqrts);
+
+/**
+ * D⁻Δ⁺ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺Δ̅⁻ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DminusDeltaplus_elastic(double sqrts);
+
+/**
+ * D⁻Δ⁺ -> D̄⁰Δ⁰ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺Δ̅⁻ -> D⁰Δ̅⁰ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DminusDeltaplus_DbarzeroDeltazero(double sqrts);
+
+/**
+ * D⁻Δ⁺⁺ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺Δ̅⁻⁻ is also handled with
+ * this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DminusDeltaplusplus_elastic(double sqrts);
+
+/**
+ * D⁻Δ⁺⁺ -> D̄⁰Δ⁺ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺Δ̅⁻⁻ -> D⁰Δ̅⁻ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DminusDeltaplusplus_DbarzeroDeltaplus(double sqrts);
+
+/**
+ * D⁻Δ⁻ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺Δ̅⁺ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DminusDeltaminus_elastic(double sqrts);
+
+/**
+ * D⁻Δ⁰ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺Δ̅⁰ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DminusDeltazero_elastic(double sqrts);
+
+/**
+ * D⁻Δ⁰ -> D̄⁰Δ⁻ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁺Δ̅⁰ -> D⁰Δ̅⁺ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DminusDeltazero_DbarzeroDeltaminus(double sqrts);
+
+/**
+ * D̄⁰Δ⁺ -> D⁻Δ⁺⁺ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰Δ̅⁻ -> D⁺Δ̅⁻⁻ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DbarzeroDeltaplus_DminusDeltaplusplus(double sqrts);
+
+/**
+ * D̄⁰Δ⁺ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰Δ̅⁻ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DbarzeroDeltaplus_elastic(double sqrts);
+
+/**
+ * D̄⁰Δ⁺⁺ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰Δ̅⁻⁻ is also handled with
+ * this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DbarzeroDeltaplusplus_elastic(double sqrts);
+
+/**
+ * D̄⁰Δ⁻ -> D⁻Δ⁰ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰Δ̅⁺ -> D⁺Δ̅⁰ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DbarzeroDeltaminus_DminusDeltazero(double sqrts);
+
+/**
+ * D̄⁰Δ⁻ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰Δ̅⁺ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DbarzeroDeltaminus_elastic(double sqrts);
+
+/**
+ * D̄⁰Δ⁰ -> D⁻Δ⁺ cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰Δ̅⁰ -> D⁺Δ̅⁻ is also handled
+ * with this function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+double DbarzeroDeltazero_DminusDeltaplus(double sqrts);
+
+/**
+ * D̄⁰Δ⁰ elastic cross section (\iref{Tolos:2013kva}), data provided by Juan
+ * Torres-Rincon. Charge conjugated cross section D⁰Δ̅⁰ is also handled with this
+ * function.
+ *
+ * \param[in] sqrts the rest frame total energy [GeV]
+ * \return the parametrized cross-section [mb]
+ */
+std::optional<double> DbarzeroDeltazero_elastic(double sqrts);
 
 }  // namespace smash
 

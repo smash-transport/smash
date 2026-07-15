@@ -467,6 +467,54 @@ class CrossSections {
   double DK_and_DstarK_inelastic() const;
 
   /**
+   * Determine the elastic cross section for a D meson-nucleon (DN) collision,
+   * If the center-of-mass energy for the collision is below the lower bound of
+   * the energy range of the underlying cross section data, the return value is
+   * zero. If it is above the upper bound, the return value will be
+   * `std::nullopt`.
+   *
+   * \return Elastic cross section for DN.
+   *
+   * \throw std::runtime_error if incoming particles are not DN.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  std::optional<double> DN_elastic() const;
+
+  /**
+   * Determine the inelastic cross section for a D meson-nucleon (DN) collision.
+   *
+   * \return Inlastic cross section for DN.
+   *
+   * \throw std::runtime_error if incoming particles are not DN.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  double DN_inelastic() const;
+
+  /**
+   * Determine the elastic cross section for a D meson-Delta (DΔ) collision,
+   * If the center-of-mass energy for the collision is below the lower bound of
+   * the energy range of the underlying cross section data, the return value is
+   * zero. If it is above the upper bound, the return value will be
+   * `std::nullopt`.
+   *
+   * \return Elastic cross section for DΔ.
+   *
+   * \throw std::runtime_error if incoming particles are not DΔ.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  std::optional<double> DDelta_elastic() const;
+
+  /**
+   * Determine the inelastic cross section for a D meson-Delta (DΔ) collision.
+   *
+   * \return Inlastic cross section for DΔ.
+   *
+   * \throw std::runtime_error if incoming particles are not DΔ.
+   * \throw std::runtime_error if cross section is negative.
+   */
+  double DDelta_inelastic() const;
+
+  /**
    * Find all processes for Nucleon-Pion to Hyperon-Kaon Scattering.
    * These scatterings are suppressed at high energies when strings are
    * turned on with probabilities, so they need to be added back manually.
@@ -541,6 +589,28 @@ class CrossSections {
   CollisionBranchList DK_and_DstarK_xx(
       const ReactionsBitSet& included_2to2,
       CharmRescattering charm_rescattering) const;
+
+  /**
+   * Find all inelastic 2->2 processes for D meson-nucleon (DN) scatterings.
+   *
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \param[in] charm_rescattering Type of charm rescattering
+   *
+   * \return List of all possible DN reactions with their cross sections
+   */
+  CollisionBranchList DN_xx(const ReactionsBitSet& included_2to2,
+                            CharmRescattering charm_rescattering) const;
+
+  /**
+   * Find all inelastic 2->2 processes for D meson-Delta (DΔ) scatterings.
+   *
+   * \param[in] included_2to2 Which 2->2 reactions are enabled?
+   * \param[in] charm_rescattering Type of charm rescattering
+   *
+   * \return List of all possible DΔ reactions with their cross sections
+   */
+  CollisionBranchList DDelta_xx(const ReactionsBitSet& included_2to2,
+                                CharmRescattering charm_rescattering) const;
 
   /**
    * Find all inelastic 2->2 processes for Delta-Kaon (DeltaK) Scattering.

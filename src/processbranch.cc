@@ -65,20 +65,20 @@ std::ostream& operator<<(std::ostream& os, const CollisionBranch& cbranch) {
   ProcessType ptype = cbranch.get_type();
   if (ptype == ProcessType::StringSoftSingleDiffractiveAX ||
       ptype == ProcessType::StringSoftSingleDiffractiveXB) {
-    os << "soft 1-diff";
+    os << "soft-1-diff";
   } else if (ptype == ProcessType::StringSoftDoubleDiffractive) {
-    os << "soft 2-diff";
+    os << "soft-2-diff";
   } else if (ptype == ProcessType::StringSoftAnnihilation) {
-    os << "soft BBbar";
+    os << "soft-BBbar";
   } else if (ptype == ProcessType::StringSoftNonDiffractive) {
-    os << "soft non-diff";
+    os << "soft-non-diff";
   } else if (ptype == ProcessType::StringHardNonDiffractive) {
-    os << "hard non-diff";
+    os << "hard-non-diff";
   } else if (ptype == ProcessType::StringHardSingleDiffractiveXB ||
              ptype == ProcessType::StringHardSingleDiffractiveAX) {
-    os << "hard 1-diff";
+    os << "hard-1-diff";
   } else if (ptype == ProcessType::StringHardDoubleDiffractive) {
-    os << "hard 2-diff";
+    os << "hard-2-diff";
   } else if (ptype == ProcessType::TwoToOne || ptype == ProcessType::TwoToTwo ||
              ptype == ProcessType::TwoToThree ||
              ptype == ProcessType::TwoToFour ||
@@ -131,13 +131,13 @@ std::ostream& operator<<(std::ostream& os, ProcessType process_type) {
     case ProcessType::StringSoftDoubleDiffractive:
     case ProcessType::StringSoftAnnihilation:
     case ProcessType::StringSoftNonDiffractive:
-      os << "Soft String Excitation";
+      os << "SoftStringExcitation";
       break;
     case ProcessType::StringHardNonDiffractive:
     case ProcessType::StringHardSingleDiffractiveAX:
     case ProcessType::StringHardSingleDiffractiveXB:
     case ProcessType::StringHardDoubleDiffractive:
-      os << "Hard String via Pythia";
+      os << "HardStringExcitation";
       break;
     case ProcessType::Decay:
       os << "Decay";
