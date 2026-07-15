@@ -111,7 +111,7 @@
       "first name": "Hendrik",
       "email": "roch@fias.uni-frankfurt.de",
       "years": "2022-2024",
-      "affiliation": "Department of Physics and Astronomy, Wayne State University, 666 W. Hancock St., Detroit, MI 48201, USA",
+      "affiliation": "Department of Physics, University of Jyväskylä, P.O. Box 35, 40014 University of Jyväskylä, Finland",
       "orcid": "0000-0002-0187-6843"
     },
     {
@@ -132,7 +132,8 @@
       "last name": "Pang",
       "first name": "Long-Gang",
       "email": "pang@fias.uni-frankfurt.de",
-      "years": "2015-2017"
+      "years": "2015-2017",
+      "affiliation": "Key Laboratory of Quark and Lepton Physics (MOE) and Institute of Particle Physics, Central China Normal University, Wuhan 430079, China"
     },
     {
       "last name": "Ostrowski",
@@ -237,7 +238,8 @@
       "last name": "Garcia-Montero",
       "first name": "Oscar",
       "email": "garcia@fias.uni-frankfurt.de",
-      "years": "2020-2021"
+      "years": "2020-2021",
+      "affiliation": "Instituto Galego de Física de Altas Enerxías IGFAE, Universidade de Santiago de Compostela, E-15782 Galicia, Spain"
     },
     {
       "last name": "Engel",
@@ -277,7 +279,8 @@
       "last name": "Auvinen",
       "first name": "Jussi",
       "email": "auvinen@fias.uni-frankfurt.de",
-      "years": "2012-2014"
+      "years": "2012-2014",
+      "affiliation": "University of Jyväskylä, Department of Physics, P.O. Box 35, FI-40014 University of Jyväskylä, Finland"
     },
     {
       "last name": "Attems",
