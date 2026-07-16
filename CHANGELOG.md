@@ -19,8 +19,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
-## SMASH-3.4rc
-Date:
+## SMASH-3.4
+Date: 2026-07-16
 
 ### Input
 * N-p bremsstrahlung of dileptons is now available with the key `CollisionTerm: Dileptons: Bremsstrahlung` as well as the form factors `CollisionTerm: Dileptons: Pion_Form_Factor`
