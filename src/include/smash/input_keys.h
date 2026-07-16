@@ -3799,22 +3799,20 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_use_monash_tune_,Use_Monash_Tune,bool,
-   * (\ref key_gen_modus_ "Modus" == "Collider" &&
-   *  \ref key_MC_sqrtsnn_ "Sqrtsnn" >= 200),\none}
+   * false,\none}
    *
-   * Whether to use the monash tune \iref{Skands:2014pea} for all string
-   * processes. If nothing is specified, this option will be generally `false`
-   * unless SMASH is run in the collider modus with an energy per nucleon pair
-   * \f$\mathtt{Sqrtsnn}\geq 200\,\mathrm{GeV}\f$.
+   * Whether to use the Monash tune \iref{Skands:2014pea} for all string
+   * processes. By default, the Monash tune is disabled.
    */
   /**
    * \see_key{key_CT_SP_use_monash_tune_}
    */
   inline static const Key<bool> collTerm_stringParam_useMonashTune{
       InputSections::c_stringParameters + "Use_Monash_Tune",
-      DefaultType::Dependent,
-      {"3.0", "3.4", "3.4"},
+      false,
+      {"3.0", "3.4"},
       detail::get_default_validator<bool>()};
+
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_unformed_xsec_suppression_,
@@ -3849,17 +3847,29 @@ struct InputKeys {
   /*!\Userguide
    * \page doxypage_input_conf_ct_string_parameters
    * \optional_key{key_CT_SP_pythia_settings_,
-   *               Pythia_Settings,list,[],\none}
+   *               Pythia_Settings,list of strings,[],\none}
    *
    * Additional Pythia 8 settings passed directly to the internal Pythia
    * instances used for string fragmentation.
    *
-   * These settings are applied after the corresponding SMASH string
-   * parameters. Consequently, if a setting is specified both through a SMASH
-   * input key and in `Pythia_Settings`, the value given in
+   * In the %YAML configuration file, provide each Pythia 8 setting as a
+   * separate string:
+   *
+   * \code{.yaml}
+   * Pythia_Settings:
+   *   - 'StringZ:aLund = 0.68'
+   *   - 'StringZ:bLund = 0.98'
+   * \endcode
+   *
+   * In the future, this option will replace SMASH input parameters that map
+   * one-to-one to individual Pythia 8 settings.
+   *
+   * The settings are applied after the corresponding SMASH string parameters.
+   * Therefore, if the same Pythia 8 setting is configured both through a SMASH
+   * input key and through `Pythia_Settings`, the value specified in
    * `Pythia_Settings` takes precedence.
    *
-   * Invalid settings cause SMASH to terminate during initialization.
+   * Invalid Pythia 8 settings cause SMASH to terminate during initialization.
    */
   /**
    * \see_key{key_CT_SP_pythia_settings_}
