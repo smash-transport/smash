@@ -385,7 +385,6 @@ void ensure_path_is_valid(const std::filesystem::path &path) {
  */
 ScatterActionsFinder actions_finder_for_dump(Configuration &configuration) {
   ExperimentParameters params = create_experiment_parameters(configuration);
-  params.use_monash_tune_default = false;
   return ScatterActionsFinder(configuration, params);
 }
 

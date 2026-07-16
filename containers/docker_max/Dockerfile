@@ -101,6 +101,7 @@ RUN <<EOF
     findutils  \
     gawk  \
     g++ \
+    pipx \
     gcc  \
     gcr  \
     gdb  \
@@ -492,11 +493,16 @@ RUN <<EOF
          ${RIVET_BUILD_PREFIX} \
          /var/cache/apt/archives/*.deb
   sed -i -e "/ghostscript/d" -e "/PS/d" -e "/PS2/d" -e "/PS3/d" \
-         -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" /etc/ImageMagick-6/policy.xml
-  ln -s /usr/bin/clang-format-18 /usr/bin/clang-format
-  ln -s /usr/bin/clang-tidy-18 /usr/bin/clang-tidy
-  pip install cmakelang
+         -e "/EPS/d" -e "/PDF/d" -e "/XPS/d" \
+         /etc/ImageMagick-6/policy.xml
+  ln -sf /usr/bin/clang-format-18 /usr/bin/clang-format
+  ln -sf /usr/bin/clang-tidy-18 /usr/bin/clang-tidy
+  pipx install cmakelang
 EOF
+
+# Set pipx packages install path on path  
+
+ENV PATH="/root/.local/bin:${PATH}"
 
 # Set a few other environment variables (just to be sure which locale is used)
 

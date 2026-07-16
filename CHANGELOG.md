@@ -55,6 +55,7 @@ Date:
 * The `Elastic_NN_Cutoff_Sqrts: 1.8` has been removed from shipped input file for `Box` and `Sphere` cases (the default value `1.98` is then used).
 * A maximum version of 3.1.11 for Rivet is now imposed, as SMASH cannot compile with the 4.x versions.
 * The separate SMASH procedure for manually peeling off leading baryons from string ends has been replaced by PYTHIA’s hard beam-remnant handling. Accordingly, `StringZ_A_Leading` and `StringZ_B_Leading` now map to PYTHIA’s `BeamRemnants:hardRemnantBaryonA` and `BeamRemnants:hardRemnantBaryonB`. Together with `BeamRemnants:dampPopcorn`, these settings control the baryon stopping of leading baryons. This change required some string-fragmentation parameters to be retuned.
+* The Monash tune is no longer used by default above a center-of-mass energy of 200 GeV.
 
 ### Fixed
 * Fixed order of arguments of the sampling of an exponential used in NN->NR scatterings for the angular distribution avoiding potentially undefined behavior.
