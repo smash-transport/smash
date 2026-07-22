@@ -150,11 +150,20 @@ void DecayAction::sample_2body_phasespace() {
 
   const bool is_valid = !std::isnan(masses.first) && !std::isnan(masses.second);
 
+  /* The following "duplicate" call of sample_angles is on purpose. The sampled
+   * masses will only be NaNs if potentials are enabled and the energy was below
+   * threshold energy, signaling a failure in the sampling process. In this case
+   * the sample_angles call should be skipped.
+   * If potentials are disabled the masses should not be NaNs and in this case
+   * sample_angles is not guarded to not mask potential bugs. */
   if (pot_pointer) {
     was_2body_phase_space_sampled_with_potentials_as_valid_ = is_valid;
+    if (is_valid) {
+      sample_angles(masses, cm_kin_energy);
+    }
+  } else {
+    sample_angles(masses, cm_kin_energy);
   }
-
-  sample_angles(masses, cm_kin_energy);
 }
 
 /* This is overridden from the Action class in order to
