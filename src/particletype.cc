@@ -758,12 +758,9 @@ std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
   } while (acceptance > max_acceptance && --max_trials_outer > 0);
 
   if (max_trials_inner == 0) {
-    /*
-     * This fallback is necessary for when the inner loop fails to find an
+    /* This fallback is necessary for when the inner loop fails to find an
      * acceptable mass combination. This can happen when the cms_energy is much
-     * smaller than the sum of pole masses of the two resonances.
-     *
-     */
+     * smaller than the sum of pole masses of the two resonances. */
     logg[LResonances].debug(
         "Could not sample a valid mass combination for the resonances ",
         t1.name(), " and ", t2.name(), " with energy ", cms_energy,
@@ -776,7 +773,8 @@ std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
 
   if (acceptance > max_acceptance && max_trials_outer == 0) {
     logg[LResonances].fatal(
-        "Maximum acceptance should be increased in sample_resonance_masses: ",
+        "Maximum acceptance should be increased in "
+        "sample_two_resonance_masses: ",
         acceptance / max_acceptance, " ", t1.pdgcode(), " ", t2.pdgcode(), " ",
         cms_energy, " ", mass_1, " ", mass_2);
     throw std::runtime_error(

@@ -270,7 +270,7 @@ std::pair<double, double> Action::sample_masses(
         std::to_string(t_b.min_mass_kinematic()));
   }
 
-  /* If one of the particles is a resonance, sample its mass. */
+  // If one of the particles is a resonance, sample its mass.
   if (!t_a.is_stable() && t_b.is_stable()) {
     masses.first = t_a.sample_resonance_mass(t_b.mass(), kinetic_energy_cm);
   } else if (!t_b.is_stable() && t_a.is_stable()) {
@@ -293,20 +293,19 @@ void Action::sample_angles(std::pair<double, double> masses,
     logg[LAction].warn("Ektot: ", kinetic_energy_cm, " m_a: ", masses.first,
                        " m_b: ", masses.second);
   }
-  /* Here we assume an isotropic angular distribution. */
+  // Here we assume an isotropic angular distribution.
   Angles phitheta;
   phitheta.distribute_isotropically();
 
   p_a->set_4momentum(masses.first, phitheta.threevec() * pcm);
   p_b->set_4momentum(masses.second, -phitheta.threevec() * pcm);
-  /* Debug message is printed before boost, so that p_a and p_b are
-   * the momenta in the center of mass frame and thus opposite to
-   * each other.*/
+  /* Debug message is printed before boost, so that p_a and p_b are the momenta
+   * in the center of mass frame and thus opposite to each other.*/
   logg[LAction].debug("p_a: ", *p_a, "\np_b: ", *p_b);
 }
 
 void Action::sample_2body_phasespace() {
-  /* This function only operates on 2-particle final states. */
+  // This function only operates on 2-particle final states.
   assert(outgoing_particles_.size() == 2);
   const FourVector p_tot = total_momentum_of_outgoing_particles();
   const double cm_kin_energy = p_tot.abs();

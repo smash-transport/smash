@@ -103,16 +103,13 @@ void DecayAction::generate_final_state() {
     }
   }
 
-  /*
-   * @brief Σ* → Λ + π decay: propagate Λ polarization from the intermediate
-   * resonance.
+  /* Σ* → Λ + π decay: propagate Λ polarization from the intermediate resonance.
    *
    * During Λ+π → Σ* formation we stored the incoming Λ polarization by
    * writing it into the Σ* spin 4-vector (optionally applying a Λ spin-flip
    * probability, cf. arXiv:2404.15890v2). At decay, we must hand this
    * polarization back to the outgoing Λ to transport Λ polarization through the
-   * resonance stage.
-   */
+   * resonance stage. */
   if (spin_interaction_type_ != SpinInteractionType::Off &&
       outgoing_particles_.size() == 2) {
     // Check for Σ* → Λ + π decay channel
