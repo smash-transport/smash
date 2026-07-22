@@ -123,7 +123,7 @@ void ParticleData::set_unpolarized_spin_vector() {
                                    random::normal(mean, sigma));
 
   // Boost the spin vector from rest frame to lab frame
-  spin_vector_ = rest_frame_spin.lorentz_boost(v);
+  spin_vector_ = rest_frame_spin.lorentz_boost(-v);
 }
 
 double ParticleData::xsec_scaling_factor(double delta_time) const {
