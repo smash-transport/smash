@@ -260,6 +260,7 @@ void ScatterAction::rescale_outgoing_branches() {
     for (auto &proc : collision_channels_) {
       proc->set_weight(proc->weight() * reweight);
     }
+    sum_of_partial_cross_sections_ = *parametrized_total_cross_section_;
   }
 }
 
