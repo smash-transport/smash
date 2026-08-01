@@ -187,12 +187,17 @@ void ScatterAction::add_all_scatterings(
 
   // Prevent pseudoresonances for charmed hadrons in T-matrix approach
   bool suppress_pseudoresonances_for_T_matrix_channels = false;
-  if (finder_parameters.charm_rescattering == CharmRescattering::T_Matrix &&
-      ((pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) ||
-       (pdg_a.is_Dstar2007() || pdg_b.is_Dstar2007()))) {
-    if ((pdg_a.is_pion() || pdg_b.is_pion()) ||
-        (pdg_a.is_eta() || pdg_b.is_eta()) ||
-        (pdg_a.is_kaon() || pdg_b.is_kaon())) {
+  if (finder_parameters.charm_rescattering == CharmRescattering::T_Matrix) {
+    const bool Dmeson_present = pdg_a.is_Dmeson() || pdg_b.is_Dmeson();
+    const bool Dstar_present = pdg_a.is_Dstar2007() || pdg_b.is_Dstar2007();
+    const bool light_meson_present = pdg_a.is_pion() || pdg_b.is_pion() ||
+                                     pdg_a.is_eta() || pdg_b.is_eta() ||
+                                     pdg_a.is_kaon() || pdg_b.is_kaon();
+    const bool nucleon_or_Delta_present = pdg_a.is_nucleon() ||
+                                          pdg_b.is_nucleon() ||
+                                          pdg_a.is_Delta() || pdg_b.is_Delta();
+    if ((Dmeson_present && (light_meson_present || nucleon_or_Delta_present)) ||
+        (Dstar_present && light_meson_present)) {
       suppress_pseudoresonances_for_T_matrix_channels = true;
     }
   }
