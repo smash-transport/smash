@@ -24,6 +24,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
   This bug resulted in partial cross sections that were larger than the total cross sections, but affected only parametrized cross sections.
 * The boost sign for the case in which the particle's spin 4-vector was set randomly and spin interactions were enabled by `Collision_Term: Spin_Interactions: On` was incorrect and is now fixed.
 * Suppress pseudoresonances for DN and DΔ when using the configuration key `Collision_Term: Heavy_Flavor: Charm_Rescattering_Method: T-matrix`.
+* The elastic cross sections of D meson scatterings with pions, etas, and kaons were wrongly provided by AQM when using the configuration key `Collision_Term: Heavy_Flavor: Charm_Rescattering_Method: T-matrix`.
+  Now the appropriate T-matrix cross sections are considered.
 
 ### Changed
 * Reduced the standard deviation of the normal distribution from which random spins are drawn to reduce statistical noise.
