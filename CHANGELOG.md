@@ -19,11 +19,17 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+### Fixed
+* The boost sign for the case in which the particle's spin 4-vector was set randomly and spin interactions were enabled by `Collision_Term: Spin_Interactions: On` was incorrect and is now fixed.
+
+### Changed
+* Reduced the standard deviation of the normal distribution from which random spins are drawn to reduce statistical noise.
+
 ## SMASH-3.4
 Date: 2026-07-16
 
 ### Input
-* N-p bremsstrahlung of dileptons is now available with the key `CollisionTerm: Dileptons: Bremsstrahlung` as well as the form factors `CollisionTerm: Dileptons: Pion_Form_Factor`
+* N-p bremsstrahlung of dileptons is now available with the key `CollisionTerm: Dileptons: Bremsstrahlung` as well as the form factors `CollisionTerm: Dileptons: Pion_Form_Factor`.
 * New key `Ignore_Unformed` in `Output: Thermodynamics` to exclude unformed (and preformed) particles from the density evaluation. This is useful e.g. in afterburner calculations.
 * New key `Unformed_Xsec_Suppression` to apply an additional suppression factor to the interaction cross sections of unformed hadrons during their formation time. A value of 1.0 corresponds to no additional suppression, while smaller values reduce the interaction probability of unformed hadrons. This parameter can be used as a phenomenological tuning knob for dense environments.
 * New key `Pythia_Settings` to pass additional PYTHIA 8 settings directly to the internal PYTHIA instances used for string fragmentation. These settings are applied after the corresponding SMASH string parameters, so values specified in `Pythia_Settings` take precedence. Invalid PYTHIA settings cause SMASH to terminate during initialization.
