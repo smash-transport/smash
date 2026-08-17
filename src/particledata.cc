@@ -116,7 +116,7 @@ void ParticleData::set_unpolarized_spin_vector() {
    * avoid unphysical artifacts.
    */
   constexpr double mean = 0.0;
-  constexpr double sigma = 0.75;
+  constexpr double sigma = 0.5;
 
   const FourVector rest_frame_spin(0., random::normal(mean, sigma),
                                    random::normal(mean, sigma),
