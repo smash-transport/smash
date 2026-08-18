@@ -23,6 +23,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Fixed missing rescaling of sum of partial cross sections when using `Total_Cross_Section_Strategy: TopDown` in the configuration file.
   This bug resulted in partial cross sections that were larger than the total cross sections, but affected only parametrized cross sections.
 * The boost sign for the case in which the particle's spin 4-vector was set randomly and spin interactions were enabled by `Collision_Term: Spin_Interactions: On` was incorrect and is now fixed.
+* Suppress pseudoresonances for DN and DΔ when using the configuration key `Collision_Term: Heavy_Flavor: Charm_Rescattering_Method: T-matrix`.
 
 ### Changed
 * Reduced the standard deviation of the normal distribution from which random spins are drawn to reduce statistical noise.
