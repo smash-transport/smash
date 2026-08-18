@@ -529,36 +529,6 @@ double CrossSections::elastic_parametrization(
              (pdg_b.is_nucleon() && pdg_a.is_kaon())) {
     // Elastic Nucleon Kaon Scattering
     elastic_xs = nk_el();
-  } else if (pdg_a.is_Dmeson() || pdg_b.is_Dmeson()) {
-    const CharmRescattering& charm_rescattering =
-        finder_parameters.charm_rescattering;
-    std::optional<double> tmp_elastic_xs = std::nullopt;
-    if (pdg_a.is_nucleon() || pdg_b.is_nucleon()) {
-      tmp_elastic_xs = DN_elastic();
-    } else if (pdg_a.is_Delta() || pdg_b.is_Delta()) {
-      tmp_elastic_xs = DDelta_elastic();
-    }
-    if ((charm_rescattering == CharmRescattering::T_Matrix) &&
-        tmp_elastic_xs.has_value()) {
-      elastic_xs = tmp_elastic_xs.value();
-    } else if (use_AQM) {
-      /* use AQM if charm_rescattering == CharmRescattering::Resonances or if
-       * tmp_elastic_xs has no value, which happens either when sqrts is above
-       * the upper bound of the energy range of the underlying cross section
-       * data or there is no underlying data for the two colliding particles */
-      const double m1 = incoming_particles_[0].effective_mass();
-      const double m2 = incoming_particles_[1].effective_mass();
-      const double s = sqrt_s_ * sqrt_s_;
-      elastic_xs = 2. / 3. * piplusp_elastic_AQM(s, m1, m2) *
-                   finder_parameters.AQM_scaling_factor(pdg_a) *
-                   finder_parameters.AQM_scaling_factor(pdg_b);
-    } else {
-      const ParticleType& a = incoming_particles_[0].type();
-      const ParticleType& b = incoming_particles_[1].type();
-      warn_if_charm_rescattering_enabled_and_AQM_disabled(sqrt_s_, a, b,
-                                                          charm_rescattering);
-      return 0.;
-    }
   } else if (pdg_a.is_nucleon() && pdg_b.is_nucleon() &&
              pdg_a.antiparticle_sign() == pdg_b.antiparticle_sign()) {
     // Elastic Nucleon Nucleon Scattering
@@ -589,6 +559,12 @@ double CrossSections::elastic_parametrization(
       tmp_elastic_xs = Deta_and_Dstareta_elastic();
     } else if (pdg_a.is_kaon() || pdg_b.is_kaon()) {
       tmp_elastic_xs = DK_and_DstarK_elastic();
+    } else if ((pdg_a.is_Dmeson() && pdg_b.is_nucleon()) ||
+               (pdg_b.is_Dmeson() && pdg_a.is_nucleon())) {
+      tmp_elastic_xs = DN_elastic();
+    } else if ((pdg_a.is_Dmeson() && pdg_b.is_Delta()) ||
+               (pdg_b.is_Dmeson() && pdg_a.is_Delta())) {
+      tmp_elastic_xs = DDelta_elastic();
     }
     if ((charm_rescattering == CharmRescattering::T_Matrix) &&
         tmp_elastic_xs.has_value()) {
