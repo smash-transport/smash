@@ -103,16 +103,13 @@ void DecayAction::generate_final_state() {
     }
   }
 
-  /*
-   * @brief Σ* → Λ + π decay: propagate Λ polarization from the intermediate
-   * resonance.
+  /* Σ* → Λ + π decay: propagate Λ polarization from the intermediate resonance.
    *
    * During Λ+π → Σ* formation we stored the incoming Λ polarization by
    * writing it into the Σ* spin 4-vector (optionally applying a Λ spin-flip
    * probability, cf. arXiv:2404.15890v2). At decay, we must hand this
    * polarization back to the outgoing Λ to transport Λ polarization through the
-   * resonance stage.
-   */
+   * resonance stage. */
   if (spin_interaction_type_ != SpinInteractionType::Off &&
       outgoing_particles_.size() == 2) {
     // Check for Σ* → Λ + π decay channel
@@ -150,11 +147,20 @@ void DecayAction::sample_2body_phasespace() {
 
   const bool is_valid = !std::isnan(masses.first) && !std::isnan(masses.second);
 
+  /* The following "duplicate" call of sample_angles is on purpose. The sampled
+   * masses will only be NaNs if potentials are enabled and the energy was below
+   * threshold energy, signaling a failure in the sampling process. In this case
+   * the sample_angles call should be skipped.
+   * If potentials are disabled the masses should not be NaNs and in this case
+   * sample_angles is not guarded to not mask potential bugs. */
   if (pot_pointer) {
     was_2body_phase_space_sampled_with_potentials_as_valid_ = is_valid;
+    if (is_valid) {
+      sample_angles(masses, cm_kin_energy);
+    }
+  } else {
+    sample_angles(masses, cm_kin_energy);
   }
-
-  sample_angles(masses, cm_kin_energy);
 }
 
 /* This is overridden from the Action class in order to

@@ -26,6 +26,7 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 * Suppress pseudoresonances for DN and DΔ when using the configuration key `Collision_Term: Heavy_Flavor: Charm_Rescattering_Method: T-matrix`.
 * The elastic cross sections of D meson scatterings with pions, etas, and kaons were wrongly provided by AQM when using the configuration key `Collision_Term: Heavy_Flavor: Charm_Rescattering_Method: T-matrix`.
   Now the appropriate T-matrix cross sections are considered.
+* A floating-point exception that occurred in a small number of runs when using potentials during the sampling of outgoing particle angles in a decay has been fixed.
 
 ### Changed
 * Reduced the standard deviation of the normal distribution from which random spins are drawn to reduce statistical noise.

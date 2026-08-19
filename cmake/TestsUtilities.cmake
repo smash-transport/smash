@@ -136,7 +136,7 @@ function(_smash_setup_python_venv out_success out_python_exec out_venv_path)
     message(STATUS "Looking for Python3")
     # Note that the functional tests require Pandas 2.0 which in turn requires at least Python 3.8.
     # However, Python 3.12 (and above) is excluded because it contains setuptools>=82 and with it
-    # pkg_resources has been removed which causes problems installing Panda v2.x.
+    # pkg_resources has been removed which causes problems installing Pandas v2.x.
     find_package(Python3 3.8...<3.12 QUIET COMPONENTS Interpreter Development)
     if(NOT Python3_FOUND)
         message(ATTENTION "Python3 not found. Functional tests disabled.")
