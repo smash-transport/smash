@@ -19,6 +19,10 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+
+## SMASH-3.4.1
+Date: 2026-08-27
+
 ### Fixed
 * Fixed missing rescaling of sum of partial cross sections when using `Total_Cross_Section_Strategy: TopDown` in the configuration file.
   This bug resulted in partial cross sections that were larger than the total cross sections, but affected only parametrized cross sections.
@@ -30,6 +34,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ### Changed
 * Reduced the standard deviation of the normal distribution from which random spins are drawn to reduce statistical noise.
+
+[Link to diff from previous version](https://github.com/smash-transport/smash/compare/SMASH-3.4...SMASH-3.4.1)
 
 
 ## SMASH-3.4
