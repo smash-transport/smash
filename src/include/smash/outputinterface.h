@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -143,7 +143,7 @@ class OutputInterface {
    */
   virtual void at_eventstart(const int, const ThermodynamicQuantity,
                              const DensityType,
-                             RectangularLattice<DensityOnLattice>) {}
+                             const RectangularLattice<DensityOnLattice> &) {}
 
   /**
    * Output launched at event start after initialization, when particles are
@@ -151,7 +151,8 @@ class OutputInterface {
    */
   virtual void at_eventstart(const int, const ThermodynamicQuantity,
                              const DensityType,
-                             RectangularLattice<EnergyMomentumTensor>) {}
+                             const RectangularLattice<EnergyMomentumTensor> &) {
+  }
 
   /**
    * Output launched at event end. Event end is determined by maximal time-step

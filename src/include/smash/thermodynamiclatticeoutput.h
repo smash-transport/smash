@@ -73,7 +73,7 @@ class ThermodynamicLatticeOutput : public OutputInterface {
   void at_eventstart(
       const int event_number, const ThermodynamicQuantity tq,
       const DensityType dens_type,
-      const RectangularLattice<DensityOnLattice> lattice) override;
+      const RectangularLattice<DensityOnLattice> &lattice) override;
   /**
    * Output launched at event start after initialization, when particles are
    * generated but not yet propagated.
@@ -89,7 +89,7 @@ class ThermodynamicLatticeOutput : public OutputInterface {
   void at_eventstart(
       const int event_number, const ThermodynamicQuantity tq,
       const DensityType dens_type,
-      const RectangularLattice<EnergyMomentumTensor> lattice) override;
+      const RectangularLattice<EnergyMomentumTensor> &lattice) override;
 
   /**
    *  Final actions at the end of each event (it closes the output files).

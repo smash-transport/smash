@@ -246,7 +246,8 @@ ThermodynamicLatticeOutput::~ThermodynamicLatticeOutput() {}
 
 void ThermodynamicLatticeOutput::at_eventstart(
     const int event_number, const ThermodynamicQuantity tq,
-    const DensityType dens_type, RectangularLattice<DensityOnLattice> lattice) {
+    const DensityType dens_type,
+    const RectangularLattice<DensityOnLattice> &lattice) {
   if (!enable_output_) {
     return;
   }
@@ -334,7 +335,7 @@ void ThermodynamicLatticeOutput::at_eventstart(
 void ThermodynamicLatticeOutput::at_eventstart(
     const int event_number, const ThermodynamicQuantity tq,
     const DensityType dens_type,
-    RectangularLattice<EnergyMomentumTensor> lattice) {
+    const RectangularLattice<EnergyMomentumTensor> &lattice) {
   if (!enable_output_) {
     return;
   }
