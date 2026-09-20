@@ -161,6 +161,23 @@ class ThermodynamicLatticeOutput : public OutputInterface {
                            const DensityType dens_type);
 
   /**
+   * Opens the ASCII or binary output file associated with the given
+   * thermodynamic quantity and returns it, ready to be written to.
+   *
+   * \param[in] tq The quantity whose associated file should be opened; this
+   *            is the same key under which the file is stored in
+   *            output_ascii_files_ / output_binary_files_.
+   * \param[in] filename Name of the file to open.
+   * \param[in] binary Whether to open the binary (\c true) or ASCII
+   *            (\c false) file.
+   * \return The now open file.
+   * \throw std::runtime_error if opening the file fails.
+   */
+  std::shared_ptr<std::ofstream> open_lattice_file(
+      const ThermodynamicQuantity tq, const std::string &filename,
+      const bool binary);
+
+  /**
    * Writes the header for the ASCII output files
    *
    * \param file Output file.

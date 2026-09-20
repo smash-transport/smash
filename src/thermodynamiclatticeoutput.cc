@@ -250,6 +250,9 @@ void ThermodynamicLatticeOutput::at_eventstart(
   if (!enable_output_) {
     return;
   }
+  // open_lattice_file() below relies on the file being stored under key tq
+  // in output_ascii_files_ / output_binary_files_, which the constructor
+  // only does for these two quantities.
   assert((tq == ThermodynamicQuantity::EckartDensity) ||
          (tq == ThermodynamicQuantity::j_QBS));
   // at the next refactoring of the code,
@@ -262,72 +265,16 @@ void ThermodynamicLatticeOutput::at_eventstart(
     sizes_[l] = cs[l];
     origin_[l] = orig[l];
   }
-  std::shared_ptr<std::ofstream> fp(nullptr);
-  std::string varname;
-  std::string filename;
-  varname = make_varname(tq, dens_type);
-  if (tq == ThermodynamicQuantity::EckartDensity) {
-    if (enable_ascii_) {
-      filename = make_filename(varname, event_number, 'a');
-      try {
-        output_ascii_files_[ThermodynamicQuantity::EckartDensity]->open(
-            filename, std::ios::out);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-      fp = output_ascii_files_[ThermodynamicQuantity::EckartDensity];
-      write_therm_lattice_ascii_header(fp, tq);
-    }
-    if (enable_binary_) {
-      filename = make_filename(varname, event_number, 'b');
-      try {
-        output_binary_files_[ThermodynamicQuantity::EckartDensity]->open(
-            filename, std::ios::out | std::ios::binary);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-      fp = output_binary_files_[ThermodynamicQuantity::EckartDensity];
-      write_therm_lattice_binary_header(fp, tq);
-    }
-  } else {
-    if (enable_ascii_) {
-      filename = make_filename(varname, event_number, 'a');
-      try {
-        output_ascii_files_[ThermodynamicQuantity::j_QBS]->open(filename,
-                                                                std::ios::out);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-      fp = output_ascii_files_[ThermodynamicQuantity::j_QBS];
-      write_therm_lattice_ascii_header(fp, tq);
-    }
-    if (enable_binary_) {
-      filename = make_filename(varname, event_number, 'b');
-      try {
-        output_binary_files_[ThermodynamicQuantity::j_QBS]->open(
-            filename, std::ios::out | std::ios::binary);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-      fp = output_binary_files_[ThermodynamicQuantity::j_QBS];
-      write_therm_lattice_binary_header(fp, tq);
-    }
+  const std::string varname = make_varname(tq, dens_type);
+  if (enable_ascii_) {
+    const std::string filename = make_filename(varname, event_number, 'a');
+    write_therm_lattice_ascii_header(open_lattice_file(tq, filename, false),
+                                     tq);
+  }
+  if (enable_binary_) {
+    const std::string filename = make_filename(varname, event_number, 'b');
+    write_therm_lattice_binary_header(open_lattice_file(tq, filename, true),
+                                      tq);
   }
 }
 
@@ -338,6 +285,14 @@ void ThermodynamicLatticeOutput::at_eventstart(
   if (!enable_output_) {
     return;
   }
+  // open_lattice_file() below relies on the file being stored under key tq
+  // in output_ascii_files_ / output_binary_files_, which the constructor
+  // only does for these three quantities. (j_QBS is never paired with an
+  // EnergyMomentumTensor lattice: it is always reported through the
+  // DensityOnLattice overload above.)
+  assert(tq == ThermodynamicQuantity::TmnLandau ||
+         tq == ThermodynamicQuantity::Tmn ||
+         tq == ThermodynamicQuantity::LandauVelocity);
   const auto dim = lattice.n_cells();
   const auto cs = lattice.cell_sizes();
   const auto orig = lattice.origin();
@@ -346,113 +301,16 @@ void ThermodynamicLatticeOutput::at_eventstart(
     sizes_[l] = cs[l];
     origin_[l] = orig[l];
   }
-  std::shared_ptr<std::ofstream> fp(nullptr);
-  std::string varname;
-  std::string filename;
-  varname = make_varname(tq, dens_type);
+  const std::string varname = make_varname(tq, dens_type);
   if (enable_ascii_) {
-    filename = make_filename(varname, event_number, 'a');
-    if (tq == ThermodynamicQuantity::TmnLandau) {
-      try {
-        output_ascii_files_[ThermodynamicQuantity::TmnLandau]->open(
-            filename, std::ios::out);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-      fp = output_ascii_files_[ThermodynamicQuantity::TmnLandau];
-    } else if (tq == ThermodynamicQuantity::Tmn) {
-      try {
-        output_ascii_files_[ThermodynamicQuantity::Tmn]->open(filename,
-                                                              std::ios::out);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-      fp = output_ascii_files_[ThermodynamicQuantity::Tmn];
-    } else if (tq == ThermodynamicQuantity::LandauVelocity) {
-      try {
-        output_ascii_files_[ThermodynamicQuantity::LandauVelocity]->open(
-            filename, std::ios::out);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-      fp = output_ascii_files_[ThermodynamicQuantity::LandauVelocity];
-    } else {
-      try {
-        output_ascii_files_[ThermodynamicQuantity::j_QBS]->open(filename,
-                                                                std::ios::out);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-    }
-    write_therm_lattice_ascii_header(fp, tq);
+    const std::string filename = make_filename(varname, event_number, 'a');
+    write_therm_lattice_ascii_header(open_lattice_file(tq, filename, false),
+                                     tq);
   }
   if (enable_binary_) {
-    filename = make_filename(varname, event_number, 'b');
-    if (tq == ThermodynamicQuantity::TmnLandau) {
-      try {
-        output_binary_files_[ThermodynamicQuantity::TmnLandau]->open(
-            filename, std::ios::out | std::ios::binary);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-      fp = output_binary_files_[ThermodynamicQuantity::TmnLandau];
-    } else if (tq == ThermodynamicQuantity::Tmn) {
-      try {
-        output_binary_files_[ThermodynamicQuantity::Tmn]->open(
-            filename, std::ios::out | std::ios::binary);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-      fp = output_binary_files_[ThermodynamicQuantity::Tmn];
-    } else if (tq == ThermodynamicQuantity::LandauVelocity) {
-      try {
-        output_binary_files_[ThermodynamicQuantity::LandauVelocity]->open(
-            filename, std::ios::out | std::ios::binary);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-      fp = output_binary_files_[ThermodynamicQuantity::LandauVelocity];
-    } else {
-      try {
-        output_binary_files_[ThermodynamicQuantity::j_QBS]->open(filename,
-                                                                 std::ios::out);
-      } catch (std::ofstream::failure &e) {
-        logg[LogArea::Main::id].fatal()
-            << "Error in opening " << filename << std::endl;
-        throw std::runtime_error(
-            "Not possible to write thermodynamic "
-            "lattice output to file.");
-      }
-    }
-    write_therm_lattice_binary_header(fp, tq);
+    const std::string filename = make_filename(varname, event_number, 'b');
+    write_therm_lattice_binary_header(open_lattice_file(tq, filename, true),
+                                      tq);
   }
 }
 
@@ -460,50 +318,13 @@ void ThermodynamicLatticeOutput::at_eventend(const ThermodynamicQuantity tq) {
   if (!enable_output_) {
     return;
   }
-  if (tq == ThermodynamicQuantity::EckartDensity) {
-    if (enable_ascii_) {
-      output_ascii_files_[ThermodynamicQuantity::EckartDensity]->close();
-    }
-    if (enable_binary_) {
-      output_binary_files_[ThermodynamicQuantity::EckartDensity]->close();
-    }
-    return;
+  // The file for tq, if any was opened, is stored under key tq in
+  // output_ascii_files_ / output_binary_files_ (see open_lattice_file()).
+  if (enable_ascii_) {
+    output_ascii_files_[tq]->close();
   }
-  if (tq == ThermodynamicQuantity::Tmn) {
-    if (enable_ascii_) {
-      output_ascii_files_[ThermodynamicQuantity::Tmn]->close();
-    }
-    if (enable_binary_) {
-      output_binary_files_[ThermodynamicQuantity::Tmn]->close();
-    }
-    return;
-  }
-  if (tq == ThermodynamicQuantity::TmnLandau) {
-    if (enable_ascii_) {
-      output_ascii_files_[ThermodynamicQuantity::TmnLandau]->close();
-    }
-    if (enable_binary_) {
-      output_binary_files_[ThermodynamicQuantity::TmnLandau]->close();
-    }
-    return;
-  }
-  if (tq == ThermodynamicQuantity::LandauVelocity) {
-    if (enable_ascii_) {
-      output_ascii_files_[ThermodynamicQuantity::LandauVelocity]->close();
-    }
-    if (enable_binary_) {
-      output_binary_files_[ThermodynamicQuantity::LandauVelocity]->close();
-    }
-    return;
-  }
-  if (tq == ThermodynamicQuantity::j_QBS) {
-    if (enable_ascii_) {
-      output_ascii_files_[ThermodynamicQuantity::j_QBS]->close();
-    }
-    if (enable_binary_) {
-      output_binary_files_[ThermodynamicQuantity::j_QBS]->close();
-    }
-    return;
+  if (enable_binary_) {
+    output_binary_files_[tq]->close();
   }
 }
 
@@ -753,6 +574,25 @@ std::string ThermodynamicLatticeOutput::make_varname(
     const ThermodynamicQuantity tq, const DensityType dens_type) {
   return std::string(to_string(dens_type)) + std::string("_") +
          std::string(to_string(tq));
+}
+
+std::shared_ptr<std::ofstream> ThermodynamicLatticeOutput::open_lattice_file(
+    const ThermodynamicQuantity tq, const std::string &filename,
+    const bool binary) {
+  std::shared_ptr<std::ofstream> file =
+      binary ? output_binary_files_[tq] : output_ascii_files_[tq];
+  const auto mode =
+      binary ? std::ios::out | std::ios::binary : std::ios::out;
+  try {
+    file->open(filename, mode);
+  } catch (std::ofstream::failure &e) {
+    logg[LogArea::Main::id].fatal()
+        << "Error in opening " << filename << std::endl;
+    throw std::runtime_error(
+        "Not possible to write thermodynamic "
+        "lattice output to file.");
+  }
+  return file;
 }
 
 void ThermodynamicLatticeOutput::write_therm_lattice_ascii_header(
