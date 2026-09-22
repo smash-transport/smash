@@ -715,7 +715,6 @@ double ParticleType::sample_resonance_mass(const double mass_stable,
   return mass_res;
 }
 
-/* Resonance mass sampling for 2-particle final state with two resonances. */
 std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
                                                       const ParticleType &t2,
                                                       const double cms_energy,
@@ -729,59 +728,34 @@ std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
   // largest possible cm momentum (from smallest mass)
   const double pcm_max =
       pCM(cms_energy, t1.min_mass_spectral(), t2.min_mass_spectral());
-  const double sf_ratio_max =
-      std::max(t1.max_ratio_spectral_full_to_breit_wigner(),
-               t1.ratio_spectral_full_to_breit_wigner(max_mass_1)) *
-      std::max(t2.max_ratio_spectral_full_to_breit_wigner(),
-               t2.ratio_spectral_full_to_breit_wigner(max_mass_2));
+  const double blw_max = blatt_weisskopf_sqr(pcm_max, L);
 
-  int max_trials_outer = 10, max_trials_inner = 20;
-  double mass_1, mass_2, acceptance, fudge_factor = 1;
-  double max_acceptance =
-      sf_ratio_max * pcm_max * blatt_weisskopf_sqr(pcm_max, L);
-  // Rejection sampling
-  do {
-    max_acceptance *= fudge_factor;
+  double mass_1, mass_2, envelope_factor = 1.0;
+  while (true) {
+    double proposal, acceptance = pcm_max * blw_max * envelope_factor;
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
       mass_1 = t1.sample_breit_wigner_spectral_function(max_mass_1);
       mass_2 = t2.sample_breit_wigner_spectral_function(max_mass_2);
-      // determine cm momentum for this case
+      // phase space for this proposal
       const double pcm = pCM(cms_energy, mass_1, mass_2);
+      const double blw = blatt_weisskopf_sqr(pcm, L);
       const double sf_ratio = t1.ratio_spectral_full_to_breit_wigner(mass_1) *
                               t2.ratio_spectral_full_to_breit_wigner(mass_2);
-      // determine ratios of full to simple spectral function
-      acceptance = sf_ratio * pcm * blatt_weisskopf_sqr(pcm, L);
-    } while (acceptance < random::uniform(0., max_acceptance) &&
-             --max_trials_inner > 0);
-    fudge_factor *= acceptance / max_acceptance;
-  } while (acceptance > max_acceptance && --max_trials_outer > 0);
+      proposal = pcm * blw * sf_ratio;
+    } while (proposal < random::uniform(0., acceptance));
 
-  if (max_trials_inner == 0) {
-    /* This fallback is necessary for when the inner loop fails to find an
-     * acceptable mass combination. This can happen when the cms_energy is much
-     * smaller than the sum of pole masses of the two resonances. */
-    logg[LResonances].debug(
-        "Could not sample a valid mass combination for the resonances ",
-        t1.name(), " and ", t2.name(), " with energy ", cms_energy,
-        " GeV. Using bisection fallback to find valid masses.");
-    while (mass_1 + mass_2 > cms_energy) {
-      mass_1 = (t1.min_mass_spectral() + mass_1) / 2;
-      mass_2 = (t2.min_mass_spectral() + mass_2) / 2;
+    if (proposal < acceptance) {
+      return {mass_1, mass_2};
     }
-  }
 
-  if (acceptance > max_acceptance && max_trials_outer == 0) {
-    logg[LResonances].fatal(
-        "Maximum acceptance should be increased in "
-        "sample_two_resonance_masses: ",
-        acceptance / max_acceptance, " ", t1.pdgcode(), " ", t2.pdgcode(), " ",
-        cms_energy, " ", mass_1, " ", mass_2);
-    throw std::runtime_error(
-        "Precomputation of maximum spectral function is not working properly. "
-        "Please contact the developers.");
+    logg[LResonances].debug("Envelope is being increased from ",
+                            envelope_factor, " by ", proposal / acceptance,
+                            " in sample_two_resonance_masses: ", cms_energy,
+                            " producing ", t1.pdgcode(), " ", t2.pdgcode(),
+                            " with masses ", mass_1, " ", mass_2, ". ");
+    envelope_factor *= proposal / acceptance;
   }
-  return {mass_1, mass_2};
 }
 
 void ParticleType::dump_width_and_spectral_function() const {
