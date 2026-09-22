@@ -19,6 +19,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## Unreleased
 
+## SMASH-3.4.2
+Date: 
 
 ## SMASH-3.4.1
 Date: 2026-08-27
