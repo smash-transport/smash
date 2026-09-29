@@ -211,13 +211,19 @@ ActionPtr ScatterActionsFinder::check_collision_two_part(
     return nullptr;
   }
 
+  // Prevent charm interactions if CharmRescattering::None is set
+  const PdgCode& pdg_a = data_a.type().pdgcode();
+  const PdgCode& pdg_b = data_b.type().pdgcode();
+  if (finder_parameters_.charm_rescattering == CharmRescattering::None &&
+      (pdg_a.frac_charm() != 0 || pdg_b.frac_charm() != 0)) {
+    return nullptr;
+  }
+
   // Determine which total cross section to use
   bool incoming_parametrized = (finder_parameters_.total_xs_strategy ==
                                 TotalCrossSectionStrategy::TopDown);
   if (finder_parameters_.total_xs_strategy ==
       TotalCrossSectionStrategy::TopDownMeasured) {
-    const PdgCode& pdg_a = data_a.type().pdgcode();
-    const PdgCode& pdg_b = data_b.type().pdgcode();
     incoming_parametrized = parametrization_exists(pdg_a, pdg_b);
   }
 
