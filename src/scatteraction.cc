@@ -153,14 +153,6 @@ void ScatterAction::add_all_scatterings(
     were_processes_added_ = true;
   }
 
-  // Prevent charm interactions if CharmRescattering::None is set
-  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
-  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
-  if (finder_parameters.charm_rescattering == CharmRescattering::None &&
-      (pdg_a.frac_charm() != 0 || pdg_b.frac_charm() != 0)) {
-    return;
-  }
-
   CrossSections xs(incoming_particles_, sqrt_s(),
                    get_potential_at_interaction_point());
   CollisionBranchList processes =
@@ -186,6 +178,8 @@ void ScatterAction::add_all_scatterings(
   }
 
   // Prevent pseudoresonances for charmed hadrons in T-matrix approach
+  const PdgCode &pdg_a = incoming_particles_[0].type().pdgcode();
+  const PdgCode &pdg_b = incoming_particles_[1].type().pdgcode();
   bool suppress_pseudoresonances_for_T_matrix_channels = false;
   if (finder_parameters.charm_rescattering == CharmRescattering::T_Matrix) {
     const bool Dmeson_present = pdg_a.is_Dmeson() || pdg_b.is_Dmeson();

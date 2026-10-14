@@ -2472,9 +2472,11 @@ struct InputKeys {
    * \optional_key{key_CT_charm_rescattering_,Charm_Rescattering_Method,string,
    * "resonances",\any_valid}
    *
-   * With this key, the method of charm rescattering at lower energies can be
-   * chosen for two to two reactions including charmed hadrons that are
-   * mentioned in <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>.
+   * With this key, the method of charm rescattering can be chosen for two to
+   * two reactions including charmed hadrons that are mentioned in <tt>\ref
+   * key_CT_included_2to2_ "Included_2to2"</tt>. This primarily affects lower
+   * energies. Higher energies are handled by Pythia as usual. This key also
+   * allows charmed interactions to be disabled altogether.
    *
    * - `"resonances"` &rarr; Charm interactions are realized via resonance
    *    formations.
@@ -2494,14 +2496,8 @@ struct InputKeys {
    *    When using this option of charm rescattering,
    *    <tt>\ref key_CT_force_decays_at_end_ "Force_Decays_At_End"</tt> should
    *    be set to true to handle decays properly.
-   * - `"none"` &rarr; Interactions of charmed hadrons will not be taken into
-   *    account, i.e. their cross sections are set to zero.
-   *
-   * @note
-   * This config key facilitates disabling the two to two interactions of
-   * charmed hadrons that would otherwise be included via `"Charm_T-matrix"` in
-   * <tt>\ref key_CT_included_2to2_ "Included_2to2"</tt>, without listing
-   * every possible value except `"Charm_T-matrix"`.
+   * - `"none"` &rarr; All interactions involving charmed hadrons will be
+   *    disabled.
    */
   /**
    * \see_key{key_CT_charm_rescattering_}

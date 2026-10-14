@@ -24,6 +24,10 @@ Date:
 
 ### Fixed
 * Fixed and improved algorithm for sampling two resonance masses.
+* Fixed a core dump triggered by setting `Charm_Recattering_Method: none` combined with `Total_Cross_Section_Strategy: TopDown` in the configuration file.
+* Corrected PDG codes for D₃*(2750), Ds₁*(2700), Ds₃*(2860), and K*₀(700) in the shipped particles lists.
+* Fixed decay channels for D₃*(2750) and Ds₃*(2860) in the shipped decaymodes files.
+
 
 ## SMASH-3.4.1
 Date: 2026-08-27
