@@ -9,7 +9,7 @@ Joseph Tindall | [✉️](mailto:tindall@fias.uni-frankfurt.de) | `2016`
 Vinzent Steinberg | [✉️](mailto:steinberg@fias.uni-frankfurt.de) | `2015-2020`
 Jan Staudenmaier | [✉️](mailto:staudenmaier@fias.uni-frankfurt.de) | `2015-2022`
 Agnieszka Sorensen | [✉️](mailto:agnieszka.sorensen@gmail.com) | `2019-`
-Alessandro Sciarra | [✉️](mailto:sciarra@itp.uni-frankfurt.de) | `2021-`
+Alessandro Sciarra | [✉️](mailto:sciarra@itp.uni-frankfurt.de) | `2021-2026`
 Anna Schäfer | [✉️](mailto:aschaefer@fias.uni-frankfurt.de) | `2017-2022`
 Robin Sattler | [✉️](mailto:sattler@itp.uni-frankfurt.de) | `2023-`
 Nils Sass | [✉️](mailto:nsass@itp.uni-frankfurt.de) | `2023-`
