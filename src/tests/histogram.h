@@ -102,7 +102,7 @@ void Histogram1d::test(Analytical analyt, const std::string& dbg_file) const {
   const double max = get_max();
   const double itg = integrate(min, max, [&](double x) { return analyt(x); });
   /* The normalization factor also accounts for the bin width
-   * and the total number of emtries in the histogram. */
+   * and the total number of entries in the histogram. */
   const double norm = dx() * num_entries() / itg;
   std::printf("norm: %f %f %f %f\n", min, max, itg, norm);
 
