@@ -21,6 +21,8 @@ Also possible, but for this project less relevant, is `Deprecated` for soon-to-b
 
 ## SMASH-3.4.2
 Date: 
+
+### Fixed
 * Fixed and improved algorithm for sampling two resonance masses.
 
 ## SMASH-3.4.1

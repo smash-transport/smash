@@ -730,9 +730,11 @@ std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
       pCM(cms_energy, t1.min_mass_spectral(), t2.min_mass_spectral());
   const double blw_max = blatt_weisskopf_sqr(pcm_max, L);
 
-  double mass_1, mass_2, envelope_factor = 1.0;
+  // initial envelope factor estimated from the median of increased values
+  // when sampling the pair (ρ,ω) with L=1 and 2 GeV of energy.
+  double mass_1, mass_2, envelope_factor = 1.2;
   while (true) {
-    double proposal, acceptance = pcm_max * blw_max * envelope_factor;
+    double proposal, envelope = pcm_max * blw_max * envelope_factor;
     do {
       // sample mass from a simple Breit-Wigner (aka Cauchy) distribution
       mass_1 = t1.sample_breit_wigner_spectral_function(max_mass_1);
@@ -743,18 +745,17 @@ std::pair<double, double> sample_two_resonance_masses(const ParticleType &t1,
       const double sf_ratio = t1.ratio_spectral_full_to_breit_wigner(mass_1) *
                               t2.ratio_spectral_full_to_breit_wigner(mass_2);
       proposal = pcm * blw * sf_ratio;
-    } while (proposal < random::uniform(0., acceptance));
+    } while (proposal < random::uniform(0., envelope));
 
-    if (proposal < acceptance) {
+    if (proposal < envelope) {
       return {mass_1, mass_2};
     }
-
-    logg[LResonances].debug("Envelope is being increased from ",
-                            envelope_factor, " by ", proposal / acceptance,
-                            " in sample_two_resonance_masses: ", cms_energy,
-                            " producing ", t1.pdgcode(), " ", t2.pdgcode(),
-                            " with masses ", mass_1, " ", mass_2, ". ");
-    envelope_factor *= proposal / acceptance;
+    logg[LResonances].debug(
+        "Envelope factor is being increased from ", envelope_factor, " by ",
+        proposal / envelope, " in sample_two_resonance_masses: ", cms_energy,
+        " producing ", t1.pdgcode(), " ", t2.pdgcode(), " with masses ", mass_1,
+        " ", mass_2, ". This indicates a bias towards lower masses.");
+    envelope_factor *= proposal / envelope;
   }
 }
 
