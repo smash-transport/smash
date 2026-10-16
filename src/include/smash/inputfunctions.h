@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2015,2017-2018,2020,2024
+ *    Copyright (c) 2014-2015,2017-2018,2020,2024,2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -99,11 +99,8 @@ inline std::string read_all(std::istream &&input) {
  * \param[in] in Input string
  * \returns True if \\r\\n was found, else false
  */
-inline bool has_crlf_line_ending(const std::string in) {
-  if (in.find("\r\n") != std::string::npos) {
-    return true;
-  }
-  return false;
+inline bool has_crlf_line_ending(const std::string &in) {
+  return in.find("\r\n") != std::string::npos;
 }
 
 }  // namespace smash

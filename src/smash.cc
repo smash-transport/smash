@@ -153,7 +153,7 @@ namespace {
 void usage(const int rc, const std::string &progname) {
   // Implement some tools to format helper using Einhard colors
   const auto colorize = [](const auto &color,
-                           const std::string s) -> std::string {
+                           const std::string &s) -> std::string {
     return color + s + einhard::NoColor_t_::ANSI();
   };
   const auto print_option = [&colorize](

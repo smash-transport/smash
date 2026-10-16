@@ -108,7 +108,7 @@ static void append_list(CollisionBranchList& main_list,
  */
 [[noreturn]] static void throw_xsec_is_not_implemented(
     const ParticleData& data_a, const ParticleData& data_b,
-    const std::string func_name) {
+    const std::string& func_name) {
   std::stringstream ss{};
   const ParticleType& a = data_a.type();
   const ParticleType& b = data_b.type();
@@ -131,7 +131,7 @@ static void append_list(CollisionBranchList& main_list,
                                                 const double xsec,
                                                 const ParticleData& data_a,
                                                 const ParticleData& data_b,
-                                                std::string func_name) {
+                                                const std::string& func_name) {
   const ParticleType& a = data_a.type();
   const ParticleType& b = data_b.type();
   const PdgCode& pdg_a = a.pdgcode();

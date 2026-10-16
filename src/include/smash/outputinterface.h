@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -114,7 +114,7 @@ class OutputInterface {
    * Construct output interface.
    * \param[in] name (File)name of output.
    */
-  explicit OutputInterface(std::string name)
+  explicit OutputInterface(const std::string &name)
       : is_dilepton_output_(name == "Dileptons"),
         is_photon_output_(name == "Photons"),
         is_IC_output_(name.substr(0, 8) == "SMASH_IC") {}
