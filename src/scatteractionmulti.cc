@@ -128,7 +128,7 @@ void ScatterActionMulti::add_possible_reactions(
           // Get type of incoming π
           ParticleList::iterator it = std::find_if(
               incoming_particles_.begin(), incoming_particles_.end(),
-              [](ParticleData x) { return x.is_pion(); });
+              [](const ParticleData& x) { return x.is_pion(); });
           const ParticleType& type_pi = it->type();
 
           const double spin_degn =
@@ -152,7 +152,7 @@ void ScatterActionMulti::add_possible_reactions(
           // Get type of incoming π
           ParticleList::iterator it = std::find_if(
               incoming_particles_.begin(), incoming_particles_.end(),
-              [](ParticleData x) { return x.is_pion(); });
+              [](const ParticleData& x) { return x.is_pion(); });
           const ParticleType& type_pi = it->type();
 
           const double spin_degn =
@@ -175,11 +175,11 @@ void ScatterActionMulti::add_possible_reactions(
             (pdg_a == pdg::n && pdg_b == pdg::p && pdg_c.is_nucleon())) {
           int symmetry_factor = 1;  // already true for N̅np → N̅d case
 
-          ParticleList::iterator it =
-              std::find_if(incoming_particles_.begin(),
-                           incoming_particles_.end(), [](ParticleData x) {
-                             return x.pdgcode().antiparticle_sign() == -1;
-                           });
+          ParticleList::iterator it = std::find_if(
+              incoming_particles_.begin(), incoming_particles_.end(),
+              [](const ParticleData& x) {
+                return x.pdgcode().antiparticle_sign() == -1;
+              });
           if (it == incoming_particles_.end()) {
             /* Meaning no anti-N found by find_if,
              * therefore not N̅np → N̅d, but Nnp → Nd. */
@@ -214,11 +214,11 @@ void ScatterActionMulti::add_possible_reactions(
             (pdg_a == -pdg::n && pdg_b == -pdg::p && pdg_c.is_nucleon())) {
           int symmetry_factor = 1;  // already true for Np̅n̅ → Nd̅ case
 
-          ParticleList::iterator it =
-              std::find_if(incoming_particles_.begin(),
-                           incoming_particles_.end(), [](ParticleData x) {
-                             return x.pdgcode().antiparticle_sign() == 1;
-                           });
+          ParticleList::iterator it = std::find_if(
+              incoming_particles_.begin(), incoming_particles_.end(),
+              [](const ParticleData& x) {
+                return x.pdgcode().antiparticle_sign() == 1;
+              });
           if (it == incoming_particles_.end()) {
             /* Meaning no N found by find_if,
              * therefore not Np̅n̅ → Nd̅, but N̅p̅n̅ → N̅d̅. */

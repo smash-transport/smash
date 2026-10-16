@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -413,10 +413,10 @@ void Nucleus::rotate() {
 }
 
 void Nucleus::generate_fermi_momenta() {
-  const int N_n = std::count_if(begin(), end(), [](const ParticleData i) {
+  const int N_n = std::count_if(begin(), end(), [](const ParticleData &i) {
     return i.pdgcode() == pdg::n;
   });
-  const int N_p = std::count_if(begin(), end(), [](const ParticleData i) {
+  const int N_p = std::count_if(begin(), end(), [](const ParticleData &i) {
     return i.pdgcode() == pdg::p;
   });
   const FourVector nucleus_center = center();
