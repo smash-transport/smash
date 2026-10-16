@@ -580,34 +580,26 @@ class RectangularLattice {
   template <typename F>
   void iterate_sublattice(const std::array<int, 3>& lower_bounds,
                           const std::array<int, 3>& upper_bounds, F&& func) {
-    logg[LLattice].debug(
-        "Iterating sublattice with lower bound index (", lower_bounds[0], ",",
-        lower_bounds[1], ",", lower_bounds[2], "), upper bound index (",
-        upper_bounds[0], ",", upper_bounds[1], ",", upper_bounds[2], ")");
+    iterate_sublattice_impl(*this, lower_bounds, upper_bounds,
+                            std::forward<F>(func));
+  }
 
-    if (periodic_) {
-      for (int iz = lower_bounds[2]; iz < upper_bounds[2]; iz++) {
-        const int z_offset = positive_modulo(iz, n_cells_[2]) * n_cells_[1];
-        for (int iy = lower_bounds[1]; iy < upper_bounds[1]; iy++) {
-          const int y_offset =
-              n_cells_[0] * (positive_modulo(iy, n_cells_[1]) + z_offset);
-          for (int ix = lower_bounds[0]; ix < upper_bounds[0]; ix++) {
-            const int index = positive_modulo(ix, n_cells_[0]) + y_offset;
-            func(lattice_[index], ix, iy, iz);
-          }
-        }
-      }
-    } else {
-      for (int iz = lower_bounds[2]; iz < upper_bounds[2]; iz++) {
-        const int z_offset = iz * n_cells_[1];
-        for (int iy = lower_bounds[1]; iy < upper_bounds[1]; iy++) {
-          const int y_offset = n_cells_[0] * (iy + z_offset);
-          for (int ix = lower_bounds[0]; ix < upper_bounds[0]; ix++) {
-            func(lattice_[ix + y_offset], ix, iy, iz);
-          }
-        }
-      }
-    }
+  /**
+   * Const overload of the sub-lattice iterator, which passes every cell to
+   * \p func as a const reference.
+   *
+   * \tparam F Type of the function. Arguments are the current node and the 3
+   * integer indices of the cell.
+   * \param[in] lower_bounds Starting numbers for iterating ix, iy, iz.
+   * \param[in] upper_bounds Ending numbers for iterating ix, iy, iz.
+   * \param[in] func Function reading the cells (such as taking value).
+   */
+  template <typename F>
+  void iterate_sublattice(const std::array<int, 3>& lower_bounds,
+                          const std::array<int, 3>& upper_bounds,
+                          F&& func) const {
+    iterate_sublattice_impl(*this, lower_bounds, upper_bounds,
+                            std::forward<F>(func));
   }
 
   /**
@@ -863,6 +855,55 @@ class RectangularLattice {
      * in negative region and replace i%n + n by i + 256 * n = i + (n << 8) */
     // FIXME: This should use asserts, also checking for under- or overflows.
     return (i + (n << 8)) % n;
+  }
+
+  /**
+   * Shared implementation of both iterate_sublattice overloads. Since \p self
+   * is either a const or a non-const lattice, \p func receives every cell with
+   * the matching constness.
+   *
+   * \tparam Self RectangularLattice<T>, possibly const-qualified.
+   * \tparam F Type of the function. Arguments are the current node and the 3
+   * integer indices of the cell.
+   * \param[in] self The lattice to iterate over.
+   * \param[in] lower_bounds Starting numbers for iterating ix, iy, iz.
+   * \param[in] upper_bounds Ending numbers for iterating ix, iy, iz.
+   * \param[in] func Function acting on the cells (such as taking value).
+   */
+  template <typename Self, typename F>
+  static void iterate_sublattice_impl(Self& self,
+                                      const std::array<int, 3>& lower_bounds,
+                                      const std::array<int, 3>& upper_bounds,
+                                      F&& func) {
+    logg[LLattice].debug(
+        "Iterating sublattice with lower bound index (", lower_bounds[0], ",",
+        lower_bounds[1], ",", lower_bounds[2], "), upper bound index (",
+        upper_bounds[0], ",", upper_bounds[1], ",", upper_bounds[2], ")");
+
+    const auto& n_cells = self.n_cells_;
+    if (self.periodic_) {
+      for (int iz = lower_bounds[2]; iz < upper_bounds[2]; iz++) {
+        const int z_offset = self.positive_modulo(iz, n_cells[2]) * n_cells[1];
+        for (int iy = lower_bounds[1]; iy < upper_bounds[1]; iy++) {
+          const int y_offset =
+              n_cells[0] * (self.positive_modulo(iy, n_cells[1]) + z_offset);
+          for (int ix = lower_bounds[0]; ix < upper_bounds[0]; ix++) {
+            const int index = self.positive_modulo(ix, n_cells[0]) + y_offset;
+            func(self.lattice_[index], ix, iy, iz);
+          }
+        }
+      }
+    } else {
+      for (int iz = lower_bounds[2]; iz < upper_bounds[2]; iz++) {
+        const int z_offset = iz * n_cells[1];
+        for (int iy = lower_bounds[1]; iy < upper_bounds[1]; iy++) {
+          const int y_offset = n_cells[0] * (iy + z_offset);
+          for (int ix = lower_bounds[0]; ix < upper_bounds[0]; ix++) {
+            func(self.lattice_[ix + y_offset], ix, iy, iz);
+          }
+        }
+      }
+    }
   }
 };
 

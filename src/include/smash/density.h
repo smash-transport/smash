@@ -370,7 +370,7 @@ class DensityOnLattice {
    * \param[in] norm_factor Normalization factor
    * \return Net Eckart density on the local lattice \f$\rho\f$ [fm\f$^{-3}\f$]
    */
-  double rho(const double norm_factor = 1.0) {
+  double rho(const double norm_factor = 1.0) const {
     return (jmu_pos_.abs() - jmu_neg_.abs()) * norm_factor;
   }
 
@@ -380,7 +380,7 @@ class DensityOnLattice {
    * \param[in] norm_factor Normalization factor
    * \return \f$\boldsymbol{\nabla}\times\mathbf{j}\f$ [fm \f$^{-4}\f$]
    */
-  ThreeVector curl_vecj(const double norm_factor = 1.0) {
+  ThreeVector curl_vecj(const double norm_factor = 1.0) const {
     ThreeVector curl_vec_j = ThreeVector();
     curl_vec_j.set_x1(djmu_dxnu_[2].x3() - djmu_dxnu_[3].x2());
     curl_vec_j.set_x2(djmu_dxnu_[3].x1() - djmu_dxnu_[1].x3());
@@ -396,7 +396,7 @@ class DensityOnLattice {
    * \param[in] norm_factor Normalization factor
    * \return \f$\boldsymbol{\nabla} j^0\f$ [fm \f$^{-4}\f$]
    */
-  ThreeVector grad_j0(const double norm_factor = 1.0) {
+  ThreeVector grad_j0(const double norm_factor = 1.0) const {
     ThreeVector j0_grad = ThreeVector();
     for (int i = 1; i < 4; i++) {
       j0_grad[i - 1] = djmu_dxnu_[i].x0() * norm_factor;
@@ -410,7 +410,7 @@ class DensityOnLattice {
    * \param[in] norm_factor Normalization factor
    * \return \f$\partial_t \mathbf{j}\f$ [fm \f$^{-4}\f$]
    */
-  ThreeVector dvecj_dt(const double norm_factor = 1.0) {
+  ThreeVector dvecj_dt(const double norm_factor = 1.0) const {
     return djmu_dxnu_[0].threevec() * norm_factor;
   }
 

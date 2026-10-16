@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2025
+ *    Copyright (c) 2014-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -143,7 +143,7 @@ class OutputInterface {
    */
   virtual void at_eventstart(const int, const ThermodynamicQuantity,
                              const DensityType,
-                             RectangularLattice<DensityOnLattice>) {}
+                             const RectangularLattice<DensityOnLattice> &) {}
 
   /**
    * Output launched at event start after initialization, when particles are
@@ -151,7 +151,8 @@ class OutputInterface {
    */
   virtual void at_eventstart(const int, const ThermodynamicQuantity,
                              const DensityType,
-                             RectangularLattice<EnergyMomentumTensor>) {}
+                             const RectangularLattice<EnergyMomentumTensor> &) {
+  }
 
   /**
    * Output launched at event end. Event end is determined by maximal time-step
@@ -194,9 +195,9 @@ class OutputInterface {
    * Output to write thermodynamics from the lattice.
    * Used for vtk output.
    */
-  virtual void thermodynamics_output(const ThermodynamicQuantity,
-                                     const DensityType,
-                                     RectangularLattice<DensityOnLattice> &) {}
+  virtual void thermodynamics_output(
+      const ThermodynamicQuantity, const DensityType,
+      const RectangularLattice<DensityOnLattice> &) {}
 
   /**
    * Output to write energy-momentum tensor and related quantities from the
@@ -204,21 +205,21 @@ class OutputInterface {
    */
   virtual void thermodynamics_output(
       const ThermodynamicQuantity, const DensityType,
-      RectangularLattice<EnergyMomentumTensor> &) {}
+      const RectangularLattice<EnergyMomentumTensor> &) {}
 
   /**
    * Output to write thermodynamics from the lattice.
    * Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
-      RectangularLattice<DensityOnLattice> &, const double) {}
+      const RectangularLattice<DensityOnLattice> &, const double) {}
 
   /**
    * Output to write thermodynamics from the lattice.
    * Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
-      RectangularLattice<DensityOnLattice> &, const double,
+      const RectangularLattice<DensityOnLattice> &, const double,
       const std::vector<Particles> &, const DensityParameters &) {}
 
   /**
@@ -226,8 +227,8 @@ class OutputInterface {
    * lattice. Used for thermodynamic lattice output.
    */
   virtual void thermodynamics_lattice_output(
-      const ThermodynamicQuantity, RectangularLattice<EnergyMomentumTensor> &,
-      const double) {}
+      const ThermodynamicQuantity,
+      const RectangularLattice<EnergyMomentumTensor> &, const double) {}
 
   /**
    * Output to write energy-momentum tensor and related quantities from the
@@ -241,8 +242,8 @@ class OutputInterface {
    * Fields are a pair of threevectors for example electric and magnetic field
    */
   virtual void fields_output(
-      const std::string, const std::string,
-      RectangularLattice<std::pair<ThreeVector, ThreeVector>> &) {}
+      const std::string &, const std::string &,
+      const RectangularLattice<std::pair<ThreeVector, ThreeVector>> &) {}
 
   /// Get, whether this is the dilepton output?
   bool is_dilepton_output() const { return is_dilepton_output_; }
