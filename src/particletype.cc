@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <map>
+#include <utility>
 #include <vector>
 
 #include "smash/constants.h"
@@ -121,7 +122,7 @@ bool ParticleType::exists(const std::string &name) {
 
 ParticleType::ParticleType(std::string n, double m, double w, Parity p,
                            PdgCode id)
-    : name_(n),
+    : name_(std::move(n)),
       mass_(m),
       width_(w),
       parity_(p),
@@ -291,7 +292,8 @@ void ParticleType::create_type_list(const std::string &input) {  // {{{
         // For bosons the parity does not change, for fermions it gets inverted.
         const auto anti_parity = (anti.spin() % 2 == 0) ? parity : -parity;
         full_name = antiname(full_name, pdgcode[i]);
-        type_list.emplace_back(full_name, mass, width, anti_parity, anti);
+        type_list.emplace_back(std::move(full_name), mass, width, anti_parity,
+                               anti);
         logg[LParticleType].debug()
             << "Setting antiparticle type: " << type_list.back();
       }

@@ -184,7 +184,7 @@ ExperimentParameters create_experiment_parameters(Configuration &config) {
     // Add an output time larger than the end time so that the next time is
     // always defined during the time evolution
     output_times.push_back(t_end + 1.);
-    output_clock = std::make_unique<CustomClock>(output_times);
+    output_clock = std::make_unique<CustomClock>(std::move(output_times));
   } else {
     const double output_dt =
         config.take(InputKeys::output_outputInterval, t_end);

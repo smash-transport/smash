@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <limits>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 #include "logging.h"
@@ -409,7 +410,8 @@ class CustomClock : public Clock {
    *
    * \param[in] times vector of desired output times
    */
-  explicit CustomClock(std::vector<double> times) : custom_times_(times) {
+  explicit CustomClock(std::vector<double> times)
+      : custom_times_(std::move(times)) {
     std::sort(custom_times_.begin(), custom_times_.end());
     counter_ = -1;
   }
