@@ -89,7 +89,7 @@ class VtkOutput : public OutputInterface {
    */
   void thermodynamics_output(
       const ThermodynamicQuantity tq, const DensityType dt,
-      RectangularLattice<DensityOnLattice> &lattice) override;
+      const RectangularLattice<DensityOnLattice> &lattice) override;
 
   /**
    * Prints the energy-momentum-tensor lattice in VTK format on a grid.
@@ -101,7 +101,7 @@ class VtkOutput : public OutputInterface {
    */
   void thermodynamics_output(
       const ThermodynamicQuantity tq, const DensityType dt,
-      RectangularLattice<EnergyMomentumTensor> &lattice) override;
+      const RectangularLattice<EnergyMomentumTensor> &lattice) override;
 
   /**
    * Printout of all thermodynamic quantities from the thermalizer class.
@@ -113,8 +113,9 @@ class VtkOutput : public OutputInterface {
 
   /// \copydoc OutputInterface::fields_output
   void fields_output(
-      const std::string name1, const std::string name2,
-      RectangularLattice<std::pair<ThreeVector, ThreeVector>> &lat) override;
+      const std::string &name1, const std::string &name2,
+      const RectangularLattice<std::pair<ThreeVector, ThreeVector>> &lat)
+      override;
 
  private:
   /**
@@ -149,7 +150,7 @@ class VtkOutput : public OutputInterface {
    * \param description Description of the output.
    */
   template <typename T>
-  void write_vtk_header(std::ofstream &file, RectangularLattice<T> &lat,
+  void write_vtk_header(std::ofstream &file, const RectangularLattice<T> &lat,
                         const std::string &description);
 
   /**
@@ -161,7 +162,7 @@ class VtkOutput : public OutputInterface {
    * \param function Function that gets the scalar given a lattice node.
    */
   template <typename T, typename F>
-  void write_vtk_scalar(std::ofstream &file, RectangularLattice<T> &lat,
+  void write_vtk_scalar(std::ofstream &file, const RectangularLattice<T> &lat,
                         const std::string &varname, F &&function);
 
   /**
@@ -173,7 +174,7 @@ class VtkOutput : public OutputInterface {
    * \param function Function that gets the vector given a lattice node.
    */
   template <typename T, typename F>
-  void write_vtk_vector(std::ofstream &file, RectangularLattice<T> &lat,
+  void write_vtk_vector(std::ofstream &file, const RectangularLattice<T> &lat,
                         const std::string &varname, F &&function);
 
   /**

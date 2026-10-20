@@ -246,7 +246,8 @@ ThermodynamicLatticeOutput::~ThermodynamicLatticeOutput() {}
 
 void ThermodynamicLatticeOutput::at_eventstart(
     const int event_number, const ThermodynamicQuantity tq,
-    const DensityType dens_type, RectangularLattice<DensityOnLattice> lattice) {
+    const DensityType dens_type,
+    const RectangularLattice<DensityOnLattice> &lattice) {
   if (!enable_output_) {
     return;
   }
@@ -334,7 +335,7 @@ void ThermodynamicLatticeOutput::at_eventstart(
 void ThermodynamicLatticeOutput::at_eventstart(
     const int event_number, const ThermodynamicQuantity tq,
     const DensityType dens_type,
-    RectangularLattice<EnergyMomentumTensor> lattice) {
+    const RectangularLattice<EnergyMomentumTensor> &lattice) {
   if (!enable_output_) {
     return;
   }
@@ -508,7 +509,7 @@ void ThermodynamicLatticeOutput::at_eventend(const ThermodynamicQuantity tq) {
 }
 
 void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
-    RectangularLattice<DensityOnLattice> &lattice, double ctime) {
+    const RectangularLattice<DensityOnLattice> &lattice, double ctime) {
   double result;
   const auto dim = lattice.n_cells();
   std::shared_ptr<std::ofstream> fp(nullptr);
@@ -524,7 +525,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     fp->write(reinterpret_cast<char *>(&ctime), sizeof(ctime));
   }
   lattice.iterate_sublattice(
-      {0, 0, 0}, dim, [&](DensityOnLattice &node, int ix, int, int) {
+      {0, 0, 0}, dim, [&](const DensityOnLattice &node, int ix, int, int) {
         if (enable_ascii_) {
           *fp << node.rho() << " ";
           if (ix == dim[0] - 1) {
@@ -539,7 +540,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
 }
 
 void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
-    RectangularLattice<DensityOnLattice> &lattice, double ctime,
+    const RectangularLattice<DensityOnLattice> &lattice, double ctime,
     const std::vector<Particles> &ensembles,
     const DensityParameters &dens_param) {
   if (!enable_output_) {
@@ -562,7 +563,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     fp->write(reinterpret_cast<char *>(&ctime), sizeof(ctime));
   }
   lattice.iterate_sublattice(
-      {0, 0, 0}, dim, [&](DensityOnLattice &, int ix, int iy, int iz) {
+      {0, 0, 0}, dim, [&](const DensityOnLattice &, int ix, int iy, int iz) {
         const ThreeVector position = lattice.cell_center(ix, iy, iz);
         jQ.reset();
         jB.reset();
@@ -610,7 +611,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
 
 void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
     const ThermodynamicQuantity tq,
-    RectangularLattice<EnergyMomentumTensor> &lattice, double ctime) {
+    const RectangularLattice<EnergyMomentumTensor> &lattice, double ctime) {
   if (!enable_output_) {
     return;
   }
@@ -658,7 +659,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
         for (int j = i; j < 4; j++) {
           lattice.iterate_sublattice(
               {0, 0, 0}, dim,
-              [&](EnergyMomentumTensor &node, int ix, int, int) {
+              [&](const EnergyMomentumTensor &node, int ix, int, int) {
                 if (enable_ascii_) {
                   *fp << node[EnergyMomentumTensor::tmn_index(i, j)] << " ";
                   if (ix == dim[0] - 1) {
@@ -678,7 +679,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
         for (int j = i; j < 4; j++) {
           lattice.iterate_sublattice(
               {0, 0, 0}, dim,
-              [&](EnergyMomentumTensor &node, int ix, int, int) {
+              [&](const EnergyMomentumTensor &node, int ix, int, int) {
                 if (enable_ascii_) {
                   const FourVector u = node.landau_frame_4velocity();
                   const EnergyMomentumTensor Tmn_L = node.boosted(u);
@@ -699,7 +700,7 @@ void ThermodynamicLatticeOutput::thermodynamics_lattice_output(
       break;
     case ThermodynamicQuantity::LandauVelocity:
       lattice.iterate_sublattice(
-          {0, 0, 0}, dim, [&](EnergyMomentumTensor &node, int, int, int) {
+          {0, 0, 0}, dim, [&](const EnergyMomentumTensor &node, int, int, int) {
             if (enable_ascii_) {
               const FourVector u = node.landau_frame_4velocity();
               const ThreeVector v = -u.velocity();
