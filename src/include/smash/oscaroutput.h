@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2014-2020,2022,2024-2025
+ *    Copyright (c) 2014-2020,2022,2024-2026
  *      SMASH Team
  *
  *    GNU General Public License (GPLv3 or later)
@@ -75,7 +75,7 @@ class OscarOutput : public OutputInterface {
    * \param[in] quantities List of quantities present in the output file.
    */
   OscarOutput(const std::filesystem::path &path, const std::string &name,
-              const std::vector<std::string> quantities = {});
+              const std::vector<std::string> &quantities = {});
 
   /**
    * Writes the initial particle information of an event to the oscar output.

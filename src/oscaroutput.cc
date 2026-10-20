@@ -22,7 +22,7 @@ namespace smash {
 template <OscarOutputFormat Format, int Contents>
 OscarOutput<Format, Contents>::OscarOutput(
     const std::filesystem::path &path, const std::string &name,
-    const std::vector<std::string> quantities)
+    const std::vector<std::string> &quantities)
     : OutputInterface(name),
       file_{path / (name + ((Format == ASCII) ? ".dat" : ".oscar") +
                     ((Format == OscarFormat1999) ? "1999" : "")),
